@@ -5,7 +5,10 @@ import { useState, useRef, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Send, Bot, User, Loader2 } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import { Send, Bot, User, Loader2, Mic, MicOff, Volume2, VolumeX, Sparkles, HelpCircle } from "lucide-react"
+import { useVoiceAssistant } from "@/lib/hooks/use-voice-assistant"
+import { createClient } from "@/lib/supabase/client"
 
 interface Message {
   id: string
@@ -42,14 +45,25 @@ export function Chatbot({ userId }: ChatbotProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
-      content: "Hello! I'm your AI assistant. How can I help you today?",
+      content: "Hello! I'm your AI assistant. You can type or use voice commands. Try saying 'send email' or 'show my contacts'!",
       role: "assistant",
       timestamp: new Date(),
     },
   ])
   const [inputMessage, setInputMessage] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const [voiceEnabled, setVoiceEnabled] = useState(true)
+  const [pendingAction, setPendingAction] = useState<any>(null)
+  const [showHelp, setShowHelp] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const supabase = createClient()
+
+  const voiceCommands = [
+    { category: "📧 Email", examples: ["Send email to John", "Email Sarah about the meeting"] },
+    { category: "👥 Contacts", examples: ["Add contact John Smith", "Show my contacts"] },
+    { category: "📅 Events", examples: ["What are my upcoming events?", "Show my calendar"] },
+    { category: "📊 Stats", examples: ["Show my stats", "How many contacts do I have?"] },
+  ]
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -58,6 +72,77 @@ export function Chatbot({ userId }: ChatbotProps) {
   useEffect(() => {
     scrollToBottom()
   }, [messages])
+
+  // Voice Assistant
+  const handleVoiceResult = async (transcript: string) => {
+    // Add user's voice message
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      content: transcript,
+      role: "user",
+      timestamp: new Date(),
+    }
+    setMessages(prev => [...prev, userMessage])
+    setIsLoading(true)
+
+    try {
+      // Process voice command
+      const response = await fetch("/api/voice-command", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ command: transcript, userId }),
+      })
+
+      if (!response.ok) throw new Error("Failed to process voice command")
+
+      const intent = await response.json()
+
+      // Handle email sending action
+      if (intent.action === "send_email" && intent.parameters.recipient) {
+        setPendingAction(intent)
+      }
+
+      // Add assistant response
+      const assistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        content: intent.response,
+        role: "assistant",
+        timestamp: new Date(),
+      }
+      setMessages(prev => [...prev, assistantMessage])
+
+      // Speak the response if voice is enabled
+      if (voiceEnabled) {
+        await speak(intent.response)
+      }
+    } catch (error) {
+      console.error("Voice command error:", error)
+      const errorMsg = "Sorry, I had trouble understanding that. Could you try again?"
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        content: errorMsg,
+        role: "assistant",
+        timestamp: new Date(),
+      }
+      setMessages(prev => [...prev, errorMessage])
+      if (voiceEnabled) {
+        await speak(errorMsg)
+      }
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleVoiceError = (error: string) => {
+    console.error("Voice error:", error)
+  }
+
+  const { isListening, isSpeaking, transcript, isSupported, toggle, speak, stopSpeaking } = 
+    useVoiceAssistant({
+      onResult: handleVoiceResult,
+      onError: handleVoiceError,
+      autoSpeak: voiceEnabled,
+    })
 
   const handleSendMessage = async () => {
     if (!inputMessage.trim() || isLoading) return
@@ -105,16 +190,134 @@ export function Chatbot({ userId }: ChatbotProps) {
     }
   }
 
+  // Handle email sending action
+  const handleSendEmail = async () => {
+    if (!pendingAction) return
+
+    setIsLoading(true)
+    try {
+      const response = await fetch("/api/send-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId,
+          to: pendingAction.parameters.recipient,
+          subject: pendingAction.parameters.subject || "Message from Netlink",
+          body: pendingAction.parameters.message || pendingAction.parameters.body || "",
+        }),
+      })
+
+      if (!response.ok) throw new Error("Failed to send email")
+
+      const successMsg = "Email sent successfully!"
+      const successMessage: Message = {
+        id: Date.now().toString(),
+        content: successMsg,
+        role: "assistant",
+        timestamp: new Date(),
+      }
+      setMessages(prev => [...prev, successMessage])
+      if (voiceEnabled) {
+        await speak(successMsg)
+      }
+      setPendingAction(null)
+    } catch (error) {
+      console.error("Error sending email:", error)
+      const errorMsg = "Sorry, I couldn't send the email. Please check your email settings."
+      const errorMessage: Message = {
+        id: Date.now().toString(),
+        content: errorMsg,
+        role: "assistant",
+        timestamp: new Date(),
+      }
+      setMessages(prev => [...prev, errorMessage])
+      if (voiceEnabled) {
+        await speak(errorMsg)
+      }
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const cancelAction = () => {
+    setPendingAction(null)
+    const cancelMsg = "Action cancelled."
+    const cancelMessage: Message = {
+      id: Date.now().toString(),
+      content: cancelMsg,
+      role: "assistant",
+      timestamp: new Date(),
+    }
+    setMessages(prev => [...prev, cancelMessage])
+  }
+
   return (
     <Card className="h-[600px] flex flex-col">
       <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2">
-          <Bot className="h-5 w-5 text-primary" />
-          AI Assistant
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2">
+            <Bot className="h-5 w-5 text-primary" />
+            AI Assistant
+          </CardTitle>
+          <div className="flex items-center gap-2">
+            {isSupported && (
+              <Badge variant={isListening ? "default" : "secondary"}>
+                {isListening ? (
+                  <>
+                    <Mic className="h-3 w-3 mr-1 animate-pulse" />
+                    Listening...
+                  </>
+                ) : isSpeaking ? (
+                  <>
+                    <Volume2 className="h-3 w-3 mr-1 animate-pulse" />
+                    Speaking...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="h-3 w-3 mr-1" />
+                    Voice Ready
+                  </>
+                )}
+              </Badge>
+            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowHelp(!showHelp)}
+              className="h-8 w-8 p-0"
+            >
+              <HelpCircle className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+        
+        {/* Voice Commands Help */}
+        {showHelp && isSupported && (
+          <div className="mt-3 p-3 bg-muted rounded-lg space-y-2 animate-slide-down">
+            <p className="text-sm font-medium flex items-center gap-2">
+              <Mic className="h-4 w-4" />
+              Voice Command Examples
+            </p>
+            <div className="space-y-2 text-xs">
+              {voiceCommands.map((cmd, idx) => (
+                <div key={idx}>
+                  <p className="font-medium text-muted-foreground">{cmd.category}</p>
+                  <ul className="ml-3 space-y-1 text-muted-foreground">
+                    {cmd.examples.map((ex, i) => (
+                      <li key={i}>• "{ex}"</li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+            <p className="text-xs text-muted-foreground italic">
+              Click the 🎤 button and speak your command!
+            </p>
+          </div>
+        )}
       </CardHeader>
-      <CardContent className="flex-1 flex flex-col p-4 pt-0">
-        <div className="flex-1 mb-4 pr-4 overflow-y-auto">
+      <CardContent className="flex-1 flex flex-col p-4 pt-0 overflow-hidden">
+        <div className="flex-1 mb-4 pr-4 overflow-y-auto overflow-x-hidden">
           <div className="space-y-4">
             {messages.map((message) => (
               <div
@@ -135,7 +338,7 @@ export function Chatbot({ userId }: ChatbotProps) {
                       : "bg-muted"
                   }`}
                 >
-                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                  <p className="text-sm whitespace-pre-wrap break-words overflow-wrap-anywhere">{message.content}</p>
                   <p className="text-xs opacity-70 mt-1">
                     {message.timestamp.toLocaleTimeString()}
                   </p>
@@ -163,15 +366,66 @@ export function Chatbot({ userId }: ChatbotProps) {
           </div>
           <div ref={messagesEndRef} />
         </div>
+
+        {/* Pending Action Confirmation */}
+        {pendingAction && (
+          <div className="mb-4 p-3 bg-primary/10 border border-primary/20 rounded-lg animate-fade-in">
+            <p className="text-sm font-medium mb-2">Confirm Action</p>
+            <p className="text-xs text-muted-foreground mb-3">
+              {pendingAction.action === "send_email" && 
+                `Send email to ${pendingAction.parameters.recipient}?`
+              }
+            </p>
+            <div className="flex gap-2">
+              <Button onClick={handleSendEmail} size="sm" className="flex-1">
+                Confirm & Send
+              </Button>
+              <Button onClick={cancelAction} size="sm" variant="outline" className="flex-1">
+                Cancel
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Live Transcript */}
+        {isListening && transcript && (
+          <div className="mb-2 p-2 bg-muted rounded-lg text-sm text-muted-foreground animate-pulse">
+            {transcript}
+          </div>
+        )}
+
         <div className="flex gap-2">
           <Input
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Type your message..."
-            disabled={isLoading}
+            placeholder={isListening ? "Listening..." : "Type or speak your message..."}
+            disabled={isLoading || isListening}
             className="flex-1"
           />
+          
+          {isSupported && (
+            <>
+              <Button
+                onClick={toggle}
+                disabled={isLoading}
+                size="icon"
+                variant={isListening ? "default" : "outline"}
+                className={isListening ? "animate-pulse" : ""}
+              >
+                {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+              </Button>
+              <Button
+                onClick={() => setVoiceEnabled(!voiceEnabled)}
+                size="icon"
+                variant="outline"
+                title={voiceEnabled ? "Mute responses" : "Unmute responses"}
+              >
+                {voiceEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
+              </Button>
+            </>
+          )}
+          
           <Button
             onClick={handleSendMessage}
             disabled={!inputMessage.trim() || isLoading}

@@ -1,5 +1,8 @@
 import { createClient } from "@/lib/supabase/server"
 import { EmailsList } from "@/components/emails-list"
+import { AIEmailAgent } from "@/components/ai-email-agent"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Mail, Bot, Send } from "lucide-react"
 
 export default async function EmailsPage() {
   const supabase = await createClient()
@@ -25,11 +28,35 @@ export default async function EmailsPage() {
   return (
     <div className="relative z-10 p-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-balance">Emails</h1>
-        <p className="text-muted-foreground mt-2">View and manage your email campaigns</p>
+        <h1 className="text-3xl font-bold text-balance flex items-center gap-2">
+          <Mail className="h-8 w-8 text-primary" />
+          Emails & Campaigns
+        </h1>
+        <p className="text-muted-foreground mt-2">
+          Send personalized emails, create AI-powered campaigns, and manage all your communications
+        </p>
       </div>
 
-      <EmailsList emails={emails || []} />
+      <Tabs defaultValue="emails" className="space-y-6">
+        <TabsList className="grid w-full max-w-md grid-cols-2">
+          <TabsTrigger value="emails" className="flex items-center gap-2">
+            <Send className="h-4 w-4" />
+            Individual Emails
+          </TabsTrigger>
+          <TabsTrigger value="campaigns" className="flex items-center gap-2">
+            <Bot className="h-4 w-4" />
+            AI Campaigns
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="emails" className="space-y-4">
+          <EmailsList emails={emails || []} />
+        </TabsContent>
+
+        <TabsContent value="campaigns" className="space-y-4">
+          <AIEmailAgent userId={user.id} />
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }

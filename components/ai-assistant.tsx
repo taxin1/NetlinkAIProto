@@ -157,7 +157,7 @@ export function AIAssistant({ userId }: AIAssistantProps) {
         </CardTitle>
       </CardHeader>
 
-      <CardContent className="flex-1 flex flex-col p-0">
+      <CardContent className="flex-1 flex flex-col p-0 overflow-hidden">
         {/* Quick Actions */}
         <div className="p-4 border-b">
           <h4 className="text-sm font-medium mb-3">Quick Actions</h4>
@@ -178,7 +178,7 @@ export function AIAssistant({ userId }: AIAssistantProps) {
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 max-h-96">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 space-y-4 max-h-96">
           {messages.map((message) => (
             <div
               key={message.id}
@@ -198,8 +198,8 @@ export function AIAssistant({ userId }: AIAssistantProps) {
                   {message.type === 'user' && (
                     <User className="h-4 w-4 mt-0.5 flex-shrink-0" />
                   )}
-                  <div className="flex-1">
-                    <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm whitespace-pre-wrap break-words overflow-wrap-anywhere">{message.content}</p>
                     <p className="text-xs opacity-70 mt-1">
                       {message.timestamp.toLocaleTimeString()}
                     </p>
