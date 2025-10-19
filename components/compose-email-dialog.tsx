@@ -7,9 +7,8 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Sparkles } from "lucide-react"
+import { Sparkles, Send } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
-import { generateEmailWithGemini } from "@/lib/gemini"
 
 interface ComposeEmailDialogProps {
   contact: {
@@ -29,6 +28,7 @@ export function ComposeEmailDialog({ contact, userId, open, onOpenChange }: Comp
   const [purpose, setPurpose] = useState("")
   const [isGenerating, setIsGenerating] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [isSending, setIsSending] = useState(false)
   const router = useRouter()
 
   const handleGenerate = async () => {
@@ -36,8 +36,25 @@ export function ComposeEmailDialog({ contact, userId, open, onOpenChange }: Comp
 
     setIsGenerating(true)
     try {
-      const generatedBody = await generateEmailWithGemini(contact.name, contact.company || "", purpose)
-      setBody(generatedBody)
+      const response = await fetch("/api/generate-email", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          contactName: contact.name,
+          contactCompany: contact.company || "",
+          purpose: purpose,
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || "Failed to generate email")
+      }
+
+      const result = await response.json()
+      setBody(result.emailBody)
     } catch (error) {
       console.error("Error generating email:", error)
       alert("Failed to generate email. Please try again.")
@@ -67,10 +84,11 @@ export function ComposeEmailDialog({ contact, userId, open, onOpenChange }: Comp
       await supabase.from("events").insert({
         user_id: userId,
         contact_id: contact.id,
-        event_type: "email_sent",
+        event_type: "email_drafted",
         description: `Drafted email to ${contact.name}`,
       })
 
+      alert("Draft saved successfully!")
       onOpenChange(false)
       router.refresh()
     } catch (error) {
@@ -78,6 +96,75 @@ export function ComposeEmailDialog({ contact, userId, open, onOpenChange }: Comp
       alert("Failed to save email. Please try again.")
     } finally {
       setIsSaving(false)
+    }
+  }
+
+  const handleSend = async () => {
+    if (!subject.trim() || !body.trim()) {
+      alert("Please fill in both subject and body")
+      return
+    }
+
+    if (!contact.email) {
+      alert("This contact doesn't have an email address")
+      return
+    }
+
+    setIsSending(true)
+    const supabase = createClient()
+
+    try {
+      // First, save the email to database
+      const { data: emailData, error: saveError } = await supabase
+        .from("emails")
+        .insert({
+          user_id: userId,
+          contact_id: contact.id,
+          subject,
+          body,
+          status: "sending",
+        })
+        .select()
+        .single()
+
+      if (saveError) throw saveError
+
+      // Send the email via API
+      const response = await fetch("/api/send-email", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          emailId: emailData.id,
+          contactEmail: contact.email,
+          subject,
+          body,
+        }),
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || "Failed to send email")
+      }
+
+      // Log event
+      await supabase.from("events").insert({
+        user_id: userId,
+        contact_id: contact.id,
+        event_type: "email_sent",
+        description: `Sent email to ${contact.name}`,
+      })
+
+      alert("Email sent successfully!")
+      onOpenChange(false)
+      router.refresh()
+    } catch (error: any) {
+      console.error("Error sending email:", error)
+      alert(error.message || "Failed to send email. Please check your email configuration in Settings.")
+    } finally {
+      setIsSending(false)
     }
   }
 
@@ -134,8 +221,26 @@ export function ComposeEmailDialog({ contact, userId, open, onOpenChange }: Comp
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button onClick={handleSave} disabled={isSaving || !subject.trim() || !body.trim()}>
+            <Button 
+              variant="outline" 
+              onClick={handleSave} 
+              disabled={isSaving || isSending || !subject.trim() || !body.trim()}
+            >
               {isSaving ? "Saving..." : "Save Draft"}
+            </Button>
+            <Button 
+              onClick={handleSend} 
+              disabled={isSending || isSaving || !subject.trim() || !body.trim() || !contact.email}
+              className="bg-white text-slate-900 hover:bg-slate-100"
+            >
+              {isSending ? (
+                <>Sending...</>
+              ) : (
+                <>
+                  <Send className="mr-2 h-4 w-4" />
+                  Send Email
+                </>
+              )}
             </Button>
           </div>
         </div>

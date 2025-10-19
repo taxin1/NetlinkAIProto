@@ -7,7 +7,6 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Upload, Scan, Loader2, CheckCircle2 } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
-import { extractBusinessCardInfo } from "@/lib/gemini"
 
 interface BusinessCardScannerProps {
   userId: string
@@ -47,7 +46,24 @@ export function BusinessCardScanner({ userId }: BusinessCardScannerProps) {
       })
 
       console.log("[v0] Extracting business card info...")
-      const info = await extractBusinessCardInfo(base64)
+      
+      // Call API route to extract business card info
+      const response = await fetch("/api/scan-card", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ imageBase64: base64 }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || "Failed to extract business card information")
+      }
+
+      const result = await response.json()
+      const info = result.data
+      
       console.log("[v0] Extracted info:", info)
       setExtractedInfo(info)
 
@@ -90,7 +106,27 @@ export function BusinessCardScanner({ userId }: BusinessCardScannerProps) {
       }, 3000)
     } catch (error) {
       console.error("[v0] Scan error:", error)
-      alert("Failed to scan business card. Please try again.")
+      
+      // Show more specific error message
+      let errorMessage = "Failed to scan business card. Please try again."
+      
+      if (error instanceof Error) {
+        if (error.message.includes("No AI API keys configured")) {
+          errorMessage = "No AI API keys configured. Please add GEMINI_API_KEY or DEEPSEEK_API_KEY to your .env.local file."
+        } else if (error.message.includes("API key not configured") || error.message.includes("GEMINI_API_KEY")) {
+          errorMessage = "API key not configured. Please set up your AI API key in the environment variables."
+        } else if (error.message.includes("API request failed")) {
+          errorMessage = "API request failed. Please check your internet connection and try again."
+        } else if (error.message.includes("No image data")) {
+          errorMessage = "Invalid image file. Please select a valid image."
+        } else if (error.message.includes("All AI providers failed")) {
+          errorMessage = "All AI providers failed. Please check your API keys and internet connection."
+        } else {
+          errorMessage = `Scan failed: ${error.message}`
+        }
+      }
+      
+      alert(errorMessage)
     } finally {
       setIsScanning(false)
     }

@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { ContactsList } from "@/components/contacts-list"
 import { AddContactDialog } from "@/components/add-contact-dialog"
+import { RealtimeNotifications } from "@/components/realtime-notifications"
 
 export default async function ContactsPage() {
   const supabase = await createClient()
@@ -10,23 +11,20 @@ export default async function ContactsPage() {
 
   if (!user) return null
 
-  const { data: contacts } = await supabase
-    .from("contacts")
-    .select("*")
-    .eq("user_id", user.id)
-    .order("created_at", { ascending: false })
-
   return (
-    <div className="relative z-10 p-8">
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-balance">Contacts</h1>
-          <p className="text-muted-foreground mt-2">Manage your network connections</p>
+    <>
+      <RealtimeNotifications userId={user.id} />
+      <div className="relative z-10 p-8">
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-balance">Contacts</h1>
+            <p className="text-muted-foreground mt-2">Manage your network connections</p>
+          </div>
+          <AddContactDialog userId={user.id} />
         </div>
-        <AddContactDialog userId={user.id} />
-      </div>
 
-      <ContactsList contacts={contacts || []} userId={user.id} />
-    </div>
+        <ContactsList userId={user.id} />
+      </div>
+    </>
   )
 }

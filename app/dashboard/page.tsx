@@ -2,6 +2,8 @@ import { createClient } from "@/lib/supabase/server"
 import { BusinessCardScanner } from "@/components/business-card-scanner"
 import { QuickStats } from "@/components/quick-stats"
 import { UpcomingEvents } from "@/components/upcoming-events"
+import { AIEmailAgent } from "@/components/ai-email-agent"
+import { RealtimeNotifications } from "@/components/realtime-notifications"
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -12,21 +14,47 @@ export default async function DashboardPage() {
   if (!user) return null
 
   return (
-    <div className="p-8 max-w-7xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold text-balance mb-2">Scan Business Card</h1>
-        <p className="text-muted-foreground">Upload a business card photo to instantly add contacts</p>
-      </div>
+    <>
+      <RealtimeNotifications userId={user.id} />
+      <div className="p-8 max-w-7xl mx-auto relative">
+        {/* Header with Glassmorphism */}
+        <div className="mb-12 animate-fade-in-up">
+          <div className="inline-flex items-center gap-2 px-4 py-2 mb-6 rounded-full bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border border-primary/20 backdrop-blur-xl shadow-lg shadow-primary/5">
+            <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+            <span className="text-xs font-semibold text-primary">
+              AI-Powered Networking
+            </span>
+          </div>
+          <h1 className="text-5xl font-bold mb-3 tracking-tight">
+            <span className="bg-gradient-to-br from-foreground via-foreground to-foreground/70 bg-clip-text text-transparent">
+              Business Card Scanner
+            </span>
+          </h1>
+          <p className="text-lg text-foreground/70">
+            Upload a business card photo to instantly extract and save contact information
+          </p>
+        </div>
 
-      <div className="mb-12">
-        <BusinessCardScanner userId={user.id} />
-      </div>
+        {/* Scanner Section with Glass Effect */}
+        <div className="mb-16 animate-fade-in-up delay-200">
+          <BusinessCardScanner userId={user.id} />
+        </div>
 
-      <QuickStats userId={user.id} />
+        {/* Stats with Glass Effect */}
+        <div className="animate-fade-in-up delay-300">
+          <QuickStats userId={user.id} />
+        </div>
 
-      <div className="mt-12">
-        <UpcomingEvents userId={user.id} />
+        {/* Upcoming Events */}
+        <div className="mt-16 animate-fade-in-up delay-500">
+          <UpcomingEvents userId={user.id} />
+        </div>
+
+        {/* AI Email Agent */}
+        <div className="mt-16 animate-fade-in-up delay-700">
+          <AIEmailAgent userId={user.id} />
+        </div>
       </div>
-    </div>
+    </>
   )
 }

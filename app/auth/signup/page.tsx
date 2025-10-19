@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { createClient } from "@/lib/supabase/client"
+import { authService } from "@/lib/auth/auth-helpers"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
+import { Chrome } from "lucide-react"
 
 export default function SignUpPage() {
   const [email, setEmail] = useState("")
@@ -20,43 +21,37 @@ export default function SignUpPage() {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault()
-    const supabase = createClient()
     setIsLoading(true)
     setError(null)
 
-    try {
-      console.log("[v0] Starting signup process...")
+    const { data, error } = await authService.signUp(email, password)
+    
+    if (error) {
+      setError(error)
+    } else if (data?.session) {
+      // User is immediately signed in (email confirmation disabled)
+      router.push("/dashboard")
+    } else if (data?.user && !data.session) {
+      // Email confirmation is required
+      router.push("/auth/check-email")
+    } else {
+      setError("Signup completed but no user data received")
+    }
+    
+    setIsLoading(false)
+  }
 
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || `${window.location.origin}/dashboard`,
-        },
-      })
+  const handleGoogleSignup = async () => {
+    setIsLoading(true)
+    setError(null)
 
-      console.log("[v0] Signup response:", { data, error })
-
-      if (error) throw error
-
-      // Check if user session was created (email confirmation disabled)
-      if (data.session) {
-        console.log("[v0] Session created, redirecting to dashboard...")
-        router.push("/dashboard")
-      } else if (data.user && !data.session) {
-        // Email confirmation is required
-        console.log("[v0] Email confirmation required, redirecting to check-email...")
-        router.push("/auth/check-email")
-      } else {
-        console.log("[v0] Unexpected signup state")
-        throw new Error("Signup completed but no user data received")
-      }
-    } catch (error: unknown) {
-      console.error("[v0] Signup error:", error)
-      setError(error instanceof Error ? error.message : "An error occurred during signup")
-    } finally {
+    const { data, error } = await authService.signInWithOAuth('google')
+    
+    if (error) {
+      setError(error)
       setIsLoading(false)
     }
+    // OAuth redirect will handle the rest
   }
 
   return (
@@ -98,6 +93,26 @@ export default function SignUpPage() {
                   {isLoading ? "Creating account..." : "Sign up"}
                 </Button>
               </div>
+              
+              <div className="relative my-4">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t border-border" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+                </div>
+              </div>
+              
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={handleGoogleSignup}
+                disabled={isLoading}
+              >
+                <Chrome className="mr-2 h-4 w-4" />
+                {isLoading ? "Creating account..." : "Continue with Google"}
+              </Button>
               <div className="mt-4 text-center text-sm text-muted-foreground">
                 Already have an account?{" "}
                 <Link href="/auth/login" className="text-primary underline underline-offset-4">
