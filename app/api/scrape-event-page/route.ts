@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { GEMINI_MODEL, GEMINI_API_BASE } from '@/lib/gemini'
 
 export async function POST(request: NextRequest) {
   try {
@@ -180,7 +181,7 @@ Return ONLY a JSON object (no markdown, no extra text):
 CRITICAL: If you find ANY date/time information on the page, you MUST extract it and format it properly. Do not return null unless there is truly no date/time information.`
 
     const geminiResponse = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+      `${GEMINI_API_BASE}/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: {

@@ -22,23 +22,53 @@ interface ChatbotProps {
 }
 
 async function sendMessageToDeepSeek(message: string): Promise<string> {
-  const response = await fetch("/api/chat", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      message,
-    }),
-  })
+  try {
+    const response = await fetch("/api/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        message,
+      }),
+    })
 
-  if (!response.ok) {
-    const errorData = await response.json()
-    throw new Error(errorData.error || "Failed to get response from AI")
+    if (!response.ok) {
+      let errorMessage = "Failed to get response from AI"
+      try {
+        const errorData = await response.json()
+        errorMessage = errorData.error || errorMessage
+        
+        // Include details if available (for debugging)
+        if (errorData.details) {
+          console.error("AI API Error Details:", errorData.details)
+        }
+        
+        // Provide more helpful error messages
+        if (errorMessage.includes("GEMINI_API_KEY") || errorMessage.includes("not configured")) {
+          errorMessage = "AI service is not configured. Please check your API key settings."
+        } else if (errorMessage.includes("timeout")) {
+          errorMessage = "The AI request took too long. Please try again with a shorter message."
+        } else if (errorMessage.includes("network") || errorMessage.includes("connect")) {
+          errorMessage = "Unable to connect to AI service. Please check your internet connection."
+        }
+      } catch (parseError) {
+        // If we can't parse the error, use the status text
+        errorMessage = `AI service error (${response.status}): ${response.statusText || "Unknown error"}`
+      }
+      
+      throw new Error(errorMessage)
+    }
+
+    const data = await response.json()
+    return data.response
+  } catch (error) {
+    // Re-throw with better context
+    if (error instanceof Error) {
+      throw error
+    }
+    throw new Error("An unexpected error occurred while communicating with the AI service")
   }
-
-  const data = await response.json()
-  return data.response
 }
 
 export function Chatbot({ userId }: ChatbotProps) {
@@ -171,9 +201,26 @@ export function Chatbot({ userId }: ChatbotProps) {
       setMessages(prev => [...prev, assistantMessage])
     } catch (error) {
       console.error("Chat error:", error)
+      
+      // Provide user-friendly error messages
+      let errorContent = "Sorry, I encountered an error. Please try again."
+      
+      if (error instanceof Error) {
+        errorContent = error.message
+        
+        // Add helpful suggestions based on error type
+        if (error.message.includes("not configured") || error.message.includes("API key")) {
+          errorContent += "\n\n💡 Tip: Make sure your AI API key is configured in the deployment settings."
+        } else if (error.message.includes("timeout")) {
+          errorContent += "\n\n💡 Tip: Try breaking your message into smaller parts."
+        } else if (error.message.includes("network") || error.message.includes("connect")) {
+          errorContent += "\n\n💡 Tip: Check your internet connection and try again."
+        }
+      }
+      
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content: error instanceof Error ? error.message : "Sorry, I encountered an error. Please try again.",
+        content: errorContent,
         role: "assistant",
         timestamp: new Date(),
       }

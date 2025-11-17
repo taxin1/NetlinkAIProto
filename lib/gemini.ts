@@ -1,3 +1,7 @@
+// Gemini API Configuration - Using latest Gemini 2.5 Flash model
+export const GEMINI_MODEL = "gemini-2.5-flash"
+export const GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta/models"
+
 export async function generateEmailWithGemini(
   contactName: string,
   contactCompany: string,
@@ -10,13 +14,12 @@ export async function generateEmailWithGemini(
 Keep it concise, friendly, and professional. Include a clear call to action. Do not include subject line, just the email body. 
 
 FORMATTING RULES:
-- Use **bold** for important titles and key points (double asterisks)
-- Use plain dash (-) for bullet points, NOT asterisks (*)
-- NEVER use single asterisk (*) for any purpose`
+- Use plain dash (-) for bullet points
+- Keep responses concise and professional`
 
   try {
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+      `${GEMINI_API_BASE}/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
       {
         method: "POST",
         headers: {
@@ -94,7 +97,7 @@ Be precise and only extract information that is clearly visible. Do not make up 
 
   try {
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+      `${GEMINI_API_BASE}/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
       {
         method: "POST",
         headers: {
@@ -174,7 +177,7 @@ export async function generateText(prompt: string): Promise<string> {
 
   try {
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiApiKey}`,
+      `${GEMINI_API_BASE}/${GEMINI_MODEL}:generateContent?key=${geminiApiKey}`,
       {
         method: "POST",
         headers: {
@@ -185,7 +188,7 @@ export async function generateText(prompt: string): Promise<string> {
             {
               parts: [
                 {
-                  text: prompt + "\n\nFORMATTING RULES:\n1. Use **bold** for titles (double asterisks)\n2. Use plain dash (-) for bullet points, NOT asterisks (*)\n3. NEVER use single asterisk (*)\n4. Keep responses concise\n\nExample:\n**Title:**\n- Point one\n- Point two",
+                  text: prompt + "\n\nFORMATTING RULES:\n1. Use plain dash (-) for bullet points\n2. Keep responses concise and professional\n3. Do not use any asterisks in formatting\n\nExample:\nTitle:\n- Point one\n- Point two",
                 },
               ],
             },
@@ -219,28 +222,56 @@ export async function generateChatResponse(message: string): Promise<string> {
     throw new Error("GEMINI_API_KEY environment variable is not set")
   }
 
-  const systemPrompt = `You are a helpful AI assistant for a business networking platform called Netlink Cogni. You help users with business networking, contact management, and professional communication.
+  const systemPrompt = `You are a helpful AI assistant for Netlink Cogni, a comprehensive AI-powered business networking platform. You help users with business networking, contact management, and professional communication.
 
-FORMATTING RULES (CRITICAL):
-1. For titles and headings: Use **Title** (double asterisks on both sides)
-2. For bullet points: Use plain dash (-) NOT asterisks (*)
-3. NEVER use single asterisk (*) for any purpose
-4. NEVER use asterisk (*) for bullet points or lists
-5. Keep responses concise, professional, and to the point
+ABOUT NETLINK COGNI PLATFORM:
+Netlink Cogni is an AI-powered business networking and contact management platform that helps professionals build, manage, and grow their professional networks. The platform includes:
+
+CORE FEATURES:
+- Business Card Scanner: AI-powered OCR using Google Gemini to extract contact information from business card photos
+- Contact Management: Comprehensive contact database with company, position, phone, email, LinkedIn, and notes
+- Email Generation: AI-powered email composition for cold emails, introductions, follow-ups, and thank you messages
+- Email Campaigns: Bulk email sending with personalized AI-generated content for each recipient
+- Event Management: Create, manage, and track calendar events and networking opportunities
+- Event URL Scraping: Automatic extraction of event details from URLs (Zoom, Google Meet, Teams, Eventbrite, etc.)
+- Voice Commands: Hands-free voice assistant for sending emails, adding contacts, viewing events, and getting statistics
+- AI Assistant: Conversational AI that provides networking advice, email writing help, and contact analysis
+- Analytics Dashboard: Track networking activity, email performance, and relationship insights
+- Real-time Notifications: Get notified about new contacts, events, and email activity
+
+TECHNICAL CAPABILITIES:
+- Uses Google Gemini 2.5 Flash model for AI processing
+- Supabase backend for data storage and authentication
+- Real-time database updates using Supabase subscriptions
+- SMTP email sending (Gmail and custom servers)
+- Responsive web interface with modern UI/UX
+
+USER WORKFLOWS:
+1. Upload business card photo → AI extracts info → Contact saved automatically
+2. Select contact → Generate AI email → Review/edit → Send individually or in campaign
+3. Paste event URL → AI scrapes details → Event created with auto-filled information
+4. Voice command → AI parses intent → Action executed (with confirmation for sensitive operations)
+5. Chat with AI Assistant → Get networking advice, email help, contact analysis
+
+FORMATTING RULES:
+1. For bullet points: Use plain dash (-) NOT asterisks
+2. Do not use asterisks in any formatting
+3. Keep responses concise, professional, and to the point
+4. Use clear, readable formatting without special markdown characters
 
 Example of correct formatting:
-**Key Features:**
+Key Features:
 - Business Networking
 - Contact Management
 - Professional Communication
 
-Be friendly, professional, and avoid unnecessary details.`
+Be friendly, professional, and knowledgeable about the platform's capabilities. When users ask about features, explain how they work within Netlink Cogni.`
   
   const fullPrompt = `${systemPrompt}\n\nUser: ${message}`
 
   try {
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+      `${GEMINI_API_BASE}/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
       {
         method: "POST",
         headers: {
@@ -304,7 +335,7 @@ Keep descriptions concise and to the point.`
 
   try {
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+      `${GEMINI_API_BASE}/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
       {
         method: "POST",
         headers: {
@@ -395,7 +426,7 @@ Example outputs:
 
   try {
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+      `${GEMINI_API_BASE}/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
       {
         method: "POST",
         headers: {

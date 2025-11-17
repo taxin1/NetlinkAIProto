@@ -1,0 +1,32 @@
+[build]
+  command = "pnpm build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "18"
+  NPM_FLAGS = "--version"
+  PNPM_VERSION = "10.19.0"
+
+# Netlify Functions configuration for Next.js API routes
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+# Increase function timeout for AI API calls (max 26 seconds on Netlify)
+# This is important for AI API calls which can take longer
+[functions]
+  node_bundler = "esbuild"
+  included_files = ["lib/**", "app/api/**"]
+  
+# Set timeout for all API routes (26 seconds is the maximum on Netlify)
+# Note: With Next.js plugin, API routes are handled automatically
+# But we can set a global timeout
+[functions."**"]
+  timeout = 26
+
+# Handle Next.js routing - let Next.js handle its own routing
+# The plugin will handle this automatically, but we keep this as fallback
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+

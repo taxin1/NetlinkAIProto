@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
+import { GEMINI_MODEL, GEMINI_API_BASE } from "@/lib/gemini"
 
 interface CommandIntent {
   action: string
@@ -19,7 +20,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
 
     // Get user context (recent contacts, emails, etc.)
     const [contactsResult, emailsResult, eventsResult] = await Promise.all([
@@ -54,42 +55,52 @@ export async function POST(request: NextRequest) {
       throw new Error("GEMINI_API_KEY environment variable is not set")
     }
 
-    const prompt = `You are a voice command parser for a networking and email management application.
-Parse the following voice command and determine the user's intent.
+    const prompt = `You are a voice command parser for Netlink Cogni, an AI-powered business networking and contact management platform.
 
-Available actions:
-- send_email: Send an email to a contact
-- create_contact: Add a new contact
-- view_contacts: Show contacts list
-- create_event: Create a new event
-- view_events: Show upcoming events
-- search_contact: Search for a specific contact
-- get_stats: Show dashboard statistics
-- general_query: Answer general questions
+ABOUT NETLINK COGNI:
+Netlink Cogni helps professionals build, manage, and grow their professional networks through AI-powered features including business card scanning, contact management, AI email generation, email campaigns, event management, voice commands, and analytics.
+
+AVAILABLE VOICE ACTIONS:
+- send_email: Send an email to a contact (requires confirmation)
+- create_contact: Add a new contact with name, email, company, phone, LinkedIn, notes
+- view_contacts: Show the user's contacts list
+- create_event: Create a new calendar event with title, date, time, location, description
+- view_events: Show upcoming events from the calendar
+- search_contact: Search for a specific contact by name, email, or company
+- get_stats: Show dashboard statistics (contacts count, emails sent, upcoming events)
+- general_query: Answer general questions about networking, email writing, or platform features
 
 Voice command: "${command}"
 
 User's recent contacts: ${contacts.map(c => `${c.name} (${c.email})`).join(", ")}
 Recent events: ${events.map(e => e.title).join(", ")}
 
-Respond with a JSON object containing:
+FORMATTING RULES:
+- Do not use asterisks in the response text
+- Use plain language without markdown formatting
+- Keep responses natural and conversational
+
+Respond with ONLY a JSON object containing:
 {
   "action": "action_name",
   "parameters": {
-    // extracted parameters like recipient, subject, message, name, email, etc.
+    // extracted parameters like recipient, subject, message, name, email, company, phone, title, date, location, description, etc.
   },
   "needsConfirmation": true/false,
-  "response": "A natural language response to say back to the user"
+  "response": "A natural language response to say back to the user (no asterisks, plain text)"
 }
 
-For send_email action, try to match contact names from the user's contacts list.
-For create_contact action, extract name, email, company, and other details.
-For create_event action, extract title, date, location, and description.
+PARSING RULES:
+- For send_email: Try to match contact names from the user's contacts list. Extract recipient (name or email), subject, and message content.
+- For create_contact: Extract name (required), email (required), company, phone, LinkedIn URL, and notes.
+- For create_event: Extract title, date/time, location, and description. Parse dates like "tomorrow", "next Monday", "March 15th", etc.
+- For view_contacts/view_events/get_stats: These are informational queries, no parameters needed.
+- For search_contact: Extract search term (name, email, or company to search for).
 
-If the command is unclear or missing information, set needsConfirmation to true and ask for clarification in the response.`
+If the command is unclear or missing required information, set needsConfirmation to true and ask for clarification in the response.`
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+      `${GEMINI_API_BASE}/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
       {
         method: "POST",
         headers: {
