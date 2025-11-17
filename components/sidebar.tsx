@@ -2,11 +2,18 @@
 
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
+import { useState, useEffect } from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { LayoutDashboard, Users, Mail, BarChart3, LogOut, Network, Bot, Settings, Calendar } from "lucide-react"
+import { LayoutDashboard, Users, Mail, BarChart3, LogOut, Network, Bot, Settings, Calendar, Menu, X } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { useMobile } from "@/lib/hooks/use-mobile"
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+} from "@/components/ui/dialog"
 
 interface SidebarProps {
   user: {
@@ -27,23 +34,41 @@ const navigation = [
 export function Sidebar({ user }: SidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
+  const { isMobile } = useMobile()
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   const handleSignOut = async () => {
     const supabase = createClient()
     await supabase.auth.signOut()
     router.push("/auth/login")
     router.refresh()
+    setMobileMenuOpen(false)
   }
 
-  return (
-    <div className="relative z-20 flex h-screen w-64 flex-col border-r border-slate-800/50 bg-slate-900/80 backdrop-blur-xl">
+  // Close mobile menu when route changes
+  useEffect(() => {
+    setMobileMenuOpen(false)
+  }, [pathname])
+
+  const SidebarContent = ({ onItemClick }: { onItemClick?: () => void }) => (
+    <>
       <div className="flex h-20 items-center justify-between border-b border-slate-800/50 px-6">
-        <Link href="/dashboard" className="flex items-center gap-3 group">
+        <Link href="/dashboard" className="flex items-center gap-3 group" onClick={onItemClick}>
           <Network className="h-6 w-6 text-white group-hover:text-cyan-400 transition-colors" />
           <span className="text-lg font-semibold text-white tracking-tight">
             Netlink<span className="text-cyan-400">-Cogni</span>
           </span>
         </Link>
+        {isMobile && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setMobileMenuOpen(false)}
+            className="text-white hover:bg-slate-800/50"
+          >
+            <X className="h-5 w-5" />
+          </Button>
+        )}
       </div>
 
       <nav className="flex-1 space-y-1 p-4">
@@ -53,6 +78,7 @@ export function Sidebar({ user }: SidebarProps) {
             <Link
               key={item.name}
               href={item.href}
+              onClick={onItemClick}
               className={cn(
                 "flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all duration-200",
                 isActive
@@ -81,6 +107,43 @@ export function Sidebar({ user }: SidebarProps) {
           Sign out
         </Button>
       </div>
-    </div>
+    </>
+  )
+
+  return (
+    <>
+      {/* Mobile Menu Button - Only visible on mobile */}
+      {isMobile && (
+        <div className="fixed top-4 left-4 z-50 lg:hidden">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setMobileMenuOpen(true)}
+            className="bg-slate-900/80 backdrop-blur-xl border-slate-800/50 text-white hover:bg-slate-800/50"
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
+        </div>
+      )}
+
+      {/* Mobile Menu Dialog */}
+      {isMobile && (
+        <Dialog open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+          <DialogContent className="fixed left-0 top-0 h-full w-[280px] max-w-[85vw] translate-x-0 translate-y-0 rounded-none border-r border-slate-800/50 bg-slate-900/95 backdrop-blur-xl p-0 data-[state=open]:slide-in-from-left data-[state=closed]:slide-out-to-left">
+            <DialogTitle className="sr-only">Navigation Menu</DialogTitle>
+            <div className="relative z-20 flex h-full w-full flex-col">
+              <SidebarContent onItemClick={() => setMobileMenuOpen(false)} />
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Desktop Sidebar - Only visible on desktop */}
+      {!isMobile && (
+        <div className="relative z-20 flex h-screen w-64 flex-col border-r border-slate-800/50 bg-slate-900/80 backdrop-blur-xl">
+          <SidebarContent />
+        </div>
+      )}
+    </>
   )
 }

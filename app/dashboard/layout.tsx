@@ -37,8 +37,10 @@ export default async function DashboardLayout({
         <div className="absolute -bottom-20 left-1/3 w-[400px] h-[400px] bg-gradient-to-br from-primary/10 via-primary/5 to-transparent rounded-full blur-3xl animate-blob animation-delay-4000" />
       </div>
 
+      {/* Sidebar - handles mobile/desktop rendering internally */}
       <Sidebar user={user} />
-      <main className="flex-1 overflow-auto relative z-10">{children}</main>
+
+      <main className="flex-1 overflow-auto relative z-10 w-full lg:w-auto">{children}</main>
     </div>
   )
 }

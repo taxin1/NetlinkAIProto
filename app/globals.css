@@ -160,6 +160,25 @@
     line-height: 1.7;
     letter-spacing: -0.011em;
   }
+
+  /* Mobile-specific improvements */
+  @media (max-width: 768px) {
+    /* Better touch targets on mobile */
+    button, a, input[type="button"], input[type="submit"] {
+      min-height: 44px;
+      min-width: 44px;
+    }
+
+    /* Prevent text size adjustment on iOS */
+    input, textarea, select {
+      font-size: 16px;
+    }
+
+    /* Better scrolling on mobile */
+    * {
+      -webkit-overflow-scrolling: touch;
+    }
+  }
 }
 
 @layer utilities {

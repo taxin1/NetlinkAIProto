@@ -16,27 +16,27 @@ export default async function DashboardPage() {
   return (
     <>
       <RealtimeNotifications userId={user.id} />
-      <div className="p-8 max-w-7xl mx-auto relative">
+      <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto relative">
         {/* Header with Glassmorphism */}
-        <div className="mb-12 animate-fade-in-up">
-          <div className="inline-flex items-center gap-2 px-4 py-2 mb-6 rounded-full bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border border-primary/20 backdrop-blur-xl shadow-lg shadow-primary/5">
+        <div className="mb-8 sm:mb-12 animate-fade-in-up">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 mb-4 sm:mb-6 rounded-full bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border border-primary/20 backdrop-blur-xl shadow-lg shadow-primary/5">
             <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
             <span className="text-xs font-semibold text-primary">
               AI-Powered Networking
             </span>
           </div>
-          <h1 className="text-5xl font-bold mb-3 tracking-tight">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-2 sm:mb-3 tracking-tight">
             <span className="bg-gradient-to-br from-foreground via-foreground to-foreground/70 bg-clip-text text-transparent">
               Business Card Scanner
             </span>
           </h1>
-          <p className="text-lg text-foreground/70">
+          <p className="text-base sm:text-lg text-foreground/70">
             Upload a business card photo to instantly extract and save contact information
           </p>
         </div>
 
         {/* Scanner Section with Glass Effect */}
-        <div className="mb-16 animate-fade-in-up delay-200">
+        <div className="mb-8 sm:mb-12 lg:mb-16 animate-fade-in-up delay-200">
           <BusinessCardScanner userId={user.id} />
         </div>
 
@@ -46,12 +46,12 @@ export default async function DashboardPage() {
         </div>
 
         {/* Upcoming Events */}
-        <div className="mt-16 animate-fade-in-up delay-500">
+        <div className="mt-8 sm:mt-12 lg:mt-16 animate-fade-in-up delay-500">
           <UpcomingEvents userId={user.id} />
         </div>
 
         {/* AI Email Agent */}
-        <div className="mt-16 animate-fade-in-up delay-700">
+        <div className="mt-8 sm:mt-12 lg:mt-16 animate-fade-in-up delay-700">
           <AIEmailAgent userId={user.id} />
         </div>
       </div>

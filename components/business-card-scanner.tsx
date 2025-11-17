@@ -307,11 +307,11 @@ export function BusinessCardScanner({ userId }: BusinessCardScannerProps) {
 
   return (
     <Card className="border-2 border-dashed border-primary/20 bg-card/50 backdrop-blur-sm hover:border-primary/40 transition-colors">
-      <CardContent className="p-12">
+      <CardContent className="p-4 sm:p-6 lg:p-12">
         <div className="flex flex-col items-center justify-center text-center">
           {/* Mode toggle buttons */}
           {!preview && (
-            <div className="flex gap-3 mb-6">
+            <div className="flex gap-2 sm:gap-3 mb-4 sm:mb-6 w-full sm:w-auto">
               <Button
                 variant={scanMode === "upload" ? "default" : "outline"}
                 onClick={() => {
@@ -320,6 +320,8 @@ export function BusinessCardScanner({ userId }: BusinessCardScannerProps) {
                   }
                   setScanMode("upload")
                 }}
+                className="flex-1 sm:flex-initial text-sm sm:text-base"
+                size="sm"
               >
                 <Upload className="mr-2 h-4 w-4" />
                 Upload
@@ -332,6 +334,8 @@ export function BusinessCardScanner({ userId }: BusinessCardScannerProps) {
                     startCamera()
                   }
                 }}
+                className="flex-1 sm:flex-initial text-sm sm:text-base"
+                size="sm"
               >
                 <Camera className="mr-2 h-4 w-4" />
                 Camera
@@ -341,15 +345,15 @@ export function BusinessCardScanner({ userId }: BusinessCardScannerProps) {
 
           {/* Camera view */}
           {scanMode === "camera" && (
-            <div className="w-full max-w-md space-y-4">
+            <div className="w-full max-w-md space-y-3 sm:space-y-4">
               {/* Always render video element when in camera mode for ref availability */}
-              <div className={`relative rounded-lg overflow-hidden border-2 border-primary/30 bg-black ${isCameraLoading ? 'min-h-[300px]' : ''}`}>
+              <div className={`relative rounded-lg overflow-hidden border-2 border-primary/30 bg-black ${isCameraLoading ? 'min-h-[200px] sm:min-h-[300px]' : ''}`}>
                 <video
                   ref={videoRef}
                   autoPlay
                   playsInline
                   muted
-                  className="w-full h-auto"
+                  className="w-full h-auto max-h-[60vh] object-contain"
                 />
                 {isCameraLoading && (
                   <div className="absolute inset-0 flex items-center justify-center">
@@ -371,15 +375,15 @@ export function BusinessCardScanner({ userId }: BusinessCardScannerProps) {
               
               {/* Show camera controls when active and no preview */}
               {isCameraActive && !preview && !isCameraLoading && (
-                <div className="flex flex-col gap-3">
-                  <div className="flex items-center justify-center gap-3">
+                <div className="flex flex-col gap-2 sm:gap-3">
+                  <div className="flex items-center justify-center gap-2 sm:gap-3">
                     <Button
                       onClick={captureAndScan}
                       disabled={isScanning}
                       size="lg"
-                      className="flex-1"
+                      className="flex-1 text-sm sm:text-base"
                     >
-                      <Scan className="mr-2 h-5 w-5" />
+                      <Scan className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
                       Capture & Scan
                     </Button>
                     <Button
@@ -388,18 +392,20 @@ export function BusinessCardScanner({ userId }: BusinessCardScannerProps) {
                         stopCamera()
                         setScanMode("upload")
                       }}
+                      size="lg"
+                      className="px-3 sm:px-4"
                     >
-                      <X className="h-5 w-5" />
+                      <X className="h-4 w-4 sm:h-5 sm:w-5" />
                     </Button>
                   </div>
-                  <label className="flex items-center justify-center gap-2 cursor-pointer">
+                  <label className="flex items-center justify-center gap-2 cursor-pointer px-2">
                     <input
                       type="checkbox"
                       checked={autoDetect}
                       onChange={(e) => setAutoDetect(e.target.checked)}
                       className="rounded"
                     />
-                    <span className="text-sm text-muted-foreground">Auto-detect (scans every 3 seconds)</span>
+                    <span className="text-xs sm:text-sm text-muted-foreground">Auto-detect (scans every 3 seconds)</span>
                   </label>
                 </div>
               )}
@@ -408,11 +414,11 @@ export function BusinessCardScanner({ userId }: BusinessCardScannerProps) {
               {preview && !isCameraLoading && (
                 <>
                   {/* Preview with camera controls */}
-                  <div className="relative">
+                  <div className="relative w-full">
                     <img
                       src={preview || "/placeholder.svg"}
                       alt="Business card preview"
-                      className="w-full h-auto rounded-lg shadow-lg"
+                      className="w-full h-auto max-h-[60vh] object-contain rounded-lg shadow-lg"
                     />
                     {isScanning && (
                       <div className="absolute inset-0 bg-black/50 rounded-lg flex items-center justify-center">
@@ -461,8 +467,8 @@ export function BusinessCardScanner({ userId }: BusinessCardScannerProps) {
                   )}
                   
                   {/* Camera controls when preview is shown */}
-                  <div className="flex flex-col gap-3">
-                    <div className="flex items-center justify-center gap-3">
+                  <div className="flex flex-col gap-2 sm:gap-3">
+                    <div className="flex items-center justify-center gap-2 sm:gap-3">
                       <Button
                         onClick={() => {
                           setPreview(null)
@@ -471,9 +477,9 @@ export function BusinessCardScanner({ userId }: BusinessCardScannerProps) {
                         }}
                         variant="outline"
                         size="lg"
-                        className="flex-1"
+                        className="flex-1 text-sm sm:text-base"
                       >
-                        <Camera className="mr-2 h-5 w-5" />
+                        <Camera className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
                         Capture Another
                       </Button>
                       <Button
@@ -485,8 +491,10 @@ export function BusinessCardScanner({ userId }: BusinessCardScannerProps) {
                           setSuccess(false)
                           setExtractedInfo(null)
                         }}
+                        size="lg"
+                        className="px-3 sm:px-4"
                       >
-                        <X className="h-5 w-5" />
+                        <X className="h-4 w-4 sm:h-5 sm:w-5" />
                       </Button>
                     </div>
                   </div>
@@ -507,7 +515,7 @@ export function BusinessCardScanner({ userId }: BusinessCardScannerProps) {
               <img
                 src={preview || "/placeholder.svg"}
                 alt="Business card preview"
-                className="w-full h-auto rounded-lg mb-6 shadow-lg"
+                className="w-full h-auto max-h-[60vh] object-contain rounded-lg mb-4 sm:mb-6 shadow-lg"
               />
               {isScanning && (
                 <div className="flex items-center justify-center gap-3 text-primary">
@@ -556,17 +564,17 @@ export function BusinessCardScanner({ userId }: BusinessCardScannerProps) {
           {/* Upload mode (default view) */}
           {scanMode === "upload" && !preview && !isCameraActive && (
             <>
-              <div className="rounded-full bg-primary/10 p-6 mb-6">
-                <Scan className="h-12 w-12 text-primary" />
+              <div className="rounded-full bg-primary/10 p-4 sm:p-6 mb-4 sm:mb-6">
+                <Scan className="h-8 w-8 sm:h-12 sm:w-12 text-primary" />
               </div>
-              <h3 className="text-2xl font-bold mb-2">Scan Business Card</h3>
-              <p className="text-muted-foreground mb-8 max-w-md">
+              <h3 className="text-xl sm:text-2xl font-bold mb-2">Scan Business Card</h3>
+              <p className="text-sm sm:text-base text-muted-foreground mb-6 sm:mb-8 max-w-md px-2">
                 Upload a photo or use your camera to scan a business card and we&apos;ll automatically extract the contact information using AI
               </p>
               <label htmlFor="card-upload">
-                <Button size="lg" className="cursor-pointer" asChild>
+                <Button size="lg" className="cursor-pointer text-sm sm:text-base" asChild>
                   <span>
-                    <Upload className="mr-2 h-5 w-5" />
+                    <Upload className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
                     Upload Business Card
                   </span>
                 </Button>
