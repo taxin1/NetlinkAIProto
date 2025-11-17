@@ -47,6 +47,10 @@ async function sendMessageToDeepSeek(message: string): Promise<string> {
         // Provide more helpful error messages
         if (errorMessage.includes("GEMINI_API_KEY") || errorMessage.includes("not configured")) {
           errorMessage = "AI service is not configured. Please check your API key settings."
+        } else if (errorMessage.includes("503") || errorMessage.includes("overloaded") || errorMessage.includes("UNAVAILABLE")) {
+          errorMessage = "The AI service is temporarily overloaded. The system will automatically retry. Please wait a moment and try again if needed."
+        } else if (errorMessage.includes("429")) {
+          errorMessage = "Too many requests. Please wait a moment before trying again."
         } else if (errorMessage.includes("timeout")) {
           errorMessage = "The AI request took too long. Please try again with a shorter message."
         } else if (errorMessage.includes("network") || errorMessage.includes("connect")) {
@@ -209,7 +213,11 @@ export function Chatbot({ userId }: ChatbotProps) {
         errorContent = error.message
         
         // Add helpful suggestions based on error type
-        if (error.message.includes("not configured") || error.message.includes("API key")) {
+        if (error.message.includes("503") || error.message.includes("overloaded") || error.message.includes("UNAVAILABLE")) {
+          errorContent = "The AI service is temporarily overloaded. The system automatically retried, but it's still busy.\n\n💡 Tip: Please wait a few moments and try again. This usually resolves quickly."
+        } else if (error.message.includes("429")) {
+          errorContent = "Too many requests sent too quickly.\n\n💡 Tip: Please wait a moment before trying again."
+        } else if (error.message.includes("not configured") || error.message.includes("API key")) {
           errorContent += "\n\n💡 Tip: Make sure your AI API key is configured in the deployment settings."
         } else if (error.message.includes("timeout")) {
           errorContent += "\n\n💡 Tip: Try breaking your message into smaller parts."

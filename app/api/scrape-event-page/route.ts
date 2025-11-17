@@ -168,7 +168,10 @@ OTHER RULES:
 - Be factual, do not infer or guess
 - For video conferences without event details, use generic platform name
 
-Return ONLY a JSON object (no markdown, no extra text):
+CRITICAL FORMATTING RULES:
+- NEVER use asterisks (*) or double asterisks (**) anywhere in your response
+- NEVER use asterisks for any purpose whatsoever
+- Return ONLY a JSON object (no markdown, no asterisks, no extra text):
 {
   "title": "extracted event title",
   "description": "brief description",

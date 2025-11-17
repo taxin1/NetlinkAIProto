@@ -48,16 +48,24 @@ User's Context:
 
 Current user message: "${message}"
 
-FORMATTING RULES:
-1. For bullet points: Use plain dash (-) NOT asterisks
-2. Do not use asterisks in any formatting
-3. Keep responses concise, professional, and actionable
-4. Reference specific Netlink Cogni features when relevant
+CRITICAL FORMATTING RULES - MUST FOLLOW STRICTLY:
+1. NEVER use asterisks (*) or double asterisks (**) in your response under any circumstances
+2. NEVER use asterisks for bold text, emphasis, bullet points, headings, or any other purpose
+3. For bullet points: ALWAYS use plain dash (-) only, NEVER asterisks
+4. Do not use asterisks in any formatting, anywhere, for any reason
+5. Keep responses concise, professional, and actionable
+6. Reference specific Netlink Cogni features when relevant
+7. Use clear, readable formatting with plain text only - no markdown, no asterisks, no special formatting characters
 
-Example of correct formatting:
+CORRECT Example of formatting:
 Key Features:
 - Business Networking
 - Contact Management
+
+WRONG Examples (NEVER DO THIS):
+**Key Features:**
+* Business Networking
+* Contact Management
 
 Provide helpful, actionable advice. If the user asks about specific contacts or emails, reference the context. When explaining features, describe how they work within the Netlink Cogni platform.`
 

@@ -52,6 +52,32 @@ export async function POST(request: NextRequest) {
           )
         }
         
+        // Check for 503/overloaded errors
+        if (error.message.includes("503") || error.message.includes("overloaded") || error.message.includes("UNAVAILABLE")) {
+          console.error("AI service overloaded (503)")
+          return NextResponse.json(
+            { 
+              error: "The AI service is temporarily overloaded. Please try again in a moment.",
+              details: error.message,
+              retryable: true
+            },
+            { status: 503 }
+          )
+        }
+        
+        // Check for rate limit errors
+        if (error.message.includes("429")) {
+          console.error("AI service rate limit (429)")
+          return NextResponse.json(
+            { 
+              error: "Too many requests. Please wait a moment before trying again.",
+              details: error.message,
+              retryable: true
+            },
+            { status: 429 }
+          )
+        }
+        
         // Check for network errors
         if (error.message.includes("fetch") || error.message.includes("network") || error.message.includes("ECONNREFUSED")) {
           console.error("AI service network error")

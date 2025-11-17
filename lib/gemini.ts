@@ -2,6 +2,46 @@
 export const GEMINI_MODEL = "gemini-2.5-flash"
 export const GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta/models"
 
+// Retry utility for handling transient errors (503, 429, etc.)
+async function retryWithBackoff<T>(
+  fn: () => Promise<T>,
+  maxRetries: number = 3,
+  baseDelay: number = 1000
+): Promise<T> {
+  let lastError: Error | null = null
+  
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      return await fn()
+    } catch (error: any) {
+      lastError = error instanceof Error ? error : new Error(String(error))
+      
+      // Check if error is retryable (503, 429, or network errors)
+      const isRetryable = 
+        (error instanceof Error && 
+         (error.message.includes("503") || 
+          error.message.includes("429") || 
+          error.message.includes("overloaded") ||
+          error.message.includes("UNAVAILABLE") ||
+          error.message.includes("network") ||
+          error.message.includes("ECONNRESET"))) ||
+        (error?.response?.status === 503 || error?.response?.status === 429)
+      
+      // Don't retry if it's not a retryable error or if we've exhausted retries
+      if (!isRetryable || attempt === maxRetries - 1) {
+        throw lastError
+      }
+      
+      // Calculate exponential backoff delay (with jitter)
+      const delay = baseDelay * Math.pow(2, attempt) + Math.random() * 1000
+      console.log(`API call failed (attempt ${attempt + 1}/${maxRetries}), retrying in ${Math.round(delay)}ms...`)
+      await new Promise(resolve => setTimeout(resolve, delay))
+    }
+  }
+  
+  throw lastError || new Error("Failed after retries")
+}
+
 export async function generateEmailWithGemini(
   contactName: string,
   contactCompany: string,
@@ -13,9 +53,12 @@ export async function generateEmailWithGemini(
 
 Keep it concise, friendly, and professional. Include a clear call to action. Do not include subject line, just the email body. 
 
-FORMATTING RULES:
-- Use plain dash (-) for bullet points
-- Keep responses concise and professional`
+CRITICAL FORMATTING RULES - READ CAREFULLY:
+- NEVER use asterisks (*) or double asterisks (**) in your response
+- NEVER use asterisks for bold text, emphasis, or any other purpose
+- Use plain dash (-) for bullet points only
+- Keep responses concise and professional
+- Use plain text formatting only - no markdown, no asterisks, no special characters for formatting`
 
   try {
     const response = await fetch(
@@ -188,7 +231,7 @@ export async function generateText(prompt: string): Promise<string> {
             {
               parts: [
                 {
-                  text: prompt + "\n\nFORMATTING RULES:\n1. Use plain dash (-) for bullet points\n2. Keep responses concise and professional\n3. Do not use any asterisks in formatting\n\nExample:\nTitle:\n- Point one\n- Point two",
+                  text: prompt + "\n\nCRITICAL FORMATTING RULES - MUST FOLLOW:\n1. NEVER use asterisks (*) or double asterisks (**) in your response\n2. NEVER use asterisks for bold text, emphasis, bullet points, or any other purpose\n3. Use plain dash (-) for bullet points only\n4. Keep responses concise and professional\n5. Use plain text formatting only - no markdown, no asterisks, no special formatting characters\n\nCORRECT Example:\nTitle:\n- Point one\n- Point two\n\nWRONG Example (DO NOT DO THIS):\n**Title**\n* Point one\n* Point two",
                 },
               ],
             },
@@ -253,23 +296,30 @@ USER WORKFLOWS:
 4. Voice command → AI parses intent → Action executed (with confirmation for sensitive operations)
 5. Chat with AI Assistant → Get networking advice, email help, contact analysis
 
-FORMATTING RULES:
-1. For bullet points: Use plain dash (-) NOT asterisks
-2. Do not use asterisks in any formatting
-3. Keep responses concise, professional, and to the point
-4. Use clear, readable formatting without special markdown characters
+CRITICAL FORMATTING RULES - MUST FOLLOW STRICTLY:
+1. NEVER use asterisks (*) or double asterisks (**) in your response under any circumstances
+2. NEVER use asterisks for bold text, emphasis, bullet points, headings, or any other purpose
+3. For bullet points: ALWAYS use plain dash (-) only, NEVER asterisks
+4. Do not use asterisks in any formatting, anywhere, for any reason
+5. Keep responses concise, professional, and to the point
+6. Use clear, readable formatting with plain text only - no markdown, no asterisks, no special formatting characters
 
-Example of correct formatting:
+CORRECT Example of formatting:
 Key Features:
 - Business Networking
 - Contact Management
 - Professional Communication
 
+WRONG Examples (NEVER DO THIS):
+**Key Features:**
+* Business Networking
+* Contact Management
+
 Be friendly, professional, and knowledgeable about the platform's capabilities. When users ask about features, explain how they work within Netlink Cogni.`
   
   const fullPrompt = `${systemPrompt}\n\nUser: ${message}`
 
-  try {
+  return retryWithBackoff(async () => {
     const response = await fetch(
       `${GEMINI_API_BASE}/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
       {
@@ -294,7 +344,11 @@ Be friendly, professional, and knowledgeable about the platform's capabilities. 
     if (!response.ok) {
       const errorText = await response.text()
       console.error("Gemini API error:", errorText)
-      throw new Error(`Gemini API request failed (${response.status}): ${errorText}`)
+      // Create error with status code for retry logic
+      const error: any = new Error(`Gemini API request failed (${response.status}): ${errorText}`)
+      error.status = response.status
+      error.response = { status: response.status }
+      throw error
     }
 
     const data = await response.json()
@@ -304,10 +358,7 @@ Be friendly, professional, and knowledgeable about the platform's capabilities. 
     }
 
     throw new Error("No valid response from Gemini API")
-  } catch (error) {
-    console.error("Gemini chat API error:", error)
-    throw error
-  }
+  }, 3, 1000)
 }
 
 export async function fetchUrlPreview(url: string): Promise<{
@@ -324,7 +375,10 @@ Generate a preview with:
 - A brief description (1-2 sentences)
 - Suggest what type of image would represent this (we'll use a placeholder)
 
-Return ONLY a JSON object:
+CRITICAL FORMATTING RULES:
+- NEVER use asterisks (*) or double asterisks (**) anywhere in your response
+- NEVER use asterisks for any purpose whatsoever
+- Return ONLY a JSON object (no markdown, no asterisks, no extra text):
 {
   "title": "event or page title",
   "description": "brief description",
@@ -410,7 +464,10 @@ For location:
 - Physical address in URL → Extract it
 - Otherwise → "Online Meeting"
 
-Return ONLY a JSON object:
+CRITICAL FORMATTING RULES:
+- NEVER use asterisks (*) or double asterisks (**) anywhere in your response
+- NEVER use asterisks for any purpose whatsoever
+- Return ONLY a JSON object (no markdown, no asterisks, no extra text):
 {
   "title": "Generic platform-based title or extracted name",
   "description": "Brief description based on platform type",

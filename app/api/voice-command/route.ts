@@ -75,10 +75,13 @@ Voice command: "${command}"
 User's recent contacts: ${contacts.map(c => `${c.name} (${c.email})`).join(", ")}
 Recent events: ${events.map(e => e.title).join(", ")}
 
-FORMATTING RULES:
-- Do not use asterisks in the response text
+CRITICAL FORMATTING RULES - MUST FOLLOW STRICTLY:
+- NEVER use asterisks (*) or double asterisks (**) in the response text under any circumstances
+- NEVER use asterisks for bold text, emphasis, bullet points, or any other purpose
 - Use plain language without markdown formatting
+- Use plain dash (-) for lists if needed, NEVER asterisks
 - Keep responses natural and conversational
+- Use plain text only - no markdown, no asterisks, no special formatting characters
 
 Respond with ONLY a JSON object containing:
 {
