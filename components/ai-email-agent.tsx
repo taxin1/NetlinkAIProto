@@ -205,7 +205,7 @@ export function AIEmailAgent({ userId }: AIEmailAgentProps) {
         if (!contact.email) continue
 
         try {
-          // Generate personalized email via API
+          // Generate personalized email via API with full context
           const response = await fetch("/api/generate-email", {
             method: "POST",
             headers: {
@@ -215,6 +215,8 @@ export function AIEmailAgent({ userId }: AIEmailAgentProps) {
               contactName: contact.name,
               contactCompany: contact.company || "",
               purpose: campaign.purpose,
+              contactId: contact.id,
+              userId: userId,
             }),
           })
 

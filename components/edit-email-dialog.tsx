@@ -66,6 +66,8 @@ export function EditEmailDialog({ email, userId, open, onOpenChange }: EditEmail
           contactName: email.contacts.name,
           contactCompany: email.contacts.company || "",
           purpose: purpose,
+          contactId: email.contact_id,
+          userId: userId,
         }),
       })
 

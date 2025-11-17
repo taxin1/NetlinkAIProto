@@ -3,11 +3,11 @@ import { createClient } from '@/lib/supabase/server'
 import nodemailer from 'nodemailer'
 
 export async function POST(request: Request) {
+  const { emailId, contactEmail, subject, body } = await request.json()
+  const supabase = await createClient()
+  
   try {
-    const { emailId, contactEmail, subject, body } = await request.json()
-
     // Verify user is authenticated
-    const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
@@ -79,7 +79,7 @@ export async function POST(request: Request) {
       replyTo: emailUser,
     })
 
-    // Update email status in database
+    // Update email status to 'sent' in database
     if (emailId) {
       await supabase
         .from('emails')
@@ -96,6 +96,23 @@ export async function POST(request: Request) {
     })
   } catch (error: any) {
     console.error('Error sending email:', error)
+    
+    // Update email status to 'failed' if emailId was provided
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      
+      if (user && emailId) {
+        await supabase
+          .from('emails')
+          .update({ 
+            status: 'failed'
+          })
+          .eq('id', emailId)
+      }
+    } catch (updateError) {
+      console.error('Error updating email status to failed:', updateError)
+    }
+    
     return NextResponse.json(
       { error: error.message || 'Failed to send email' },
       { status: 500 }

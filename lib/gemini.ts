@@ -42,25 +42,137 @@ async function retryWithBackoff<T>(
   throw lastError || new Error("Failed after retries")
 }
 
+interface EmailGenerationContext {
+  contactName: string
+  contactCompany: string
+  contactPosition?: string
+  contactNotes?: string
+  contactLinkedIn?: string
+  contactTags?: string[]
+  userProfile?: {
+    name?: string
+    email?: string
+    displayName?: string
+  }
+  purpose: string
+  previousEmails?: Array<{
+    subject?: string
+    body?: string
+    created_at?: string
+    status?: string
+  }>
+  recentInteractions?: Array<{
+    event_type?: string
+    description?: string
+    created_at?: string
+  }>
+}
+
 export async function generateEmailWithGemini(
-  contactName: string,
-  contactCompany: string,
-  purpose: string,
+  context: EmailGenerationContext
 ): Promise<string> {
   const apiKey = process.env.GEMINI_API_KEY!
 
-  const prompt = `Write a professional cold email to ${contactName}${contactCompany ? ` at ${contactCompany}` : ""} for the following purpose: ${purpose}. 
+  const {
+    contactName,
+    contactCompany,
+    contactPosition,
+    contactNotes,
+    contactLinkedIn,
+    contactTags,
+    userProfile,
+    purpose,
+    previousEmails,
+    recentInteractions
+  } = context
 
-Keep it concise, friendly, and professional. Include a clear call to action. Do not include subject line, just the email body. 
+  const senderName = userProfile?.name || userProfile?.displayName || "I"
+  const senderEmail = userProfile?.email || ""
 
-CRITICAL FORMATTING RULES - READ CAREFULLY:
-- NEVER use asterisks (*) or double asterisks (**) in your response
-- NEVER use asterisks for bold text, emphasis, or any other purpose
-- Use plain dash (-) for bullet points only
-- Keep responses concise and professional
-- Use plain text formatting only - no markdown, no asterisks, no special characters for formatting`
+  // Build context about previous interactions
+  let previousEmailContext = ""
+  if (previousEmails && previousEmails.length > 0) {
+    previousEmailContext = `\n\nPREVIOUS EMAILS SENT TO THIS CONTACT:\n${previousEmails.map((email, idx) => 
+      `${idx + 1}. ${email.subject || 'No subject'} (${email.created_at ? new Date(email.created_at).toLocaleDateString() : 'Unknown date'})\n   ${email.body ? email.body.substring(0, 150) + '...' : ''}`
+    ).join('\n\n')}`
+  }
 
-  try {
+  let interactionContext = ""
+  if (recentInteractions && recentInteractions.length > 0) {
+    interactionContext = `\n\nRECENT INTERACTIONS WITH THIS CONTACT:\n${recentInteractions.map((event, idx) => 
+      `${idx + 1}. ${event.event_type || 'Interaction'} - ${event.description || 'No description'} (${event.created_at ? new Date(event.created_at).toLocaleDateString() : 'Unknown date'})`
+    ).join('\n')}`
+  }
+
+  const prompt = `You are an expert email writer helping ${senderName} write a highly personalized, authentic email. This is NOT a template - write a genuine, specific email that sounds like it came directly from ${senderName}.
+
+YOUR ROLE:
+Write a professional email that is:
+- Highly personalized and specific to the recipient and situation
+- Genuine and authentic, not generic or template-like
+- Uses specific details from the context provided
+- Shows you've done research or know the recipient
+- Professional but warm and human
+
+RECIPIENT INFORMATION:
+- Name: ${contactName}
+- Company: ${contactCompany || 'Not specified'}
+- Position: ${contactPosition || 'Not specified'}
+- Notes about contact: ${contactNotes || 'None'}
+- LinkedIn: ${contactLinkedIn || 'Not provided'}
+- Tags/Categories: ${contactTags?.join(', ') || 'None'}${previousEmailContext}${interactionContext}
+
+SENDER INFORMATION:
+- Sender Name: ${senderName}
+- Sender Email: ${senderEmail}
+
+EMAIL PURPOSE:
+${purpose}
+
+CRITICAL INSTRUCTIONS - READ CAREFULLY:
+1. PERSONALIZATION IS KEY: Use specific details from the recipient information, previous emails, and interactions to make this email highly personalized. Reference their company, position, or past interactions when relevant.
+
+2. NO GENERIC TEMPLATES: Do NOT use phrases like:
+   - "I hope this email finds you well" (too generic)
+   - "I'm reaching out because..." (too template-like)
+   - "I wanted to touch base" (overused)
+   - Instead, start with something specific to them or the situation
+
+3. BE SPECIFIC AND AUTHENTIC: 
+   - Reference their company, position, or industry if relevant
+   - Mention previous emails or interactions if appropriate
+   - Include details from notes if they provide context
+   - Show you've put thought into why you're reaching out
+
+4. WRITE AS THE SENDER: Write in first person as ${senderName}, not as a third party or assistant. Sound like a real person wrote this, not an AI.
+
+5. STRUCTURE:
+   - Opening: Specific, personalized greeting that shows you know who they are
+   - Body: Clear explanation of purpose with specific context
+   - Call to action: Clear next steps
+   - Closing: Professional sign-off
+
+6. TONE: Professional but warm, authentic, and specific. Match the purpose and relationship level.
+
+7. LENGTH: Concise but complete - typically 3-5 paragraphs. Don't ramble, but include enough detail to be meaningful.
+
+8. CALL TO ACTION: Include a specific, clear call to action relevant to the purpose.
+
+FORMATTING RULES:
+- NEVER use asterisks (*) or double asterisks (**) anywhere
+- Use plain text formatting only - no markdown
+- Use plain dash (-) for bullet points if needed
+- Keep paragraphs natural and readable
+
+EXAMPLES OF GOOD OPENINGS (NOT templates, but personalized):
+- If they're at a known company: "I noticed you're [position] at [company] - I've been following your work on [specific thing]..."
+- If previous email: "Following up on our previous conversation about [topic]..."
+- If mutual connection: "I was speaking with [mutual contact] who mentioned you work on [specific area]..."
+- Purpose-specific: "I saw your post about [specific thing] and thought it connected to [your purpose]..."
+
+Write the email body now. Make it specific, authentic, and personalized - NOT a template.`
+
+  return retryWithBackoff(async () => {
     const response = await fetch(
       `${GEMINI_API_BASE}/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
       {
@@ -82,17 +194,35 @@ CRITICAL FORMATTING RULES - READ CAREFULLY:
       },
     )
 
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error("Gemini API error response:", {
+        status: response.status,
+        statusText: response.statusText,
+        body: errorText
+      })
+      // Create error with status code for retry logic
+      const error: any = new Error(`Gemini API request failed (${response.status}): ${errorText}`)
+      error.status = response.status
+      error.response = { status: response.status }
+      throw error
+    }
+
     const data = await response.json()
+
+    // Check for API errors in response
+    if (data.error) {
+      console.error("Gemini API error:", data.error)
+      throw new Error(`Gemini API error: ${data.error.message || JSON.stringify(data.error)}`)
+    }
 
     if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
       return data.candidates[0].content.parts[0].text
     }
 
-    throw new Error("Failed to generate email")
-  } catch (error) {
-    console.error("Gemini API error:", error)
-    throw error
-  }
+    console.error("No valid response from Gemini API:", data)
+    throw new Error("Failed to generate email: No valid response from AI")
+  }, 3, 1000)
 }
 
 export async function extractBusinessCardInfo(imageBase64: string): Promise<{

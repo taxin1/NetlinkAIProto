@@ -45,19 +45,30 @@ export function ComposeEmailDialog({ contact, userId, open, onOpenChange }: Comp
           contactName: contact.name,
           contactCompany: contact.company || "",
           purpose: purpose,
+          contactId: contact.id,
+          userId: userId,
         }),
       })
 
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || "Failed to generate email")
+        const errorData = await response.json().catch(() => ({ error: "Unknown error" }))
+        console.error("API error response:", errorData)
+        throw new Error(errorData.error || `Failed to generate email (${response.status})`)
       }
 
       const result = await response.json()
+      console.log("API response:", result)
+      
+      if (!result.emailBody) {
+        console.error("No emailBody in response:", result)
+        throw new Error("Invalid response from server: email body not found")
+      }
+
       setBody(result.emailBody)
     } catch (error) {
       console.error("Error generating email:", error)
-      alert("Failed to generate email. Please try again.")
+      const errorMessage = error instanceof Error ? error.message : "Failed to generate email. Please try again."
+      alert(errorMessage)
     } finally {
       setIsGenerating(false)
     }
@@ -114,7 +125,8 @@ export function ComposeEmailDialog({ contact, userId, open, onOpenChange }: Comp
     const supabase = createClient()
 
     try {
-      // First, save the email to database
+      // First, save the email to database as draft
+      // It will be updated to 'sent' or 'failed' by the send-email API
       const { data: emailData, error: saveError } = await supabase
         .from("emails")
         .insert({
@@ -122,14 +134,14 @@ export function ComposeEmailDialog({ contact, userId, open, onOpenChange }: Comp
           contact_id: contact.id,
           subject,
           body,
-          status: "sending",
+          status: "draft", // Must be one of: 'draft', 'sent', 'failed'
         })
         .select()
         .single()
 
       if (saveError) throw saveError
 
-      // Send the email via API
+      // Send the email via API (this will update status to 'sent' or 'failed')
       const response = await fetch("/api/send-email", {
         method: "POST",
         headers: {
@@ -146,6 +158,11 @@ export function ComposeEmailDialog({ contact, userId, open, onOpenChange }: Comp
       const result = await response.json()
 
       if (!response.ok) {
+        // Update status to 'failed' if sending failed
+        await supabase
+          .from("emails")
+          .update({ status: "failed" })
+          .eq("id", emailData.id)
         throw new Error(result.error || "Failed to send email")
       }
 
