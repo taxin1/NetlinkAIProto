@@ -69,10 +69,18 @@ export async function POST(request: Request) {
       },
     })
 
+    // Validate recipient email
+    if (!contactEmail || !contactEmail.trim()) {
+      return NextResponse.json(
+        { error: 'No recipients defined. Please provide a valid email address.' },
+        { status: 400 }
+      )
+    }
+
     // Send email
     await transporter.sendMail({
       from: `"${fromName}" <${emailUser}>`,
-      to: contactEmail,
+      to: contactEmail.trim(),
       subject: subject,
       text: body,
       html: body.replace(/\n/g, '<br>'),

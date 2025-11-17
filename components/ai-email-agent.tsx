@@ -19,7 +19,9 @@ import {
   Settings,
   Play,
   Pause,
-  StopCircle
+  StopCircle,
+  Sparkles,
+  Wand2
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 
@@ -59,6 +61,11 @@ export function AIEmailAgent({ userId }: AIEmailAgentProps) {
   const [campaignPurpose, setCampaignPurpose] = useState("")
   const [campaignSubject, setCampaignSubject] = useState("")
   const [selectedContacts, setSelectedContacts] = useState<string[]>([])
+  
+  // AI generation states
+  const [isGeneratingPurpose, setIsGeneratingPurpose] = useState(false)
+  const [isGeneratingSubject, setIsGeneratingSubject] = useState(false)
+  const [isGeneratingAll, setIsGeneratingAll] = useState(false)
   
   // Current running campaign
   const [currentCampaign, setCurrentCampaign] = useState<EmailCampaign | null>(null)
@@ -184,7 +191,26 @@ export function AIEmailAgent({ userId }: AIEmailAgentProps) {
     }
   }
 
-  const runCampaign = async (campaign: EmailCampaign) => {
+  const rerunCampaign = async (campaign: EmailCampaign) => {
+    // Reset campaign for re-run
+    const supabase = createClient()
+    await supabase
+      .from("email_campaigns")
+      .update({ 
+        status: "draft",
+        sent_count: 0
+      })
+      .eq("id", campaign.id)
+    
+    // Reload to get fresh data
+    await loadData()
+    
+    // Run the campaign
+    const updatedCampaign = { ...campaign, status: 'draft' as const, sent_count: 0 }
+    await runCampaign(updatedCampaign)
+  }
+
+  const runCampaign = async (campaign: EmailCampaign, skipAlreadySent: boolean = false) => {
     if (!campaign.contacts.length) return
 
     setIsRunning(true)
@@ -193,6 +219,7 @@ export function AIEmailAgent({ userId }: AIEmailAgentProps) {
 
     const supabase = createClient()
     let sentCount = 0
+    let totalToProcess = campaign.contacts.length
 
     try {
       // Update campaign status
@@ -201,46 +228,141 @@ export function AIEmailAgent({ userId }: AIEmailAgentProps) {
         .update({ status: "running" })
         .eq("id", campaign.id)
 
-      for (const contact of campaign.contacts) {
-        if (!contact.email) continue
+      // Filter contacts based on skipAlreadySent option
+      let contactsToProcess = campaign.contacts
+      if (skipAlreadySent && campaign.status === 'completed') {
+        // Check which contacts already received emails in this campaign
+        const { data: existingEmails } = await supabase
+          .from("emails")
+          .select("contact_id")
+          .eq("campaign_id", campaign.id)
+          .eq("status", "sent")
+        
+        const sentContactIds = new Set(existingEmails?.map(e => e.contact_id) || [])
+        contactsToProcess = campaign.contacts.filter(c => !sentContactIds.has(c.id))
+        totalToProcess = contactsToProcess.length
+        
+        if (contactsToProcess.length === 0) {
+          alert("All contacts in this campaign have already received emails. Use 'Re-run All' to send to everyone again.")
+          return
+        }
+      }
+
+      for (const contact of contactsToProcess) {
+        if (!contact.email) {
+          console.warn(`Skipping ${contact.name} - no email address`)
+          continue
+        }
 
         try {
-          // Generate personalized email via API with full context
-          const response = await fetch("/api/generate-email", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              contactName: contact.name,
-              contactCompany: contact.company || "",
-              purpose: campaign.purpose,
-              contactId: contact.id,
-              userId: userId,
-            }),
-          })
-
-          if (!response.ok) {
-            const errorData = await response.json()
-            throw new Error(errorData.error || "Failed to generate email")
+          // Add delay before generating email to avoid overwhelming the API
+          // Wait longer for each subsequent email to avoid rate limits
+          const delayMs = 2000 + (sentCount * 500) // 2s base + 0.5s per email sent
+          if (sentCount > 0) {
+            await new Promise(resolve => setTimeout(resolve, delayMs))
           }
 
-          const result = await response.json()
-          const emailBody = result.emailBody
+          // Generate personalized email via API with full context
+          let emailBody: string | null = null
+          let retries = 3
+          let lastError: Error | null = null
+
+          // Retry logic for email generation
+          while (retries > 0 && !emailBody) {
+            try {
+              const response = await fetch("/api/generate-email", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  contactName: contact.name,
+                  contactCompany: contact.company || "",
+                  purpose: campaign.purpose,
+                  contactId: contact.id,
+                  userId: userId,
+                }),
+              })
+
+              if (!response.ok) {
+                const errorData = await response.json().catch(() => ({ error: "Unknown error" }))
+                const errorMessage = errorData.error || `Failed to generate email (${response.status})`
+                
+                // Check if it's a 503/429 error that should be retried
+                if ((response.status === 503 || response.status === 429) && retries > 1) {
+                  console.warn(`API overloaded for ${contact.name}, retrying in ${delayMs * 2}ms... (${4 - retries}/3)`)
+                  await new Promise(resolve => setTimeout(resolve, delayMs * 2))
+                  retries--
+                  continue
+                }
+                
+                throw new Error(errorMessage)
+              }
+
+              const result = await response.json()
+              if (result.emailBody) {
+                emailBody = result.emailBody
+                break // Success, exit retry loop
+              } else {
+                throw new Error("No email body in response")
+              }
+            } catch (error) {
+              lastError = error instanceof Error ? error : new Error(String(error))
+              retries--
+              
+              if (retries > 0) {
+                console.warn(`Error generating email for ${contact.name}, retrying... (${3 - retries}/3)`)
+                await new Promise(resolve => setTimeout(resolve, delayMs * (4 - retries)))
+              }
+            }
+          }
+
+          // If we still don't have an email body after retries, skip this contact
+          if (!emailBody) {
+            console.error(`Failed to generate email for ${contact.name} after retries:`, lastError?.message)
+            continue
+          }
 
           // Actually send the email via Gmail SMTP
           let emailSentSuccessfully = false
+          let emailId: string | null = null
           try {
+            // Validate email exists
+            if (!contact.email || !contact.email.trim()) {
+              throw new Error(`No email address for ${contact.name}`)
+            }
+
+            // Save email to database first (before sending)
+            const { data: savedEmail, error: saveError } = await supabase
+              .from("emails")
+              .insert({
+                user_id: userId,
+                contact_id: contact.id,
+                subject: campaign.subject,
+                body: emailBody,
+                status: "draft", // Will update to "sent" or "failed" after sending attempt
+                campaign_id: campaign.id
+              })
+              .select("id")
+              .single()
+
+            if (saveError) {
+              console.error(`Error saving email for ${contact.name}:`, saveError)
+              throw new Error(`Failed to save email: ${saveError.message}`)
+            }
+
+            emailId = savedEmail?.id || null
+
             const sendResponse = await fetch("/api/send-email", {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
               },
               body: JSON.stringify({
-                to: contact.email,
+                emailId: emailId, // Pass emailId so API can update status
+                contactEmail: contact.email.trim(),
                 subject: campaign.subject,
                 body: emailBody,
-                fromName: "Netlink Cogni",
               }),
             })
 
@@ -248,33 +370,45 @@ export function AIEmailAgent({ userId }: AIEmailAgentProps) {
               emailSentSuccessfully = true
               console.log(`Email sent successfully to ${contact.name}`)
             } else {
-              const errorData = await sendResponse.json()
-              console.error(`Failed to send email to ${contact.name}:`, errorData.error)
+              const errorData = await sendResponse.json().catch(() => ({ error: "Unknown error" }))
+              const errorMessage = errorData.error || `Failed to send email (${sendResponse.status})`
+              console.error(`Failed to send email to ${contact.name}:`, errorMessage)
+              
+              // Update email status to failed if we have emailId
+              if (emailId) {
+                await supabase
+                  .from("emails")
+                  .update({ status: "failed" })
+                  .eq("id", emailId)
+              }
+              
+              // If email configuration is missing, show user-friendly message
+              if (errorData.needsConfiguration) {
+                alert(`Email not configured for ${contact.name}. Please configure your email settings in Settings → Email Configuration.`)
+              }
             }
           } catch (sendError) {
             console.error(`Error sending email to ${contact.name}:`, sendError)
+            const errorMessage = sendError instanceof Error ? sendError.message : String(sendError)
+            
+            // Update email status to failed if we have emailId
+            if (emailId) {
+              await supabase
+                .from("emails")
+                .update({ status: "failed" })
+                .eq("id", emailId)
+            }
+            
+            // Show user-friendly error for configuration issues
+            if (errorMessage.includes("not configured") || errorMessage.includes("needsConfiguration")) {
+              alert(`Email configuration required. Please set up your email account in Settings → Email Configuration.`)
+            }
           }
 
-          // Save email to database
-          const { error: emailError } = await supabase
-            .from("emails")
-            .insert({
-              user_id: userId,
-              contact_id: contact.id,
-              subject: campaign.subject,
-              body: emailBody,
-              status: emailSentSuccessfully ? "sent" : "failed",
-              campaign_id: campaign.id
-            })
-
-          if (emailError) {
-            console.error(`Error saving email for ${contact.name}:`, emailError)
-            continue
-          }
-
-          // Only count as sent if email was actually sent
+          // Email was already saved before sending attempt above
+          // Only count as sent if email was actually sent successfully
           if (!emailSentSuccessfully) {
-            console.warn(`Email to ${contact.name} was not sent, but saved as draft`)
+            console.warn(`Email to ${contact.name} was not sent (status should be 'failed' in database)`)
             continue
           }
 
@@ -287,12 +421,23 @@ export function AIEmailAgent({ userId }: AIEmailAgentProps) {
           })
 
           sentCount++
-          setSendingProgress(Math.round((sentCount / campaign.contacts.length) * 100))
+          setSendingProgress(Math.round((sentCount / totalToProcess) * 100))
 
           // Add delay between emails to avoid rate limiting
-          await new Promise(resolve => setTimeout(resolve, 1000))
+          // Longer delay if API was overloaded to prevent further issues
+          const finalDelay = lastError?.message?.includes("503") || lastError?.message?.includes("overloaded") 
+            ? 3000 
+            : 2000
+          await new Promise(resolve => setTimeout(resolve, finalDelay))
         } catch (error) {
-          console.error(`Error sending email to ${contact.name}:`, error)
+          console.error(`Error processing email for ${contact.name}:`, error)
+          const errorMessage = error instanceof Error ? error.message : String(error)
+          
+          // If it's an API overload error, wait longer before continuing
+          if (errorMessage.includes("503") || errorMessage.includes("overloaded") || errorMessage.includes("UNAVAILABLE")) {
+            console.warn("API is overloaded, waiting 5 seconds before continuing campaign...")
+            await new Promise(resolve => setTimeout(resolve, 5000))
+          }
         }
       }
 
@@ -323,6 +468,122 @@ export function AIEmailAgent({ userId }: AIEmailAgentProps) {
         ? prev.filter(id => id !== contactId)
         : [...prev, contactId]
     )
+  }
+
+  const generatePurpose = async () => {
+    if (!campaignName.trim()) {
+      alert("Please enter a campaign name first")
+      return
+    }
+
+    setIsGeneratingPurpose(true)
+    try {
+      const response = await fetch("/api/generate-campaign-content", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          campaignName: campaignName,
+          generatePurpose: true,
+          userId: userId,
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || "Failed to generate purpose")
+      }
+
+      const result = await response.json()
+      if (result.purpose) {
+        setCampaignPurpose(result.purpose)
+      }
+    } catch (error) {
+      console.error("Error generating purpose:", error)
+      alert(error instanceof Error ? error.message : "Failed to generate purpose. Please try again.")
+    } finally {
+      setIsGeneratingPurpose(false)
+    }
+  }
+
+  const generateSubject = async () => {
+    if (!campaignName.trim()) {
+      alert("Please enter a campaign name first")
+      return
+    }
+
+    setIsGeneratingSubject(true)
+    try {
+      const response = await fetch("/api/generate-campaign-content", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          campaignName: campaignName,
+          generateSubject: true,
+          campaignPurpose: campaignPurpose, // Pass existing purpose if available for better context
+          userId: userId,
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || "Failed to generate subject")
+      }
+
+      const result = await response.json()
+      if (result.subject) {
+        setCampaignSubject(result.subject)
+      }
+    } catch (error) {
+      console.error("Error generating subject:", error)
+      alert(error instanceof Error ? error.message : "Failed to generate subject. Please try again.")
+    } finally {
+      setIsGeneratingSubject(false)
+    }
+  }
+
+  const generateAll = async () => {
+    if (!campaignName.trim()) {
+      alert("Please enter a campaign name first")
+      return
+    }
+
+    setIsGeneratingAll(true)
+    try {
+      const response = await fetch("/api/generate-campaign-content", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          campaignName: campaignName,
+          generatePurpose: true,
+          generateSubject: true,
+          userId: userId,
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || "Failed to generate content")
+      }
+
+      const result = await response.json()
+      if (result.purpose) {
+        setCampaignPurpose(result.purpose)
+      }
+      if (result.subject) {
+        setCampaignSubject(result.subject)
+      }
+    } catch (error) {
+      console.error("Error generating content:", error)
+      alert(error instanceof Error ? error.message : "Failed to generate content. Please try again.")
+    } finally {
+      setIsGeneratingAll(false)
+    }
   }
 
   const getStatusIcon = (status: string) => {
@@ -384,6 +645,29 @@ export function AIEmailAgent({ userId }: AIEmailAgentProps) {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* AI Generate All Button */}
+          <div className="flex justify-end">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={generateAll}
+              disabled={isGeneratingAll || !campaignName.trim()}
+              className="border-cyan-500/50 text-cyan-400 hover:bg-cyan-500/10 hover:text-cyan-300"
+            >
+              {isGeneratingAll ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Wand2 className="mr-2 h-4 w-4" />
+                  Generate All with AI
+                </>
+              )}
+            </Button>
+          </div>
+
           <div className="grid gap-4">
             <div className="grid gap-2">
               <Label htmlFor="campaign-name" className="text-slate-300">Campaign Name</Label>
@@ -397,7 +681,26 @@ export function AIEmailAgent({ userId }: AIEmailAgentProps) {
             </div>
             
             <div className="grid gap-2">
-              <Label htmlFor="campaign-purpose" className="text-slate-300">Email Purpose</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="campaign-purpose" className="text-slate-300">Email Purpose</Label>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={generatePurpose}
+                  disabled={isGeneratingPurpose || !campaignName.trim()}
+                  className="text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10 h-8 px-2"
+                >
+                  {isGeneratingPurpose ? (
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                  ) : (
+                    <>
+                      <Sparkles className="h-3 w-3 mr-1" />
+                      Generate
+                    </>
+                  )}
+                </Button>
+              </div>
               <Textarea
                 id="campaign-purpose"
                 value={campaignPurpose}
@@ -409,7 +712,26 @@ export function AIEmailAgent({ userId }: AIEmailAgentProps) {
             </div>
             
             <div className="grid gap-2">
-              <Label htmlFor="campaign-subject" className="text-slate-300">Email Subject</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="campaign-subject" className="text-slate-300">Email Subject</Label>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={generateSubject}
+                  disabled={isGeneratingSubject || !campaignName.trim()}
+                  className="text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10 h-8 px-2"
+                >
+                  {isGeneratingSubject ? (
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                  ) : (
+                    <>
+                      <Sparkles className="h-3 w-3 mr-1" />
+                      Generate
+                    </>
+                  )}
+                </Button>
+              </div>
               <Input
                 id="campaign-subject"
                 value={campaignSubject}
@@ -499,12 +821,35 @@ export function AIEmailAgent({ userId }: AIEmailAgentProps) {
                         <Button
                           size="sm"
                           onClick={() => runCampaign(campaign)}
-                          disabled={isRunning}
+                          disabled={isRunning || currentCampaign?.id === campaign.id}
                           className="bg-white text-slate-900 hover:bg-slate-100"
                         >
                           <Play className="mr-2 h-4 w-4" />
                           Run
                         </Button>
+                      )}
+                      {campaign.status === 'completed' && (
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            onClick={() => runCampaign(campaign, true)}
+                            disabled={isRunning || currentCampaign?.id === campaign.id}
+                            variant="outline"
+                            className="border-cyan-500/50 text-cyan-400 hover:bg-cyan-500/10 hover:text-cyan-300"
+                          >
+                            <Play className="mr-2 h-4 w-4" />
+                            Re-run Unsent
+                          </Button>
+                          <Button
+                            size="sm"
+                            onClick={() => rerunCampaign(campaign)}
+                            disabled={isRunning || currentCampaign?.id === campaign.id}
+                            className="bg-white text-slate-900 hover:bg-slate-100"
+                          >
+                            <Play className="mr-2 h-4 w-4" />
+                            Re-run All
+                          </Button>
+                        </div>
                       )}
                     </div>
                   </div>
