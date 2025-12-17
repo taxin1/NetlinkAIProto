@@ -24,7 +24,6 @@ import {
   X,
   Check,
 } from "lucide-react"
-import { useVoiceAssistant } from "@/lib/hooks/use-voice-assistant"
 import { useElevenLabsVoice } from "@/lib/hooks/use-elevenlabs-voice"
 import { createClient } from "@/lib/supabase/client"
 import { motion, AnimatePresence } from "framer-motion"
@@ -316,19 +315,25 @@ export function VoiceAgent({ userId }: VoiceAgentProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const supabase = createClient()
 
-  // ElevenLabs TTS
-  const { speak: elevenLabsSpeak, stop: stopSpeaking, isSpeaking } = useElevenLabsVoice({
-    onSpeechStart: () => console.log("Speaking started"),
-    onSpeechEnd: () => console.log("Speaking ended"),
-  })
-
-  // Speech Recognition
-  const handleVoiceResult = useCallback(async (transcript: string) => {
-    await processCommand(transcript)
+  // ElevenLabs for both TTS and STT
+  const handleVoiceResult = useCallback(async (transcribedText: string) => {
+    if (transcribedText.trim()) {
+      await processCommand(transcribedText)
+    }
   }, [])
 
-  const { isListening, transcript, isSupported, toggle: toggleListening } = useVoiceAssistant({
-    onResult: handleVoiceResult,
+  const { 
+    speak: elevenLabsSpeak, 
+    stop: stopSpeaking, 
+    isSpeaking,
+    isListening,
+    transcript,
+    toggleListening,
+    isLoading: isVoiceLoading
+  } = useElevenLabsVoice({
+    onSpeechStart: () => console.log("Speaking started"),
+    onSpeechEnd: () => console.log("Speaking ended"),
+    onTranscript: handleVoiceResult,
     onError: (error) => console.error("Voice error:", error),
   })
 

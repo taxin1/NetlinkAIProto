@@ -1,69 +1,64 @@
 import { NextRequest, NextResponse } from "next/server"
 
+// Gemini doesn't have TTS, so we'll signal the client to use browser TTS
+// This route now returns a JSON response indicating to use browser fallback
 export async function POST(request: NextRequest) {
   try {
-    const { text, voiceId } = await request.json()
+    const { text } = await request.json()
 
     if (!text) {
       return NextResponse.json({ error: "Text is required" }, { status: 400 })
     }
 
-    const apiKey = process.env.ELEVENLABS_API_KEY
-    if (!apiKey) {
-      return NextResponse.json(
-        { error: "ElevenLabs API key not configured" },
-        { status: 500 }
-      )
-    }
-
-    // Default to Rachel voice if not specified
-    const voice = voiceId || "21m00Tcm4TlvDq8ikWAM" // Rachel - warm, conversational
-
-    const response = await fetch(
-      `https://api.elevenlabs.io/v1/text-to-speech/${voice}`,
-      {
-        method: "POST",
-        headers: {
-          "Accept": "audio/mpeg",
-          "Content-Type": "application/json",
-          "xi-api-key": apiKey,
-        },
-        body: JSON.stringify({
-          text,
-          model_id: "eleven_monolingual_v1",
-          voice_settings: {
-            stability: 0.5,
-            similarity_boost: 0.75,
-            style: 0.5,
-            use_speaker_boost: true,
+    // Check if ElevenLabs is configured - if so, use it
+    const elevenLabsKey = process.env.ELEVENLABS_API_KEY
+    if (elevenLabsKey) {
+      const voiceId = "21m00Tcm4TlvDq8ikWAM" // Rachel voice
+      
+      const response = await fetch(
+        `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
+        {
+          method: "POST",
+          headers: {
+            "Accept": "audio/mpeg",
+            "Content-Type": "application/json",
+            "xi-api-key": elevenLabsKey,
           },
-        }),
-      }
-    )
-
-    if (!response.ok) {
-      const errorText = await response.text()
-      console.error("ElevenLabs API error:", errorText)
-      return NextResponse.json(
-        { error: "Failed to generate speech" },
-        { status: response.status }
+          body: JSON.stringify({
+            text,
+            model_id: "eleven_monolingual_v1",
+            voice_settings: {
+              stability: 0.5,
+              similarity_boost: 0.75,
+              style: 0.5,
+              use_speaker_boost: true,
+            },
+          }),
+        }
       )
+
+      if (response.ok) {
+        const audioBuffer = await response.arrayBuffer()
+        return new NextResponse(audioBuffer, {
+          headers: {
+            "Content-Type": "audio/mpeg",
+            "Content-Length": audioBuffer.byteLength.toString(),
+          },
+        })
+      }
     }
 
-    const audioBuffer = await response.arrayBuffer()
-    
-    return new NextResponse(audioBuffer, {
-      headers: {
-        "Content-Type": "audio/mpeg",
-        "Content-Length": audioBuffer.byteLength.toString(),
-      },
-    })
+    // No ElevenLabs or it failed - signal browser to use Web Speech API
+    return NextResponse.json(
+      { useBrowserTTS: true, text },
+      { status: 200 }
+    )
   } catch (error) {
     console.error("TTS error:", error)
+    // On error, signal to use browser TTS
     return NextResponse.json(
-      { error: "Failed to generate speech" },
-      { status: 500 }
+      { useBrowserTTS: true },
+      { status: 200 }
     )
   }
 }
-

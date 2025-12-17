@@ -2,11 +2,24 @@
 export const GEMINI_MODEL = "gemini-2.5-flash"
 export const GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta"
 
+// Rate limiting - track last request time
+let lastRequestTime = 0
+const MIN_REQUEST_INTERVAL = 4000 // 4 seconds between requests (15 RPM = 1 per 4s)
+
+async function throttle(): Promise<void> {
+  const now = Date.now()
+  const timeSinceLastRequest = now - lastRequestTime
+  if (timeSinceLastRequest < MIN_REQUEST_INTERVAL) {
+    await new Promise(resolve => setTimeout(resolve, MIN_REQUEST_INTERVAL - timeSinceLastRequest))
+  }
+  lastRequestTime = Date.now()
+}
+
 // Retry utility for handling transient errors (503, 429, etc.)
 async function retryWithBackoff<T>(
   fn: () => Promise<T>,
   maxRetries: number = 3,
-  baseDelay: number = 1000
+  baseDelay: number = 2000
 ): Promise<T> {
   let lastError: Error | null = null
   
@@ -51,6 +64,7 @@ function getApiKey(): string {
 }
 
 async function callGemini(prompt: string, systemInstruction?: string): Promise<string> {
+  await throttle() // Rate limit requests
   const apiKey = getApiKey()
   
   const contents = [
@@ -68,9 +82,16 @@ async function callGemini(prompt: string, systemInstruction?: string): Promise<s
     }
   }
 
+  // Always add no-asterisks rule to system instruction
+  const noAsterisksRule = "CRITICAL: Never use asterisks (*) in your responses. Use plain dashes (-) for bullet points. No markdown formatting."
+  
   if (systemInstruction) {
     body.systemInstruction = {
-      parts: [{ text: systemInstruction }]
+      parts: [{ text: `${systemInstruction}\n\n${noAsterisksRule}` }]
+    }
+  } else {
+    body.systemInstruction = {
+      parts: [{ text: noAsterisksRule }]
     }
   }
 

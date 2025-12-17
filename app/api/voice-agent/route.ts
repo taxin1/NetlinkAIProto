@@ -1,6 +1,43 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
-import { GEMINI_MODEL, GEMINI_API_BASE } from "@/lib/gemini"
+import { GEMINI_API_BASE } from "@/lib/gemini"
+
+// Use flash model for fastest responses
+const FAST_MODEL = "gemini-2.0-flash"
+
+// Retry utility for handling transient errors
+async function retryWithBackoff<T>(
+  fn: () => Promise<T>,
+  maxRetries: number = 3,
+  baseDelay: number = 1000
+): Promise<T> {
+  let lastError: Error | null = null
+  
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      return await fn()
+    } catch (error: any) {
+      lastError = error instanceof Error ? error : new Error(String(error))
+      
+      const isRetryable = 
+        error instanceof Error && 
+        (error.message.includes("503") || 
+         error.message.includes("429") || 
+         error.message.includes("overloaded") ||
+         error.message.includes("UNAVAILABLE"))
+      
+      if (!isRetryable || attempt === maxRetries - 1) {
+        throw lastError
+      }
+      
+      const delay = baseDelay * Math.pow(2, attempt) + Math.random() * 1000
+      console.log(`Voice agent API retry (attempt ${attempt + 1}/${maxRetries}), waiting ${Math.round(delay)}ms...`)
+      await new Promise(resolve => setTimeout(resolve, delay))
+    }
+  }
+  
+  throw lastError || new Error("Failed after retries")
+}
 
 interface AgentAction {
   action: string
@@ -20,70 +57,58 @@ export async function POST(request: NextRequest) {
 
     const supabase = await createClient()
 
-    const [contactsResult, emailsResult, eventsResult, profileResult] = await Promise.all([
-      supabase.from("contacts").select("*").eq("user_id", userId).order("created_at", { ascending: false }).limit(50),
-      supabase.from("emails").select("*").eq("user_id", userId).order("created_at", { ascending: false }).limit(20),
-      supabase.from("calendar_events").select("*").eq("user_id", userId).order("event_date", { ascending: true }).limit(20),
-      supabase.auth.getUser(),
+    const [contactsResult, eventsResult] = await Promise.all([
+      supabase.from("contacts").select("name,email,company").eq("user_id", userId).limit(10),
+      supabase.from("calendar_events").select("title,event_date").eq("user_id", userId).limit(5),
     ])
 
     const contacts = contactsResult.data || []
-    const emails = emailsResult.data || []
     const events = eventsResult.data || []
-    const userProfile = profileResult.data?.user
 
     const apiKey = process.env.GEMINI_API_KEY
     if (!apiKey) {
       throw new Error("GEMINI_API_KEY not configured")
     }
 
-    const contactsList = contacts.map(c => ({ name: c.name, email: c.email, company: c.company, role: c.role, interests: c.notes, tags: c.tags }))
-    const eventsList = events.map(e => ({ title: e.title, date: e.event_date, location: e.location, description: e.description }))
+    // Minimal context for faster responses
+    const contactNames = contacts.slice(0, 10).map(c => c.name).join(", ")
+    const eventTitles = events.slice(0, 5).map(e => e.title).join(", ")
 
-    const prompt = `You are ARIA, an AI Voice Agent for Netlink Cogni - a professional networking platform.
+    const prompt = `You are ARIA, a fast voice assistant. Be concise and conversational.
 
-USER CONTEXT:
-- User Email: ${userProfile?.email || "Unknown"}
-- Total Contacts: ${contacts.length}
-- Upcoming Events: ${events.length}
+Stats: ${contacts.length} contacts, ${events.length} events
+Recent contacts: ${contactNames || "None"}
+Upcoming: ${eventTitles || "None"}
 
-CONTACTS: ${JSON.stringify(contactsList.slice(0, 20), null, 2)}
-EVENTS: ${JSON.stringify(eventsList.slice(0, 10), null, 2)}
+User: "${command}"
+${context ? `Context: ${context}` : ""}
 
-AVAILABLE ACTIONS:
-send_email, create_event, add_contact, search_contacts, find_similar_interests, view_contacts, view_events, get_stats, analyze_network, general_query
+Reply JSON only:
+{"action":"action_name","parameters":{},"needsConfirmation":false,"response":"Short natural reply","data":null}
 
-USER COMMAND: "${command}"
-${context ? `CONTEXT: ${context}` : ""}
+Actions: send_email, create_event, add_contact, search_contacts, view_contacts, view_events, get_stats, general_query
+Set needsConfirmation:true only for send_email, create_event, add_contact.
+Keep response under 30 words, friendly and direct.`
 
-Respond with ONLY a JSON object:
-{
-  "action": "action_name",
-  "parameters": {},
-  "needsConfirmation": true/false,
-  "response": "Natural spoken response (no asterisks)",
-  "data": null
-}
+    const data = await retryWithBackoff(async () => {
+      const response = await fetch(
+        `${GEMINI_API_BASE}/models/${FAST_MODEL}:generateContent?key=${apiKey}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ role: "user", parts: [{ text: prompt }] }],
+            generationConfig: { temperature: 0.5, maxOutputTokens: 256 },
+          }),
+        }
+      )
 
-For data-modifying actions (send_email, create_event, add_contact), set needsConfirmation to true.`
-
-    const response = await fetch(
-      `${GEMINI_API_BASE}/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ role: "user", parts: [{ text: prompt }] }],
-          generationConfig: { temperature: 0.7, maxOutputTokens: 1024 },
-        }),
+      if (!response.ok) {
+        throw new Error(`Gemini API error: ${response.status}`)
       }
-    )
 
-    if (!response.ok) {
-      throw new Error(`Gemini API error: ${response.status}`)
-    }
-
-    const data = await response.json()
+      return await response.json()
+    }, 3, 1000)
     const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text
 
     if (!responseText) {
@@ -110,11 +135,11 @@ For data-modifying actions (send_email, create_event, add_contact), set needsCon
           intent.response = `You have ${contacts.length} contacts. Here are the most recent ones.`
           break
         case "view_events":
-          intent.data = events.slice(0, 5).map(e => ({ title: e.title, date: e.event_date, location: e.location }))
+          intent.data = events.slice(0, 5).map(e => ({ title: e.title, date: e.event_date }))
           intent.response = events.length > 0 ? `You have ${events.length} upcoming events. Your next event is ${events[0]?.title}.` : "You don't have any upcoming events scheduled."
           break
         case "get_stats":
-          intent.data = { totalContacts: contacts.length, totalEmails: emails.length, upcomingEvents: events.length }
+          intent.data = { totalContacts: contacts.length, upcomingEvents: events.length }
           break
         case "analyze_network":
           const companies = new Set(contacts.map(c => c.company).filter(Boolean))
@@ -126,8 +151,9 @@ For data-modifying actions (send_email, create_event, add_contact), set needsCon
     return NextResponse.json(intent)
   } catch (error) {
     console.error("Voice agent error:", error)
+    const errorMessage = error instanceof Error ? error.message : "Unknown error"
     return NextResponse.json(
-      { action: "error", parameters: {}, needsConfirmation: false, response: "I encountered an error. Please try again.", data: null },
+      { action: "error", parameters: {}, needsConfirmation: false, response: `Error: ${errorMessage}`, data: null },
       { status: 500 }
     )
   }
