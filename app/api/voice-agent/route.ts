@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
-import { GEMINI_API_BASE } from "@/lib/gemini"
-
-// Use flash model for fastest responses
-const FAST_MODEL = "gemini-2.0-flash"
+import { OPENROUTER_API_BASE, OPENROUTER_TEXT_MODEL } from "@/lib/gemini"
 
 // Retry utility for handling transient errors
 async function retryWithBackoff<T>(
@@ -65,9 +62,9 @@ export async function POST(request: NextRequest) {
     const contacts = contactsResult.data || []
     const events = eventsResult.data || []
 
-    const apiKey = process.env.GEMINI_API_KEY
+    const apiKey = process.env.OPENROUTER_API_KEY
     if (!apiKey) {
-      throw new Error("GEMINI_API_KEY not configured")
+      throw new Error("OPENROUTER_API_KEY not configured")
     }
 
     // Minimal context for faster responses
@@ -92,24 +89,31 @@ Keep response under 30 words, friendly and direct.`
 
     const data = await retryWithBackoff(async () => {
       const response = await fetch(
-        `${GEMINI_API_BASE}/models/${FAST_MODEL}:generateContent?key=${apiKey}`,
+        `${OPENROUTER_API_BASE}/chat/completions`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${apiKey}`,
+            "HTTP-Referer": process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+            "X-Title": "Netlink Cogni"
+          },
           body: JSON.stringify({
-            contents: [{ role: "user", parts: [{ text: prompt }] }],
-            generationConfig: { temperature: 0.5, maxOutputTokens: 256 },
+            model: OPENROUTER_TEXT_MODEL,
+            messages: [{ role: "user", content: prompt }],
+            temperature: 0.5,
+            max_tokens: 256,
           }),
         }
       )
 
       if (!response.ok) {
-        throw new Error(`Gemini API error: ${response.status}`)
+        throw new Error(`OpenRouter API error: ${response.status}`)
       }
 
       return await response.json()
     }, 3, 1000)
-    const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text
+    const responseText = data.choices?.[0]?.message?.content
 
     if (!responseText) {
       throw new Error("No response from AI")
