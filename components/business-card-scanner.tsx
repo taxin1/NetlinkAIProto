@@ -204,7 +204,7 @@ export function BusinessCardScanner({ userId }: BusinessCardScannerProps) {
       
       if (error instanceof Error) {
         if (error.message.includes("No AI API keys configured")) {
-          errorMessage = "No AI API keys configured. Please add GEMINI_API_KEY or DEEPSEEK_API_KEY to your .env.local file."
+          errorMessage = "No AI API keys configured. Please add GEMINI_API_KEY to your .env.local file."
         } else if (error.message.includes("API key not configured") || error.message.includes("GEMINI_API_KEY")) {
           errorMessage = "API key not configured. Please set up your AI API key in the environment variables."
         } else if (error.message.includes("API request failed")) {

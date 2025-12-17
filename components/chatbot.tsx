@@ -21,7 +21,7 @@ interface ChatbotProps {
   userId: string
 }
 
-async function sendMessageToDeepSeek(message: string): Promise<string> {
+async function sendMessageToAI(message: string): Promise<string> {
   try {
     const response = await fetch("/api/chat", {
       method: "POST",
@@ -193,7 +193,7 @@ export function Chatbot({ userId }: ChatbotProps) {
     setIsLoading(true)
 
     try {
-      const response = await sendMessageToDeepSeek(userMessage.content)
+      const response = await sendMessageToAI(userMessage.content)
       
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),

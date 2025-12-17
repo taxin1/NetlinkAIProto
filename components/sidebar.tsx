@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation"
 import { useState, useEffect } from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { LayoutDashboard, Users, Mail, BarChart3, LogOut, Network, Bot, Settings, Calendar, Menu, X } from "lucide-react"
+import { LayoutDashboard, Users, Mail, BarChart3, LogOut, Network, Bot, Settings, Calendar, Menu, X, Share2, Mic } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { useMobile } from "@/lib/hooks/use-mobile"
@@ -23,10 +23,12 @@ interface SidebarProps {
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { name: "Network Profile", href: "/dashboard/profile", icon: Share2 },
   { name: "Contacts", href: "/dashboard/contacts", icon: Users },
   { name: "Events", href: "/dashboard/events", icon: Calendar },
   { name: "Emails", href: "/dashboard/emails", icon: Mail },
   { name: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
+  { name: "Voice Agent", href: "/dashboard/voice-agent", icon: Mic },
   { name: "AI Assistant", href: "/dashboard/ai-assistant", icon: Bot },
   { name: "Settings", href: "/dashboard/settings", icon: Settings },
 ]

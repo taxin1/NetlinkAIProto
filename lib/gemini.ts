@@ -1,6 +1,6 @@
-// Gemini API Configuration - Using latest Gemini 2.5 Flash model
-export const GEMINI_MODEL = "gemini-2.5-flash"
-export const GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta/models"
+// Gemini API Configuration (Free tier)
+export const GEMINI_MODEL = "gemini-1.5-flash"
+export const GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta"
 
 // Retry utility for handling transient errors (503, 429, etc.)
 async function retryWithBackoff<T>(
@@ -42,6 +42,77 @@ async function retryWithBackoff<T>(
   throw lastError || new Error("Failed after retries")
 }
 
+function getApiKey(): string {
+  const apiKey = process.env.GEMINI_API_KEY
+  if (!apiKey) {
+    throw new Error("GEMINI_API_KEY environment variable is not set. Please add it to your .env.local file.")
+  }
+  return apiKey
+}
+
+async function callGemini(prompt: string, systemInstruction?: string): Promise<string> {
+  const apiKey = getApiKey()
+  
+  const contents = [
+    {
+      role: "user",
+      parts: [{ text: prompt }]
+    }
+  ]
+
+  const body: any = {
+    contents,
+    generationConfig: {
+      temperature: 0.7,
+      maxOutputTokens: 2048,
+    }
+  }
+
+  if (systemInstruction) {
+    body.systemInstruction = {
+      parts: [{ text: systemInstruction }]
+    }
+  }
+
+  const response = await fetch(
+    `${GEMINI_API_BASE}/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    }
+  )
+
+  if (!response.ok) {
+    const errorText = await response.text()
+    console.error("Gemini API error response:", {
+      status: response.status,
+      statusText: response.statusText,
+      body: errorText
+    })
+    const error: any = new Error(`Gemini API request failed (${response.status}): ${errorText}`)
+    error.status = response.status
+    error.response = { status: response.status }
+    throw error
+  }
+
+  const data = await response.json()
+
+  if (data.error) {
+    console.error("Gemini API error:", data.error)
+    throw new Error(`Gemini API error: ${data.error.message || JSON.stringify(data.error)}`)
+  }
+
+  if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
+    return data.candidates[0].content.parts[0].text
+  }
+
+  console.error("No valid response from Gemini API:", data)
+  throw new Error("Failed to generate response: No valid response from AI")
+}
+
 interface EmailGenerationContext {
   contactName: string
   contactCompany: string
@@ -71,8 +142,6 @@ interface EmailGenerationContext {
 export async function generateEmailWithGemini(
   context: EmailGenerationContext
 ): Promise<string> {
-  const apiKey = process.env.GEMINI_API_KEY!
-
   const {
     contactName,
     contactCompany,
@@ -173,55 +242,7 @@ EXAMPLES OF GOOD OPENINGS (NOT templates, but personalized):
 Write the email body now. Make it specific, authentic, and personalized - NOT a template.`
 
   return retryWithBackoff(async () => {
-    const response = await fetch(
-      `${GEMINI_API_BASE}/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                {
-                  text: prompt,
-                },
-              ],
-            },
-          ],
-        }),
-      },
-    )
-
-    if (!response.ok) {
-      const errorText = await response.text()
-      console.error("Gemini API error response:", {
-        status: response.status,
-        statusText: response.statusText,
-        body: errorText
-      })
-      // Create error with status code for retry logic
-      const error: any = new Error(`Gemini API request failed (${response.status}): ${errorText}`)
-      error.status = response.status
-      error.response = { status: response.status }
-      throw error
-    }
-
-    const data = await response.json()
-
-    // Check for API errors in response
-    if (data.error) {
-      console.error("Gemini API error:", data.error)
-      throw new Error(`Gemini API error: ${data.error.message || JSON.stringify(data.error)}`)
-    }
-
-    if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
-      return data.candidates[0].content.parts[0].text
-    }
-
-    console.error("No valid response from Gemini API:", data)
-    throw new Error("Failed to generate email: No valid response from AI")
+    return await callGemini(prompt)
   }, 3, 1000)
 }
 
@@ -233,23 +254,7 @@ export async function extractBusinessCardInfo(imageBase64: string): Promise<{
   position?: string
   linkedin_url?: string
 }> {
-  const geminiApiKey = process.env.GEMINI_API_KEY
-
-  if (!geminiApiKey) {
-    throw new Error("GEMINI_API_KEY environment variable is not set. Please add it to your .env.local file.")
-  }
-
-  return await extractWithGemini(imageBase64, geminiApiKey)
-}
-
-async function extractWithGemini(imageBase64: string, apiKey: string): Promise<{
-  name?: string
-  email?: string
-  phone?: string
-  company?: string
-  position?: string
-  linkedin_url?: string
-}> {
+  const apiKey = getApiKey()
 
   // Validate image data
   if (!imageBase64 || imageBase64.length === 0) {
@@ -270,7 +275,7 @@ Be precise and only extract information that is clearly visible. Do not make up 
 
   try {
     const response = await fetch(
-      `${GEMINI_API_BASE}/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
+      `${GEMINI_API_BASE}/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
       {
         method: "POST",
         headers: {
@@ -279,21 +284,20 @@ Be precise and only extract information that is clearly visible. Do not make up 
         body: JSON.stringify({
           contents: [
             {
+              role: "user",
               parts: [
-                {
-                  text: prompt,
-                },
-                {
-                  inline_data: {
-                    mime_type: "image/jpeg",
-                    data: imageBase64,
-                  },
-                },
+                { text: prompt },
+                { 
+                  inlineData: { 
+                    mimeType: "image/jpeg", 
+                    data: imageBase64 
+                  } 
+                }
               ],
             },
           ],
         }),
-      },
+      }
     )
 
     if (!response.ok) {
@@ -303,7 +307,6 @@ Be precise and only extract information that is clearly visible. Do not make up 
 
     const data = await response.json()
 
-    // Check for API errors
     if (data.error) {
       throw new Error(`Gemini API error: ${data.error.message || 'Unknown error'}`)
     }
@@ -312,7 +315,6 @@ Be precise and only extract information that is clearly visible. Do not make up 
       const text = data.candidates[0].content.parts[0].text
       console.log("Gemini response text:", text)
       
-      // Extract JSON from the response (it might be wrapped in markdown code blocks)
       const jsonMatch = text.match(/\{[\s\S]*\}/)
       if (jsonMatch) {
         try {
@@ -330,58 +332,37 @@ Be precise and only extract information that is clearly visible. Do not make up 
   } catch (error) {
     console.error("Gemini API error:", error)
     
-    // Re-throw with more context if it's our custom error
     if (error instanceof Error) {
       throw error
     }
     
-    // Handle unexpected errors
     throw new Error(`Failed to extract business card information: ${error}`)
   }
 }
 
 
 export async function generateText(prompt: string): Promise<string> {
-  const geminiApiKey = process.env.GEMINI_API_KEY
+  const formattingRules = `
 
-  if (!geminiApiKey) {
-    throw new Error("GEMINI_API_KEY environment variable is not set")
-  }
+CRITICAL FORMATTING RULES - MUST FOLLOW:
+1. NEVER use asterisks (*) or double asterisks (**) in your response
+2. NEVER use asterisks for bold text, emphasis, bullet points, or any other purpose
+3. Use plain dash (-) for bullet points only
+4. Keep responses concise and professional
+5. Use plain text formatting only - no markdown, no asterisks, no special formatting characters
+
+CORRECT Example:
+Title:
+- Point one
+- Point two
+
+WRONG Example (DO NOT DO THIS):
+**Title**
+* Point one
+* Point two`
 
   try {
-    const response = await fetch(
-      `${GEMINI_API_BASE}/${GEMINI_MODEL}:generateContent?key=${geminiApiKey}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                {
-                  text: prompt + "\n\nCRITICAL FORMATTING RULES - MUST FOLLOW:\n1. NEVER use asterisks (*) or double asterisks (**) in your response\n2. NEVER use asterisks for bold text, emphasis, bullet points, or any other purpose\n3. Use plain dash (-) for bullet points only\n4. Keep responses concise and professional\n5. Use plain text formatting only - no markdown, no asterisks, no special formatting characters\n\nCORRECT Example:\nTitle:\n- Point one\n- Point two\n\nWRONG Example (DO NOT DO THIS):\n**Title**\n* Point one\n* Point two",
-                },
-              ],
-            },
-          ],
-        }),
-      },
-    )
-
-    if (!response.ok) {
-      const errorText = await response.text()
-      throw new Error(`Gemini API request failed (${response.status}): ${errorText}`)
-    }
-
-    const data = await response.json()
-
-    if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
-      return data.candidates[0].content.parts[0].text
-    }
-
-    throw new Error("No valid response from Gemini API")
+    return await callGemini(prompt + formattingRules)
   } catch (error) {
     console.error("Gemini API error:", error)
     throw error
@@ -389,19 +370,13 @@ export async function generateText(prompt: string): Promise<string> {
 }
 
 export async function generateChatResponse(message: string): Promise<string> {
-  const apiKey = process.env.GEMINI_API_KEY
-
-  if (!apiKey) {
-    throw new Error("GEMINI_API_KEY environment variable is not set")
-  }
-
   const systemPrompt = `You are a helpful AI assistant for Netlink Cogni, a comprehensive AI-powered business networking platform. You help users with business networking, contact management, and professional communication.
 
 ABOUT NETLINK COGNI PLATFORM:
 Netlink Cogni is an AI-powered business networking and contact management platform that helps professionals build, manage, and grow their professional networks. The platform includes:
 
 CORE FEATURES:
-- Business Card Scanner: AI-powered OCR using Google Gemini to extract contact information from business card photos
+- Business Card Scanner: AI-powered OCR to extract contact information from business card photos
 - Contact Management: Comprehensive contact database with company, position, phone, email, LinkedIn, and notes
 - Email Generation: AI-powered email composition for cold emails, introductions, follow-ups, and thank you messages
 - Email Campaigns: Bulk email sending with personalized AI-generated content for each recipient
@@ -413,7 +388,7 @@ CORE FEATURES:
 - Real-time Notifications: Get notified about new contacts, events, and email activity
 
 TECHNICAL CAPABILITIES:
-- Uses Google Gemini 2.5 Flash model for AI processing
+- Uses Google Gemini AI for intelligent processing
 - Supabase backend for data storage and authentication
 - Real-time database updates using Supabase subscriptions
 - SMTP email sending (Gmail and custom servers)
@@ -446,48 +421,9 @@ WRONG Examples (NEVER DO THIS):
 * Contact Management
 
 Be friendly, professional, and knowledgeable about the platform's capabilities. When users ask about features, explain how they work within Netlink Cogni.`
-  
-  const fullPrompt = `${systemPrompt}\n\nUser: ${message}`
 
   return retryWithBackoff(async () => {
-    const response = await fetch(
-      `${GEMINI_API_BASE}/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                {
-                  text: fullPrompt,
-                },
-              ],
-            },
-          ],
-        }),
-      },
-    )
-
-    if (!response.ok) {
-      const errorText = await response.text()
-      console.error("Gemini API error:", errorText)
-      // Create error with status code for retry logic
-      const error: any = new Error(`Gemini API request failed (${response.status}): ${errorText}`)
-      error.status = response.status
-      error.response = { status: response.status }
-      throw error
-    }
-
-    const data = await response.json()
-
-    if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
-      return data.candidates[0].content.parts[0].text
-    }
-
-    throw new Error("No valid response from Gemini API")
+    return await callGemini(message, systemPrompt)
   }, 3, 1000)
 }
 
@@ -496,8 +432,6 @@ export async function fetchUrlPreview(url: string): Promise<{
   description?: string
   image?: string
 }> {
-  const apiKey = process.env.GEMINI_API_KEY!
-
   const prompt = `Given this URL: ${url}
 
 Generate a preview with:
@@ -518,37 +452,11 @@ CRITICAL FORMATTING RULES:
 Keep descriptions concise and to the point.`
 
   try {
-    const response = await fetch(
-      `${GEMINI_API_BASE}/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                {
-                  text: prompt,
-                },
-              ],
-            },
-          ],
-        }),
-      },
-    )
-
-    const data = await response.json()
-
-    if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
-      const text = data.candidates[0].content.parts[0].text
+    const text = await callGemini(prompt)
       const jsonMatch = text.match(/\{[\s\S]*\}/)
       if (jsonMatch) {
         return JSON.parse(jsonMatch[0])
       }
-    }
-
     return { title: url, description: "Event link" }
   } catch (error) {
     console.error("Gemini API error:", error)
@@ -564,8 +472,6 @@ export async function extractEventDataFromUrl(url: string): Promise<{
   location?: string
   imageUrl?: string
 }> {
-  const apiKey = process.env.GEMINI_API_KEY!
-
   const prompt = `Analyze this URL and extract event information if present: ${url}
 
 IMPORTANT RULES:
@@ -612,37 +518,11 @@ Example outputs:
 - "https://eventbrite.com/e/product-launch-123" → {"title": "Product Launch", "description": "Event", "startTime": null, "endTime": null, "location": "TBD"}`
 
   try {
-    const response = await fetch(
-      `${GEMINI_API_BASE}/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                {
-                  text: prompt,
-                },
-              ],
-            },
-          ],
-        }),
-      },
-    )
-
-    const data = await response.json()
-
-    if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
-      const text = data.candidates[0].content.parts[0].text
+    const text = await callGemini(prompt)
       const jsonMatch = text.match(/\{[\s\S]*\}/)
       if (jsonMatch) {
         return JSON.parse(jsonMatch[0])
       }
-    }
-
     throw new Error("Failed to extract event data")
   } catch (error) {
     console.error("Gemini API error:", error)
