@@ -381,9 +381,11 @@ export function VoiceAgent({ userId }: VoiceAgentProps) {
         body: JSON.stringify({ command, userId }),
       })
 
-      if (!response.ok) throw new Error("Failed to process command")
-
       const result = await response.json()
+      
+      if (!response.ok) {
+        throw new Error(result.response || result.error || "Failed to process command")
+      }
 
       if (result.needsConfirmation) {
         setPendingAction(result)
@@ -413,7 +415,7 @@ export function VoiceAgent({ userId }: VoiceAgentProps) {
       }, 3000)
     } catch (error) {
       console.error("Command processing error:", error)
-      const errorMsg = "Oops! Something went wrong. Try again?"
+      const errorMsg = error instanceof Error ? error.message : "Oops! Something went wrong. Try again?"
       setCurrentBubbleText(errorMsg)
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),

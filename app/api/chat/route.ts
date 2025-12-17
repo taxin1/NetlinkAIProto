@@ -13,13 +13,16 @@ export async function POST(request: NextRequest) {
     }
 
     try {
+      console.log("Chat API: Calling generateChatResponse with message:", message.substring(0, 50))
       const response = await generateChatResponse(message)
+      console.log("Chat API: Got response successfully")
       
       return NextResponse.json({
         response: response,
       })
     } catch (error) {
       console.error("AI service error:", error)
+      console.error("Error details:", JSON.stringify(error, Object.getOwnPropertyNames(error)))
       
       if (error instanceof Error) {
         if (error.message.includes("GEMINI_API_KEY") || error.message.includes("environment variable is not set")) {

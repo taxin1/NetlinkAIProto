@@ -1,5 +1,5 @@
 // Gemini API Configuration (Free tier)
-export const GEMINI_MODEL = "gemini-1.5-flash"
+export const GEMINI_MODEL = "gemini-2.5-flash"
 export const GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta"
 
 // Retry utility for handling transient errors (503, 429, etc.)
