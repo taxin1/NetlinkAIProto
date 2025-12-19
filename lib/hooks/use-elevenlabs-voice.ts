@@ -2,9 +2,10 @@
 
 import { useState, useCallback, useRef } from "react"
 
-interface ElevenLabsVoiceOptions {
+interface VoiceOptions {
   onSpeechStart?: () => void
   onSpeechEnd?: () => void
+  onTranscript?: (text: string) => void
   onError?: (error: string) => void
   voiceId?: string
 }
@@ -12,14 +13,46 @@ interface ElevenLabsVoiceOptions {
 export function useElevenLabsVoice({
   onSpeechStart,
   onSpeechEnd,
+  onTranscript,
   onError,
-  voiceId = "21m00Tcm4TlvDq8ikWAM", // Rachel - default
-}: ElevenLabsVoiceOptions = {}) {
+  voiceId = "21m00Tcm4TlvDq8ikWAM",
+}: VoiceOptions = {}) {
   const [isSpeaking, setIsSpeaking] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [isListening, setIsListening] = useState(false)
+  const [transcript, setTranscript] = useState("")
   const audioRef = useRef<HTMLAudioElement | null>(null)
-  const audioContextRef = useRef<AudioContext | null>(null)
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null)
+  const audioChunksRef = useRef<Blob[]>([])
+  const streamRef = useRef<MediaStream | null>(null)
 
+  // Browser TTS fallback
+  const fallbackSpeak = useCallback((text: string) => {
+    if (!("speechSynthesis" in window)) {
+      onError?.("Text-to-speech not supported")
+      return
+    }
+
+    window.speechSynthesis.cancel()
+    const utterance = new SpeechSynthesisUtterance(text)
+    utterance.rate = 1.0
+    utterance.pitch = 1.0
+
+    utterance.onstart = () => {
+      setIsSpeaking(true)
+      setIsLoading(false)
+      onSpeechStart?.()
+    }
+
+    utterance.onend = () => {
+      setIsSpeaking(false)
+      onSpeechEnd?.()
+    }
+
+    window.speechSynthesis.speak(utterance)
+  }, [onSpeechStart, onSpeechEnd, onError])
+
+  // Text-to-Speech - tries API first, falls back to browser
   const speak = useCallback(async (text: string) => {
     if (!text || isLoading) return
 
@@ -38,9 +71,17 @@ export function useElevenLabsVoice({
         body: JSON.stringify({ text, voiceId }),
       })
 
+      // Check if response is JSON (browser fallback signal)
+      const contentType = response.headers.get("content-type")
+      if (contentType?.includes("application/json")) {
+        const json = await response.json()
+        if (json.useBrowserTTS) {
+          fallbackSpeak(text)
+          return
+        }
+      }
+
       if (!response.ok) {
-        // Fallback to browser TTS if ElevenLabs fails
-        console.warn("ElevenLabs TTS failed, falling back to browser TTS")
         fallbackSpeak(text)
         return
       }
@@ -69,45 +110,105 @@ export function useElevenLabsVoice({
         setIsLoading(false)
         URL.revokeObjectURL(audioUrl)
         audioRef.current = null
-        // Fallback to browser TTS
         fallbackSpeak(text)
       }
 
       await audio.play()
     } catch (error) {
-      console.error("ElevenLabs TTS error:", error)
+      console.error("TTS error:", error)
       setIsLoading(false)
-      // Fallback to browser TTS
       fallbackSpeak(text)
     }
-  }, [isLoading, voiceId, onSpeechStart, onSpeechEnd])
+  }, [isLoading, voiceId, onSpeechStart, onSpeechEnd, fallbackSpeak])
 
-  const fallbackSpeak = useCallback((text: string) => {
-    if (!("speechSynthesis" in window)) {
-      onError?.("Text-to-speech not supported")
-      return
+  // Speech-to-Text using Gemini 2.0 Flash
+  const startListening = useCallback(async () => {
+    if (isListening) return
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      streamRef.current = stream
+      audioChunksRef.current = []
+
+      const mediaRecorder = new MediaRecorder(stream, {
+        mimeType: MediaRecorder.isTypeSupported("audio/webm") ? "audio/webm" : "audio/mp4"
+      })
+      mediaRecorderRef.current = mediaRecorder
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data)
+        }
+      }
+
+      mediaRecorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunksRef.current, { 
+          type: mediaRecorder.mimeType 
+        })
+        
+        // Stop all tracks
+        stream.getTracks().forEach(track => track.stop())
+        streamRef.current = null
+        
+        // Send to Gemini STT
+        await transcribeAudio(audioBlob)
+      }
+
+      mediaRecorder.start()
+      setIsListening(true)
+      setTranscript("")
+    } catch (error) {
+      console.error("Error starting recording:", error)
+      onError?.("Failed to access microphone")
     }
+  }, [isListening, onError])
 
-    window.speechSynthesis.cancel()
-    const utterance = new SpeechSynthesisUtterance(text)
-    utterance.rate = 1.0
-    utterance.pitch = 1.0
+  const stopListening = useCallback(() => {
+    if (mediaRecorderRef.current && isListening) {
+      mediaRecorderRef.current.stop()
+      setIsListening(false)
+    }
+  }, [isListening])
 
-    utterance.onstart = () => {
-      setIsSpeaking(true)
+  const transcribeAudio = useCallback(async (audioBlob: Blob) => {
+    setIsLoading(true)
+    
+    try {
+      const formData = new FormData()
+      formData.append("audio", audioBlob, "recording.webm")
+
+      const response = await fetch("/api/elevenlabs-stt", {
+        method: "POST",
+        body: formData,
+      })
+
+      if (!response.ok) {
+        throw new Error("Transcription failed")
+      }
+
+      const result = await response.json()
+      const transcribedText = result.text || ""
+      
+      setTranscript(transcribedText)
+      onTranscript?.(transcribedText)
+    } catch (error) {
+      console.error("Transcription error:", error)
+      onError?.("Failed to transcribe audio")
+    } finally {
       setIsLoading(false)
-      onSpeechStart?.()
     }
+  }, [onTranscript, onError])
 
-    utterance.onend = () => {
-      setIsSpeaking(false)
-      onSpeechEnd?.()
+  const toggleListening = useCallback(() => {
+    if (isListening) {
+      stopListening()
+    } else {
+      startListening()
     }
-
-    window.speechSynthesis.speak(utterance)
-  }, [onSpeechStart, onSpeechEnd, onError])
+  }, [isListening, startListening, stopListening])
 
   const stop = useCallback(() => {
+    // Stop TTS
     if (audioRef.current) {
       audioRef.current.pause()
       audioRef.current = null
@@ -116,25 +217,42 @@ export function useElevenLabsVoice({
       window.speechSynthesis.cancel()
     }
     setIsSpeaking(false)
+    
+    // Stop STT
+    if (mediaRecorderRef.current && isListening) {
+      mediaRecorderRef.current.stop()
+    }
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop())
+      streamRef.current = null
+    }
+    setIsListening(false)
     setIsLoading(false)
-  }, [])
+  }, [isListening])
 
   return {
+    // TTS
     speak,
     stop,
     isSpeaking,
+    // STT
+    startListening,
+    stopListening,
+    toggleListening,
+    isListening,
+    transcript,
+    // Common
     isLoading,
   }
 }
 
-// Voice IDs for different personalities
+// Voice IDs for different personalities (kept for compatibility)
 export const ELEVENLABS_VOICES = {
-  rachel: "21m00Tcm4TlvDq8ikWAM", // Warm, conversational female
-  adam: "pNInz6obpgDQGcFmaJgB", // Deep, authoritative male
-  antoni: "ErXwobaYiN019PkySvjV", // Warm, friendly male
-  bella: "EXAVITQu4vr4xnSDxMaL", // Soft, gentle female
-  elli: "MF3mGyEYCl7XYWbV9V6O", // Young, energetic female
-  josh: "TxGEqnHWrfWFTfGW9XjX", // Deep, narrative male
-  sam: "yoZ06aMxZJJ28mfd3POQ", // Raspy, authentic male
+  rachel: "21m00Tcm4TlvDq8ikWAM",
+  adam: "pNInz6obpgDQGcFmaJgB",
+  antoni: "ErXwobaYiN019PkySvjV",
+  bella: "EXAVITQu4vr4xnSDxMaL",
+  elli: "MF3mGyEYCl7XYWbV9V6O",
+  josh: "TxGEqnHWrfWFTfGW9XjX",
+  sam: "yoZ06aMxZJJ28mfd3POQ",
 } as const
-

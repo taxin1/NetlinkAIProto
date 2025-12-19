@@ -1,12 +1,26 @@
-// Gemini API Configuration (Free tier)
-export const GEMINI_MODEL = "gemini-2.5-flash"
-export const GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta"
+// OpenRouter API Configuration (using Qwen)
+export const OPENROUTER_MODEL = "qwen/qwen-2-vl-7b-instruct:free"
+export const OPENROUTER_TEXT_MODEL = "qwen/qwen3-14b:free"
+export const OPENROUTER_API_BASE = "https://openrouter.ai/api/v1"
+
+// Rate limiting - track last request time
+let lastRequestTime = 0
+const MIN_REQUEST_INTERVAL = 1000 // 1 second between requests
+
+async function throttle(): Promise<void> {
+  const now = Date.now()
+  const timeSinceLastRequest = now - lastRequestTime
+  if (timeSinceLastRequest < MIN_REQUEST_INTERVAL) {
+    await new Promise(resolve => setTimeout(resolve, MIN_REQUEST_INTERVAL - timeSinceLastRequest))
+  }
+  lastRequestTime = Date.now()
+}
 
 // Retry utility for handling transient errors (503, 429, etc.)
 async function retryWithBackoff<T>(
   fn: () => Promise<T>,
   maxRetries: number = 3,
-  baseDelay: number = 1000
+  baseDelay: number = 2000
 ): Promise<T> {
   let lastError: Error | null = null
   
@@ -43,56 +57,63 @@ async function retryWithBackoff<T>(
 }
 
 function getApiKey(): string {
-  const apiKey = process.env.GEMINI_API_KEY
+  const apiKey = process.env.OPENROUTER_API_KEY
   if (!apiKey) {
-    throw new Error("GEMINI_API_KEY environment variable is not set. Please add it to your .env.local file.")
+    throw new Error("OPENROUTER_API_KEY environment variable is not set. Please add it to your .env.local file.")
   }
   return apiKey
 }
 
-async function callGemini(prompt: string, systemInstruction?: string): Promise<string> {
+async function callOpenRouter(prompt: string, systemInstruction?: string): Promise<string> {
+  await throttle() // Rate limit requests
   const apiKey = getApiKey()
   
-  const contents = [
-    {
-      role: "user",
-      parts: [{ text: prompt }]
-    }
-  ]
-
-  const body: any = {
-    contents,
-    generationConfig: {
-      temperature: 0.7,
-      maxOutputTokens: 2048,
-    }
-  }
-
-  if (systemInstruction) {
-    body.systemInstruction = {
-      parts: [{ text: systemInstruction }]
-    }
-  }
+  const messages: any[] = []
+  
+  // Always add no-asterisks rule to system instruction
+  const noAsterisksRule = "CRITICAL: Never use asterisks (*) in your responses. Use plain dashes (-) for bullet points. No markdown formatting."
+  
+  const systemContent = systemInstruction 
+    ? `${systemInstruction}\n\n${noAsterisksRule}`
+    : noAsterisksRule
+  
+  messages.push({
+    role: "system",
+    content: systemContent
+  })
+  
+  messages.push({
+    role: "user",
+    content: prompt
+  })
 
   const response = await fetch(
-    `${GEMINI_API_BASE}/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
+    `${OPENROUTER_API_BASE}/chat/completions`,
     {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${apiKey}`,
+        "HTTP-Referer": process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+        "X-Title": "Netlink Cogni"
       },
-      body: JSON.stringify(body),
+      body: JSON.stringify({
+        model: OPENROUTER_TEXT_MODEL,
+        messages,
+        temperature: 0.7,
+        max_tokens: 2048,
+      }),
     }
   )
 
   if (!response.ok) {
     const errorText = await response.text()
-    console.error("Gemini API error response:", {
+    console.error("OpenRouter API error response:", {
       status: response.status,
       statusText: response.statusText,
       body: errorText
     })
-    const error: any = new Error(`Gemini API request failed (${response.status}): ${errorText}`)
+    const error: any = new Error(`OpenRouter API request failed (${response.status}): ${errorText}`)
     error.status = response.status
     error.response = { status: response.status }
     throw error
@@ -101,15 +122,15 @@ async function callGemini(prompt: string, systemInstruction?: string): Promise<s
   const data = await response.json()
 
   if (data.error) {
-    console.error("Gemini API error:", data.error)
-    throw new Error(`Gemini API error: ${data.error.message || JSON.stringify(data.error)}`)
+    console.error("OpenRouter API error:", data.error)
+    throw new Error(`OpenRouter API error: ${data.error.message || JSON.stringify(data.error)}`)
   }
 
-  if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
-    return data.candidates[0].content.parts[0].text
+  if (data.choices && data.choices[0]?.message?.content) {
+    return data.choices[0].message.content
   }
 
-  console.error("No valid response from Gemini API:", data)
+  console.error("No valid response from OpenRouter API:", data)
   throw new Error("Failed to generate response: No valid response from AI")
 }
 
@@ -242,7 +263,7 @@ EXAMPLES OF GOOD OPENINGS (NOT templates, but personalized):
 Write the email body now. Make it specific, authentic, and personalized - NOT a template.`
 
   return retryWithBackoff(async () => {
-    return await callGemini(prompt)
+    return await callOpenRouter(prompt)
   }, 3, 1000)
 }
 
@@ -275,45 +296,51 @@ Be precise and only extract information that is clearly visible. Do not make up 
 
   try {
     const response = await fetch(
-      `${GEMINI_API_BASE}/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
+      `${OPENROUTER_API_BASE}/chat/completions`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`,
+          "HTTP-Referer": process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+          "X-Title": "Netlink Cogni"
         },
         body: JSON.stringify({
-          contents: [
+          model: OPENROUTER_MODEL, // Vision model for images
+          messages: [
             {
               role: "user",
-              parts: [
-                { text: prompt },
+              content: [
+                { type: "text", text: prompt },
                 { 
-                  inlineData: { 
-                    mimeType: "image/jpeg", 
-                    data: imageBase64 
-                  } 
+                  type: "image_url",
+                  image_url: {
+                    url: `data:image/jpeg;base64,${imageBase64}`
+                  }
                 }
-              ],
-            },
+              ]
+            }
           ],
+          temperature: 0.3,
+          max_tokens: 1024,
         }),
       }
     )
 
     if (!response.ok) {
       const errorText = await response.text()
-      throw new Error(`Gemini API request failed (${response.status}): ${errorText}`)
+      throw new Error(`OpenRouter API request failed (${response.status}): ${errorText}`)
     }
 
     const data = await response.json()
 
     if (data.error) {
-      throw new Error(`Gemini API error: ${data.error.message || 'Unknown error'}`)
+      throw new Error(`OpenRouter API error: ${data.error.message || 'Unknown error'}`)
     }
 
-    if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
-      const text = data.candidates[0].content.parts[0].text
-      console.log("Gemini response text:", text)
+    if (data.choices && data.choices[0]?.message?.content) {
+      const text = data.choices[0].message.content
+      console.log("OpenRouter response text:", text)
       
       const jsonMatch = text.match(/\{[\s\S]*\}/)
       if (jsonMatch) {
@@ -328,9 +355,9 @@ Be precise and only extract information that is clearly visible. Do not make up 
       }
     }
 
-    throw new Error("No valid response from Gemini API")
+    throw new Error("No valid response from OpenRouter API")
   } catch (error) {
-    console.error("Gemini API error:", error)
+    console.error("OpenRouter API error:", error)
     
     if (error instanceof Error) {
       throw error
@@ -362,9 +389,9 @@ WRONG Example (DO NOT DO THIS):
 * Point two`
 
   try {
-    return await callGemini(prompt + formattingRules)
+    return await callOpenRouter(prompt + formattingRules)
   } catch (error) {
-    console.error("Gemini API error:", error)
+    console.error("OpenRouter API error:", error)
     throw error
   }
 }
@@ -388,7 +415,7 @@ CORE FEATURES:
 - Real-time Notifications: Get notified about new contacts, events, and email activity
 
 TECHNICAL CAPABILITIES:
-- Uses Google Gemini AI for intelligent processing
+- Uses Qwen AI via OpenRouter for intelligent processing
 - Supabase backend for data storage and authentication
 - Real-time database updates using Supabase subscriptions
 - SMTP email sending (Gmail and custom servers)
@@ -423,7 +450,7 @@ WRONG Examples (NEVER DO THIS):
 Be friendly, professional, and knowledgeable about the platform's capabilities. When users ask about features, explain how they work within Netlink Cogni.`
 
   return retryWithBackoff(async () => {
-    return await callGemini(message, systemPrompt)
+    return await callOpenRouter(message, systemPrompt)
   }, 3, 1000)
 }
 
@@ -452,14 +479,14 @@ CRITICAL FORMATTING RULES:
 Keep descriptions concise and to the point.`
 
   try {
-    const text = await callGemini(prompt)
+    const text = await callOpenRouter(prompt)
       const jsonMatch = text.match(/\{[\s\S]*\}/)
       if (jsonMatch) {
         return JSON.parse(jsonMatch[0])
       }
     return { title: url, description: "Event link" }
   } catch (error) {
-    console.error("Gemini API error:", error)
+    console.error("OpenRouter API error:", error)
     return { title: url, description: "Event link" }
   }
 }
@@ -518,14 +545,14 @@ Example outputs:
 - "https://eventbrite.com/e/product-launch-123" → {"title": "Product Launch", "description": "Event", "startTime": null, "endTime": null, "location": "TBD"}`
 
   try {
-    const text = await callGemini(prompt)
+    const text = await callOpenRouter(prompt)
       const jsonMatch = text.match(/\{[\s\S]*\}/)
       if (jsonMatch) {
         return JSON.parse(jsonMatch[0])
       }
     throw new Error("Failed to extract event data")
   } catch (error) {
-    console.error("Gemini API error:", error)
+    console.error("OpenRouter API error:", error)
     throw error
   }
 }
