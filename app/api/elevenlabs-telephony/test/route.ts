@@ -90,15 +90,36 @@ export async function POST(request: NextRequest) {
             endpoint: endpoint
           })
         } else {
+          let errorDetails
+          try {
+            errorDetails = JSON.parse(responseText)
+          } catch {
+            errorDetails = { message: responseText }
+          }
+          
           lastError = {
             status: response.status,
             statusText: response.statusText,
-            body: responseText
+            body: responseText,
+            parsed: errorDetails
           }
+          
+          console.log(`[Test Call] Endpoint ${endpoint} failed:`, {
+            status: response.status,
+            error: errorDetails
+          })
+          
           // If it's a 404, try next endpoint
           if (response.status === 404) {
             continue
           }
+          
+          // For 400/401/403, log but try other endpoints
+          if ([400, 401, 403].includes(response.status)) {
+            console.warn(`[Test Call] Endpoint exists but returned ${response.status}, trying alternatives...`)
+            continue
+          }
+          
           // For other errors, break and show the error
           break
         }

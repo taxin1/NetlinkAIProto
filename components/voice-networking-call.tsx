@@ -81,7 +81,7 @@ export function VoiceNetworkingCall({ userId }: VoiceNetworkingCallProps) {
   // Process contact response function - defined before hook
   const processContactResponseRef = useRef<((text: string) => Promise<void>) | null>(null)
 
-  // ElevenLabs voice
+  // ElevenLabs voice for all voice interactions
   const { 
     speak, 
     stop: stopSpeaking,
@@ -357,8 +357,8 @@ export function VoiceNetworkingCall({ userId }: VoiceNetworkingCallProps) {
     setStage("calling")
     
     try {
-      // Initiate phone call via ElevenLabs telephony
-      const response = await fetch("/api/elevenlabs-telephony", {
+      // Initiate phone call via Twilio (direct, no ElevenLabs)
+      const response = await fetch("/api/twilio-telephony", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -407,21 +407,18 @@ export function VoiceNetworkingCall({ userId }: VoiceNetworkingCallProps) {
   async function pollCallStatus(callId: string) {
     const interval = setInterval(async () => {
       try {
-        const response = await fetch(`/api/elevenlabs-telephony?callId=${callId}`)
+        const response = await fetch(`/api/twilio-telephony?callId=${callId}`)
         const result = await response.json()
         
         if (result.status) {
           setCallStatus(result.status)
           
           // If call ended, stop polling
-          if (result.status === "ended" || result.status === "completed" || result.status === "failed") {
+          if (result.status === "completed" || result.status === "failed" || result.status === "busy" || result.status === "no-answer") {
             clearInterval(interval)
-            if (result.status === "completed" || result.status === "ended") {
-              // Get conversation transcript if available
-              if (result.transcript) {
-                // Process transcript and update conversation
-                // This would depend on ElevenLabs API response format
-              }
+            if (result.status === "completed") {
+              // Call completed successfully
+              console.log("Call completed:", result)
             }
           }
         }
@@ -616,22 +613,24 @@ export function VoiceNetworkingCall({ userId }: VoiceNetworkingCallProps) {
               
               {/* Test Call Button for specific number */}
               <div className="mt-4 p-3 bg-violet-500/10 border border-violet-500/20 rounded-lg">
-                <p className="text-xs text-slate-400 mb-2">Test Call</p>
+                <p className="text-xs text-slate-400 mb-2">Test Call (Direct Twilio)</p>
                 <Button
                   onClick={async () => {
                     try {
-                      const response = await fetch("/api/elevenlabs-telephony/test", {
+                      const response = await fetch("/api/twilio-telephony", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ phoneNumber: "08072497474" })
+                        body: JSON.stringify({ 
+                          phoneNumber: "08072497474",
+                          userId: userId
+                        })
                       })
                       const result = await response.json()
                       if (result.success) {
                         alert(`✅ Call initiated to ${result.phoneNumber}!\nCall ID: ${result.callId}\nStatus: ${result.status}`)
                       } else {
-                        // Show formatted instructions
                         const message = result.error 
-                          ? `${result.error}\n\n${result.instructions?.join('\n') || result.details || ''}`
+                          ? `${result.error}\n\n${result.details || ''}`
                           : JSON.stringify(result, null, 2)
                         alert(message)
                       }
@@ -959,26 +958,41 @@ export function VoiceNetworkingCall({ userId }: VoiceNetworkingCallProps) {
             {conversation.map((msg) => (
               <div
                 key={msg.id}
-                className={`flex ${msg.role === "agent" ? "justify-end" : "justify-start"}`}
+                className={`flex items-start gap-3 ${msg.role === "agent" ? "justify-end" : "justify-start"}`}
               >
-                <div
-                  className={`max-w-[80%] rounded-lg px-4 py-2 ${
-                    msg.role === "agent"
-                      ? "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white"
-                      : "bg-slate-800 text-slate-100 border border-white/5"
-                  }`}
-                >
-                  <p className="text-sm">{msg.content}</p>
-                  <p className="text-xs opacity-70 mt-1">
+                {msg.role === "contact" && (
+                  <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center flex-shrink-0 mt-1">
+                    <User className="w-4 h-4 text-white" />
+                  </div>
+                )}
+                <div className={`max-w-[80%] flex flex-col ${msg.role === "agent" ? "items-end" : "items-start"}`}>
+                  <div
+                    className={`rounded-lg px-4 py-2 ${
+                      msg.role === "agent"
+                        ? "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white"
+                        : "bg-slate-800 text-slate-100 border border-white/5"
+                    }`}
+                  >
+                    <p className="text-sm leading-relaxed">{msg.content}</p>
+                  </div>
+                  <p className={`text-xs opacity-70 mt-1 ${msg.role === "agent" ? "text-right" : "text-left"}`}>
                     {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </p>
                 </div>
+                {msg.role === "agent" && (
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center flex-shrink-0 mt-1">
+                    <Phone className="w-4 h-4 text-white" />
+                  </div>
+                )}
               </div>
             ))}
             {transcript && isListening && (
-              <div className="flex justify-start">
+              <div className="flex items-start gap-3 justify-start">
+                <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center flex-shrink-0 mt-1">
+                  <User className="w-4 h-4 text-white" />
+                </div>
                 <div className="bg-slate-800/50 border border-white/10 rounded-lg px-4 py-2 max-w-[80%]">
-                  <p className="text-sm text-slate-400 italic">"{transcript}"</p>
+                  <p className="text-sm text-slate-400 italic leading-relaxed">"{transcript}"</p>
                 </div>
               </div>
             )}

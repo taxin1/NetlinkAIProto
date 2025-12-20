@@ -2,7 +2,7 @@
 
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Mail, Phone, Building2, Trash2, Loader2, Pencil } from "lucide-react"
+import { Mail, Phone, Building2, Trash2, Loader2, Pencil, Users } from "lucide-react"
 import { useState } from "react"
 import { useRealtimeContacts } from "@/lib/hooks/use-realtime-contacts"
 import { ComposeEmailDialog } from "@/components/compose-email-dialog"

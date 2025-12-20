@@ -90,12 +90,19 @@ export async function GET(request: NextRequest) {
 
   // Check 4: Test Telephony Endpoint (without making actual call)
   if (process.env.ELEVENLABS_API_KEY && process.env.ELEVENLABS_AGENT_ID) {
-    try {
-      // Try to make a test request to see what the endpoint expects
-      // We'll use an invalid phone number to see the error response format
-      const telephonyResponse = await fetch(
-        "https://api.elevenlabs.io/v1/convai/conversation/outbound_call",
-        {
+    const endpointsToTest = [
+      "https://api.elevenlabs.io/v1/convai/conversation/outbound_call",
+      "https://api.elevenlabs.io/v1/convai/outbound_call",
+      "https://api.elevenlabs.io/v1/convai/call",
+      "https://api.elevenlabs.io/v1/convai/conversations/outbound_call",
+      "https://api.elevenlabs.io/v1/convai/telephony/outbound_call",
+    ]
+    
+    results.checks.telephonyEndpoints = []
+    
+    for (const endpoint of endpointsToTest) {
+      try {
+        const telephonyResponse = await fetch(endpoint, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -105,31 +112,63 @@ export async function GET(request: NextRequest) {
             phone_number: "+10000000000", // Invalid test number
             agent_id: process.env.ELEVENLABS_AGENT_ID,
           }),
+        })
+
+        const telephonyText = await telephonyResponse.text()
+        let parsedResponse
+        try {
+          parsedResponse = JSON.parse(telephonyText)
+        } catch {
+          parsedResponse = { raw: telephonyText }
         }
-      )
 
-      results.checks.telephonyEndpointExists = telephonyResponse.status !== 404
-      results.checks.telephonyStatus = telephonyResponse.status
-      const telephonyText = await telephonyResponse.text()
+        results.checks.telephonyEndpoints.push({
+          endpoint,
+          status: telephonyResponse.status,
+          exists: telephonyResponse.status !== 404,
+          response: parsedResponse
+        })
 
-      try {
-        results.checks.telephonyResponse = JSON.parse(telephonyText)
-      } catch {
-        results.checks.telephonyResponseRaw = telephonyText
+        // If we find an endpoint that exists (not 404), mark it
+        if (telephonyResponse.status !== 404) {
+          results.checks.telephonyEndpointExists = true
+          results.checks.telephonyStatus = telephonyResponse.status
+          results.checks.telephonyErrorType = telephonyResponse.status === 400 ? "Bad Request (endpoint exists, invalid params)" :
+            telephonyResponse.status === 401 ? "Unauthorized (endpoint exists, auth issue)" :
+              telephonyResponse.status === 403 ? "Forbidden (endpoint exists, permission issue)" :
+                telephonyResponse.status === 200 ? "Success (endpoint exists)" :
+                  "Other error"
+        }
+      } catch (error) {
+        results.checks.telephonyEndpoints.push({
+          endpoint,
+          status: "error",
+          exists: false,
+          error: error instanceof Error ? error.message : "Unknown error"
+        })
       }
+    }
 
-      if (telephonyResponse.status === 404) {
-        results.errors.push("Telephony endpoint returned 404 - endpoint may not exist or telephony not enabled")
-      } else if (!telephonyResponse.ok) {
-        // 400/401/403 errors are actually good - they mean the endpoint exists!
-        results.checks.telephonyEndpointExists = true
-        results.checks.telephonyErrorType = telephonyResponse.status === 400 ? "Bad Request (endpoint exists, invalid params)" :
-          telephonyResponse.status === 401 ? "Unauthorized (endpoint exists, auth issue)" :
-            telephonyResponse.status === 403 ? "Forbidden (endpoint exists, permission issue)" :
-              "Other error"
+    // If all endpoints returned 404
+    const all404 = results.checks.telephonyEndpoints.every((e: any) => e.status === 404)
+    if (all404) {
+      results.errors.push("⚠️ ALL telephony endpoints returned 404 - Telephony is NOT enabled for your account")
+      results.checks.telephonyDiagnosis = {
+        issue: "Telephony endpoint not available",
+        possibleCauses: [
+          "Your ElevenLabs plan doesn't include telephony",
+          "Twilio integration is not fully activated",
+          "Telephony feature is not enabled for your account",
+          "You need to upgrade your plan or contact ElevenLabs support"
+        ],
+        solutions: [
+          "Check your ElevenLabs plan includes telephony",
+          "Verify Twilio shows 'Active' (not just 'Connected') in dashboard",
+          "Wait 5-10 minutes after connecting Twilio",
+          "Contact ElevenLabs support: support@elevenlabs.io",
+          "Use browser-based ConvAI widget as alternative"
+        ]
       }
-    } catch (error) {
-      results.errors.push(`Telephony endpoint test error: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }
 

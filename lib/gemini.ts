@@ -1,8 +1,11 @@
-// OpenRouter API Configuration (using Qwen)
-// Using a single model for all AI tasks for consistency
-export const OPENROUTER_MODEL = "qwen/qwen3-14b:free"
-export const OPENROUTER_TEXT_MODEL = "qwen/qwen3-14b:free" // Same as OPENROUTER_MODEL
+// Gemini API Configuration (using Gemini 2.5 Flash)
+// Using Gemini 2.5 Flash for all AI tasks
+export const GEMINI_MODEL = "gemini-2.5-flash"
+export const GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta"
+
+// OpenRouter API Configuration
 export const OPENROUTER_API_BASE = "https://openrouter.ai/api/v1"
+export const OPENROUTER_TEXT_MODEL = "qwen/qwen3-14b:free"
 
 // Rate limiting - track last request time
 let lastRequestTime = 0
@@ -58,18 +61,16 @@ async function retryWithBackoff<T>(
 }
 
 function getApiKey(): string {
-  const apiKey = process.env.OPENROUTER_API_KEY
+  const apiKey = process.env.GEMINI_API_KEY
   if (!apiKey) {
-    throw new Error("OPENROUTER_API_KEY environment variable is not set. Please add it to your .env.local file.")
+    throw new Error("GEMINI_API_KEY environment variable is not set. Please add it to your .env.local file.")
   }
   return apiKey
 }
 
-async function callOpenRouter(prompt: string, systemInstruction?: string): Promise<string> {
+async function callGemini(prompt: string, systemInstruction?: string): Promise<string> {
   await throttle() // Rate limit requests
   const apiKey = getApiKey()
-  
-  const messages: any[] = []
   
   // Always add no-asterisks rule to system instruction
   const noAsterisksRule = "CRITICAL: Never use asterisks (*) in your responses. Use plain dashes (-) for bullet points. No markdown formatting."
@@ -77,44 +78,39 @@ async function callOpenRouter(prompt: string, systemInstruction?: string): Promi
   const systemContent = systemInstruction 
     ? `${systemInstruction}\n\n${noAsterisksRule}`
     : noAsterisksRule
-  
-  messages.push({
-    role: "system",
-    content: systemContent
-  })
-  
-  messages.push({
-    role: "user",
-    content: prompt
-  })
+
+  const contents: any[] = [
+    {
+      role: "user",
+      parts: [{ text: `${systemContent}\n\n${prompt}` }]
+    }
+  ]
 
   const response = await fetch(
-    `${OPENROUTER_API_BASE}/chat/completions`,
+    `${GEMINI_API_BASE}/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
     {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${apiKey}`,
-        "HTTP-Referer": process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
-        "X-Title": "Netlink Cogni"
       },
       body: JSON.stringify({
-        model: OPENROUTER_TEXT_MODEL,
-        messages,
-        temperature: 0.7,
-        max_tokens: 2048,
+        contents,
+        generationConfig: {
+          temperature: 0.7,
+          maxOutputTokens: 2048,
+        },
       }),
     }
   )
 
   if (!response.ok) {
     const errorText = await response.text()
-    console.error("OpenRouter API error response:", {
+    console.error("Gemini API error response:", {
       status: response.status,
       statusText: response.statusText,
       body: errorText
     })
-    const error: any = new Error(`OpenRouter API request failed (${response.status}): ${errorText}`)
+    const error: any = new Error(`Gemini API request failed (${response.status}): ${errorText}`)
     error.status = response.status
     error.response = { status: response.status }
     throw error
@@ -123,15 +119,15 @@ async function callOpenRouter(prompt: string, systemInstruction?: string): Promi
   const data = await response.json()
 
   if (data.error) {
-    console.error("OpenRouter API error:", data.error)
-    throw new Error(`OpenRouter API error: ${data.error.message || JSON.stringify(data.error)}`)
+    console.error("Gemini API error:", data.error)
+    throw new Error(`Gemini API error: ${data.error.message || JSON.stringify(data.error)}`)
   }
 
-  if (data.choices && data.choices[0]?.message?.content) {
-    return data.choices[0].message.content
+  if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
+    return data.candidates[0].content.parts[0].text
   }
 
-  console.error("No valid response from OpenRouter API:", data)
+  console.error("No valid response from Gemini API:", data)
   throw new Error("Failed to generate response: No valid response from AI")
 }
 
@@ -264,7 +260,7 @@ EXAMPLES OF GOOD OPENINGS (NOT templates, but personalized):
 Write the email body now. Make it specific, authentic, and personalized - NOT a template.`
 
   return retryWithBackoff(async () => {
-    return await callOpenRouter(prompt)
+    return await callGemini(prompt)
   }, 3, 1000)
 }
 
@@ -297,51 +293,49 @@ Be precise and only extract information that is clearly visible. Do not make up 
 
   try {
     const response = await fetch(
-      `${OPENROUTER_API_BASE}/chat/completions`,
+      `${GEMINI_API_BASE}/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${apiKey}`,
-          "HTTP-Referer": process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
-          "X-Title": "Netlink Cogni"
         },
         body: JSON.stringify({
-          model: OPENROUTER_MODEL, // Using same model for all AI tasks
-          messages: [
+          contents: [
             {
               role: "user",
-              content: [
-                { type: "text", text: prompt },
-                { 
-                  type: "image_url",
-                  image_url: {
-                    url: `data:image/jpeg;base64,${imageBase64}`
+              parts: [
+                { text: prompt },
+                {
+                  inlineData: {
+                    mimeType: "image/jpeg",
+                    data: imageBase64
                   }
                 }
               ]
             }
           ],
-          temperature: 0.3,
-          max_tokens: 1024,
+          generationConfig: {
+            temperature: 0.3,
+            maxOutputTokens: 1024,
+          },
         }),
       }
     )
 
     if (!response.ok) {
       const errorText = await response.text()
-      throw new Error(`OpenRouter API request failed (${response.status}): ${errorText}`)
+      throw new Error(`Gemini API request failed (${response.status}): ${errorText}`)
     }
 
     const data = await response.json()
 
     if (data.error) {
-      throw new Error(`OpenRouter API error: ${data.error.message || 'Unknown error'}`)
+      throw new Error(`Gemini API error: ${data.error.message || 'Unknown error'}`)
     }
 
-    if (data.choices && data.choices[0]?.message?.content) {
-      const text = data.choices[0].message.content
-      console.log("OpenRouter response text:", text)
+    if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
+      const text = data.candidates[0].content.parts[0].text
+      console.log("Gemini response text:", text)
       
       const jsonMatch = text.match(/\{[\s\S]*\}/)
       if (jsonMatch) {
@@ -356,9 +350,9 @@ Be precise and only extract information that is clearly visible. Do not make up 
       }
     }
 
-    throw new Error("No valid response from OpenRouter API")
+    throw new Error("No valid response from Gemini API")
   } catch (error) {
-    console.error("OpenRouter API error:", error)
+    console.error("Gemini API error:", error)
     
     if (error instanceof Error) {
       throw error
@@ -390,9 +384,9 @@ WRONG Example (DO NOT DO THIS):
 * Point two`
 
   try {
-    return await callOpenRouter(prompt + formattingRules)
+    return await callGemini(prompt + formattingRules)
   } catch (error) {
-    console.error("OpenRouter API error:", error)
+    console.error("Gemini API error:", error)
     throw error
   }
 }
@@ -416,7 +410,7 @@ CORE FEATURES:
 - Real-time Notifications: Get notified about new contacts, events, and email activity
 
 TECHNICAL CAPABILITIES:
-- Uses Qwen AI via OpenRouter for intelligent processing
+- Uses Google Gemini 2.5 Flash for intelligent processing
 - Supabase backend for data storage and authentication
 - Real-time database updates using Supabase subscriptions
 - SMTP email sending (Gmail and custom servers)
@@ -451,7 +445,7 @@ WRONG Examples (NEVER DO THIS):
 Be friendly, professional, and knowledgeable about the platform's capabilities. When users ask about features, explain how they work within Netlink Cogni.`
 
   return retryWithBackoff(async () => {
-    return await callOpenRouter(message, systemPrompt)
+    return await callGemini(message, systemPrompt)
   }, 3, 1000)
 }
 
@@ -480,14 +474,14 @@ CRITICAL FORMATTING RULES:
 Keep descriptions concise and to the point.`
 
   try {
-    const text = await callOpenRouter(prompt)
+    const text = await callGemini(prompt)
       const jsonMatch = text.match(/\{[\s\S]*\}/)
       if (jsonMatch) {
         return JSON.parse(jsonMatch[0])
       }
     return { title: url, description: "Event link" }
   } catch (error) {
-    console.error("OpenRouter API error:", error)
+    console.error("Gemini API error:", error)
     return { title: url, description: "Event link" }
   }
 }
@@ -546,14 +540,14 @@ Example outputs:
 - "https://eventbrite.com/e/product-launch-123" → {"title": "Product Launch", "description": "Event", "startTime": null, "endTime": null, "location": "TBD"}`
 
   try {
-    const text = await callOpenRouter(prompt)
+    const text = await callGemini(prompt)
       const jsonMatch = text.match(/\{[\s\S]*\}/)
       if (jsonMatch) {
         return JSON.parse(jsonMatch[0])
       }
     throw new Error("Failed to extract event data")
   } catch (error) {
-    console.error("OpenRouter API error:", error)
+    console.error("Gemini API error:", error)
     throw error
   }
 }

@@ -671,15 +671,15 @@ export function VoiceAgent({ userId }: VoiceAgentProps) {
   ]
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
       {/* Left: Mascot & Controls */}
-      <Card className="bg-slate-900/50 backdrop-blur-xl border-white/10 shadow-2xl overflow-hidden">
-        <CardContent className="p-6 flex flex-col items-center justify-center min-h-[500px]">
+      <Card className="bg-slate-900/50 backdrop-blur-xl border-white/10 shadow-2xl overflow-hidden h-full flex flex-col">
+        <CardContent className="p-6 flex flex-col items-center justify-between min-h-[600px]">
           {/* Status indicator */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className={`mb-4 px-4 py-1.5 rounded-full text-xs font-semibold ${isListening
+            className={`mb-6 px-4 py-1.5 rounded-full text-xs font-semibold ${isListening
               ? "bg-red-500/20 text-red-400 border border-red-500/30"
               : isSpeaking
                 ? "bg-green-500/20 text-green-400 border border-green-500/30"
@@ -692,7 +692,7 @@ export function VoiceAgent({ userId }: VoiceAgentProps) {
           </motion.div>
 
           {/* Mascot with speech bubble */}
-          <div className="relative mb-8">
+          <div className="relative mb-8 flex-shrink-0">
             <SpeechBubble text={currentBubbleText} isVisible={showBubble} />
             <AriaMascot
               isListening={isListening}
@@ -729,53 +729,57 @@ export function VoiceAgent({ userId }: VoiceAgentProps) {
           </div>
 
           {/* Main mic button */}
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={toggleListening}
-            disabled={isProcessing || isSpeaking}
-            className={`relative w-20 h-20 rounded-full flex items-center justify-center transition-all ${isListening
-              ? "bg-red-500 shadow-lg shadow-red-500/50"
-              : "bg-gradient-to-br from-violet-600 to-fuchsia-600 shadow-lg shadow-violet-500/30 hover:shadow-violet-500/50"
-              }`}
-          >
-            {isListening ? (
-              <MicOff className="w-8 h-8 text-white" />
-            ) : (
-              <Mic className="w-8 h-8 text-white" />
-            )}
-            {isListening && (
-              <motion.div
-                animate={{ scale: [1, 1.5, 1] }}
-                transition={{ duration: 1, repeat: Infinity }}
-                className="absolute inset-0 rounded-full border-4 border-red-400"
-              />
-            )}
-          </motion.button>
+          <div className="flex flex-col items-center mb-4">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={toggleListening}
+              disabled={isProcessing || isSpeaking}
+              className={`relative w-20 h-20 rounded-full flex items-center justify-center transition-all ${isListening
+                ? "bg-red-500 shadow-lg shadow-red-500/50"
+                : "bg-gradient-to-br from-violet-600 to-fuchsia-600 shadow-lg shadow-violet-500/30 hover:shadow-violet-500/50"
+                }`}
+            >
+              {isListening ? (
+                <MicOff className="w-8 h-8 text-white" />
+              ) : (
+                <Mic className="w-8 h-8 text-white" />
+              )}
+              {isListening && (
+                <motion.div
+                  animate={{ scale: [1, 1.5, 1] }}
+                  transition={{ duration: 1, repeat: Infinity }}
+                  className="absolute inset-0 rounded-full border-4 border-red-400"
+                />
+              )}
+            </motion.button>
 
-          <p className="mt-4 text-sm text-slate-400">
-            {isListening ? "Tap to stop" : "Tap to speak"}
-          </p>
+            <p className="mt-4 text-sm text-slate-400 text-center">
+              {isListening ? "Tap to stop" : "Tap to speak"}
+            </p>
+          </div>
 
           {/* Voice toggle */}
-          <Button
-            onClick={() => {
-              if (isSpeaking) stopSpeaking()
-              setVoiceEnabled(!voiceEnabled)
-            }}
-            variant="ghost"
-            size="sm"
-            className="mt-4 text-slate-400 hover:text-white"
-          >
-            {voiceEnabled ? (
-              <><Volume2 className="w-4 h-4 mr-2" /> Voice On</>
-            ) : (
-              <><VolumeX className="w-4 h-4 mr-2" /> Voice Off</>
-            )}
-          </Button>
+          <div className="mb-6">
+            <Button
+              onClick={() => {
+                if (isSpeaking) stopSpeaking()
+                setVoiceEnabled(!voiceEnabled)
+              }}
+              variant="ghost"
+              size="sm"
+              className="text-slate-400 hover:text-white"
+            >
+              {voiceEnabled ? (
+                <><Volume2 className="w-4 h-4 mr-2" /> Voice On</>
+              ) : (
+                <><VolumeX className="w-4 h-4 mr-2" /> Voice Off</>
+              )}
+            </Button>
+          </div>
 
           {/* Quick actions */}
-          <div className="mt-8 w-full">
+          <div className="mt-auto w-full pt-4">
             <p className="text-xs text-slate-500 mb-3 text-center">Quick Actions</p>
             <div className="grid grid-cols-4 gap-2">
               {quickActions.map((action, idx) => (
@@ -799,9 +803,9 @@ export function VoiceAgent({ userId }: VoiceAgentProps) {
       </Card>
 
       {/* Right: Chat */}
-      <Card className="bg-slate-900/50 backdrop-blur-xl border-white/10 shadow-2xl overflow-hidden flex flex-col h-[600px]">
+      <Card className="bg-slate-900/50 backdrop-blur-xl border-white/10 shadow-2xl overflow-hidden flex flex-col h-full min-h-[600px]">
         {/* Chat header */}
-        <div className="p-4 border-b border-white/10 bg-slate-800/30">
+        <div className="p-4 border-b border-white/10 bg-slate-800/30 flex-shrink-0">
           <h3 className="font-semibold text-white flex items-center gap-2">
             <Bot className="w-5 h-5 text-violet-400" />
             Conversation
@@ -809,7 +813,7 @@ export function VoiceAgent({ userId }: VoiceAgentProps) {
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
           {messages.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-center">
               <motion.div
@@ -828,37 +832,37 @@ export function VoiceAgent({ userId }: VoiceAgentProps) {
                 key={message.id}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className={`flex gap-3 ${message.role === "user" ? "justify-end" : "justify-start"}`}
+                className={`flex gap-3 $                ${message.role === "user" ? "justify-end" : "justify-start"}`}
               >
                 {message.role === "assistant" && (
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center flex-shrink-0">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center flex-shrink-0 mt-1">
                     <Bot className="w-4 h-4 text-white" />
                   </div>
                 )}
-                <div className={`max-w-[80%] ${message.role === "user" ? "order-first" : ""}`}>
+                <div className={`max-w-[80%] flex flex-col ${message.role === "user" ? "order-first items-end" : "items-start"}`}>
                   <div className={`rounded-2xl px-4 py-2.5 ${message.role === "user"
                     ? "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white"
                     : "bg-slate-800 text-slate-100 border border-white/5"
                     }`}>
-                    <p className="text-sm">{message.content}</p>
+                    <p className="text-sm leading-relaxed">{message.content}</p>
                   </div>
                   {message.data && Array.isArray(message.data) && message.data.length > 0 && (
-                    <div className="mt-2 space-y-1">
+                    <div className="mt-2 space-y-1 w-full">
                       {message.data.slice(0, 3).map((item: any, idx: number) => (
                         <div key={idx} className="text-xs bg-slate-800/60 rounded-lg px-3 py-2 flex items-center gap-2">
-                          <Users className="h-3 w-3 text-violet-400" />
+                          <Users className="h-3 w-3 text-violet-400 flex-shrink-0" />
                           <span className="text-white">{item.name}</span>
                           {item.company && <span className="text-slate-500">• {item.company}</span>}
                         </div>
                       ))}
                     </div>
                   )}
-                  <p className="text-[10px] text-slate-500 mt-1 px-1">
+                  <p className={`text-[10px] text-slate-500 mt-1 px-1 ${message.role === "user" ? "text-right" : "text-left"}`}>
                     {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </p>
                 </div>
                 {message.role === "user" && (
-                  <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center flex-shrink-0">
+                  <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center flex-shrink-0 mt-1">
                     <User className="w-4 h-4 text-white" />
                   </div>
                 )}
@@ -873,13 +877,13 @@ export function VoiceAgent({ userId }: VoiceAgentProps) {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="flex gap-3"
+                className="flex gap-3 items-start"
               >
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center flex-shrink-0 mt-1">
                   <Bot className="w-4 h-4 text-white" />
                 </div>
                 <div className="bg-slate-800 rounded-2xl px-4 py-3 border border-white/5">
-                  <div className="flex gap-1">
+                  <div className="flex gap-1 items-center">
                     {[0, 1, 2].map((i) => (
                       <motion.span
                         key={i}
@@ -904,7 +908,7 @@ export function VoiceAgent({ userId }: VoiceAgentProps) {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 20 }}
-              className="mx-4 mb-4 p-4 bg-violet-500/10 border border-violet-500/20 rounded-xl"
+              className="mx-4 mb-4 p-4 bg-violet-500/10 border border-violet-500/20 rounded-xl flex-shrink-0"
             >
               <p className="text-sm font-medium text-white mb-2">Confirm Action?</p>
               <p className="text-xs text-slate-400 mb-3">
@@ -927,7 +931,7 @@ export function VoiceAgent({ userId }: VoiceAgentProps) {
         </AnimatePresence>
 
         {/* Input */}
-        <div className="p-4 border-t border-white/10 bg-slate-800/30">
+        <div className="p-4 border-t border-white/10 bg-slate-800/30 flex-shrink-0">
           <div className="flex gap-2">
             <Input
               value={inputMessage}

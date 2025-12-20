@@ -93,10 +93,10 @@ export function Chatbot({ userId }: ChatbotProps) {
   const supabase = createClient()
 
   const voiceCommands = [
-    { category: "📧 Email", examples: ["Send email to John", "Email Sarah about the meeting"] },
-    { category: "👥 Contacts", examples: ["Add contact John Smith", "Show my contacts"] },
-    { category: "📅 Events", examples: ["What are my upcoming events?", "Show my calendar"] },
-    { category: "📊 Stats", examples: ["Show my stats", "How many contacts do I have?"] },
+    { category: "📧 Email", examples: ["Write an email to John about the meeting", "Send email to Sarah", "Create a campaign for product launch"] },
+    { category: "👥 Contacts", examples: ["Add contact John Smith", "Show my contacts", "Search for contact Sarah"] },
+    { category: "📅 Events", examples: ["What are my upcoming events?", "Show my calendar", "Create event tomorrow"] },
+    { category: "📊 Stats", examples: ["Show my stats", "How many contacts do I have?", "View my campaigns"] },
   ]
 
   const scrollToBottom = () => {
@@ -131,8 +131,22 @@ export function Chatbot({ userId }: ChatbotProps) {
 
       const intent = await response.json()
 
-      // Handle email sending action
-      if (intent.action === "send_email" && intent.parameters.recipient) {
+      // Handle different actions
+      if (intent.action === "write_email" && intent.parameters.generatedEmail) {
+        // Show generated email and ask for confirmation to send
+        setPendingAction({
+          ...intent,
+          action: "send_email", // Convert to send_email action
+          parameters: {
+            ...intent.parameters,
+            subject: intent.parameters.subject || `Message from Netlink`,
+            body: intent.parameters.generatedEmail,
+          }
+        })
+      } else if (intent.action === "send_email" && (intent.parameters.recipient || intent.parameters.contactEmail)) {
+        setPendingAction(intent)
+      } else if (intent.action === "create_campaign" && intent.parameters.campaignId) {
+        // Ask if user wants to run the campaign
         setPendingAction(intent)
       }
 
@@ -251,20 +265,46 @@ export function Chatbot({ userId }: ChatbotProps) {
 
     setIsLoading(true)
     try {
+      // First, save the email to database
+      const supabase = createClient()
+      let emailId: string | null = null
+      
+      if (pendingAction.parameters.contactId) {
+        const { data: savedEmail, error: saveError } = await supabase
+          .from("emails")
+          .insert({
+            user_id: userId,
+            contact_id: pendingAction.parameters.contactId,
+            subject: pendingAction.parameters.subject || "Message from Netlink",
+            body: pendingAction.parameters.body || pendingAction.parameters.message || "",
+            status: "draft",
+          })
+          .select("id")
+          .single()
+        
+        if (!saveError && savedEmail) {
+          emailId = savedEmail.id
+        }
+      }
+
+      // Then send the email
       const response = await fetch("/api/send-email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          userId,
-          to: pendingAction.parameters.recipient,
+          emailId: emailId,
+          contactEmail: pendingAction.parameters.contactEmail || pendingAction.parameters.recipient,
           subject: pendingAction.parameters.subject || "Message from Netlink",
-          body: pendingAction.parameters.message || pendingAction.parameters.body || "",
+          body: pendingAction.parameters.body || pendingAction.parameters.message || "",
         }),
       })
 
-      if (!response.ok) throw new Error("Failed to send email")
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || "Failed to send email")
+      }
 
-      const successMsg = "Email sent successfully!"
+      const successMsg = `Email sent successfully to ${pendingAction.parameters.contactName || pendingAction.parameters.recipient}!`
       const successMessage: Message = {
         id: Date.now().toString(),
         content: successMsg,
@@ -278,7 +318,62 @@ export function Chatbot({ userId }: ChatbotProps) {
       setPendingAction(null)
     } catch (error) {
       console.error("Error sending email:", error)
-      const errorMsg = "Sorry, I couldn't send the email. Please check your email settings."
+      const errorMsg = error instanceof Error 
+        ? `Sorry, I couldn't send the email: ${error.message}`
+        : "Sorry, I couldn't send the email. Please check your email settings."
+      const errorMessage: Message = {
+        id: Date.now().toString(),
+        content: errorMsg,
+        role: "assistant",
+        timestamp: new Date(),
+      }
+      setMessages(prev => [...prev, errorMessage])
+      if (voiceEnabled) {
+        await speak(errorMsg)
+      }
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Handle campaign creation and running
+  const handleRunCampaign = async () => {
+    if (!pendingAction || !pendingAction.parameters.campaignId) return
+
+    setIsLoading(true)
+    try {
+      // Navigate to campaigns page or trigger campaign run
+      const response = await fetch(`/api/run-campaign`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          campaignId: pendingAction.parameters.campaignId,
+          userId: userId,
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || "Failed to run campaign")
+      }
+
+      const successMsg = `Campaign "${pendingAction.parameters.campaign_name}" is now running!`
+      const successMessage: Message = {
+        id: Date.now().toString(),
+        content: successMsg,
+        role: "assistant",
+        timestamp: new Date(),
+      }
+      setMessages(prev => [...prev, successMessage])
+      if (voiceEnabled) {
+        await speak(successMsg)
+      }
+      setPendingAction(null)
+    } catch (error) {
+      console.error("Error running campaign:", error)
+      const errorMsg = error instanceof Error 
+        ? `Sorry, I couldn't run the campaign: ${error.message}`
+        : "Sorry, I couldn't run the campaign. Please try again."
       const errorMessage: Message = {
         id: Date.now().toString(),
         content: errorMsg,
@@ -428,12 +523,28 @@ export function Chatbot({ userId }: ChatbotProps) {
             <p className="text-sm font-medium mb-2">Confirm Action</p>
             <p className="text-xs text-muted-foreground mb-3">
               {pendingAction.action === "send_email" && 
-                `Send email to ${pendingAction.parameters.recipient}?`
+                `Send email to ${pendingAction.parameters.contactName || pendingAction.parameters.recipient}?`
+              }
+              {pendingAction.action === "create_campaign" && 
+                `Start sending emails for campaign "${pendingAction.parameters.campaign_name}"?`
               }
             </p>
+            {pendingAction.parameters.generatedEmail && (
+              <div className="mb-3 p-2 bg-muted rounded text-xs max-h-32 overflow-y-auto">
+                <p className="font-medium mb-1">Email Preview:</p>
+                <p className="text-muted-foreground whitespace-pre-wrap">
+                  {pendingAction.parameters.generatedEmail.substring(0, 200)}
+                  {pendingAction.parameters.generatedEmail.length > 200 ? "..." : ""}
+                </p>
+              </div>
+            )}
             <div className="flex gap-2">
-              <Button onClick={handleSendEmail} size="sm" className="flex-1">
-                Confirm & Send
+              <Button 
+                onClick={pendingAction.action === "create_campaign" ? handleRunCampaign : handleSendEmail} 
+                size="sm" 
+                className="flex-1"
+              >
+                {pendingAction.action === "create_campaign" ? "Start Campaign" : "Confirm & Send"}
               </Button>
               <Button onClick={cancelAction} size="sm" variant="outline" className="flex-1">
                 Cancel
