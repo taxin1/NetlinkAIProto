@@ -44,11 +44,20 @@ export async function POST(request: NextRequest) {
     // 2. Use their Conversational AI API to create an outbound call
     // 3. Or use Twilio integration
 
+    // Get agent ID
+    const finalAgentId = agentId || process.env.ELEVENLABS_AGENT_ID
+    if (!finalAgentId) {
+      return NextResponse.json(
+        { error: "Agent ID is required. Please provide agentId or set ELEVENLABS_AGENT_ID in environment variables." },
+        { status: 400 }
+      )
+    }
+
     // Try to create an outbound call via ElevenLabs Conversational AI
     // Note: This endpoint may vary - check ElevenLabs documentation for the exact endpoint
     const callData: any = {
       phone_number: formattedPhone,
-      agent_id: agentId || process.env.ELEVENLABS_AGENT_ID,
+      agent_id: finalAgentId,
     }
 
     // Generate full system prompt with context if not provided
