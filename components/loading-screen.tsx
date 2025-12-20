@@ -1,135 +1,140 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Network } from "lucide-react"
+import { Network, Sparkles } from "lucide-react"
+import { motion } from "framer-motion"
 
-export function LoadingScreen() {
+interface LoadingScreenProps {
+  onComplete?: () => void
+}
+
+export function LoadingScreen({ onComplete }: LoadingScreenProps) {
   const [progress, setProgress] = useState(0)
-  const [dots, setDots] = useState<Array<{ id: number; x: number; y: number; delay: number }>>([])
+  const [currentPhase, setCurrentPhase] = useState(0)
+
+  const phases = [
+    "Initializing AI systems...",
+    "Connecting neural networks...",
+    "Loading intelligent agents...",
+    "Ready to launch!",
+  ]
 
   useEffect(() => {
-    // Generate random network dots
-    const newDots = Array.from({ length: 30 }, (_, i) => ({
-      id: i,
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      delay: Math.random() * 2,
-    }))
-    setDots(newDots)
+    // Smooth, natural progress animation with easing
+    let currentProgress = 0
+    const progressInterval = setInterval(() => {
+      // Ease out function for natural deceleration
+      const remaining = 100 - currentProgress
+      const increment = Math.max(1, remaining * 0.05) // Slightly faster and guaranteed finish
+      currentProgress += increment
 
-    // Simulate loading progress
-    const interval = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval)
-          return 100
-        }
-        return prev + 2
-      })
+      if (currentProgress >= 100) {
+        currentProgress = 100
+        setProgress(100)
+        setCurrentPhase(phases.length - 1)
+        clearInterval(progressInterval)
+
+        // Small delay before completing to show 100%
+        setTimeout(() => {
+          if (onComplete) onComplete()
+        }, 500)
+        return
+      }
+
+      setProgress(currentProgress)
+
+      // Update phase based on progress
+      const phaseIndex = Math.floor((currentProgress / 100) * phases.length)
+      setCurrentPhase(Math.min(phaseIndex, phases.length - 1))
     }, 30)
 
-    return () => clearInterval(interval)
-  }, [])
+    return () => clearInterval(progressInterval)
+  }, [onComplete])
 
   return (
-    <div className="fixed inset-0 z-50 bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 flex items-center justify-center overflow-hidden">
-      {/* Animated network background */}
+    <div className="fixed inset-0 z-50 bg-slate-950 flex items-center justify-center overflow-hidden">
+      {/* Smooth animated background */}
       <div className="absolute inset-0">
-        {/* Network nodes */}
-        {dots.map((dot) => (
-          <div
-            key={dot.id}
-            className="absolute w-2 h-2 bg-cyan-400 rounded-full animate-pulse"
-            style={{
-              left: `${dot.x}%`,
-              top: `${dot.y}%`,
-              animationDelay: `${dot.delay}s`,
-              boxShadow: "0 0 10px rgba(34, 211, 238, 0.5)",
-            }}
-          />
-        ))}
-        
-        {/* Connection lines */}
-        <svg className="absolute inset-0 w-full h-full">
-          <defs>
-            <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#06b6d4" stopOpacity="0.3" />
-              <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.1" />
-            </linearGradient>
-          </defs>
-          {dots.slice(0, 15).map((dot, i) => {
-            const nextDot = dots[(i + 3) % dots.length]
-            return (
-              <line
-                key={`line-${dot.id}`}
-                x1={`${dot.x}%`}
-                y1={`${dot.y}%`}
-                x2={`${nextDot.x}%`}
-                y2={`${nextDot.y}%`}
-                stroke="url(#lineGradient)"
-                strokeWidth="1"
-                className="animate-pulse"
-                style={{ animationDelay: `${dot.delay}s` }}
-              />
-            )
-          })}
-        </svg>
-
-        {/* Grid overlay */}
-        <div 
-          className="absolute inset-0 opacity-10"
+        {/* Subtle grid pattern */}
+        <div
+          className="absolute inset-0 opacity-[0.03]"
           style={{
             backgroundImage: `
-              linear-gradient(to right, rgba(34, 211, 238, 0.1) 1px, transparent 1px),
-              linear-gradient(to bottom, rgba(34, 211, 238, 0.1) 1px, transparent 1px)
+              linear-gradient(to right, rgba(34, 211, 238, 0.08) 1px, transparent 1px),
+              linear-gradient(to bottom, rgba(34, 211, 238, 0.08) 1px, transparent 1px)
             `,
-            backgroundSize: "40px 40px",
+            backgroundSize: "60px 60px",
           }}
         />
+
+        {/* Smooth floating gradient orbs */}
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-cyan-500/15 rounded-full blur-3xl animate-blob" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/15 rounded-full blur-3xl animate-blob animation-delay-2000" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-indigo-500/10 rounded-full blur-3xl animate-blob animation-delay-4000" />
       </div>
 
-      {/* Loading content */}
-      <div className="relative z-10 text-center">
-        {/* Logo animation */}
-        <div className="mb-8 relative">
-          <div className="absolute inset-0 animate-ping">
-            <Network className="h-20 w-20 text-cyan-400 opacity-20 mx-auto" />
+      {/* Main loading content */}
+      <div className="relative z-10 text-center px-6 animate-fade-in">
+        {/* Elegant animated logo */}
+        <div className="mb-12 relative">
+          <div className="relative inline-block">
+            {/* Outer glow ring */}
+            <div className="absolute inset-0 -m-6 border border-cyan-400/10 rounded-full animate-spin-slow" />
+
+            {/* Pulsing background circle */}
+            <div className="absolute inset-0 -m-2 bg-cyan-400/5 rounded-full animate-pulse" style={{ animationDuration: "3s" }} />
+
+            {/* Main icon container */}
+            <div className="relative p-8 bg-gradient-to-br from-cyan-500/10 to-blue-500/10 rounded-3xl backdrop-blur-sm border border-cyan-400/20 shadow-xl">
+              <Network className="h-20 w-20 text-cyan-400 transition-transform duration-300" />
+            </div>
           </div>
-          <Network className="h-20 w-20 text-cyan-400 mx-auto relative z-10 animate-pulse" />
         </div>
 
-        {/* Brand name */}
-        <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-cyan-400 via-blue-400 to-indigo-400 bg-clip-text text-transparent">
-          Netlink-Cogni
+        {/* Brand name with smooth gradient */}
+        <h1 className="text-5xl sm:text-6xl font-bold mb-4 bg-gradient-to-r from-cyan-400 via-blue-400 to-indigo-400 bg-clip-text text-transparent animate-gradient-flow">
+          Netlink<span className="text-cyan-400">-Cogni</span>
         </h1>
-        <p className="text-cyan-200 text-lg mb-8">AI-Powered Networking Platform</p>
 
-        {/* Progress bar */}
-        <div className="w-64 h-2 bg-slate-800 rounded-full overflow-hidden mx-auto mb-4">
-          <div
-            className="h-full bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-500 transition-all duration-300 rounded-full"
-            style={{ width: `${progress}%` }}
-          >
-            <div className="h-full w-full animate-pulse bg-gradient-to-r from-transparent via-white to-transparent opacity-50" />
+        {/* Subtitle */}
+        <div className="flex items-center justify-center gap-2 mb-12">
+          <Sparkles className="h-5 w-5 text-cyan-400 animate-pulse" style={{ animationDuration: "2s" }} />
+          <p className="text-cyan-200/80 text-lg font-light">AI-Powered Networking Platform</p>
+        </div>
+
+        {/* Smooth animated progress bar */}
+        <div className="w-80 max-w-full mx-auto mb-8">
+          <div className="relative h-2.5 bg-slate-800/40 rounded-full overflow-hidden backdrop-blur-sm">
+            <div
+              className="h-full bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-500 rounded-full relative transition-all duration-300 ease-out"
+              style={{ width: `${progress}%` }}
+            >
+              {/* Smooth shimmer effect */}
+              <div
+                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent"
+                style={{
+                  animation: "shimmer 2s ease-in-out infinite",
+                  transform: "translateX(-100%)",
+                }}
+              />
+              {/* Soft glow */}
+              <div className="absolute inset-0 bg-cyan-400/30 blur-md" />
+            </div>
           </div>
         </div>
 
-        {/* Loading text */}
-        <div className="text-cyan-300 text-sm font-mono">
-          {progress < 30 && "Initializing AI systems..."}
-          {progress >= 30 && progress < 60 && "Connecting neural networks..."}
-          {progress >= 60 && progress < 90 && "Loading intelligent agents..."}
-          {progress >= 90 && "Ready to launch!"}
+        {/* Loading text with smooth transition */}
+        <div className="text-cyan-300 text-base font-medium mb-6 min-h-[24px] transition-all duration-500 ease-in-out">
+          <span key={currentPhase} className="inline-block animate-fade-in-up">
+            {phases[currentPhase]}
+          </span>
         </div>
 
-        {/* Percentage */}
-        <div className="text-2xl font-bold text-cyan-400 mt-4 font-mono">{progress}%</div>
+        {/* Percentage with smooth counter */}
+        <div className="text-4xl font-bold text-cyan-400 font-mono tracking-wider transition-all duration-300">
+          {Math.round(progress)}%
+        </div>
       </div>
-
-      {/* Animated circles */}
-      <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-cyan-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob" />
-      <div className="absolute top-1/3 right-1/4 w-64 h-64 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob animation-delay-2000" />
-      <div className="absolute bottom-1/4 left-1/3 w-64 h-64 bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob animation-delay-4000" />
     </div>
   )
 }

@@ -1,6 +1,7 @@
 // OpenRouter API Configuration (using Qwen)
-export const OPENROUTER_MODEL = "qwen/qwen-2-vl-7b-instruct:free"
-export const OPENROUTER_TEXT_MODEL = "qwen/qwen3-14b:free"
+// Using a single model for all AI tasks for consistency
+export const OPENROUTER_MODEL = "qwen/qwen3-14b:free"
+export const OPENROUTER_TEXT_MODEL = "qwen/qwen3-14b:free" // Same as OPENROUTER_MODEL
 export const OPENROUTER_API_BASE = "https://openrouter.ai/api/v1"
 
 // Rate limiting - track last request time
@@ -306,7 +307,7 @@ Be precise and only extract information that is clearly visible. Do not make up 
           "X-Title": "Netlink Cogni"
         },
         body: JSON.stringify({
-          model: OPENROUTER_MODEL, // Vision model for images
+          model: OPENROUTER_MODEL, // Using same model for all AI tasks
           messages: [
             {
               role: "user",

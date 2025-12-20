@@ -36,17 +36,14 @@ export function LandingPage() {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    // Show loading screen
-    const loadingTimer = setTimeout(() => {
-      setIsLoading(false)
-      setTimeout(() => setIsVisible(true), 100)
-    }, 3000)
-
-    return () => clearTimeout(loadingTimer)
+    // Optional: Preload critical assets here
   }, [])
 
   if (isLoading) {
-    return <LoadingScreen />
+    return <LoadingScreen onComplete={() => {
+      setIsLoading(false)
+      setTimeout(() => setIsVisible(true), 100)
+    }} />
   }
 
   return (
@@ -55,12 +52,12 @@ export function LandingPage() {
       <div className="fixed inset-0 z-0">
         {/* Grid pattern */}
         <div className="absolute inset-0 tech-grid opacity-30" />
-        
+
         {/* Animated gradient orbs */}
         <div className="absolute top-0 -left-20 w-96 h-96 bg-cyan-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob" />
         <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000" />
         <div className="absolute -bottom-20 left-20 w-96 h-96 bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000" />
-        
+
         {/* Scan line effect */}
         <div className="absolute inset-0 overflow-hidden opacity-10">
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-cyan-400 to-transparent h-40 animate-scan-line" />
@@ -81,8 +78,8 @@ export function LandingPage() {
             </Link>
             <div className="flex items-center gap-3">
               <Link href="/auth/login">
-                <Button 
-                  variant="ghost" 
+                <Button
+                  variant="ghost"
                   className="text-slate-400 hover:text-white hover:bg-slate-800/50 font-medium"
                 >
                   Sign In
@@ -102,9 +99,8 @@ export function LandingPage() {
       <section className="relative pt-32 pb-20 px-4 sm:px-6 lg:px-8 z-10">
         <div className="max-w-7xl mx-auto">
           <div
-            className={`text-center transition-all duration-1000 ${
-              isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
-            }`}
+            className={`text-center transition-all duration-1000 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+              }`}
           >
             <div className="inline-flex items-center gap-2 px-4 py-2 mb-8 rounded-full bg-slate-800/60 border border-slate-700/50 backdrop-blur-sm">
               <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
@@ -112,7 +108,7 @@ export function LandingPage() {
                 ENTERPRISE AI PLATFORM
               </span>
             </div>
-            
+
             <h1 className="text-[3.5rem] sm:text-7xl lg:text-8xl font-bold mb-8 leading-[1.05] tracking-tight">
               <span className="block text-white mb-2">
                 Intelligent Networking
@@ -121,15 +117,15 @@ export function LandingPage() {
                 Automated Growth
               </span>
             </h1>
-            
+
             <p className="text-lg sm:text-xl text-slate-400 mb-12 max-w-2xl mx-auto font-light leading-relaxed">
-              Enterprise-grade AI platform that transforms your business networking. 
+              Enterprise-grade AI platform that transforms your business networking.
               Automate contact management, deploy intelligent outreach campaigns, and scale your professional network effortlessly.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-10">
               <Link href="/auth/signup">
-                <Button 
-                  size="lg" 
+                <Button
+                  size="lg"
                   className="h-14 px-8 text-base font-medium bg-white text-slate-900 hover:bg-slate-100 shadow-lg hover:shadow-xl transition-all duration-200"
                 >
                   Start Free Trial
@@ -137,8 +133,8 @@ export function LandingPage() {
                 </Button>
               </Link>
               <Link href="/auth/login">
-                <Button 
-                  size="lg" 
+                <Button
+                  size="lg"
                   variant="ghost"
                   className="h-14 px-8 text-base font-medium text-slate-300 hover:text-white hover:bg-slate-800/50 border border-slate-700/50 hover:border-slate-600"
                 >
@@ -146,7 +142,7 @@ export function LandingPage() {
                 </Button>
               </Link>
             </div>
-            
+
             <div className="flex flex-wrap justify-center gap-8 text-sm text-slate-400 font-light">
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="h-4 w-4 text-slate-500" />
@@ -234,11 +230,10 @@ export function LandingPage() {
             <Button
               variant={activeDemo === "scan" ? "default" : "outline"}
               onClick={() => setActiveDemo("scan")}
-              className={`gap-2 h-11 px-6 font-medium ${
-                activeDemo === "scan"
+              className={`gap-2 h-11 px-6 font-medium ${activeDemo === "scan"
                   ? "bg-white text-slate-900 hover:bg-slate-100"
                   : "border-slate-700 text-slate-400 hover:text-white hover:bg-slate-800/50 hover:border-slate-600"
-              }`}
+                }`}
             >
               <Scan className="h-4 w-4" />
               Card Scanning
@@ -246,11 +241,10 @@ export function LandingPage() {
             <Button
               variant={activeDemo === "ai" ? "default" : "outline"}
               onClick={() => setActiveDemo("ai")}
-              className={`gap-2 h-11 px-6 font-medium ${
-                activeDemo === "ai"
+              className={`gap-2 h-11 px-6 font-medium ${activeDemo === "ai"
                   ? "bg-white text-slate-900 hover:bg-slate-100"
                   : "border-slate-700 text-slate-400 hover:text-white hover:bg-slate-800/50 hover:border-slate-600"
-              }`}
+                }`}
             >
               <Bot className="h-4 w-4" />
               AI Agent
@@ -258,11 +252,10 @@ export function LandingPage() {
             <Button
               variant={activeDemo === "analytics" ? "default" : "outline"}
               onClick={() => setActiveDemo("analytics")}
-              className={`gap-2 h-11 px-6 font-medium ${
-                activeDemo === "analytics"
+              className={`gap-2 h-11 px-6 font-medium ${activeDemo === "analytics"
                   ? "bg-white text-slate-900 hover:bg-slate-100"
                   : "border-slate-700 text-slate-400 hover:text-white hover:bg-slate-800/50 hover:border-slate-600"
-              }`}
+                }`}
             >
               <BarChart3 className="h-4 w-4" />
               Analytics

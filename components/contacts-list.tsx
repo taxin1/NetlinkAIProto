@@ -32,10 +32,23 @@ export function ContactsList({ userId }: ContactsListProps) {
 
   if (loading) {
     return (
-      <Card className="border-border bg-card/50 backdrop-blur-sm">
-        <CardContent className="flex flex-col items-center justify-center py-12">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground mb-2" />
-          <p className="text-muted-foreground">Loading contacts...</p>
+      <Card className="border-border bg-card/50 backdrop-blur-sm overflow-hidden relative">
+        {/* Animated background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-cyan-50/50 via-blue-50/50 to-indigo-50/50 dark:from-cyan-950/20 dark:via-blue-950/20 dark:to-indigo-950/20" />
+        <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-400/10 dark:bg-cyan-600/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+        
+        <CardContent className="flex flex-col items-center justify-center py-16 relative z-10">
+          <div className="relative mb-6">
+            <div className="absolute inset-0 animate-ping">
+              <Users className="h-12 w-12 text-cyan-400 opacity-20" />
+            </div>
+            <div className="relative p-4 bg-gradient-to-br from-cyan-500/20 to-blue-500/20 rounded-2xl backdrop-blur-sm border border-cyan-400/30">
+              <Users className="h-12 w-12 text-cyan-400 animate-pulse" />
+            </div>
+          </div>
+          <Loader2 className="h-8 w-8 animate-spin text-cyan-500 mb-3" />
+          <p className="text-muted-foreground font-medium">Loading your network...</p>
+          <p className="text-sm text-muted-foreground/70 mt-1">Connecting to contacts database</p>
         </CardContent>
       </Card>
     )

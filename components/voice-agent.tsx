@@ -4,14 +4,14 @@ import { useState, useRef, useEffect, useCallback } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { 
-  Mic, 
-  MicOff, 
-  Volume2, 
-  VolumeX, 
-  Send, 
-  Bot, 
-  User, 
+import {
+  Mic,
+  MicOff,
+  Volume2,
+  VolumeX,
+  Send,
+  Bot,
+  User,
   Sparkles,
   Mail,
   Users,
@@ -27,6 +27,7 @@ import {
 import { useElevenLabsVoice } from "@/lib/hooks/use-elevenlabs-voice"
 import { createClient } from "@/lib/supabase/client"
 import { motion, AnimatePresence } from "framer-motion"
+import Image from "next/image"
 
 interface Message {
   id: string
@@ -42,241 +43,358 @@ interface VoiceAgentProps {
 }
 
 // Animated Mascot Component
-function AriaMascot({ 
-  isListening, 
-  isSpeaking, 
+function AriaMascot({
+  isListening,
+  isSpeaking,
   isProcessing,
-  mood = "idle"
-}: { 
+  mood = "idle",
+  onInteract
+}: {
   isListening: boolean
   isSpeaking: boolean
   isProcessing: boolean
   mood?: "idle" | "happy" | "thinking" | "talking"
+  onInteract?: () => void
 }) {
-  const currentMood = isListening ? "listening" : isSpeaking ? "talking" : isProcessing ? "thinking" : mood
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
+  const [isHovered, setIsHovered] = useState(false)
+  const [isPoked, setIsPoked] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!containerRef.current) return
+      const { left, top, width, height } = containerRef.current.getBoundingClientRect()
+      const centerX = left + width / 2
+      const centerY = top + height / 2
+
+      // Calculate distance from center normalized to -1 to 1
+      const x = (e.clientX - centerX) / (window.innerWidth / 2)
+      const y = (e.clientY - centerY) / (window.innerHeight / 2)
+
+      setMousePosition({ x, y })
+    }
+
+    window.addEventListener("mousemove", handleMouseMove)
+    return () => window.removeEventListener("mousemove", handleMouseMove)
+  }, [])
+
+  const handleInteract = () => {
+    setIsPoked(true)
+    if (onInteract) onInteract()
+    setTimeout(() => setIsPoked(false), 800)
+  }
 
   return (
-    <div className="relative w-40 h-40 mx-auto">
-      {/* Outer glow rings */}
+    <div
+      className="relative w-64 h-64 mx-auto perspective-1000 cursor-pointer group"
+      ref={containerRef}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      onClick={handleInteract}
+    >
+      {/* Tooltip hint */}
       <motion.div
-        animate={{
-          scale: isListening ? [1, 1.3, 1] : isSpeaking ? [1, 1.2, 1] : [1, 1.05, 1],
-          opacity: [0.3, 0.1, 0.3],
-        }}
-        transition={{ duration: isListening ? 0.8 : 2, repeat: Infinity }}
-        className={`absolute inset-0 rounded-full ${
-          isListening ? "bg-red-500" : isSpeaking ? "bg-green-500" : "bg-violet-500"
-        } blur-xl`}
-      />
-      <motion.div
-        animate={{
-          scale: isListening ? [1.1, 1.4, 1.1] : isSpeaking ? [1.1, 1.3, 1.1] : [1.02, 1.08, 1.02],
-          opacity: [0.2, 0.05, 0.2],
-        }}
-        transition={{ duration: isListening ? 1 : 2.5, repeat: Infinity, delay: 0.2 }}
-        className={`absolute inset-0 rounded-full ${
-          isListening ? "bg-red-400" : isSpeaking ? "bg-emerald-400" : "bg-fuchsia-500"
-        } blur-2xl`}
-      />
-
-      {/* Main body */}
-      <motion.div
-        animate={{
-          y: isSpeaking ? [0, -5, 0, -3, 0] : [0, -4, 0],
-          scale: isListening ? [1, 1.05, 1] : 1,
-        }}
-        transition={{ 
-          duration: isSpeaking ? 0.5 : 2, 
-          repeat: Infinity,
-          ease: "easeInOut"
-        }}
-        className="relative w-full h-full"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: isHovered ? 1 : 0, y: isHovered ? 0 : 10 }}
+        className="absolute -top-12 left-1/2 -translate-x-1/2 bg-slate-900/90 text-slate-200 text-xs font-medium px-3 py-1.5 rounded-lg border border-slate-700 shadow-xl whitespace-nowrap z-20 pointer-events-none backdrop-blur-sm"
       >
-        {/* Body gradient sphere */}
-        <div className="absolute inset-4 rounded-full bg-gradient-to-br from-violet-500 via-fuchsia-500 to-purple-600 shadow-2xl shadow-violet-500/50">
-          {/* Shine effect */}
-          <div className="absolute top-3 left-6 w-8 h-8 bg-white/30 rounded-full blur-md" />
-          <div className="absolute top-5 left-8 w-3 h-3 bg-white/50 rounded-full" />
-        </div>
-
-        {/* Face container */}
-        <div className="absolute inset-4 flex items-center justify-center">
-          {/* Eyes */}
-          <div className="flex gap-5 -mt-2">
-            {/* Left eye */}
-            <motion.div
-              animate={{
-                scaleY: isSpeaking ? [1, 0.8, 1] : isProcessing ? [1, 0.2, 1] : 1,
-              }}
-              transition={{ 
-                duration: isSpeaking ? 0.3 : 2.5, 
-                repeat: isSpeaking || isProcessing ? Infinity : 0,
-                repeatDelay: isProcessing ? 0.5 : 0
-              }}
-              className="relative"
-            >
-              <div className="w-6 h-7 bg-white rounded-full flex items-center justify-center shadow-inner">
-                <motion.div
-                  animate={{
-                    x: isListening ? [-2, 2, -2] : 0,
-                    y: isProcessing ? [0, 2, 0] : 0,
-                  }}
-                  transition={{ duration: 1.5, repeat: Infinity }}
-                  className="w-3 h-3 bg-slate-900 rounded-full"
-                >
-                  <div className="w-1.5 h-1.5 bg-white rounded-full ml-0.5 mt-0.5" />
-                </motion.div>
-              </div>
-            </motion.div>
-
-            {/* Right eye */}
-            <motion.div
-              animate={{
-                scaleY: isSpeaking ? [1, 0.8, 1] : isProcessing ? [1, 0.2, 1] : 1,
-              }}
-              transition={{ 
-                duration: isSpeaking ? 0.3 : 2.5, 
-                repeat: isSpeaking || isProcessing ? Infinity : 0,
-                repeatDelay: isProcessing ? 0.5 : 0,
-                delay: 0.1
-              }}
-              className="relative"
-            >
-              <div className="w-6 h-7 bg-white rounded-full flex items-center justify-center shadow-inner">
-                <motion.div
-                  animate={{
-                    x: isListening ? [-2, 2, -2] : 0,
-                    y: isProcessing ? [0, 2, 0] : 0,
-                  }}
-                  transition={{ duration: 1.5, repeat: Infinity }}
-                  className="w-3 h-3 bg-slate-900 rounded-full"
-                >
-                  <div className="w-1.5 h-1.5 bg-white rounded-full ml-0.5 mt-0.5" />
-                </motion.div>
-              </div>
-            </motion.div>
-          </div>
-        </div>
-
-        {/* Mouth */}
-        <div className="absolute bottom-10 left-1/2 -translate-x-1/2">
-          <AnimatePresence mode="wait">
-            {isSpeaking ? (
-              <motion.div
-                key="speaking"
-                initial={{ scale: 0 }}
-                animate={{ 
-                  scale: 1,
-                  scaleY: [1, 1.5, 0.8, 1.3, 1],
-                }}
-                exit={{ scale: 0 }}
-                transition={{ 
-                  scaleY: { duration: 0.4, repeat: Infinity }
-                }}
-                className="w-6 h-6 bg-slate-900 rounded-full"
-              />
-            ) : isListening ? (
-              <motion.div
-                key="listening"
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                exit={{ scale: 0 }}
-                className="w-8 h-8 border-4 border-slate-900 rounded-full bg-red-400/50"
-              />
-            ) : (
-              <motion.div
-                key="smile"
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                exit={{ scale: 0 }}
-                className="w-8 h-3 border-b-4 border-slate-900 rounded-b-full"
-              />
-            )}
-          </AnimatePresence>
-        </div>
-
-        {/* Blush marks */}
-        <div className="absolute bottom-14 left-6 w-4 h-2 bg-pink-400/40 rounded-full blur-sm" />
-        <div className="absolute bottom-14 right-6 w-4 h-2 bg-pink-400/40 rounded-full blur-sm" />
+        Activate Assistant
       </motion.div>
 
-      {/* Sound waves when speaking */}
+      {/* Dynamic Background Glow / Aura */}
+      <motion.div
+        animate={{
+          scale: isListening ? [1, 1.2, 1] : isSpeaking ? [1, 1.1, 1] : isPoked ? [1, 1.15, 1] : [1, 1.05, 1],
+          opacity: isListening ? [0.4, 0.6, 0.4] : [0.2, 0.4, 0.2],
+        }}
+        transition={{ duration: isListening ? 1.5 : isPoked ? 0.8 : 4, repeat: Infinity, ease: "easeInOut" }}
+        className={`absolute inset-0 rounded-full blur-[60px] transition-colors duration-500 ${isListening ? "bg-red-500/40" :
+          isSpeaking ? "bg-emerald-500/40" :
+            isProcessing ? "bg-amber-500/40" :
+              isPoked ? "bg-cyan-500/40" :
+                "bg-indigo-500/30"
+          }`}
+      />
+
+      {/* High-tech rings - accelerate on interact */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <motion.div
+          animate={{ rotate: 360, scale: isHovered ? 1.05 : 1 }}
+          transition={{ duration: isHovered ? 10 : 20, repeat: Infinity, ease: "linear" }}
+          className={`w-[120%] h-[120%] border border-dashed rounded-full opacity-20 transition-colors duration-300 ${isListening ? "border-red-400" : "border-violet-400"
+            }`}
+        />
+        <motion.div
+          animate={{ rotate: -360, scale: isHovered ? 1.1 : 1 }}
+          transition={{ duration: isHovered ? 7 : 15, repeat: Infinity, ease: "linear" }}
+          className={`absolute w-[140%] h-[140%] border border-dotted rounded-full opacity-10 transition-colors duration-300 ${isListening ? "border-red-400" : "border-cyan-400"
+            }`}
+        />
+      </div>
+
+      {/* 3D Animated Code-Based Robot Body V2 - High Fidelity */}
+      <motion.div
+        animate={{
+          y: isPoked ? [0, -8, 0] : isSpeaking ? [0, -4, 0] : [0, -6, 0],
+          rotateX: mousePosition.y * 8,
+          rotateY: mousePosition.x * 8,
+        }}
+        transition={{
+          y: { duration: isPoked ? 0.4 : 3, repeat: Infinity, ease: "easeInOut" },
+          rotateX: { type: "spring", stiffness: 60, damping: 25 },
+          rotateY: { type: "spring", stiffness: 60, damping: 25 },
+        }}
+        style={{ transformStyle: "preserve-3d" }}
+        className="relative w-full h-full z-10 flex flex-col items-center justify-center pointer-events-none"
+      >
+        {/* -- HEAD ASSEMBLY -- */}
+        <div className="relative z-30 mb-[-10px]" style={{ transformStyle: "preserve-3d" }}>
+          {/* Neck Joint */}
+          <div className="absolute top-[85%] left-1/2 -translate-x-1/2 w-8 h-8 bg-slate-700 rounded-full shadow-inner -z-10" />
+
+          {/* Cranium */}
+          <div className="relative w-36 h-36 rounded-full bg-slate-100 shadow-[inset_-8px_-8px_20px_rgba(0,0,0,0.15),inset_8px_8px_20px_rgba(255,255,255,1),0_10px_30px_rgba(0,0,0,0.2)] overflow-hidden border border-white/80">
+
+            {/* Brain Glow */}
+            <motion.div
+              animate={{ rotate: 360, opacity: isProcessing ? 0.8 : 0.3 }}
+              transition={{ duration: isProcessing ? 2 : 10, repeat: Infinity, ease: "linear" }}
+              className={`absolute -top-1/2 -left-1/2 w-[200%] h-[200%] bg-gradient-to-tr ${isListening ? "from-red-400 via-rose-300 to-transparent" :
+                  isSpeaking ? "from-emerald-400 via-teal-300 to-transparent" :
+                    "from-indigo-400 via-blue-300 to-transparent"
+                } blur-2xl`}
+            />
+
+            {/* Visor Area */}
+            <div className="absolute top-[20%] left-[15%] right-[15%] bottom-[20%] rounded-[2rem] bg-slate-900 overflow-hidden flex flex-col items-center justify-center border-2 border-slate-800 shadow-[inset_0_0_15px_rgba(0,0,0,1)]">
+              <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[length:4px_4px]" />
+
+              {/* Face UI */}
+              <div className="relative z-10 flex flex-col gap-3 items-center w-full">
+                <div className="flex gap-4 justify-center w-full">
+                  <Eye isBlinking={false} mood={isListening ? "angry" : isSpeaking ? "happy" : "neutral"} color={isListening ? "#ef4444" : isSpeaking ? "#10b981" : "#06b6d4"} />
+                  <Eye isBlinking={false} mood={isListening ? "angry" : isSpeaking ? "happy" : "neutral"} color={isListening ? "#ef4444" : isSpeaking ? "#10b981" : "#06b6d4"} />
+                </div>
+
+                {/* Voice Equalizer */}
+                <div className="h-4 flex items-end justify-center gap-[3px]">
+                  {isSpeaking ? (
+                    [...Array(7)].map((_, i) => (
+                      <motion.div
+                        key={i}
+                        animate={{ height: [4, 16 + Math.random() * 10, 4] }}
+                        transition={{ duration: 0.3, repeat: Infinity, delay: i * 0.05 }}
+                        className="w-1 bg-emerald-400 rounded-full shadow-[0_0_5px_#34d399]"
+                      />
+                    ))
+                  ) : (
+                    // Idle Status Line
+                    <div className={`w-8 h-1 rounded-full ${isListening ? "bg-red-500 shadow-[0_0_8px_#ef4444]" : "bg-cyan-500/50"}`} />
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Specular Highlight */}
+            <div className="absolute top-4 left-6 w-12 h-6 bg-gradient-to-br from-white to-transparent rounded-full blur-[1px] opacity-80" />
+          </div>
+
+          {/* Ear Pods */}
+          <div className="absolute top-12 -left-3 w-4 h-12 bg-slate-200 rounded-l-lg border-r border-slate-300 shadow-lg" />
+          <div className="absolute top-12 -right-3 w-4 h-12 bg-slate-200 rounded-r-lg border-l border-slate-300 shadow-lg" />
+        </div>
+
+        {/* -- TORSO ASSEMBLY -- */}
+        <div className="relative z-20 flex flex-col items-center w-32">
+
+          {/* Upper Chest Plate */}
+          <div className="relative w-full h-24 bg-gradient-to-b from-white to-slate-200 rounded-[2.5rem] shadow-[0_5px_15px_rgba(0,0,0,0.2),inset_0_-5px_10px_rgba(0,0,0,0.05)] border border-white flex flex-col items-center justify-start pt-6 z-20">
+            {/* Arc Reactor */}
+            <div className="w-12 h-12 rounded-full bg-slate-800 border-4 border-slate-200 flex items-center justify-center shadow-[inset_0_0_10px_black]">
+              <motion.div
+                animate={{ scale: [1, 1.1, 1], opacity: [0.8, 1, 0.8] }}
+                transition={{ duration: 1.5, repeat: Infinity }}
+                className={`w-5 h-5 rounded-full blur-[2px] ${isListening ? "bg-red-500 shadow-[0_0_15px_#ef4444]" :
+                    isSpeaking ? "bg-emerald-500 shadow-[0_0_15px_#10b981]" :
+                      "bg-cyan-400 shadow-[0_0_15px_#22d3ee]"
+                  }`}
+              />
+            </div>
+          </div>
+
+          {/* Mid-Section / Spine */}
+          <div className="w-16 h-12 bg-slate-700 rounded-b-3xl -mt-6 z-10 shadow-inner flex flex-col items-center gap-1 pt-7">
+            <div className="w-12 h-1 bg-slate-600 rounded-full" />
+            <div className="w-10 h-1 bg-slate-600 rounded-full" />
+          </div>
+
+          {/* -- ARMS (Connected to Torso) -- */}
+
+          {/* Left Arm Assembly */}
+          <motion.div
+            animate={{ rotate: isSpeaking ? [0, -15, 0] : [0, 5, 0] }}
+            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute top-4 -left-3 origin-top-right z-10"
+          >
+            <div className="w-8 h-8 rounded-full bg-slate-300 shadow-md transform -translate-x-1" /> {/* Shoulder Joint */}
+            <div className="w-6 h-16 bg-white rounded-full border border-slate-200 -mt-2 ml-1 shadow-sm flex flex-col items-center justify-end pb-2"> {/* Upper Arm */}
+              <div className="w-4 h-16 bg-slate-200 rounded-full -mb-10 shadow-inner border border-white/50" /> {/* Forearm */}
+              <div className="w-6 h-7 bg-slate-300 rounded-full -mb-[46px] border border-white" /> {/* Hand */}
+            </div>
+          </motion.div>
+
+          {/* Right Arm Assembly */}
+          <motion.div
+            animate={{ rotate: isSpeaking ? [0, 15, 0] : [0, -5, 0] }}
+            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+            className="absolute top-4 -right-3 origin-top-left z-10"
+          >
+            <div className="w-8 h-8 rounded-full bg-slate-300 shadow-md transform translate-x-1" /> {/* Shoulder Joint */}
+            <div className="w-6 h-16 bg-white rounded-full border border-slate-200 -mt-2 ml-[-4px] shadow-sm flex flex-col items-center justify-end pb-2"> {/* Upper Arm */}
+              <div className="w-4 h-16 bg-slate-200 rounded-full -mb-10 shadow-inner border border-white/50" /> {/* Forearm */}
+              <div className="w-6 h-7 bg-slate-300 rounded-full -mb-[46px] border border-white" /> {/* Hand */}
+            </div>
+          </motion.div>
+        </div>
+
+        {/* -- LEGS ASSEMBLY -- */}
+        <div className="relative flex gap-8 -mt-2 z-10">
+          {/* Left Leg */}
+          <motion.div
+            animate={{ y: [0, 4, 0], rotate: [0, -2, 0] }}
+            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+            className="flex flex-col items-center"
+          >
+            <div className="w-6 h-6 bg-slate-700 rounded-full -mb-3 z-0" /> {/* Hip Joint */}
+            <div className="w-8 h-16 bg-white rounded-2xl border border-slate-200 shadow-sm z-10 flex items-end justify-center pb-1"> {/* Thigh */}
+              <div className="w-6 h-1 bg-slate-300" />
+            </div>
+            <div className="w-8 h-10 bg-slate-200 rounded-b-xl shadow-inner -mt-1 pt-1 flex justify-center"> {/* Lower Leg */}
+              <div className="w-10 h-6 bg-slate-800 rounded-lg mt-auto shadow-lg" /> {/* Foot */}
+            </div>
+            {/* Thruster */}
+            <motion.div
+              animate={{ scale: [1, 1.5, 1], opacity: [0.6, 0, 0.6] }}
+              transition={{ duration: 0.8, repeat: Infinity }}
+              className="w-4 h-4 mt-1 bg-cyan-400 blur-md rounded-full"
+            />
+          </motion.div>
+
+          {/* Right Leg */}
+          <motion.div
+            animate={{ y: [0, 4, 0], rotate: [0, 2, 0] }}
+            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 1.5 }}
+            className="flex flex-col items-center"
+          >
+            <div className="w-6 h-6 bg-slate-700 rounded-full -mb-3 z-0" /> {/* Hip Joint */}
+            <div className="w-8 h-16 bg-white rounded-2xl border border-slate-200 shadow-sm z-10 flex items-end justify-center pb-1"> {/* Thigh */}
+              <div className="w-6 h-1 bg-slate-300" />
+            </div>
+            <div className="w-8 h-10 bg-slate-200 rounded-b-xl shadow-inner -mt-1 pt-1 flex justify-center"> {/* Lower Leg */}
+              <div className="w-10 h-6 bg-slate-800 rounded-lg mt-auto shadow-lg" /> {/* Foot */}
+            </div>
+            {/* Thruster */}
+            <motion.div
+              animate={{ scale: [1, 1.5, 1], opacity: [0.6, 0, 0.6] }}
+              transition={{ duration: 0.8, repeat: Infinity, delay: 0.4 }}
+              className="w-4 h-4 mt-1 bg-cyan-400 blur-md rounded-full"
+            />
+          </motion.div>
+        </div>
+
+        {/* Orbiting Rings container (larger now) */}
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+          className="absolute w-[300px] h-[300px] rounded-full border border-dashed border-slate-400/20 -z-20 pointer-events-none"
+        />
+
+      </motion.div>
+
+      {/* Active Voice Visualization (Waves) */}
       <AnimatePresence>
         {isSpeaking && (
-          <>
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full pointer-events-none">
             {[...Array(3)].map((_, i) => (
               <motion.div
                 key={i}
                 initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ 
-                  opacity: [0, 0.5, 0],
-                  scale: [0.9, 1.3 + i * 0.15, 1.5 + i * 0.15],
+                animate={{
+                  opacity: [0, 0.3, 0],
+                  scale: [0.8, 1.4 + i * 0.2],
+                  borderColor: ["rgba(52, 211, 153, 0)", "rgba(52, 211, 153, 0.5)", "rgba(52, 211, 153, 0)"]
                 }}
-                exit={{ opacity: 0 }}
-                transition={{ 
-                  duration: 1,
-                  repeat: Infinity,
-                  delay: i * 0.3,
-                }}
-                className="absolute inset-0 rounded-full border-2 border-green-400"
-              />
-            ))}
-          </>
-        )}
-      </AnimatePresence>
-
-      {/* Listening pulse rings */}
-      <AnimatePresence>
-        {isListening && (
-          <>
-            {[...Array(3)].map((_, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ 
-                  opacity: [0.6, 0],
-                  scale: [1, 1.8],
-                }}
-                exit={{ opacity: 0 }}
-                transition={{ 
+                transition={{
                   duration: 1.5,
                   repeat: Infinity,
                   delay: i * 0.4,
+                  ease: "easeOut"
                 }}
-                className="absolute inset-0 rounded-full border-2 border-red-400"
+                className="absolute inset-0 rounded-full border-2 border-emerald-400/50"
               />
             ))}
-          </>
+          </div>
         )}
       </AnimatePresence>
 
-      {/* Sparkles around when idle */}
-      {!isListening && !isSpeaking && !isProcessing && (
-        <>
-          {[...Array(4)].map((_, i) => (
+      {/* Processing Particles */}
+      {isProcessing && (
+        <div className="absolute inset-0 pointer-events-none">
+          {[...Array(5)].map((_, i) => (
             <motion.div
               key={i}
               animate={{
+                y: [0, -40, -80],
+                x: Math.sin(i) * 20,
                 opacity: [0, 1, 0],
-                scale: [0.5, 1, 0.5],
-                y: [0, -10, 0],
+                scale: [0, 1, 0]
               }}
               transition={{
                 duration: 2,
                 repeat: Infinity,
-                delay: i * 0.5,
+                delay: i * 0.3,
+                ease: "easeOut"
               }}
-              className="absolute"
-              style={{
-                top: `${20 + Math.random() * 20}%`,
-                left: `${10 + i * 25}%`,
-              }}
-            >
-              <Sparkles className="w-4 h-4 text-yellow-400" />
-            </motion.div>
+              className="absolute top-1/2 left-1/2 w-2 h-2 bg-amber-400 rounded-full shadow-[0_0_10px_rgba(251,191,36,0.8)]"
+            />
           ))}
-        </>
+        </div>
       )}
+    </div>
+  )
+}
+
+// Procedural Eye Component
+function Eye({ isBlinking, mood, color }: { isBlinking: boolean, mood: string, color: string }) {
+  const [blink, setBlink] = useState(false)
+
+  // Random blink logic
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setBlink(true)
+      setTimeout(() => setBlink(false), 150)
+    }, Math.random() * 3000 + 2000)
+    return () => clearInterval(interval)
+  }, [])
+
+  const eyeVariants = {
+    neutral: { height: 12, borderRadius: 20 },
+    happy: { height: 18, borderRadius: "50% 50% 0 0", scaleY: 0.8 }, // Upside down U shape illusion via container? Or just simple arc
+    angry: { height: 8, borderRadius: 0, rotate: 10 },
+  }
+
+  return (
+    <div className="relative">
+      <motion.div
+        animate={{
+          height: blink ? 2 : mood === "happy" ? 14 : mood === "angry" ? 8 : 16,
+          backgroundColor: color,
+          scaleY: blink ? 0.1 : 1
+        }}
+        className="w-8 rounded-full shadow-[0_0_8px_currentColor]"
+        style={{ color: color }}
+      />
     </div>
   )
 }
@@ -322,9 +440,9 @@ export function VoiceAgent({ userId }: VoiceAgentProps) {
     }
   }, [])
 
-  const { 
-    speak: elevenLabsSpeak, 
-    stop: stopSpeaking, 
+  const {
+    speak: elevenLabsSpeak,
+    stop: stopSpeaking,
     isSpeaking,
     isListening,
     transcript,
@@ -387,7 +505,7 @@ export function VoiceAgent({ userId }: VoiceAgentProps) {
       })
 
       const result = await response.json()
-      
+
       if (!response.ok) {
         throw new Error(result.response || result.error || "Failed to process command")
       }
@@ -561,15 +679,14 @@ export function VoiceAgent({ userId }: VoiceAgentProps) {
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className={`mb-4 px-4 py-1.5 rounded-full text-xs font-semibold ${
-              isListening 
-                ? "bg-red-500/20 text-red-400 border border-red-500/30" 
-                : isSpeaking 
+            className={`mb-4 px-4 py-1.5 rounded-full text-xs font-semibold ${isListening
+              ? "bg-red-500/20 text-red-400 border border-red-500/30"
+              : isSpeaking
                 ? "bg-green-500/20 text-green-400 border border-green-500/30"
                 : isProcessing
-                ? "bg-amber-500/20 text-amber-400 border border-amber-500/30"
-                : "bg-violet-500/20 text-violet-400 border border-violet-500/30"
-            }`}
+                  ? "bg-amber-500/20 text-amber-400 border border-amber-500/30"
+                  : "bg-violet-500/20 text-violet-400 border border-violet-500/30"
+              }`}
           >
             {isListening ? "🎤 Listening..." : isSpeaking ? "🔊 Speaking" : isProcessing ? "⚡ Processing" : "✨ Ready"}
           </motion.div>
@@ -577,10 +694,37 @@ export function VoiceAgent({ userId }: VoiceAgentProps) {
           {/* Mascot with speech bubble */}
           <div className="relative mb-8">
             <SpeechBubble text={currentBubbleText} isVisible={showBubble} />
-            <AriaMascot 
-              isListening={isListening} 
-              isSpeaking={isSpeaking} 
+            <AriaMascot
+              isListening={isListening}
+              isSpeaking={isSpeaking}
               isProcessing={isProcessing}
+              onInteract={() => {
+                const interactions = [
+                  "System online. �",
+                  "Awaiting command. ⌨️",
+                  "Ready to assist. 🤝",
+                  "How may I help? �",
+                  "Listening... 🎙️",
+                  "At your service. ⚡"
+                ]
+                const randomMsg = interactions[Math.floor(Math.random() * interactions.length)]
+                setCurrentBubbleText(randomMsg)
+                setShowBubble(true)
+
+                // Optional: Play a subtle UI sound
+                if (voiceEnabled && !isSpeaking && !isListening) {
+                  setTimeout(() => {
+                    // Play "active" sound
+                  }, 100)
+                }
+
+                // Clear bubble after a few seconds
+                setTimeout(() => {
+                  if (!isSpeaking && !isListening && !isProcessing) {
+                    setShowBubble(false)
+                  }
+                }, 2500)
+              }}
             />
           </div>
 
@@ -590,11 +734,10 @@ export function VoiceAgent({ userId }: VoiceAgentProps) {
             whileTap={{ scale: 0.95 }}
             onClick={toggleListening}
             disabled={isProcessing || isSpeaking}
-            className={`relative w-20 h-20 rounded-full flex items-center justify-center transition-all ${
-              isListening 
-                ? "bg-red-500 shadow-lg shadow-red-500/50" 
-                : "bg-gradient-to-br from-violet-600 to-fuchsia-600 shadow-lg shadow-violet-500/30 hover:shadow-violet-500/50"
-            }`}
+            className={`relative w-20 h-20 rounded-full flex items-center justify-center transition-all ${isListening
+              ? "bg-red-500 shadow-lg shadow-red-500/50"
+              : "bg-gradient-to-br from-violet-600 to-fuchsia-600 shadow-lg shadow-violet-500/30 hover:shadow-violet-500/50"
+              }`}
           >
             {isListening ? (
               <MicOff className="w-8 h-8 text-white" />
@@ -693,11 +836,10 @@ export function VoiceAgent({ userId }: VoiceAgentProps) {
                   </div>
                 )}
                 <div className={`max-w-[80%] ${message.role === "user" ? "order-first" : ""}`}>
-                  <div className={`rounded-2xl px-4 py-2.5 ${
-                    message.role === "user"
-                      ? "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white"
-                      : "bg-slate-800 text-slate-100 border border-white/5"
-                  }`}>
+                  <div className={`rounded-2xl px-4 py-2.5 ${message.role === "user"
+                    ? "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white"
+                    : "bg-slate-800 text-slate-100 border border-white/5"
+                    }`}>
                     <p className="text-sm">{message.content}</p>
                   </div>
                   {message.data && Array.isArray(message.data) && message.data.length > 0 && (
@@ -766,11 +908,11 @@ export function VoiceAgent({ userId }: VoiceAgentProps) {
             >
               <p className="text-sm font-medium text-white mb-2">Confirm Action?</p>
               <p className="text-xs text-slate-400 mb-3">
-                {pendingAction.action?.includes("email") 
+                {pendingAction.action?.includes("email")
                   ? `Send email to ${pendingAction.parameters?.recipient || pendingAction.parameters?.to}?`
                   : pendingAction.action?.includes("event") || pendingAction.action?.includes("meeting")
-                  ? `Create: ${pendingAction.parameters?.title}?`
-                  : "Proceed with action?"}
+                    ? `Create: ${pendingAction.parameters?.title}?`
+                    : "Proceed with action?"}
               </p>
               <div className="flex gap-2">
                 <Button onClick={confirmAction} size="sm" className="flex-1 bg-violet-600 hover:bg-violet-500">

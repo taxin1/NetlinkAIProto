@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation"
 import { useState, useEffect } from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { LayoutDashboard, Users, Mail, BarChart3, LogOut, Network, Bot, Settings, Calendar, Menu, X, Share2, Mic } from "lucide-react"
+import { LayoutDashboard, Users, Mail, BarChart3, LogOut, Network, Bot, Settings, Calendar, Menu, X, Share2, Mic, Phone } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { useMobile } from "@/lib/hooks/use-mobile"
@@ -28,6 +28,7 @@ const navigation = [
   { name: "Events", href: "/dashboard/events", icon: Calendar },
   { name: "Emails", href: "/dashboard/emails", icon: Mail },
   { name: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
+  { name: "Voice Calls", href: "/dashboard/voice-call", icon: Phone },
   { name: "Voice Agent", href: "/dashboard/voice-agent", icon: Mic },
   { name: "AI Assistant", href: "/dashboard/ai-assistant", icon: Bot },
   { name: "Settings", href: "/dashboard/settings", icon: Settings },

@@ -257,38 +257,80 @@ END:VCARD`
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-6 w-6 animate-spin" />
+      <div className="flex items-center justify-center min-h-screen relative overflow-hidden">
+        {/* Simple background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-cyan-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-cyan-950 dark:to-teal-950" />
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-cyan-400/15 dark:bg-cyan-600/8 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-400/15 dark:bg-blue-600/8 rounded-full blur-3xl" />
+        
+        {/* Loading content */}
+        <div className="relative z-10 text-center">
+          <div className="mb-6">
+            <div className="p-6 bg-gradient-to-br from-cyan-500/10 to-blue-500/10 rounded-2xl backdrop-blur-sm border border-cyan-400/20 inline-block">
+              <Share2 className="h-16 w-16 text-cyan-400" />
+            </div>
+          </div>
+          <div className="text-cyan-600 dark:text-cyan-400 font-semibold text-lg mb-4">Loading Network Profile</div>
+          <Loader2 className="h-8 w-8 animate-spin text-cyan-500 mx-auto" />
+        </div>
       </div>
     )
   }
 
   return (
     <div className="min-h-screen relative overflow-hidden">
-      {/* Animated gradient background */}
+      {/* Simplified animated gradient background */}
       <div className="fixed inset-0 -z-10">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-cyan-50 to-teal-50 dark:from-gray-900 dark:via-cyan-950 dark:to-teal-950 animate-gradient-shift" />
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-cyan-400/20 dark:bg-cyan-600/10 rounded-full blur-3xl animate-pulse-slow" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-400/20 dark:bg-blue-600/10 rounded-full blur-3xl animate-pulse-slow delay-1000" />
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-cyan-50 to-teal-50 dark:from-gray-900 dark:via-cyan-950 dark:to-teal-950" />
+        
+        {/* Subtle grid pattern */}
+        <div 
+          className="absolute inset-0 opacity-[0.02] dark:opacity-[0.03]"
+          style={{
+            backgroundImage: `
+              linear-gradient(to right, rgba(6, 182, 212, 0.15) 1px, transparent 1px),
+              linear-gradient(to bottom, rgba(6, 182, 212, 0.15) 1px, transparent 1px)
+            `,
+            backgroundSize: "60px 60px",
+          }}
+        />
+        
+        {/* Simple gradient orbs */}
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-cyan-400/15 dark:bg-cyan-600/8 rounded-full blur-3xl animate-blob" />
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-400/15 dark:bg-blue-600/8 rounded-full blur-3xl animate-blob animation-delay-2000" />
       </div>
 
       <div className="container max-w-6xl mx-auto p-6 space-y-8 animate-fade-in">
-        {/* Header */}
+        {/* Simplified Header */}
         <div className="relative">
-          <div className="absolute inset-0 bg-gradient-to-r from-cyan-600 to-blue-600 blur-2xl opacity-20 animate-pulse-slow" />
-          <div className="relative backdrop-blur-sm bg-white/50 dark:bg-gray-900/50 rounded-2xl p-8 border border-white/60 dark:border-gray-800/60 shadow-2xl">
+          <div className="relative backdrop-blur-sm bg-white/70 dark:bg-gray-900/70 rounded-3xl p-8 border border-white/60 dark:border-gray-800/60 shadow-xl">
             <div className="flex items-center gap-4 mb-4">
-              <div className="p-3 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl shadow-lg animate-bounce-slow">
+              <div className="p-4 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl shadow-lg">
                 <Share2 className="h-8 w-8 text-white" />
               </div>
-              <div>
-                <h1 className="text-4xl font-bold bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
+              <div className="flex-1">
+                <h1 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 bg-clip-text text-transparent mb-2">
                   Network Profile
                 </h1>
-                <p className="text-muted-foreground mt-1">
-                  Share your profile instantly with QR codes & NFC ⚡
+                <p className="text-muted-foreground text-lg flex items-center gap-2">
+                  <Zap className="h-5 w-5 text-cyan-500" />
+                  Share your profile instantly with QR codes & NFC
                 </p>
               </div>
+            </div>
+            
+            {/* Quick stats */}
+            <div className="flex flex-wrap gap-4 mt-6 pt-6 border-t border-gray-200/50 dark:border-gray-800/50">
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-cyan-50 dark:bg-cyan-950/30 rounded-lg">
+                <QrCode className="h-4 w-4 text-cyan-600 dark:text-cyan-400" />
+                <span className="text-sm font-medium text-cyan-700 dark:text-cyan-300">QR Code Ready</span>
+              </div>
+              {nfcSupported && (
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-purple-50 dark:bg-purple-950/30 rounded-lg">
+                  <Nfc className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                  <span className="text-sm font-medium text-purple-700 dark:text-purple-300">NFC Enabled</span>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -318,11 +360,11 @@ END:VCARD`
         )}
 
         <div className="grid lg:grid-cols-2 gap-8">
-          {/* Profile Form */}
-          <Card className="backdrop-blur-md bg-white/70 dark:bg-gray-900/70 border-white/60 dark:border-gray-800/60 shadow-2xl">
+          {/* Simplified Profile Form */}
+          <Card className="backdrop-blur-sm bg-white/70 dark:bg-gray-900/70 border-white/60 dark:border-gray-800/60 shadow-xl">
             <CardHeader className="border-b border-gray-200/50 dark:border-gray-800/50">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg shadow-lg">
+                <div className="p-2.5 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg shadow-md">
                   <User className="h-6 w-6 text-white" />
                 </div>
                 <div>
@@ -462,11 +504,11 @@ END:VCARD`
 
           {/* QR Code & Share Options */}
           <div className="space-y-6">
-            {/* LinkedIn QR Code - Main Focus */}
-            <Card className="backdrop-blur-md bg-white/70 dark:bg-gray-900/70 border-white/60 dark:border-gray-800/60 shadow-2xl overflow-hidden">
-              <CardHeader className="border-b border-gray-200/50 dark:border-gray-800/50 bg-gradient-to-r from-[#0077B5]/10 to-blue-500/10">
+            {/* Simplified LinkedIn QR Code */}
+            <Card className="backdrop-blur-sm bg-white/70 dark:bg-gray-900/70 border-white/60 dark:border-gray-800/60 shadow-xl">
+              <CardHeader className="border-b border-gray-200/50 dark:border-gray-800/50 bg-gradient-to-r from-[#0077B5]/5 to-blue-500/5">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-[#0077B5] rounded-lg shadow-lg">
+                  <div className="p-2.5 bg-[#0077B5] rounded-lg shadow-md">
                     <Linkedin className="h-6 w-6 text-white" />
                   </div>
                   <div>
@@ -478,7 +520,7 @@ END:VCARD`
               <CardContent className="p-6">
                 {profile.linkedin ? (
                   <div className="flex flex-col items-center space-y-6">
-                    <div ref={qrRef} className="p-6 bg-white rounded-2xl shadow-xl">
+                    <div ref={qrRef} className="p-6 bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
                       <QRCodeSVG
                         value={getLinkedInUrl()}
                         size={200}
@@ -541,12 +583,12 @@ END:VCARD`
               </CardContent>
             </Card>
 
-            {/* NFC Card */}
-            <Card className="backdrop-blur-md bg-white/70 dark:bg-gray-900/70 border-white/60 dark:border-gray-800/60 shadow-2xl">
+            {/* Simplified NFC Card */}
+            <Card className="backdrop-blur-sm bg-white/70 dark:bg-gray-900/70 border-white/60 dark:border-gray-800/60 shadow-xl">
               <CardHeader className="border-b border-gray-200/50 dark:border-gray-800/50">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg shadow-lg">
+                    <div className="p-2.5 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg shadow-md">
                       <Nfc className="h-6 w-6 text-white" />
                     </div>
                     <div>
@@ -555,7 +597,7 @@ END:VCARD`
                     </div>
                   </div>
                   {nfcSupported ? (
-                    <Badge className="bg-green-500/20 text-green-700 dark:text-green-300">
+                    <Badge className="bg-green-500/20 text-green-700 dark:text-green-300 border border-green-500/30">
                       <Zap className="h-3 w-3 mr-1" /> Supported
                     </Badge>
                   ) : (

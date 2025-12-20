@@ -1,0 +1,12 @@
+﻿-----------------------------------------
+Connection Verification Script
+-----------------------------------------
+API Key: sk_0244a72...
+Agent ID: agent_4301kcx2taxrfnvvs89rky7mae5m
+-----------------------------------------
+
+1. Verifying Agent (agent_4301kcx2taxrfnvvs89rky7mae5m)...
+
+2. Verifying Telephony Endpoint...
+Status: 404
+Response: {"detail":"Not Found"}

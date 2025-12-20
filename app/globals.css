@@ -244,6 +244,10 @@
   }
 }
 
+.animate-fade-in-up {
+  animation: fade-in-up 0.6s ease-out;
+}
+
 @keyframes slide-down {
   from {
     opacity: 0;
@@ -275,10 +279,6 @@
 
 .animate-fade-in {
   animation: fade-in 0.6s ease-out;
-}
-
-.animate-fade-in-up {
-  animation: fade-in-up 0.6s ease-out;
 }
 
 .animate-slide-down {
@@ -458,6 +458,25 @@
 
 .animate-scan-line {
   animation: scan-line 2s linear infinite;
+}
+
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 20s linear infinite;
+}
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: -12;
+  }
 }
 
 /* Tech grid pattern */
