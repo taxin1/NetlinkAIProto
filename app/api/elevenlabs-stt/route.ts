@@ -5,8 +5,8 @@ export async function POST(request: NextRequest) {
     const formData = await request.formData()
     const audioFile = formData.get("audio") as File
 
-    if (!audioFile) {
-      return NextResponse.json({ error: "Audio file is required" }, { status: 400 })
+    if (!audioFile || audioFile.size === 0) {
+      return NextResponse.json({ error: "Audio file is required and must not be empty" }, { status: 400 })
     }
 
     const apiKey = process.env.ELEVENLABS_API_KEY
@@ -34,10 +34,25 @@ export async function POST(request: NextRequest) {
     )
 
     if (!response.ok) {
-      const errorText = await response.text()
-      console.error("ElevenLabs STT error:", errorText)
+      let errorMessage = "Failed to transcribe audio"
+      try {
+        // Read response as text first, then try to parse as JSON
+        const errorText = await response.text()
+        if (errorText) {
+          try {
+            const errorData = JSON.parse(errorText)
+            errorMessage = errorData.detail?.message || errorData.error?.message || errorData.message || errorText
+          } catch {
+            // If not JSON, use the text as-is
+            errorMessage = errorText
+          }
+        }
+      } catch {
+        // Fall back to default message if reading fails
+      }
+      console.error("ElevenLabs STT error:", errorMessage, `(Status: ${response.status})`)
       return NextResponse.json(
-        { error: "Failed to transcribe audio" },
+        { error: errorMessage },
         { status: response.status }
       )
     }

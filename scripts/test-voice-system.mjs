@@ -111,9 +111,6 @@ async function runTests() {
   log('\n📋 Environment Variables Check:', 'cyan')
   const envVars = {
     'ELEVENLABS_API_KEY': ELEVENLABS_API_KEY,
-    'TWILIO_ACCOUNT_SID': TWILIO_ACCOUNT_SID,
-    'TWILIO_AUTH_TOKEN': TWILIO_AUTH_TOKEN,
-    'TWILIO_PHONE_NUMBER': TWILIO_PHONE_NUMBER,
     'NEXT_PUBLIC_APP_URL': BASE_URL,
   }
 
@@ -126,9 +123,7 @@ async function runTests() {
       logSuccess(`${key}: ${masked}`)
     } else {
       logWarning(`${key}: Not set`)
-      if (key !== 'TWILIO_ACCOUNT_SID' && key !== 'TWILIO_AUTH_TOKEN' && key !== 'TWILIO_PHONE_NUMBER') {
-        envOk = false
-      }
+      envOk = false
     }
   }
 

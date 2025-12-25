@@ -121,6 +121,51 @@ export function useElevenLabsVoice({
     }
   }, [isLoading, voiceId, onSpeechStart, onSpeechEnd, fallbackSpeak])
 
+  // Speech-to-Text transcription function
+  const transcribeAudio = useCallback(async (audioBlob: Blob) => {
+    setIsLoading(true)
+    
+    try {
+      // Validate audio blob
+      if (!audioBlob || audioBlob.size === 0) {
+        throw new Error("No audio data recorded")
+      }
+
+      const formData = new FormData()
+      formData.append("audio", audioBlob, "recording.webm")
+
+      const response = await fetch("/api/elevenlabs-stt", {
+        method: "POST",
+        body: formData,
+      })
+
+      if (!response.ok) {
+        // Try to extract error message from response
+        let errorMessage = "Transcription failed"
+        try {
+          const errorData = await response.json()
+          errorMessage = errorData.error || errorMessage
+        } catch {
+          // If response is not JSON, use status text
+          errorMessage = response.statusText || errorMessage
+        }
+        throw new Error(errorMessage)
+      }
+
+      const result = await response.json()
+      const transcribedText = result.text || ""
+      
+      setTranscript(transcribedText)
+      onTranscript?.(transcribedText)
+    } catch (error) {
+      console.error("Transcription error:", error)
+      const errorMessage = error instanceof Error ? error.message : "Failed to transcribe audio"
+      onError?.(errorMessage)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [onTranscript, onError])
+
   // Speech-to-Text using Gemini 2.0 Flash
   const startListening = useCallback(async () => {
     if (isListening) return
@@ -150,7 +195,7 @@ export function useElevenLabsVoice({
         stream.getTracks().forEach(track => track.stop())
         streamRef.current = null
         
-        // Send to Gemini STT
+        // Send to transcription API
         await transcribeAudio(audioBlob)
       }
 
@@ -161,7 +206,7 @@ export function useElevenLabsVoice({
       console.error("Error starting recording:", error)
       onError?.("Failed to access microphone")
     }
-  }, [isListening, onError])
+  }, [isListening, onError, transcribeAudio])
 
   const stopListening = useCallback(() => {
     if (mediaRecorderRef.current && isListening) {
@@ -169,35 +214,6 @@ export function useElevenLabsVoice({
       setIsListening(false)
     }
   }, [isListening])
-
-  const transcribeAudio = useCallback(async (audioBlob: Blob) => {
-    setIsLoading(true)
-    
-    try {
-      const formData = new FormData()
-      formData.append("audio", audioBlob, "recording.webm")
-
-      const response = await fetch("/api/elevenlabs-stt", {
-        method: "POST",
-        body: formData,
-      })
-
-      if (!response.ok) {
-        throw new Error("Transcription failed")
-      }
-
-      const result = await response.json()
-      const transcribedText = result.text || ""
-      
-      setTranscript(transcribedText)
-      onTranscript?.(transcribedText)
-    } catch (error) {
-      console.error("Transcription error:", error)
-      onError?.("Failed to transcribe audio")
-    } finally {
-      setIsLoading(false)
-    }
-  }, [onTranscript, onError])
 
   const toggleListening = useCallback(() => {
     if (isListening) {

@@ -28,7 +28,6 @@ const navigation = [
   { name: "Events", href: "/dashboard/events", icon: Calendar },
   { name: "Emails", href: "/dashboard/emails", icon: Mail },
   { name: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
-  { name: "Voice Calls", href: "/dashboard/voice-call", icon: Phone },
   { name: "Voice Agent", href: "/dashboard/voice-agent", icon: Mic },
   { name: "AI Assistant", href: "/dashboard/ai-assistant", icon: Bot },
   { name: "Settings", href: "/dashboard/settings", icon: Settings },

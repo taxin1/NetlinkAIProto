@@ -85,14 +85,72 @@ export default function NetworkProfilePage() {
       if (user) {
         setProfile(prev => ({ ...prev, email: user.email || "" }))
         
-        // Try to load saved profile from localStorage for now
-        const saved = localStorage.getItem(`network-profile-${user.id}`)
-        if (saved) {
-          setProfile(JSON.parse(saved))
+        // Load profile from database
+        const { data: dbProfile, error: dbError } = await supabase
+          .from("network_profiles")
+          .select("*")
+          .eq("user_id", user.id)
+          .single()
+        
+        if (dbError && dbError.code !== "PGRST116") { // PGRST116 = no rows returned
+          console.error("Error loading profile from database:", dbError)
+          // Fallback to localStorage if database fails
+          const saved = localStorage.getItem(`network-profile-${user.id}`)
+          if (saved) {
+            setProfile(JSON.parse(saved))
+          }
+        } else if (dbProfile) {
+          // Load from database
+          setProfile({
+            name: dbProfile.name || "",
+            title: dbProfile.title || "",
+            company: dbProfile.company || "",
+            email: dbProfile.email || user.email || "",
+            phone: dbProfile.phone || "",
+            linkedin: dbProfile.linkedin || "",
+            twitter: dbProfile.twitter || "",
+            github: dbProfile.github || "",
+            instagram: dbProfile.instagram || "",
+            website: dbProfile.website || "",
+          })
+        } else {
+          // Try localStorage as fallback for migration
+          const saved = localStorage.getItem(`network-profile-${user.id}`)
+          if (saved) {
+            const localProfile = JSON.parse(saved)
+            setProfile(localProfile)
+            // Migrate from localStorage to database
+            await supabase.from("network_profiles").upsert({
+              user_id: user.id,
+              name: localProfile.name || null,
+              title: localProfile.title || null,
+              company: localProfile.company || null,
+              email: localProfile.email || user.email || null,
+              phone: localProfile.phone || null,
+              linkedin: localProfile.linkedin || null,
+              twitter: localProfile.twitter || null,
+              github: localProfile.github || null,
+              instagram: localProfile.instagram || null,
+              website: localProfile.website || null,
+            })
+          }
         }
       }
     } catch (error) {
       console.error("Error loading profile:", error)
+      // Fallback to localStorage on error
+      try {
+        const supabase = createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        if (user) {
+          const saved = localStorage.getItem(`network-profile-${user.id}`)
+          if (saved) {
+            setProfile(JSON.parse(saved))
+          }
+        }
+      } catch (fallbackError) {
+        console.error("Error loading from localStorage fallback:", fallbackError)
+      }
     } finally {
       setIsLoading(false)
     }
@@ -106,12 +164,53 @@ export default function NetworkProfilePage() {
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       
-      if (user) {
+      if (!user) {
+        setMessage({ type: "error", text: "User not authenticated" })
+        return
+      }
+
+      // Save to database using upsert (insert or update)
+      const { error: dbError } = await supabase
+        .from("network_profiles")
+        .upsert({
+          user_id: user.id,
+          name: profile.name || null,
+          title: profile.title || null,
+          company: profile.company || null,
+          email: profile.email || user.email || null,
+          phone: profile.phone || null,
+          linkedin: profile.linkedin || null,
+          twitter: profile.twitter || null,
+          github: profile.github || null,
+          instagram: profile.instagram || null,
+          website: profile.website || null,
+        }, {
+          onConflict: "user_id"
+        })
+
+      if (dbError) {
+        console.error("Database save error:", dbError)
+        // Fallback to localStorage if database save fails
+        localStorage.setItem(`network-profile-${user.id}`, JSON.stringify(profile))
+        setMessage({ type: "error", text: "Failed to save to database, saved locally instead" })
+      } else {
+        // Also save to localStorage as backup
         localStorage.setItem(`network-profile-${user.id}`, JSON.stringify(profile))
         setMessage({ type: "success", text: "Profile saved successfully!" })
       }
     } catch (error) {
+      console.error("Error saving profile:", error)
       setMessage({ type: "error", text: "Failed to save profile" })
+      // Try localStorage as last resort
+      try {
+        const supabase = createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        if (user) {
+          localStorage.setItem(`network-profile-${user.id}`, JSON.stringify(profile))
+        }
+      } catch (fallbackError) {
+        console.error("Error saving to localStorage fallback:", fallbackError)
+      }
     } finally {
       setIsSaving(false)
     }
