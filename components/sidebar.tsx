@@ -5,7 +5,8 @@ import { usePathname, useRouter } from "next/navigation"
 import { useState, useEffect } from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { LayoutDashboard, Users, Mail, BarChart3, LogOut, Network, Bot, Settings, Calendar, Menu, X, Share2, Mic, Phone } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import { LayoutDashboard, Users, Mail, BarChart3, LogOut, Network, Bot, Settings, Calendar, Menu, X, Share2, Mic, Phone, CheckCircle2, CalendarDays } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { useMobile } from "@/lib/hooks/use-mobile"
@@ -25,6 +26,7 @@ const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Network Profile", href: "/dashboard/profile", icon: Share2 },
   { name: "Contacts", href: "/dashboard/contacts", icon: Users },
+  { name: "Calendar", href: "/dashboard/calendar", icon: CalendarDays },
   { name: "Events", href: "/dashboard/events", icon: Calendar },
   { name: "Emails", href: "/dashboard/emails", icon: Mail },
   { name: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
@@ -38,6 +40,7 @@ export function Sidebar({ user }: SidebarProps) {
   const router = useRouter()
   const { isMobile } = useMobile()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [googleCalendarConnected, setGoogleCalendarConnected] = useState(false)
 
   const handleSignOut = async () => {
     const supabase = createClient()
@@ -51,6 +54,31 @@ export function Sidebar({ user }: SidebarProps) {
   useEffect(() => {
     setMobileMenuOpen(false)
   }, [pathname])
+
+  // Check if Google Calendar is connected
+  useEffect(() => {
+    const checkGoogleCalendar = async () => {
+      try {
+        const supabase = createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) return
+
+        const { data: connection } = await supabase
+          .from('google_calendar_connections')
+          .select('sync_enabled')
+          .eq('user_id', user.id)
+          .eq('sync_enabled', true)
+          .single()
+
+        setGoogleCalendarConnected(!!connection)
+      } catch (error) {
+        // Connection doesn't exist, which is fine
+        setGoogleCalendarConnected(false)
+      }
+    }
+
+    checkGoogleCalendar()
+  }, [])
 
   const SidebarContent = ({ onItemClick }: { onItemClick?: () => void }) => (
     <>
@@ -75,21 +103,43 @@ export function Sidebar({ user }: SidebarProps) {
 
       <nav className="flex-1 space-y-1 p-4">
         {navigation.map((item) => {
-          const isActive = pathname === item.href
+          const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname?.startsWith(item.href))
+          const showGoogleCalendarBadge = (item.name === "Calendar" || item.name === "Events") && googleCalendarConnected
+          
           return (
             <Link
               key={item.name}
               href={item.href}
               onClick={onItemClick}
               className={cn(
-                "flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all duration-200",
+                "flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all duration-200 relative",
                 isActive
                   ? "bg-white text-slate-900 shadow-md"
                   : "text-slate-400 hover:text-white hover:bg-slate-800/50",
               )}
             >
               <item.icon className="h-5 w-5" />
-              {item.name}
+              <span className="flex-1">{item.name}</span>
+              {showGoogleCalendarBadge && (
+                <div className="flex items-center gap-1.5">
+                  <Badge 
+                    variant="secondary" 
+                    className="text-[10px] px-1.5 py-0 h-4 bg-green-500/20 text-green-400 border-green-500/30"
+                    title="Google Calendar connected"
+                  >
+                    <CheckCircle2 className="h-2.5 w-2.5 mr-0.5" />
+                    Synced
+                  </Badge>
+                </div>
+              )}
+              {item.name === "Events" && !googleCalendarConnected && (
+                <Badge 
+                  variant="outline" 
+                  className="text-[10px] px-1.5 py-0 h-4 bg-blue-500/10 text-blue-400 border-blue-500/30"
+                >
+                  NEW
+                </Badge>
+              )}
             </Link>
           )
         })}

@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -33,7 +33,34 @@ export function AddEventForm({ userId, contacts }: AddEventFormProps) {
     location: "",
     contactId: "",
     notificationEnabled: true,
+    syncWithGoogle: false,
   })
+  const [googleCalendarConnected, setGoogleCalendarConnected] = useState(false)
+  const [checkingConnection, setCheckingConnection] = useState(true)
+
+  // Check if Google Calendar is connected
+  useEffect(() => {
+    const checkConnection = async () => {
+      try {
+        const supabase = createClient()
+        const { data } = await supabase
+          .from('google_calendar_connections')
+          .select('sync_enabled')
+          .eq('user_id', userId)
+          .single()
+
+        if (data?.sync_enabled) {
+          setGoogleCalendarConnected(true)
+          setFormData(prev => ({ ...prev, syncWithGoogle: true }))
+        }
+      } catch (error) {
+        console.error('Error checking Google Calendar connection:', error)
+      } finally {
+        setCheckingConnection(false)
+      }
+    }
+    checkConnection()
+  }, [userId])
 
   const handleFetchPreview = async () => {
     if (!formData.eventUrl) return
@@ -104,6 +131,48 @@ export function AddEventForm({ userId, contacts }: AddEventFormProps) {
       if (error) throw error
 
       console.log("[v0] Event created:", data)
+      
+      // Sync with Google Calendar if enabled
+      if (formData.syncWithGoogle && googleCalendarConnected) {
+        try {
+          const syncResponse = await fetch('/api/google-calendar/sync', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              action: 'create',
+              eventId: data.id,
+              event: {
+                title: formData.title,
+                description: formData.description,
+                start_time: formData.startTime,
+                end_time: formData.endTime || null,
+                location: formData.location || null,
+              },
+            }),
+          })
+
+          if (!syncResponse.ok) {
+            console.error('Failed to sync with Google Calendar')
+          } else {
+            const syncResult = await syncResponse.json()
+            // Update local event with Google Calendar event ID
+            if (syncResult.googleEventId) {
+              await supabase
+                .from('calendar_events')
+                .update({
+                  google_calendar_event_id: syncResult.googleEventId,
+                  google_calendar_synced: true,
+                })
+                .eq('id', data.id)
+            }
+          }
+        } catch (syncError) {
+          console.error('Error syncing with Google Calendar:', syncError)
+          // Don't fail the entire operation if sync fails
+        }
+      }
       
       // Ask if user wants to prepare an email campaign for this event
       if (formData.eventUrl) {
@@ -321,6 +390,20 @@ export function AddEventForm({ userId, contacts }: AddEventFormProps) {
               onCheckedChange={(checked) => setFormData({ ...formData, notificationEnabled: checked })}
             />
           </div>
+
+          {googleCalendarConnected && (
+            <div className="flex items-center justify-between p-4 bg-slate-800/50 rounded-lg border border-slate-700/50">
+              <div className="space-y-0.5">
+                <Label htmlFor="syncGoogle" className="text-slate-300">Sync with Google Calendar</Label>
+                <p className="text-sm text-slate-500">Automatically add to your Google Calendar</p>
+              </div>
+              <Switch
+                id="syncGoogle"
+                checked={formData.syncWithGoogle}
+                onCheckedChange={(checked) => setFormData({ ...formData, syncWithGoogle: checked })}
+              />
+            </div>
+          )}
 
           <div className="flex gap-4">
             <Button 

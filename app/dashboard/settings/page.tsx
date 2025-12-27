@@ -21,6 +21,7 @@ import {
   Zap,
   Sparkles
 } from "lucide-react"
+import { GoogleCalendarSettings } from "@/components/google-calendar-settings"
 
 interface EmailSettings {
   id?: string
@@ -50,21 +51,47 @@ export default function SettingsPage() {
   const [hasExistingSettings, setHasExistingSettings] = useState(false)
 
   useEffect(() => {
+    // Safety timeout to ensure loading state is cleared after 3 seconds max
+    const safetyTimeout = setTimeout(() => {
+      setIsLoading(false)
+    }, 3000)
+
     loadSettings()
+
+    return () => {
+      clearTimeout(safetyTimeout)
+    }
   }, [])
 
   const loadSettings = async () => {
     try {
-      const response = await fetch("/api/email-settings")
+      // Add timeout to fetch request
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 3000) // 3 second timeout
+      
+      const response = await fetch("/api/email-settings", {
+        signal: controller.signal,
+      })
+      
+      clearTimeout(timeoutId)
+      
       if (response.ok) {
         const data = await response.json()
         if (data.settings) {
           setSettings(data.settings)
           setHasExistingSettings(true)
         }
+      } else {
+        // If API returns error, still continue (settings might not exist yet)
+        console.log("Email settings not found, continuing...")
       }
-    } catch (error) {
-      console.error("Error loading settings:", error)
+    } catch (error: any) {
+      if (error.name === 'AbortError') {
+        console.warn("Settings API request timed out")
+      } else {
+        console.error("Error loading settings:", error)
+      }
+      // Don't block the page from loading if API call fails
     } finally {
       setIsLoading(false)
     }
@@ -553,6 +580,9 @@ export default function SettingsPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Google Calendar Integration Card */}
+      <GoogleCalendarSettings />
       </div>
     </div>
   )

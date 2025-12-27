@@ -4,6 +4,7 @@ import { QuickStats } from "@/components/quick-stats"
 import { UpcomingEvents } from "@/components/upcoming-events"
 import { AIEmailAgent } from "@/components/ai-email-agent"
 import { RealtimeNotifications } from "@/components/realtime-notifications"
+import { MeetingReminders } from "@/components/meeting-reminders"
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -16,6 +17,7 @@ export default async function DashboardPage() {
   return (
     <>
       <RealtimeNotifications userId={user.id} />
+      <MeetingReminders userId={user.id} />
       <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto relative">
         {/* Header with Glassmorphism */}
         <div className="mb-8 sm:mb-12 animate-fade-in-up">

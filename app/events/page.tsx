@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Calendar, Plus, ExternalLink, Bell } from "lucide-react"
 import Link from "next/link"
 import { format } from "date-fns"
+import { MeetingReminders } from "@/components/meeting-reminders"
 
 export default async function EventsPage() {
   const supabase = await createClient()
@@ -20,7 +21,9 @@ export default async function EventsPage() {
     .order("start_time", { ascending: true })
 
   return (
-    <div className="p-8 max-w-7xl mx-auto">
+    <>
+      <MeetingReminders userId={user.id} />
+      <div className="p-8 max-w-7xl mx-auto">
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-3xl font-bold text-balance">Events</h1>
@@ -97,6 +100,7 @@ export default async function EventsPage() {
           </CardContent>
         </Card>
       )}
-    </div>
+      </div>
+    </>
   )
 }
