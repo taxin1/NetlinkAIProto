@@ -6,7 +6,7 @@ import { useState, useEffect } from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { LayoutDashboard, Users, Mail, BarChart3, LogOut, Network, Bot, Settings, Calendar, Menu, X, Share2, Mic, Phone, CheckCircle2, CalendarDays } from "lucide-react"
+import { LayoutDashboard, Users, Mail, BarChart3, LogOut, Network, Bot, Settings, Calendar, Menu, X, Share2, Mic, Phone, CheckCircle2, CalendarDays, Briefcase } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { useMobile } from "@/lib/hooks/use-mobile"
@@ -25,6 +25,7 @@ interface SidebarProps {
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Network Profile", href: "/dashboard/profile", icon: Share2 },
+  { name: "Portfolio", href: "/dashboard/portfolio", icon: Briefcase },
   { name: "Contacts", href: "/dashboard/contacts", icon: Users },
   { name: "Calendar", href: "/dashboard/calendar", icon: CalendarDays },
   { name: "Events", href: "/dashboard/events", icon: Calendar },
