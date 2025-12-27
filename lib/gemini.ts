@@ -1,17 +1,38 @@
-// Gemini API Configuration (using Gemini 2.5 Flash)
-// Using Gemini 2.5 Flash for all AI tasks
 export const GEMINI_MODEL = "gemini-2.5-flash"
 export const GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta"
 
-// OpenRouter API Configuration
 export const OPENROUTER_API_BASE = "https://openrouter.ai/api/v1"
-export const OPENROUTER_TEXT_MODEL = "qwen/qwen3-14b:free"
 
-// Rate limiting - track last request time
+const DEFAULT_OPENROUTER_MODEL = "qwen/qwen3-14b:free"
+
+export const OPENROUTER_MODEL = DEFAULT_OPENROUTER_MODEL
+export const OPENROUTER_TEXT_MODEL = DEFAULT_OPENROUTER_MODEL
+
+const CHAT_OPENROUTER_MODELS = [
+  "google/gemma-3-12b-it:free",
+  "openai/gpt-oss-120b:free",
+  "google/gemma-3n-e4b-it:free"
+]
+
+const CORE_BYTEZ_API_BASE = "https://api.bytez.com/models/v2"
+
+export const CHAT_BYTEZ_MODELS = [
+  "ek-ai/DeepSeek-R1-Distill-Qwen-1.5B",
+  "Qwen/Qwen3-0.6B",
+  "microsoft/Phi-3-mini-4k-instruct"
+]
+
+const CORE_OPENROUTER_MODELS = [
+  OPENROUTER_TEXT_MODEL,
+  ...CHAT_OPENROUTER_MODELS,
+]
+
+const CORE_BYTEZ_MODELS = CHAT_BYTEZ_MODELS
+
 let lastRequestTime = 0
-const MIN_REQUEST_INTERVAL = 1000 // 1 second between requests
+const MIN_REQUEST_INTERVAL = 1000
 
-async function throttle(): Promise<void> {
+export async function throttle(): Promise<void> {
   const now = Date.now()
   const timeSinceLastRequest = now - lastRequestTime
   if (timeSinceLastRequest < MIN_REQUEST_INTERVAL) {
@@ -20,8 +41,7 @@ async function throttle(): Promise<void> {
   lastRequestTime = Date.now()
 }
 
-// Retry utility for handling transient errors (503, 429, etc.)
-async function retryWithBackoff<T>(
+export async function retryWithBackoff<T>(
   fn: () => Promise<T>,
   maxRetries: number = 3,
   baseDelay: number = 2000
@@ -34,7 +54,6 @@ async function retryWithBackoff<T>(
     } catch (error: any) {
       lastError = error instanceof Error ? error : new Error(String(error))
       
-      // Check if error is retryable (503, 429, or network errors)
       const isRetryable = 
         (error instanceof Error && 
          (error.message.includes("503") || 
@@ -45,12 +64,10 @@ async function retryWithBackoff<T>(
           error.message.includes("ECONNRESET"))) ||
         (error?.response?.status === 503 || error?.response?.status === 429)
       
-      // Don't retry if it's not a retryable error or if we've exhausted retries
       if (!isRetryable || attempt === maxRetries - 1) {
         throw lastError
       }
       
-      // Calculate exponential backoff delay (with jitter)
       const delay = baseDelay * Math.pow(2, attempt) + Math.random() * 1000
       console.log(`API call failed (attempt ${attempt + 1}/${maxRetries}), retrying in ${Math.round(delay)}ms...`)
       await new Promise(resolve => setTimeout(resolve, delay))
@@ -60,7 +77,7 @@ async function retryWithBackoff<T>(
   throw lastError || new Error("Failed after retries")
 }
 
-function getApiKey(): string {
+export function getApiKey(): string {
   const apiKey = process.env.GEMINI_API_KEY
   if (!apiKey) {
     throw new Error("GEMINI_API_KEY environment variable is not set. Please add it to your .env.local file.")
@@ -68,11 +85,18 @@ function getApiKey(): string {
   return apiKey
 }
 
-async function callGemini(prompt: string, systemInstruction?: string): Promise<string> {
-  await throttle() // Rate limit requests
+function getBytezApiKey(): string {
+  const apiKey = process.env.BYTEZ_API_KEY
+  if (!apiKey) {
+    throw new Error("BYTEZ_API_KEY environment variable is not set. Please add it to your .env.local file.")
+  }
+  return apiKey
+}
+
+export async function callGemini(prompt: string, systemInstruction?: string): Promise<string> {
+  await throttle()
   const apiKey = getApiKey()
   
-  // Always add no-asterisks rule to system instruction
   const noAsterisksRule = "CRITICAL: Never use asterisks (*) in your responses. Use plain dashes (-) for bullet points. No markdown formatting."
   
   const systemContent = systemInstruction 
@@ -175,8 +199,7 @@ export async function generateEmailWithGemini(
 
   const senderName = userProfile?.name || userProfile?.displayName || "I"
   const senderEmail = userProfile?.email || ""
-
-  // Build context about previous interactions
+  
   let previousEmailContext = ""
   if (previousEmails && previousEmails.length > 0) {
     previousEmailContext = `\n\nPREVIOUS EMAILS SENT TO THIS CONTACT:\n${previousEmails.map((email, idx) => 
@@ -259,109 +282,185 @@ EXAMPLES OF GOOD OPENINGS (NOT templates, but personalized):
 
 Write the email body now. Make it specific, authentic, and personalized - NOT a template.`
 
-  return retryWithBackoff(async () => {
-    return await callGemini(prompt)
-  }, 3, 1000)
-}
-
-export async function extractBusinessCardInfo(imageBase64: string): Promise<{
-  name?: string
-  email?: string
-  phone?: string
-  company?: string
-  position?: string
-  linkedin_url?: string
-}> {
-  const apiKey = getApiKey()
-
-  // Validate image data
-  if (!imageBase64 || imageBase64.length === 0) {
-    throw new Error("No image data provided for business card scanning")
+  try {
+    return await retryWithBackoff(async () => {
+      return await callGemini(prompt)
+    }, 3, 1000)
+  } catch (error) {
+    console.error("Gemini email generation failed, trying OpenRouter fallback", error)
   }
-
-  const prompt = `Extract contact information from this business card image. Return ONLY a JSON object with these fields (use null for missing fields):
-{
-  "name": "full name",
-  "email": "email address",
-  "phone": "phone number",
-  "company": "company name",
-  "position": "job title/position",
-  "linkedin_url": "LinkedIn URL if present"
-}
-
-Be precise and only extract information that is clearly visible. Do not make up information.`
 
   try {
-    const response = await fetch(
-      `${GEMINI_API_BASE}/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              role: "user",
-              parts: [
-                { text: prompt },
-                {
-                  inlineData: {
-                    mimeType: "image/jpeg",
-                    data: imageBase64
-                  }
-                }
-              ]
-            }
-          ],
-          generationConfig: {
-            temperature: 0.3,
-            maxOutputTokens: 1024,
-          },
-        }),
-      }
-    )
-
-    if (!response.ok) {
-      const errorText = await response.text()
-      throw new Error(`Gemini API request failed (${response.status}): ${errorText}`)
-    }
-
-    const data = await response.json()
-
-    if (data.error) {
-      throw new Error(`Gemini API error: ${data.error.message || 'Unknown error'}`)
-    }
-
-    if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
-      const text = data.candidates[0].content.parts[0].text
-      console.log("Gemini response text:", text)
-      
-      const jsonMatch = text.match(/\{[\s\S]*\}/)
-      if (jsonMatch) {
-        try {
-          return JSON.parse(jsonMatch[0])
-        } catch (parseError) {
-          console.error("JSON parsing error:", parseError)
-          throw new Error("Failed to parse business card information from AI response")
-        }
-      } else {
-        throw new Error("No valid JSON found in AI response")
-      }
-    }
-
-    throw new Error("No valid response from Gemini API")
+    return await retryWithBackoff(async () => {
+      return await callOpenRouterChat(
+        prompt,
+        "You are an expert email writer. Follow all instructions in the user message exactly."
+      )
+    }, 3, 1000)
   } catch (error) {
-    console.error("Gemini API error:", error)
-    
-    if (error instanceof Error) {
-      throw error
-    }
-    
-    throw new Error(`Failed to extract business card information: ${error}`)
+    console.error("OpenRouter primary email model failed", error)
   }
+
+  for (const model of CORE_OPENROUTER_MODELS) {
+    try {
+      return await retryWithBackoff(async () => {
+        return await callOpenRouterChatModel(
+          model,
+          prompt,
+          "You are an expert email writer. Follow all instructions in the user message exactly."
+        )
+      }, 2, 1000)
+    } catch (modelError) {
+      console.error("OpenRouter email fallback model failed", model, modelError)
+    }
+  }
+
+  for (const modelId of CORE_BYTEZ_MODELS) {
+    try {
+      return await retryWithBackoff(async () => {
+        return await callBytezChatModel(
+          modelId,
+          prompt,
+          "You are an expert email writer. Follow all instructions in the user message exactly."
+        )
+      }, 2, 1000)
+    } catch (modelError) {
+      console.error("Bytez email fallback model failed", modelId, modelError)
+    }
+  }
+
+  throw new Error("All AI providers failed for email generation")
 }
 
+function getOpenRouterApiKey(): string {
+  const apiKey = process.env.OPENROUTER_API_KEY
+  if (!apiKey) {
+    throw new Error("OPENROUTER_API_KEY environment variable is not set. Please add it to your .env.local file.")
+  }
+  return apiKey
+}
+
+export async function callOpenRouterChat(
+  message: string,
+  systemPrompt: string
+): Promise<string> {
+  return callOpenRouterChatModel(OPENROUTER_TEXT_MODEL, message, systemPrompt)
+}
+
+async function callOpenRouterChatModel(
+  model: string,
+  message: string,
+  systemPrompt: string
+): Promise<string> {
+  await throttle()
+  const apiKey = getOpenRouterApiKey()
+
+  const messages = [
+    {
+      role: "system",
+      content: systemPrompt
+    },
+    {
+      role: "user",
+      content: message
+    }
+  ]
+
+  const response = await fetch(
+    `${OPENROUTER_API_BASE}/chat/completions`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${apiKey}`,
+        "HTTP-Referer": process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+        "X-Title": "Netlink Cogni"
+      },
+      body: JSON.stringify({
+        model,
+        messages,
+        temperature: 0.7,
+        max_tokens: 2048
+      })
+    }
+  )
+
+  if (!response.ok) {
+    const errorText = await response.text()
+    throw new Error(`OpenRouter chat API error for ${model}: ${response.status} - ${errorText}`)
+  }
+
+  const data = await response.json()
+  const content = data.choices && data.choices[0]?.message?.content
+
+  if (!content) {
+    throw new Error(`No response content from OpenRouter chat model ${model}`)
+  }
+
+  return typeof content === "string"
+    ? content
+    : Array.isArray(content)
+      ? content.map((part: any) => part.text || "").join("\n")
+      : String(content)
+}
+
+async function callBytezChatModel(
+  modelId: string,
+  message: string,
+  systemPrompt: string
+): Promise<string> {
+  await throttle()
+  const apiKey = getBytezApiKey()
+
+  const response = await fetch(
+    `${CORE_BYTEZ_API_BASE}/${encodeURIComponent(modelId)}`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": apiKey
+      },
+      body: JSON.stringify({
+        messages: [
+          {
+            role: "user",
+            content: [
+              {
+                type: "text",
+                text: `${systemPrompt}\n\nUser: ${message}`
+              }
+            ]
+          }
+        ],
+        stream: false,
+        params: {
+          max_length: 2048,
+          temperature: 0.7
+        }
+      })
+    }
+  )
+
+  if (!response.ok) {
+    const errorText = await response.text()
+    throw new Error(`Bytez chat API error for ${modelId}: ${response.status} - ${errorText}`)
+  }
+
+  const data = await response.json()
+  const output = data.output
+
+  if (!output) {
+    throw new Error(`No output field in Bytez response for model ${modelId}`)
+  }
+
+  const content = typeof output.content === "string" ? output.content : output.content?.toString?.() ?? JSON.stringify(output)
+
+  if (!content) {
+    throw new Error(`No content in Bytez output for model ${modelId}`)
+  }
+
+  return content
+}
 
 export async function generateText(prompt: string): Promise<string> {
   const formattingRules = `
@@ -383,70 +482,56 @@ WRONG Example (DO NOT DO THIS):
 * Point one
 * Point two`
 
+  const fullPrompt = prompt + formattingRules
+
   try {
-    return await callGemini(prompt + formattingRules)
+    return await retryWithBackoff(async () => {
+      return await callGemini(fullPrompt)
+    }, 3, 1000)
   } catch (error) {
-    console.error("Gemini API error:", error)
-    throw error
+    console.error("Gemini text generation failed, trying OpenRouter fallback", error)
   }
-}
 
-export async function generateChatResponse(message: string): Promise<string> {
-  const systemPrompt = `You are a helpful AI assistant for Netlink Cogni, a comprehensive AI-powered business networking platform. You help users with business networking, contact management, and professional communication.
+  try {
+    return await retryWithBackoff(async () => {
+      return await callOpenRouterChat(
+        fullPrompt,
+        "You are a helpful text generator. Follow all formatting rules in the user message."
+      )
+    }, 3, 1000)
+  } catch (error) {
+    console.error("OpenRouter primary text model failed", error)
+  }
 
-ABOUT NETLINK COGNI PLATFORM:
-Netlink Cogni is an AI-powered business networking and contact management platform that helps professionals build, manage, and grow their professional networks. The platform includes:
+  for (const model of CORE_OPENROUTER_MODELS) {
+    try {
+      return await retryWithBackoff(async () => {
+        return await callOpenRouterChatModel(
+          model,
+          fullPrompt,
+          "You are a helpful text generator. Follow all formatting rules in the user message."
+        )
+      }, 2, 1000)
+    } catch (modelError) {
+      console.error("OpenRouter text fallback model failed", model, modelError)
+    }
+  }
 
-CORE FEATURES:
-- Business Card Scanner: AI-powered OCR to extract contact information from business card photos
-- Contact Management: Comprehensive contact database with company, position, phone, email, LinkedIn, and notes
-- Email Generation: AI-powered email composition for cold emails, introductions, follow-ups, and thank you messages
-- Email Campaigns: Bulk email sending with personalized AI-generated content for each recipient
-- Event Management: Create, manage, and track calendar events and networking opportunities
-- Event URL Scraping: Automatic extraction of event details from URLs (Zoom, Google Meet, Teams, Eventbrite, etc.)
-- Voice Commands: Hands-free voice assistant for sending emails, adding contacts, viewing events, and getting statistics
-- AI Assistant: Conversational AI that provides networking advice, email writing help, and contact analysis
-- Analytics Dashboard: Track networking activity, email performance, and relationship insights
-- Real-time Notifications: Get notified about new contacts, events, and email activity
+  for (const modelId of CORE_BYTEZ_MODELS) {
+    try {
+      return await retryWithBackoff(async () => {
+        return await callBytezChatModel(
+          modelId,
+          fullPrompt,
+          "You are a helpful text generator. Follow all formatting rules in the user message."
+        )
+      }, 2, 1000)
+    } catch (modelError) {
+      console.error("Bytez text fallback model failed", modelId, modelError)
+    }
+  }
 
-TECHNICAL CAPABILITIES:
-- Uses Google Gemini 2.5 Flash for intelligent processing
-- Supabase backend for data storage and authentication
-- Real-time database updates using Supabase subscriptions
-- SMTP email sending (Gmail and custom servers)
-- Responsive web interface with modern UI/UX
-
-USER WORKFLOWS:
-1. Upload business card photo → AI extracts info → Contact saved automatically
-2. Select contact → Generate AI email → Review/edit → Send individually or in campaign
-3. Paste event URL → AI scrapes details → Event created with auto-filled information
-4. Voice command → AI parses intent → Action executed (with confirmation for sensitive operations)
-5. Chat with AI Assistant → Get networking advice, email help, contact analysis
-
-CRITICAL FORMATTING RULES - MUST FOLLOW STRICTLY:
-1. NEVER use asterisks (*) or double asterisks (**) in your response under any circumstances
-2. NEVER use asterisks for bold text, emphasis, bullet points, headings, or any other purpose
-3. For bullet points: ALWAYS use plain dash (-) only, NEVER asterisks
-4. Do not use asterisks in any formatting, anywhere, for any reason
-5. Keep responses concise, professional, and to the point
-6. Use clear, readable formatting with plain text only - no markdown, no asterisks, no special formatting characters
-
-CORRECT Example of formatting:
-Key Features:
-- Business Networking
-- Contact Management
-- Professional Communication
-
-WRONG Examples (NEVER DO THIS):
-**Key Features:**
-* Business Networking
-* Contact Management
-
-Be friendly, professional, and knowledgeable about the platform's capabilities. When users ask about features, explain how they work within Netlink Cogni.`
-
-  return retryWithBackoff(async () => {
-    return await callGemini(message, systemPrompt)
-  }, 3, 1000)
+  throw new Error("All AI providers failed for text generation")
 }
 
 export async function fetchUrlPreview(url: string): Promise<{
@@ -475,15 +560,62 @@ Keep descriptions concise and to the point.`
 
   try {
     const text = await callGemini(prompt)
+    const jsonMatch = text.match(/\{[\s\S]*\}/)
+    if (jsonMatch) {
+      return JSON.parse(jsonMatch[0])
+    }
+    return { title: url, description: "Event link" }
+  } catch (error) {
+    console.error("Gemini URL preview error, trying OpenRouter fallback:", error)
+  }
+
+  try {
+    const text = await callOpenRouterChat(
+      prompt,
+      "You generate URL previews and must respond with JSON only."
+    )
+    const jsonMatch = text.match(/\{[\s\S]*\}/)
+    if (jsonMatch) {
+      return JSON.parse(jsonMatch[0])
+    }
+    return { title: url, description: "Event link" }
+  } catch (error) {
+    console.error("OpenRouter primary URL preview model error:", error)
+  }
+
+  for (const model of CORE_OPENROUTER_MODELS) {
+    try {
+      const text = await callOpenRouterChatModel(
+        model,
+        prompt,
+        "You generate URL previews and must respond with JSON only."
+      )
       const jsonMatch = text.match(/\{[\s\S]*\}/)
       if (jsonMatch) {
         return JSON.parse(jsonMatch[0])
       }
-    return { title: url, description: "Event link" }
-  } catch (error) {
-    console.error("Gemini API error:", error)
-    return { title: url, description: "Event link" }
+    } catch (modelError) {
+      console.error("OpenRouter URL preview fallback model error:", model, modelError)
+    }
   }
+
+  for (const modelId of CORE_BYTEZ_MODELS) {
+    try {
+      const text = await callBytezChatModel(
+        modelId,
+        prompt,
+        "You generate URL previews and must respond with JSON only."
+      )
+      const jsonMatch = text.match(/\{[\s\S]*\}/)
+      if (jsonMatch) {
+        return JSON.parse(jsonMatch[0])
+      }
+    } catch (modelError) {
+      console.error("Bytez URL preview fallback model error:", modelId, modelError)
+    }
+  }
+
+  return { title: url, description: "Event link" }
 }
 
 export async function extractEventDataFromUrl(url: string): Promise<{
@@ -541,13 +673,59 @@ Example outputs:
 
   try {
     const text = await callGemini(prompt)
+    const jsonMatch = text.match(/\{[\s\S]*\}/)
+    if (jsonMatch) {
+      return JSON.parse(jsonMatch[0])
+    }
+    throw new Error("Failed to extract event data from Gemini response")
+  } catch (error) {
+    console.error("Gemini API error for event data, trying OpenRouter fallback:", error)
+  }
+
+  try {
+    const text = await callOpenRouterChat(
+      prompt,
+      "You extract structured event data from URLs and must respond with JSON only."
+    )
+    const jsonMatch = text.match(/\{[\s\S]*\}/)
+    if (jsonMatch) {
+      return JSON.parse(jsonMatch[0])
+    }
+  } catch (error) {
+    console.error("OpenRouter primary event data model error:", error)
+  }
+
+  for (const model of CORE_OPENROUTER_MODELS) {
+    try {
+      const text = await callOpenRouterChatModel(
+        model,
+        prompt,
+        "You extract structured event data from URLs and must respond with JSON only."
+      )
       const jsonMatch = text.match(/\{[\s\S]*\}/)
       if (jsonMatch) {
         return JSON.parse(jsonMatch[0])
       }
-    throw new Error("Failed to extract event data")
-  } catch (error) {
-    console.error("Gemini API error:", error)
-    throw error
+    } catch (modelError) {
+      console.error("OpenRouter event data fallback model error:", model, modelError)
+    }
   }
+
+  for (const modelId of CORE_BYTEZ_MODELS) {
+    try {
+      const text = await callBytezChatModel(
+        modelId,
+        prompt,
+        "You extract structured event data from URLs and must respond with JSON only."
+      )
+      const jsonMatch = text.match(/\{[\s\S]*\}/)
+      if (jsonMatch) {
+        return JSON.parse(jsonMatch[0])
+      }
+    } catch (modelError) {
+      console.error("Bytez event data fallback model error:", modelId, modelError)
+    }
+  }
+
+  throw new Error("All AI providers failed to extract event data from URL")
 }

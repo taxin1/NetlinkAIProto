@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { extractBusinessCardInfo } from "@/lib/gemini"
+import { extractBusinessCardInfo } from "@/lib/ai/business-card"
 
 export async function POST(request: NextRequest) {
   try {
