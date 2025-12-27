@@ -1,0 +1,93 @@
+import { NextRequest, NextResponse } from 'next/server'
+
+// Return optimized HTML loading page with instant redirect
+function getLoadingPage(code: string, error?: string) {
+  const redirectUrl = error 
+    ? `/dashboard/settings?error=${encodeURIComponent(error)}`
+    : `/api/gmail/process?code=${encodeURIComponent(code)}`
+  
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="refresh" content="0;url=${redirectUrl}">
+  <title>Connecting Gmail...</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      overflow: hidden;
+    }
+    .container {
+      text-align: center;
+      padding: 2rem;
+      animation: fadeIn 0.2s ease-in;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 3px solid rgba(255, 255, 255, 0.2);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 1.5rem;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    h1 { font-size: 1.25rem; margin-bottom: 0.5rem; font-weight: 600; }
+    p { opacity: 0.85; font-size: 0.875rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="spinner"></div>
+    <h1>Connecting Gmail...</h1>
+    <p>Setting up your integration</p>
+  </div>
+  <script>
+    (function() {
+      try {
+        window.location.replace('${redirectUrl}');
+      } catch(e) {
+        window.location.href = '${redirectUrl}';
+      }
+    })();
+  </script>
+</body>
+</html>`
+}
+
+export async function GET(request: NextRequest) {
+  const searchParams = request.nextUrl.searchParams
+  const code = searchParams.get('code')
+  const error = searchParams.get('error')
+
+  if (error) {
+    return new NextResponse(getLoadingPage('', error), {
+      headers: { 'Content-Type': 'text/html' },
+    })
+  }
+
+  if (!code) {
+    return new NextResponse(getLoadingPage('', 'no_code'), {
+      headers: { 'Content-Type': 'text/html' },
+    })
+  }
+
+  return new NextResponse(getLoadingPage(code), {
+    headers: { 'Content-Type': 'text/html' },
+  })
+}
+

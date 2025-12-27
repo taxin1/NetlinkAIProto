@@ -15,6 +15,7 @@ import { Chrome } from "lucide-react"
 export default function SignUpPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [consentAccepted, setConsentAccepted] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
@@ -23,6 +24,13 @@ export default function SignUpPage() {
     e.preventDefault()
     setIsLoading(true)
     setError(null)
+
+    // Validate consent
+    if (!consentAccepted) {
+      setError("You must agree to the Terms & Conditions and Privacy Policy to create an account")
+      setIsLoading(false)
+      return
+    }
 
     const { data, error } = await authService.signUp(email, password)
     
@@ -44,6 +52,13 @@ export default function SignUpPage() {
   const handleGoogleSignup = async () => {
     setIsLoading(true)
     setError(null)
+
+    // Validate consent
+    if (!consentAccepted) {
+      setError("You must agree to the Terms & Conditions and Privacy Policy to create an account")
+      setIsLoading(false)
+      return
+    }
 
     const { data, error } = await authService.signInWithOAuth('google')
     
@@ -88,8 +103,30 @@ export default function SignUpPage() {
                     className="bg-secondary border-border"
                   />
                 </div>
+                
+                <div className="flex items-start gap-2">
+                  <input
+                    type="checkbox"
+                    id="consent"
+                    checked={consentAccepted}
+                    onChange={(e) => setConsentAccepted(e.target.checked)}
+                    className="mt-1 h-4 w-4 rounded border-border bg-secondary text-primary focus:ring-2 focus:ring-primary focus:ring-offset-0 cursor-pointer"
+                    required
+                  />
+                  <Label htmlFor="consent" className="text-sm text-muted-foreground cursor-pointer leading-relaxed">
+                    I agree to the{" "}
+                    <Link href="/terms" target="_blank" className="text-primary underline underline-offset-4 hover:text-primary/80">
+                      Terms & Conditions
+                    </Link>
+                    {" "}and{" "}
+                    <Link href="/privacy" target="_blank" className="text-primary underline underline-offset-4 hover:text-primary/80">
+                      Privacy Policy
+                    </Link>
+                  </Label>
+                </div>
+                
                 {error && <p className="text-sm text-destructive">{error}</p>}
-                <Button type="submit" className="w-full" disabled={isLoading}>
+                <Button type="submit" className="w-full" disabled={isLoading || !consentAccepted}>
                   {isLoading ? "Creating account..." : "Sign up"}
                 </Button>
               </div>
@@ -108,7 +145,7 @@ export default function SignUpPage() {
                 variant="outline"
                 className="w-full"
                 onClick={handleGoogleSignup}
-                disabled={isLoading}
+                disabled={isLoading || !consentAccepted}
               >
                 <Chrome className="mr-2 h-4 w-4" />
                 {isLoading ? "Creating account..." : "Continue with Google"}

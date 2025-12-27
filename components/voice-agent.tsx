@@ -592,12 +592,38 @@ export function VoiceAgent({ userId }: VoiceAgentProps) {
         }
         case "create_event":
         case "schedule_meeting": {
+          const eventTitle = pendingAction.parameters.title
+          const eventDate = pendingAction.parameters.date || new Date().toISOString()
+          
+          // Check for duplicate events: same title and start_time within 1 minute
+          const startTime = new Date(eventDate)
+          const oneMinuteBefore = new Date(startTime.getTime() - 60000)
+          const oneMinuteAfter = new Date(startTime.getTime() + 60000)
+
+          const { data: existingEvents, error: checkError } = await supabase
+            .from("calendar_events")
+            .select("id, title, start_time")
+            .eq("user_id", userId)
+            .eq("title", eventTitle.trim())
+            .gte("start_time", oneMinuteBefore.toISOString())
+            .lte("start_time", oneMinuteAfter.toISOString())
+            .limit(1)
+
+          if (checkError) {
+            console.error("Error checking for duplicates:", checkError)
+          }
+
+          if (existingEvents && existingEvents.length > 0) {
+            successMsg = "Event already exists! 📅"
+            break
+          }
+
           const { error } = await supabase.from("calendar_events").insert({
             user_id: userId,
-            title: pendingAction.parameters.title,
-            event_date: pendingAction.parameters.date || new Date().toISOString(),
-            location: pendingAction.parameters.location,
-            description: pendingAction.parameters.description,
+            title: eventTitle,
+            start_time: eventDate,
+            location: pendingAction.parameters.location || null,
+            description: pendingAction.parameters.description || null,
           })
           if (error) throw error
           successMsg = "Event created! 📅"

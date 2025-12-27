@@ -648,9 +648,17 @@ export function LandingPage() {
             <Network className="h-6 w-6 text-primary" />
             <span className="text-xl font-bold">Netlink-Cogni</span>
           </div>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-gray-600 dark:text-gray-400 mb-4">
             © 2025 Netlink-Cogni. All rights reserved. Making networking effortless with AI.
           </p>
+          <div className="flex justify-center gap-6 text-sm">
+            <Link href="/privacy" className="text-gray-600 dark:text-gray-400 hover:text-cyan-400 dark:hover:text-cyan-400 transition-colors cursor-pointer underline-offset-4 hover:underline">
+              Privacy Policy
+            </Link>
+            <Link href="/terms" className="text-gray-600 dark:text-gray-400 hover:text-cyan-400 dark:hover:text-cyan-400 transition-colors cursor-pointer underline-offset-4 hover:underline">
+              Terms & Conditions
+            </Link>
+          </div>
         </div>
       </footer>
     </div>

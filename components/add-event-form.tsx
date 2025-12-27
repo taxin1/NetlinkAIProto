@@ -107,6 +107,30 @@ export function AddEventForm({ userId, contacts }: AddEventFormProps) {
     try {
       const supabase = createClient()
 
+      // Check for duplicate events: same title and start_time within 1 minute
+      const startTime = new Date(formData.startTime)
+      const oneMinuteBefore = new Date(startTime.getTime() - 60000)
+      const oneMinuteAfter = new Date(startTime.getTime() + 60000)
+
+      const { data: existingEvents, error: checkError } = await supabase
+        .from("calendar_events")
+        .select("id, title, start_time")
+        .eq("user_id", userId)
+        .eq("title", formData.title.trim())
+        .gte("start_time", oneMinuteBefore.toISOString())
+        .lte("start_time", oneMinuteAfter.toISOString())
+        .limit(1)
+
+      if (checkError) {
+        console.error("Error checking for duplicates:", checkError)
+      }
+
+      if (existingEvents && existingEvents.length > 0) {
+        alert("An event with the same title and time already exists. Please check your events list.")
+        setIsLoading(false)
+        return
+      }
+
       const { data, error } = await supabase
         .from("calendar_events")
         .insert({
