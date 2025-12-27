@@ -13,6 +13,8 @@ interface Event {
   description: string | null
   event_url: string | null
   url_preview_image: string | null
+  url_preview_title: string | null
+  url_preview_description: string | null
   start_time: string
   end_time: string | null
   location: string | null
