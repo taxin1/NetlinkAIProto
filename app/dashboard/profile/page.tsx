@@ -26,7 +26,8 @@ import {
   ExternalLink,
   User,
   Sparkles,
-  Zap
+  Zap,
+  X
 } from "lucide-react"
 import { QRCodeSVG } from "qrcode.react"
 import { createClient } from "@/lib/supabase/client"
@@ -52,6 +53,7 @@ export default function NetworkProfilePage() {
   const [nfcWriting, setNfcWriting] = useState(false)
   const [nfcChecking, setNfcChecking] = useState(true)
   const [copiedLink, setCopiedLink] = useState<string | null>(null)
+  const [showQRFullscreen, setShowQRFullscreen] = useState(false)
   const [nfcDiagnostics, setNfcDiagnostics] = useState<{
     hasNDEFReader: boolean
     isSecureContext: boolean
@@ -315,15 +317,42 @@ export default function NetworkProfilePage() {
   }
 
   const getVCardData = () => {
-    return `BEGIN:VCARD
+    const name = profile.name || "Contact"
+    const nameParts = name.split(" ")
+    const firstName = nameParts[0] || ""
+    const lastName = nameParts.slice(1).join(" ") || ""
+    
+    let vcard = `BEGIN:VCARD
 VERSION:3.0
-FN:${profile.name || ""}
-TITLE:${profile.title || ""}
-ORG:${profile.company || ""}
-EMAIL:${profile.email || ""}
-TEL:${profile.phone || ""}
-URL:${profile.linkedin ? getLinkedInUrl() : profile.website || ""}
-END:VCARD`
+FN:${name}
+N:${lastName};${firstName};;;`
+    
+    if (profile.title) {
+      vcard += `\nTITLE:${profile.title}`
+    }
+    
+    if (profile.company) {
+      vcard += `\nORG:${profile.company}`
+    }
+    
+    if (profile.email) {
+      vcard += `\nEMAIL;TYPE=INTERNET:${profile.email}`
+    }
+    
+    if (profile.phone) {
+      vcard += `\nTEL;TYPE=CELL:${profile.phone.replace(/\s/g, "")}`
+    }
+    
+    if (profile.linkedin) {
+      vcard += `\nURL;TYPE=LINKEDIN:${getLinkedInUrl()}`
+    }
+    
+    if (profile.website) {
+      vcard += `\nURL;TYPE=WEBSITE:${profile.website.startsWith("http") ? profile.website : `https://${profile.website}`}`
+    }
+    
+    vcard += `\nEND:VCARD`
+    return vcard
   }
 
   const copyToClipboard = async (text: string, label: string) => {
@@ -489,6 +518,50 @@ END:VCARD`
       }
     } else {
       copyToClipboard(getLinkedInUrl(), "share")
+    }
+  }
+
+  const downloadVCard = () => {
+    const vcard = getVCardData()
+    const blob = new Blob([vcard], { type: "text/vcard" })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement("a")
+    link.href = url
+    link.download = `${profile.name || "contact"}.vcf`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+    setMessage({ type: "success", text: "vCard downloaded! Open it in Contacts app to add to your contacts." })
+  }
+
+  const shareViaIOS = async () => {
+    if (!navigator.share) {
+      setMessage({ type: "error", text: "Native sharing not available. Use QR code or copy link instead." })
+      return
+    }
+
+    try {
+      const shareText = profile.name 
+        ? `Connect with ${profile.name}${profile.title ? ` - ${profile.title}` : ""}${profile.company ? ` at ${profile.company}` : ""}`
+        : "Connect with me"
+      
+      const shareData: any = {
+        title: `${profile.name || "My"} Network Profile`,
+        text: shareText,
+      }
+
+      // Add URL if LinkedIn is available
+      if (profile.linkedin) {
+        shareData.url = getLinkedInUrl()
+      }
+
+      await navigator.share(shareData)
+      setMessage({ type: "success", text: "Profile shared successfully!" })
+    } catch (error: any) {
+      if (error.name !== "AbortError") {
+        setMessage({ type: "error", text: "Failed to share. Try copying the link instead." })
+      }
     }
   }
 
@@ -742,14 +815,21 @@ END:VCARD`
           {/* QR Code & Share Options */}
           <div className="space-y-6">
             {/* Simplified LinkedIn QR Code */}
-            <Card className="backdrop-blur-sm bg-white/70 dark:bg-gray-900/70 border-white/60 dark:border-gray-800/60 shadow-xl">
+            <Card className={`backdrop-blur-sm bg-white/70 dark:bg-gray-900/70 border-white/60 dark:border-gray-800/60 shadow-xl ${!nfcSupported && nfcDiagnostics?.isMobile && !nfcDiagnostics?.isAndroid ? "ring-2 ring-blue-500/50" : ""}`}>
               <CardHeader className="border-b border-gray-200/50 dark:border-gray-800/50 bg-gradient-to-r from-[#0077B5]/5 to-blue-500/5">
                 <div className="flex items-center gap-3">
                   <div className="p-2.5 bg-[#0077B5] rounded-lg shadow-md">
                     <Linkedin className="h-6 w-6 text-white" />
                   </div>
-                  <div>
-                    <CardTitle className="text-2xl">LinkedIn QR Code</CardTitle>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <CardTitle className="text-2xl">LinkedIn QR Code</CardTitle>
+                      {!nfcSupported && nfcDiagnostics?.isMobile && !nfcDiagnostics?.isAndroid && (
+                        <Badge className="bg-blue-500/20 text-blue-700 dark:text-blue-300 border border-blue-500/30 text-xs">
+                          Recommended for iOS
+                        </Badge>
+                      )}
+                    </div>
                     <CardDescription>Scan to connect instantly</CardDescription>
                   </div>
                 </div>
@@ -757,6 +837,16 @@ END:VCARD`
               <CardContent className="p-6">
                 {profile.linkedin ? (
                   <div className="flex flex-col items-center space-y-6">
+                    {/* iOS Quick Share Button - Prominent */}
+                    {!nfcSupported && nfcDiagnostics?.isMobile && !nfcDiagnostics?.isAndroid && (
+                      <Button
+                        onClick={shareViaIOS}
+                        className="w-full h-14 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold shadow-lg text-lg"
+                      >
+                        <Share2 className="mr-3 h-6 w-6" /> Quick Share (AirDrop, Messages, etc.)
+                      </Button>
+                    )}
+
                     <div ref={qrRef} className="p-6 bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
                       <QRCodeSVG
                         value={getLinkedInUrl()}
@@ -772,6 +862,16 @@ END:VCARD`
                         }}
                       />
                     </div>
+
+                    {/* Show QR Fullscreen Button for iOS */}
+                    {!nfcSupported && nfcDiagnostics?.isMobile && !nfcDiagnostics?.isAndroid && (
+                      <Button
+                        onClick={() => setShowQRFullscreen(true)}
+                        className="w-full h-12 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white font-semibold shadow-lg"
+                      >
+                        <QrCode className="mr-2 h-5 w-5" /> Show QR Code Fullscreen
+                      </Button>
+                    )}
                     
                     <div className="flex flex-wrap gap-3 justify-center">
                       <Button
@@ -853,6 +953,8 @@ END:VCARD`
                       ? "Checking NFC support on your device..."
                       : nfcSupported 
                       ? "Write your LinkedIn profile to an NFC tag. Anyone can tap it with their phone to instantly connect with you!"
+                      : nfcDiagnostics?.isMobile && !nfcDiagnostics?.isAndroid
+                      ? "⚠️ Web NFC is not available on iOS devices. iOS doesn't support the Web NFC API. Please use an Android device with Chrome or Edge browser, or use the QR code feature above to share your profile."
                       : "NFC is not supported on this device/browser. Use Chrome or Edge on Android for NFC support. Make sure you're using HTTPS."}
                   </p>
                   
@@ -877,6 +979,31 @@ END:VCARD`
                       >
                         <Nfc className="mr-2 h-4 w-4" /> Write to NFC Tag/Sticker
                       </Button>
+                    </div>
+                  )}
+
+                  {/* iOS Alternative Options - Simplified */}
+                  {!nfcSupported && nfcDiagnostics?.isMobile && !nfcDiagnostics?.isAndroid && profile.linkedin && (
+                    <div className="p-4 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 rounded-xl border-2 border-blue-200 dark:border-blue-800">
+                      <div className="text-center mb-3">
+                        <h4 className="font-bold text-blue-900 dark:text-blue-100 mb-1 text-lg">
+                          📱 Easy iOS Sharing
+                        </h4>
+                        <p className="text-sm text-blue-700 dark:text-blue-300">
+                          Just like Android NFC, but for iOS!
+                        </p>
+                      </div>
+                      <div className="space-y-2">
+                        <Button
+                          onClick={shareViaIOS}
+                          className="w-full h-12 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold shadow-lg text-base"
+                        >
+                          <Share2 className="mr-2 h-5 w-5" /> Tap to Share (AirDrop, Messages, etc.)
+                        </Button>
+                        <p className="text-xs text-center text-blue-600 dark:text-blue-400">
+                          Opens iOS share menu - choose AirDrop, Messages, or any app!
+                        </p>
+                      </div>
                     </div>
                   )}
 
@@ -963,7 +1090,13 @@ END:VCARD`
                           {!nfcSupported && (
                             <div className="text-xs text-muted-foreground mt-1">
                               {!nfcDiagnostics.isSecureContext && "⚠️ Requires HTTPS or localhost"}
-                              {nfcDiagnostics.isSecureContext && !nfcDiagnostics.hasNDEFReader && !nfcDiagnostics.isAndroid && "⚠️ Requires Android device"}
+                              {nfcDiagnostics.isSecureContext && !nfcDiagnostics.hasNDEFReader && !nfcDiagnostics.isAndroid && nfcDiagnostics.isMobile && (
+                                <div className="space-y-1">
+                                  <div>⚠️ iOS doesn't support Web NFC API</div>
+                                  <div className="text-green-600 dark:text-green-400">💡 Use QR Code feature above instead!</div>
+                                </div>
+                              )}
+                              {nfcDiagnostics.isSecureContext && !nfcDiagnostics.hasNDEFReader && !nfcDiagnostics.isAndroid && !nfcDiagnostics.isMobile && "⚠️ Requires Android device"}
                               {nfcDiagnostics.isSecureContext && !nfcDiagnostics.hasNDEFReader && nfcDiagnostics.isAndroid && !nfcDiagnostics.isChrome && !nfcDiagnostics.isEdge && "⚠️ Requires Chrome or Edge browser"}
                             </div>
                           )}
@@ -1035,6 +1168,52 @@ END:VCARD`
           </div>
         </div>
       </div>
+
+      {/* Fullscreen QR Code Modal for iOS */}
+      {showQRFullscreen && profile.linkedin && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm"
+          onClick={() => setShowQRFullscreen(false)}
+        >
+          <div className="relative p-8 bg-white dark:bg-gray-900 rounded-3xl shadow-2xl max-w-sm w-full mx-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute top-4 right-4"
+              onClick={() => setShowQRFullscreen(false)}
+            >
+              <X className="h-6 w-6" />
+            </Button>
+            <div className="flex flex-col items-center space-y-6">
+              <div className="p-8 bg-white dark:bg-gray-800 rounded-2xl shadow-lg border-4 border-blue-500">
+                <QRCodeSVG
+                  value={getLinkedInUrl()}
+                  size={300}
+                  level="H"
+                  includeMargin
+                  fgColor="#0077B5"
+                  imageSettings={{
+                    src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%230077B5'%3E%3Cpath d='M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z'/%3E%3C/svg%3E",
+                    height: 60,
+                    width: 60,
+                    excavate: true,
+                  }}
+                />
+              </div>
+              <div className="text-center">
+                <h3 className="text-xl font-bold mb-2">{profile.name || "My Profile"}</h3>
+                <p className="text-sm text-muted-foreground">Scan with any camera app</p>
+              </div>
+              <Button
+                onClick={() => setShowQRFullscreen(false)}
+                className="w-full h-12 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold"
+              >
+                Close
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
