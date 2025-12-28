@@ -26,4 +26,3 @@ ON public.calendar_events(user_id, title, start_time);
 -- Note: This constraint prevents exact duplicates. If users need multiple events 
 -- with the same title at the same time, they should add a slight variation 
 -- to the title or adjust the time slightly.
-

@@ -39,7 +39,7 @@ The system uses:
 
 ## Required Environment Variables
 
-```env
+\`\`\`env
 # ElevenLabs Configuration (Required for voice)
 ELEVENLABS_API_KEY=your_elevenlabs_api_key_here
 
@@ -50,7 +50,7 @@ TWILIO_PHONE_NUMBER=+1234567890
 
 # App URL (Required for webhooks)
 NEXT_PUBLIC_APP_URL=https://your-domain.com
-```
+\`\`\`
 
 ## How It Works
 
@@ -77,12 +77,12 @@ NEXT_PUBLIC_APP_URL=https://your-domain.com
 Generates audio from text using ElevenLabs TTS.
 
 **Request:**
-```json
+\`\`\`json
 {
   "text": "Hello, how are you?",
   "voiceId": "21m00Tcm4TlvDq8ikWAM" // Optional
 }
-```
+\`\`\`
 
 **Response:** Audio file (audio/mpeg)
 
@@ -92,12 +92,12 @@ Transcribes audio to text using ElevenLabs STT.
 **Request:** FormData with audio file
 
 **Response:**
-```json
+\`\`\`json
 {
   "text": "transcribed text",
   "language": "en"
 }
-```
+\`\`\`
 
 ### `/api/elevenlabs-tts-audio`
 Generates audio for phone calls (used by Twilio).
@@ -112,7 +112,7 @@ Generates audio for phone calls (used by Twilio).
 Main hook for ElevenLabs voice interactions.
 
 **Usage:**
-```typescript
+\`\`\`typescript
 const {
   speak,
   stop,
@@ -127,13 +127,13 @@ const {
   onTranscript: (text) => {},
   onError: (error) => {}
 })
-```
+\`\`\`
 
 ### `useVoiceAssistant`
 Wrapper hook for chatbot and general voice interactions.
 
 **Usage:**
-```typescript
+\`\`\`typescript
 const {
   isListening,
   isSpeaking,
@@ -145,7 +145,7 @@ const {
   onError: (error) => {},
   autoSpeak: true
 })
-```
+\`\`\`
 
 ## Testing
 
@@ -194,7 +194,7 @@ To change the voice, update the `voiceId` in:
 - `app/api/elevenlabs-tts-audio/route.ts`
 
 Available voices can be found in `lib/hooks/use-elevenlabs-voice.ts`:
-```typescript
+\`\`\`typescript
 export const ELEVENLABS_VOICES = {
   rachel: "21m00Tcm4TlvDq8ikWAM",
   adam: "pNInz6obpgDQGcFmaJgB",
@@ -204,7 +204,7 @@ export const ELEVENLABS_VOICES = {
   josh: "TxGEqnHWrfWFTfGW9XjX",
   sam: "yoZ06aMxZJJ28mfd3POQ",
 }
-```
+\`\`\`
 
 ## Summary
 
@@ -214,4 +214,3 @@ export const ELEVENLABS_VOICES = {
 ✅ Fallback mechanisms in place for reliability
 
 The system is now fully integrated with ElevenLabs for all voice functionality!
-

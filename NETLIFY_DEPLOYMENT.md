@@ -17,24 +17,24 @@ This error typically occurs when:
 4. Add the following variables:
 
 #### Required Variables:
-```
+\`\`\`
 GEMINI_API_KEY=your_gemini_api_key_here
-```
+\`\`\`
 
 #### Optional Variables (if using Supabase):
-```
+\`\`\`
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
-```
+\`\`\`
 
 #### Optional Variables (if using email):
-```
+\`\`\`
 SMTP_HOST=your_smtp_host
 SMTP_PORT=587
 SMTP_USER=your_email@example.com
 SMTP_PASS=your_app_password
-```
+\`\`\`
 
 ### 2. Redeploy After Setting Variables
 
@@ -80,7 +80,7 @@ The project includes:
 ## Testing Locally
 
 To test with Netlify environment:
-```bash
+\`\`\`bash
 # Install Netlify CLI
 npm install -g netlify-cli
 
@@ -92,7 +92,7 @@ netlify link
 
 # Run dev server with Netlify functions
 netlify dev
-```
+\`\`\`
 
 ## Additional Notes
 
@@ -100,4 +100,3 @@ netlify dev
 - Environment variables are case-sensitive
 - Always redeploy after changing environment variables
 - Check function logs in Netlify dashboard for detailed error messages
-

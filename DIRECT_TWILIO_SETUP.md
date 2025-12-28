@@ -23,7 +23,7 @@ The system now supports making phone calls directly through Twilio, using:
 
 Add these to your `.env.local` file:
 
-```env
+\`\`\`env
 # Twilio Configuration (Required)
 TWILIO_ACCOUNT_SID=your_account_sid_here
 TWILIO_AUTH_TOKEN=your_auth_token_here
@@ -36,30 +36,30 @@ NEXT_PUBLIC_APP_URL=https://your-domain.com
 
 # AI Configuration (Required for AI responses)
 OPENROUTER_API_KEY=your_openrouter_api_key
-```
+\`\`\`
 
 ### 3. Configure Twilio Webhooks
 
 Twilio needs to be able to reach your webhook endpoints. For local development:
 
 1. Use **ngrok** or similar tunneling service:
-   ```bash
+   \`\`\`bash
    ngrok http 3000
-   ```
+   \`\`\`
 
 2. Update `NEXT_PUBLIC_APP_URL` to your ngrok URL:
-   ```env
+   \`\`\`env
    NEXT_PUBLIC_APP_URL=https://your-ngrok-url.ngrok.io
-   ```
+   \`\`\`
 
 3. For production, ensure your domain is accessible and `NEXT_PUBLIC_APP_URL` points to your production URL.
 
 ### 4. Test the Integration
 
 1. Start your development server:
-   ```bash
+   \`\`\`bash
    npm run dev
-   ```
+   \`\`\`
 
 2. Navigate to the Voice Call page in your dashboard
 3. Enter a phone number and click "Call Now"
@@ -95,17 +95,17 @@ Twilio needs to be able to reach your webhook endpoints. For local development:
 Initiates a phone call via Twilio.
 
 **Request:**
-```json
+\`\`\`json
 {
   "phoneNumber": "+1234567890",
   "userId": "user-id",
   "context": { /* call context */ },
   "customPrompt": "optional custom prompt"
 }
-```
+\`\`\`
 
 **Response:**
-```json
+\`\`\`json
 {
   "success": true,
   "callId": "CAxxxxx",
@@ -113,7 +113,7 @@ Initiates a phone call via Twilio.
   "phoneNumber": "+1234567890",
   "twilioCallSid": "CAxxxxx"
 }
-```
+\`\`\`
 
 ### GET `/api/twilio-telephony?callId=CAxxxxx`
 Gets the status of a call.
@@ -180,4 +180,3 @@ If you were previously using ElevenLabs:
 For more information, see:
 - [Twilio Voice API Documentation](https://www.twilio.com/docs/voice)
 - [Web Speech API Documentation](https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API)
-

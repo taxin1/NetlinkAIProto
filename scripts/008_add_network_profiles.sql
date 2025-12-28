@@ -57,4 +57,3 @@ create trigger update_network_profiles_updated_at
 
 -- Enable real-time for network profiles
 alter publication supabase_realtime add table public.network_profiles;
-

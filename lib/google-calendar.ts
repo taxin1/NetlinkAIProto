@@ -276,4 +276,3 @@ export async function getGoogleCalendarTokens(code: string) {
     throw new Error('Failed to exchange authorization code for tokens')
   }
 }
-

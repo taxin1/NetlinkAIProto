@@ -18,13 +18,13 @@ Completely redesigned the Email Settings page with professional gradients, smoot
 - Modern, professional aesthetic
 
 ### 3. **Gradient Accents Throughout**
-```css
+\`\`\`css
 - Header: Blue to purple gradient on text and background
 - Save Button: Blue to purple gradient with hover effects
 - Test Button: Green gradient border
 - Status Badges: Dynamic gradient based on state
 - Input Fields: Colored gradient glow on hover/focus
-```
+\`\`\`
 
 ### 4. **Smooth Animations**
 
@@ -75,7 +75,7 @@ Each input field has its own color theme:
 - Animated states
 
 ### 7. **Professional Button Design**
-```typescript
+\`\`\`typescript
 Save Button:
 - Gradient background (blue to purple)
 - Shadow elevation on hover
@@ -93,7 +93,7 @@ Delete Button:
 - Destructive variant maintained
 - Icon scale animation
 - Rounded corners
-```
+\`\`\`
 
 ### 8. **SMTP Configuration Section**
 When Custom SMTP is selected:
@@ -122,7 +122,7 @@ Enhanced status display:
 ## 🎨 CSS Animations Added
 
 ### Keyframe Animations:
-```css
+\`\`\`css
 @keyframes gradient-shift - Background gradient animation
 @keyframes gradient-x - Horizontal gradient flow
 @keyframes pulse-slow - Gentle opacity pulsing
@@ -130,10 +130,10 @@ Enhanced status display:
 @keyframes fade-in - Simple fade in
 @keyframes fade-in-up - Fade with upward motion
 @keyframes slide-down - Slide from top
-```
+\`\`\`
 
 ### Animation Classes:
-```css
+\`\`\`css
 .animate-gradient-shift
 .animate-gradient-x
 .animate-pulse-slow
@@ -143,7 +143,7 @@ Enhanced status display:
 .animate-slide-down
 .delay-200
 .delay-1000
-```
+\`\`\`
 
 ## 🎯 User Experience Enhancements
 
@@ -236,4 +236,3 @@ The settings page now feels:
 - **Trustworthy**: Clear states and feedback
 
 Perfect for a professional SaaS application! 🚀
-

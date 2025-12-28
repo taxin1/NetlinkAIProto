@@ -123,7 +123,7 @@ Once configured, the AI Email Agent will automatically use your email account wh
 
 The user email settings are stored in the `user_email_settings` table:
 
-```sql
+\`\`\`sql
 CREATE TABLE user_email_settings (
   id UUID PRIMARY KEY,
   user_id UUID REFERENCES auth.users(id),
@@ -138,7 +138,7 @@ CREATE TABLE user_email_settings (
   created_at TIMESTAMP,
   updated_at TIMESTAMP
 );
-```
+\`\`\`
 
 ## API Endpoints
 
@@ -149,7 +149,7 @@ Retrieve the current user's email settings (password excluded)
 Save or update email settings for the current user
 
 **Request Body**:
-```json
+\`\`\`json
 {
   "email_provider": "gmail",
   "email_address": "user@example.com",
@@ -159,7 +159,7 @@ Save or update email settings for the current user
   "smtp_port": 587,                 // For custom SMTP only
   "smtp_secure": false              // For custom SMTP only
 }
-```
+\`\`\`
 
 ### DELETE /api/email-settings
 Delete the current user's email settings
@@ -168,14 +168,14 @@ Delete the current user's email settings
 Send an email using the user's configured email (with fallback to system email)
 
 **Request Body**:
-```json
+\`\`\`json
 {
   "to": "recipient@example.com",
   "subject": "Email Subject",
   "body": "Email body content",
   "fromName": "Optional sender name"
 }
-```
+\`\`\`
 
 ### POST /api/test-email
 Send a test email to verify the configuration
@@ -197,4 +197,3 @@ If you encounter any issues or have questions:
 1. Check the troubleshooting section above
 2. Review the server logs for detailed error messages
 3. Contact support with your error details
-

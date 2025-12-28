@@ -24,14 +24,14 @@ The full system prompt is defined in:
 
 When making actual phone calls via ElevenLabs Telephony API:
 
-```typescript
+\`\`\`typescript
 // In app/api/elevenlabs-telephony/route.ts
 const { generateContextualSystemPrompt } = await import('@/lib/voice-agent/system-prompt')
 const systemPrompt = generateContextualSystemPrompt(context)
 
 // This is passed to ElevenLabs API as system_prompt
 callData.system_prompt = systemPrompt
-```
+\`\`\`
 
 **Important**: The system prompt is sent with each call. However, for best results, you should also configure it in your ElevenLabs agent dashboard:
 
@@ -47,11 +47,11 @@ The context-specific parts will be added dynamically when making calls.
 
 During active calls, when processing contact responses:
 
-```typescript
+\`\`\`typescript
 // In app/api/voice-call/route.ts (conversation action)
 const systemInstruction = generateContextualSystemPrompt(callContext)
 // Used as system instruction for OpenRouter API
-```
+\`\`\`
 
 ### 3. Configuration in ElevenLabs Dashboard
 
@@ -71,7 +71,7 @@ const systemInstruction = generateContextualSystemPrompt(callContext)
 To verify the system prompt works correctly:
 
 1. **Check Prompt Generation**:
-   ```typescript
+   \`\`\`typescript
    import { generateContextualSystemPrompt } from '@/lib/voice-agent/system-prompt'
    
    const prompt = generateContextualSystemPrompt({
@@ -81,7 +81,7 @@ To verify the system prompt works correctly:
    })
    
    console.log(prompt) // Should include full prompt + context
-   ```
+   \`\`\`
 
 2. **Make a Test Call**:
    - Use the voice networking call component
@@ -129,4 +129,3 @@ If you need to modify the system prompt:
 4. ✅ System prompt is used for real-time conversation processing
 
 The system is ready to use once you configure the agent in the ElevenLabs dashboard!
-

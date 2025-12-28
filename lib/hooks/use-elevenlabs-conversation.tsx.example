@@ -293,4 +293,3 @@ export function useElevenLabsConversation(options: UseElevenLabsConversationOpti
  * //    NEXT_PUBLIC_ELEVENLABS_AGENT_ID=your-agent-id-here
  * // 3. Use the hook - it will automatically connect to your agent when startSession() is called
  */
-

@@ -245,4 +245,3 @@ export async function syncAllUsersGoogleCalendarEvents(): Promise<{
     results,
   }
 }
-

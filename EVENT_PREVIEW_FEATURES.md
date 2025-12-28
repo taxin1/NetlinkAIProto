@@ -7,7 +7,7 @@
 When you paste an event URL, you now get a **beautiful live preview card** showing:
 
 #### Preview Card Features:
-```
+\`\`\`
 ┌─────────────────────────────────────────┐
 │  🎨 Gradient Banner (Cyan/Blue/Purple) │
 │     with platform badge                 │
@@ -20,7 +20,7 @@ When you paste an event URL, you now get a **beautiful live preview card** showi
 │                                         │
 │  🔗 Full URL                           │
 └─────────────────────────────────────────┘
-```
+\`\`\`
 
 ### Visual Elements:
 
@@ -47,7 +47,7 @@ When you paste an event URL, you now get a **beautiful live preview card** showi
 
 Saved events now display with:
 
-```
+\`\`\`
 ┌─────────────────────────────┐
 │  🎨 Gradient Banner         │
 │  (Platform badge)           │
@@ -61,7 +61,7 @@ Saved events now display with:
 │                             │
 │  [Open Link] [Delete]       │
 └─────────────────────────────┘
-```
+\`\`\`
 
 ## Color Scheme
 
@@ -98,9 +98,9 @@ Each URL shows its platform badge with:
 ## User Experience Flow
 
 ### 1. Paste URL
-```
+\`\`\`
 User pastes: https://eventbrite.com/e/tech-summit
-```
+\`\`\`
 
 ### 2. Preview Appears
 - Gradient banner loads immediately
@@ -187,4 +187,3 @@ Potential improvements:
 - Screen reader friendly
 
 The visual enhancements make event management more intuitive and beautiful!
-

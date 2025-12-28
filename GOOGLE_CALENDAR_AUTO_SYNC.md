@@ -35,10 +35,10 @@ Since this application is deployed on Netlify (which doesn't have built-in cron 
    - **Timeout**: 60 seconds
 
 3. Add `CRON_SECRET` or `GOOGLE_CALENDAR_CRON_SECRET` to your Netlify environment variables:
-   ```bash
+   \`\`\`bash
    # In Netlify dashboard: Site settings > Environment variables
    GOOGLE_CALENDAR_CRON_SECRET=your-secret-key-here
-   ```
+   \`\`\`
 
 4. Use the same secret in the cron job URL
 
@@ -60,7 +60,7 @@ If your code is in a GitHub repository, you can use GitHub Actions:
 
 1. Create `.github/workflows/google-calendar-sync.yml`:
 
-```yaml
+\`\`\`yaml
 name: Google Calendar Daily Sync
 
 on:
@@ -76,7 +76,7 @@ jobs:
       - name: Trigger Google Calendar Sync
         run: |
           curl -X GET "https://your-app.netlify.app/api/google-calendar/cron?secret=${{ secrets.CRON_SECRET }}"
-```
+\`\`\`
 
 2. Add `CRON_SECRET` to GitHub repository secrets (Settings > Secrets and variables > Actions)
 
@@ -86,7 +86,7 @@ If you migrate to Vercel, you can use built-in cron support:
 
 1. Create `vercel.json`:
 
-```json
+\`\`\`json
 {
   "crons": [
     {
@@ -95,7 +95,7 @@ If you migrate to Vercel, you can use built-in cron support:
     }
   ]
 }
-```
+\`\`\`
 
 2. Add the cron secret to Vercel environment variables
 
@@ -119,14 +119,14 @@ Users can also manually sync their Google Calendar events by:
 
 You can test the cron endpoint manually:
 
-```bash
+\`\`\`bash
 # Using curl
 curl -X GET "https://your-app.netlify.app/api/google-calendar/cron?secret=YOUR_SECRET"
 
 # Or using the Authorization header
 curl -X GET "https://your-app.netlify.app/api/google-calendar/cron" \
   -H "Authorization: Bearer YOUR_SECRET"
-```
+\`\`\`
 
 ## Monitoring
 
@@ -162,4 +162,3 @@ Check your cron service logs or set up monitoring to receive notifications on fa
 2. Verify Google Calendar OAuth tokens are still valid
 3. Check Supabase connection and permissions
 4. Review the application logs for detailed error messages
-

@@ -57,4 +57,3 @@ on storage.objects
 for select
 to public
 using (bucket_id = 'portfolios');
-

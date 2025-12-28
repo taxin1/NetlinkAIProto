@@ -815,4 +815,3 @@ END:VCARD`
     </div>
   )
 }
-

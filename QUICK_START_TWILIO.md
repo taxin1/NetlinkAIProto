@@ -18,10 +18,10 @@ You've added Twilio! Here's the quick setup:
 
 Make sure `.env.local` has:
 
-```env
+\`\`\`env
 ELEVENLABS_API_KEY=your_key
 ELEVENLABS_AGENT_ID=your_agent_id
-```
+\`\`\`
 
 ### Step 3: Test It!
 
@@ -40,4 +40,3 @@ Your system prompt is already configured - it's passed automatically on every ca
 - **Agent doesn't respond?** → Check agent ID is correct
 
 **Ready to test! 🎉**
-

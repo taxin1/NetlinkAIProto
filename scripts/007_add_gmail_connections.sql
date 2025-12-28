@@ -77,4 +77,3 @@ create index if not exists email_replies_email_id_idx on public.email_replies(em
 create index if not exists email_replies_contact_id_idx on public.email_replies(contact_id);
 create index if not exists email_replies_gmail_message_id_idx on public.email_replies(gmail_message_id);
 create index if not exists email_replies_received_at_idx on public.email_replies(received_at);
-

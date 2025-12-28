@@ -26,16 +26,16 @@ The "Not Found" error means the ElevenLabs API endpoint isn't responding. Here's
 2. Select your agent
 3. Copy the **Agent ID** (should be a long string)
 4. Verify it's in your `.env.local`:
-   ```env
+   \`\`\`env
    ELEVENLABS_AGENT_ID=your_actual_agent_id_here
-   ```
+   \`\`\`
 
 ### Step 3: Verify API Key
 
 1. Check your `.env.local` has:
-   ```env
+   \`\`\`env
    ELEVENLABS_API_KEY=your_api_key_here
-   ```
+   \`\`\`
 2. Make sure there are no extra spaces or quotes
 3. Restart your dev server after changing `.env.local`
 
@@ -95,9 +95,9 @@ Make sure your agent:
 ### Fix 4: Check Server Logs
 
 Look at your terminal/console where `npm run dev` is running. You should see:
-```
+\`\`\`
 ElevenLabs telephony error: [actual error message]
-```
+\`\`\`
 
 This will tell you the exact issue.
 
@@ -167,4 +167,3 @@ Before testing, make sure:
 - [ ] Your ElevenLabs account has telephony access
 
 Try these steps and let me know what error you see in the server console!
-

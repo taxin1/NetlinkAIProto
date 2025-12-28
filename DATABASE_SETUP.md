@@ -15,21 +15,21 @@ You need to run the SQL scripts in the `scripts/` folder in your Supabase databa
 5. Copy and paste the contents of each SQL file in this order:
 
    **Required for Events:**
-   ```
+   \`\`\`
    scripts/001_create_tables.sql
    scripts/003_add_calendar_events.sql
-   ```
+   \`\`\`
 
    **Required for Email Campaigns:**
-   ```
+   \`\`\`
    scripts/004_add_email_campaigns.sql
-   ```
+   \`\`\`
 
    **Required for User Email Settings:**
-   ```
+   \`\`\`
    scripts/006_add_user_email_settings.sql
    scripts/007_add_sent_at_to_emails.sql
-   ```
+   \`\`\`
 
 6. Click **Run** for each query
 
@@ -37,25 +37,25 @@ You need to run the SQL scripts in the `scripts/` folder in your Supabase databa
 
 If you have Supabase CLI installed:
 
-```bash
+\`\`\`bash
 # Navigate to project directory
 cd e:\Portfolio\Netlink-Cogni
 
 # Run migrations
 supabase db push
-```
+\`\`\`
 
 ### Option 3: Manual SQL Execution
 
 Connect to your PostgreSQL database using these credentials from `.env.local`:
 
-```
+\`\`\`
 Host: aws-0-us-east-1.pooler.supabase.com
 Port: 6543
 Database: postgres
 User: postgres.kaqptbreyakggqybftjc
 Password: BQKd9bPgzkcwmjRK
-```
+\`\`\`
 
 Then run each SQL file.
 
@@ -96,4 +96,3 @@ Your Supabase project: `kaqptbreyakggqybftjc`
 URL: https://kaqptbreyakggqybftjc.supabase.co
 
 Check the Supabase dashboard to see if tables exist.
-

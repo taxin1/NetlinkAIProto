@@ -245,4 +245,3 @@ export function EventsList({ userId }: EventsListProps) {
     </div>
   )
 }
-

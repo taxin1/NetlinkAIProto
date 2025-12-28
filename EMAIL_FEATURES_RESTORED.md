@@ -27,7 +27,7 @@ All your email features are now back and better organized! The emails page now h
    - View email history
 
 ### How to Use:
-```
+\`\`\`
 1. Go to Dashboard → Emails
 2. Click "Compose Email" button
 3. Select a contact
@@ -35,7 +35,7 @@ All your email features are now back and better organized! The emails page now h
 5. Click "Generate" - AI creates the email!
 6. Edit if needed
 7. Click "Send Email" or "Save Draft"
-```
+\`\`\`
 
 ---
 
@@ -61,7 +61,7 @@ All your email features are now back and better organized! The emails page now h
    - Monitor progress with progress bars
 
 ### How to Use:
-```
+\`\`\`
 1. Go to Dashboard → Emails
 2. Click "AI Campaigns" tab
 3. Fill in campaign details:
@@ -72,7 +72,7 @@ All your email features are now back and better organized! The emails page now h
 5. Click "Create Campaign"
 6. Click "Run" to start sending
 7. Watch the progress bar!
-```
+\`\`\`
 
 ---
 
@@ -115,7 +115,7 @@ All your email features are now back and better organized! The emails page now h
 - ✅ **Empty States**: Helpful prompts when no emails exist
 
 ### Visual Hierarchy:
-```
+\`\`\`
 Emails & Campaigns
 ├── Individual Emails Tab
 │   ├── Compose Email Button (with AI sparkle)
@@ -133,14 +133,14 @@ Emails & Campaigns
     │   ├── Progress Bars
     │   └── Run/Pause buttons
     └── Campaign Stats
-```
+\`\`\`
 
 ---
 
 ## 🚀 Example Workflows
 
 ### Workflow 1: Quick Individual Email
-```
+\`\`\`
 1. Click "Compose Email"
 2. Select "John Smith"
 3. Purpose: "Follow up from networking event"
@@ -148,10 +148,10 @@ Emails & Campaigns
    "Hi John, Great meeting you at TechCon! 
    I wanted to follow up on our conversation..."
 5. Review and send
-```
+\`\`\`
 
 ### Workflow 2: Large Campaign
-```
+\`\`\`
 1. Switch to "AI Campaigns" tab
 2. Name: "Product Launch Invitations"
 3. Purpose: "Invite to product demo webinar"
@@ -161,7 +161,7 @@ Emails & Campaigns
 7. Click "Run"
 8. AI generates 50 unique emails
 9. Sends automatically with tracking
-```
+\`\`\`
 
 ---
 
@@ -254,4 +254,3 @@ Everything is working and connected:
 ---
 
 Enjoy your fully-featured email system! 🚀✨
-

@@ -398,4 +398,3 @@ ${cvData.languages ? `\nLanguages:\n${cvData.languages}` : ''}`
     )
   }
 }
-

@@ -17,14 +17,14 @@ When you make a call, the system automatically:
 
 **File**: `app/api/elevenlabs-telephony/route.ts`
 
-```typescript
+\`\`\`typescript
 // This happens automatically when you make a call
 const { generateContextualSystemPrompt } = await import('@/lib/voice-agent/system-prompt')
 const finalPrompt = generateContextualSystemPrompt(context)
 
 // Pass directly to ElevenLabs API
 callData.system_prompt = finalPrompt
-```
+\`\`\`
 
 ### 3. What You DO Need from Dashboard
 
@@ -33,9 +33,9 @@ callData.system_prompt = finalPrompt
 1. Go to ElevenLabs Dashboard → Create an agent (or use existing)
 2. Copy the Agent ID
 3. Add to `.env.local`:
-   ```env
+   \`\`\`env
    ELEVENLABS_AGENT_ID=your-agent-id-here
-   ```
+   \`\`\`
 
 That's it! The system prompt is handled entirely in your code.
 
@@ -56,7 +56,7 @@ That's it! The system prompt is handled entirely in your code.
 
 ## Example Flow
 
-```typescript
+\`\`\`typescript
 // When you call /api/elevenlabs-telephony
 POST {
   phoneNumber: "+1234567890",
@@ -73,7 +73,7 @@ POST {
 // 3. Sends to ElevenLabs as system_prompt
 
 // ElevenLabs uses YOUR prompt directly - no dashboard needed!
-```
+\`\`\`
 
 ## Testing
 
@@ -88,12 +88,12 @@ To verify it's working:
 
 Just edit `lib/voice-agent/system-prompt.ts`:
 
-```typescript
+\`\`\`typescript
 export const NETLINK_VOICE_AGENT_SYSTEM_PROMPT = `
   Your updated prompt here...
   No dashboard changes needed!
 `
-```
+\`\`\`
 
 Save, deploy, and the new prompt is active immediately!
 
@@ -105,4 +105,3 @@ Save, deploy, and the new prompt is active immediately!
 - ⚠️ Only need Agent ID from dashboard (one-time setup)
 
 You're fully in control! 🎉
-

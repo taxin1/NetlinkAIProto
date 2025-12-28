@@ -1,9 +1,9 @@
 # Gmail App Password Setup Guide
 
 ## ❌ Current Error
-```
+\`\`\`
 Invalid login: 535-5.7.8 Username and Password not accepted
-```
+\`\`\`
 
 **Reason**: The Gmail App Password in `.env.local` is either:
 - Invalid or expired
@@ -40,45 +40,45 @@ Gmail App Passwords **only work** if 2FA is enabled.
 5. Click **"Generate"**
 
 6. Google will show you a **16-character password** like:
-   ```
+   \`\`\`
    abcd efgh ijkl mnop
-   ```
+   \`\`\`
 
 7. ✅ **Copy this password immediately** (you won't see it again!)
 
 ### Step 3: Update Your .env.local File
 
 **Current (in your .env.local):**
-```
+\`\`\`
 GMAIL_USER=cognisorai@gmail.com
 GMAIL_APP_PASSWORD=qffz djsz byrw dkdo
-```
+\`\`\`
 
 **Update the App Password with the new one:**
 
 1. Open `.env.local`
 2. Replace the `GMAIL_APP_PASSWORD` value with your new password
 3. **Remove spaces** from the password (use it as one string):
-   ```
+   \`\`\`
    # If Google gives you: abcd efgh ijkl mnop
    # Use it as: abcdefghijklmnop
    
    GMAIL_APP_PASSWORD=abcdefghijklmnop
-   ```
+   \`\`\`
 
 **Example:**
-```env
+\`\`\`env
 GMAIL_USER=cognisorai@gmail.com
 GMAIL_APP_PASSWORD=yourNewAppPasswordHere
-```
+\`\`\`
 
 ### Step 4: Restart Your Development Server
 
-```powershell
+\`\`\`powershell
 # Stop the current server (Ctrl+C)
 # Then restart:
 pnpm dev
-```
+\`\`\`
 
 ### Step 5: Test Email Sending
 
@@ -105,10 +105,10 @@ Two possibilities:
 
 ### Need to use a different Gmail account?
 Update both values in `.env.local`:
-```env
+\`\`\`env
 GMAIL_USER=your-other-email@gmail.com
 GMAIL_APP_PASSWORD=new-app-password-here
-```
+\`\`\`
 
 ## 📋 Quick Checklist
 
@@ -125,26 +125,26 @@ Before testing:
 If Gmail is not working, you can use other providers:
 
 ### **Option 1: Outlook/Hotmail**
-```env
+\`\`\`env
 GMAIL_USER=your-email@outlook.com
 GMAIL_APP_PASSWORD=your-outlook-app-password
-```
+\`\`\`
 Update `route.ts`:
-```typescript
+\`\`\`typescript
 const smtpHost = 'smtp-mail.outlook.com'
 const smtpPort = 587
-```
+\`\`\`
 
 ### **Option 2: Yahoo Mail**
-```env
+\`\`\`env
 GMAIL_USER=your-email@yahoo.com
 GMAIL_APP_PASSWORD=your-yahoo-app-password
-```
+\`\`\`
 Update `route.ts`:
-```typescript
+\`\`\`typescript
 const smtpHost = 'smtp.mail.yahoo.com'
 const smtpPort = 587
-```
+\`\`\`
 
 ### **Option 3: Custom SMTP**
 Use your own SMTP server - update both `.env.local` and the database `user_email_settings` table.
@@ -188,4 +188,3 @@ If you continue to have problems:
 - Email: cognisorai@gmail.com
 - Password: Need to generate new App Password
 - Action Required: Follow Steps 1-4 above
-

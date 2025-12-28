@@ -41,4 +41,3 @@ export interface CreatePortfolioData {
 export interface UpdatePortfolioData extends Partial<CreatePortfolioData> {
   id: string
 }
-

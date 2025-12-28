@@ -96,14 +96,14 @@ If telephony isn't available, you can use the browser-based voice widget:
 
 Run this to check your setup:
 
-```bash
+\`\`\`bash
 # Test if your agent exists
 curl "https://api.elevenlabs.io/v1/convai/agents/YOUR_AGENT_ID" \
   -H "xi-api-key: YOUR_API_KEY"
 
 # If this works, your agent exists
 # If telephony endpoint returns 404, telephony isn't enabled
-```
+\`\`\`
 
 ## What Success Looks Like
 
@@ -131,4 +131,3 @@ The widget is already in your codebase at `components/elevenlabs-convai-widget.t
 3. Agent doesn't have telephony enabled → Enable it in agent settings
 
 Try these first!
-

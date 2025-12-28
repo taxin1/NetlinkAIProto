@@ -67,20 +67,20 @@ Two new tables were added:
 
 Run the SQL migration script to create the necessary tables:
 
-```bash
+\`\`\`bash
 # Execute the SQL script in your Supabase SQL editor
 scripts/007_add_gmail_connections.sql
-```
+\`\`\`
 
 ### 2. Environment Variables
 
 Ensure these environment variables are set (same as Google Calendar):
 
-```env
+\`\`\`env
 GOOGLE_CLIENT_ID=your-google-client-id
 GOOGLE_CLIENT_SECRET=your-google-client-secret
 NEXT_PUBLIC_APP_URL=https://your-domain.com
-```
+\`\`\`
 
 **Note**: Gmail does NOT use `GOOGLE_REDIRECT_URI`. It automatically constructs the redirect URI as `${NEXT_PUBLIC_APP_URL}/api/gmail/callback` to avoid conflicts with Google Calendar's redirect URI.
 
@@ -129,7 +129,7 @@ NEXT_PUBLIC_APP_URL=https://your-domain.com
 
 The send-email API now automatically uses Gmail API if connected:
 
-```typescript
+\`\`\`typescript
 // Automatically uses Gmail API if connected, falls back to SMTP
 const response = await fetch('/api/send-email', {
   method: 'POST',
@@ -141,11 +141,11 @@ const response = await fetch('/api/send-email', {
     useGmailApi: true // Optional, defaults to true
   })
 })
-```
+\`\`\`
 
 #### Fetching Replies
 
-```typescript
+\`\`\`typescript
 // Get replies
 const response = await fetch('/api/gmail/replies?maxResults=20')
 const { replies } = await response.json()
@@ -155,7 +155,7 @@ const syncResponse = await fetch('/api/gmail/sync', {
   method: 'POST'
 })
 const { synced, new: newCount } = await syncResponse.json()
-```
+\`\`\`
 
 ## Integration with Email Agent
 
@@ -217,4 +217,3 @@ Gmail API has the following limits:
 - **Send operations**: 100 quota units per request
 
 The implementation includes automatic retry logic and rate limit handling.
-

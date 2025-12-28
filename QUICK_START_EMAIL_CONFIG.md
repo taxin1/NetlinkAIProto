@@ -13,17 +13,17 @@ You need to create the database table first. Choose one method:
 5. Paste and click "Run"
 
 **Option B: Using Supabase CLI**
-```bash
+\`\`\`bash
 supabase db push
-```
+\`\`\`
 
 ### Step 2: Configure Your Email
 1. Start/restart your development server:
-   ```bash
+   \`\`\`bash
    npm run dev
    # or
    pnpm dev
-   ```
+   \`\`\`
 
 2. Log in to your application
 3. Click "Settings" in the sidebar (new!)
@@ -128,4 +128,3 @@ To verify everything works:
 Your users can now send emails from their own email addresses. Each user can configure their own email independently, making your application truly multi-user friendly!
 
 Enjoy your personalized email sending! 📧
-

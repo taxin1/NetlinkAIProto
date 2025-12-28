@@ -192,4 +192,3 @@ export function EditContactDialog({ contact, userId, open, onOpenChange }: EditC
     </Dialog>
   )
 }
-

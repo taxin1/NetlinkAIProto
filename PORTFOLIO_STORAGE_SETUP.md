@@ -45,23 +45,22 @@ This will create the necessary RLS policies that allow:
 ### If you want to restrict image viewing to authenticated users only:
 
 Edit the last policy in the SQL script and change:
-```sql
+\`\`\`sql
 to public
-```
+\`\`\`
 to:
-```sql
+\`\`\`sql
 to authenticated
-```
+\`\`\`
 
 ## File Structure
 
 Images are stored in the bucket with this structure:
-```
+\`\`\`
 portfolios/
   └── {user_id}/
       ├── profile-{timestamp}-{random}.webp
       └── cover-{timestamp}-{random}.webp
-```
+\`\`\`
 
 Each user can only access files in their own folder, ensuring security.
-

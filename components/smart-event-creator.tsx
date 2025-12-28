@@ -547,4 +547,3 @@ export function SmartEventCreator({ userId, contacts }: SmartEventCreatorProps) 
     </Card>
   )
 }
-

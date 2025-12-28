@@ -76,4 +76,3 @@ export async function compressImage(file: File, maxWidth: number = 800, quality:
 export function getFileSizeKB(file: File): number {
   return Math.round(file.size / 1024)
 }
-

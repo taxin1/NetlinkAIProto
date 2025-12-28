@@ -5,14 +5,14 @@ Run this diagnostic test to verify your setup:
 ## Quick Test
 
 1. **Start your dev server** (if not already running):
-   ```bash
+   \`\`\`bash
    npm run dev
-   ```
+   \`\`\`
 
 2. **Open browser and go to**:
-   ```
+   \`\`\`
    http://localhost:3000/api/test-telephony-connection
-   ```
+   \`\`\`
 
 3. **Check the JSON response** - it will show:
    - ✅ Environment variables (API key, Agent ID)
@@ -55,4 +55,3 @@ Run this diagnostic test to verify your setup:
 ## Share Results
 
 Copy the JSON response and share it, and I'll help you fix any issues!
-

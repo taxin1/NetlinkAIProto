@@ -250,4 +250,3 @@ export function GmailSettings() {
     </Card>
   )
 }
-

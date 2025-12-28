@@ -343,4 +343,3 @@ function generateClosingLine(
     .replace(/{contactName}/g, "the contact")
     .replace(/{resource\/person}/g, "relevant resources")
 }
-

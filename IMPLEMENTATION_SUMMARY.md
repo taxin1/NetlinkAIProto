@@ -70,7 +70,7 @@ Comprehensive guide covering:
 
 ### Email Sending Flow:
 
-```
+\`\`\`
 User triggers email send
         ↓
 System authenticates user
@@ -91,7 +91,7 @@ Check for user email settings in database
     SMTP configuration
               ↓
          Success/Error
-```
+\`\`\`
 
 ### Security Features:
 1. User authentication required for all email operations
@@ -104,10 +104,10 @@ Check for user email settings in database
 ### Step 1: Run Database Migration
 Execute the SQL migration script in your Supabase database:
 
-```bash
+\`\`\`bash
 # Connect to your Supabase database and run:
 # scripts/006_add_user_email_settings.sql
-```
+\`\`\`
 
 Or through Supabase Dashboard:
 1. Go to Supabase Dashboard → SQL Editor
@@ -180,10 +180,10 @@ Or through Supabase Dashboard:
 ## Environment Variables
 
 The system still supports fallback to environment variables if needed:
-```env
+\`\`\`env
 GMAIL_USER=your-email@gmail.com
 GMAIL_APP_PASSWORD=your-app-password
-```
+\`\`\`
 
 However, users are encouraged to configure their email through the Settings page instead.
 
@@ -215,4 +215,3 @@ If users encounter issues:
 This implementation provides a complete, user-friendly solution for configuring personalized email accounts. Users can now send emails from their own email addresses through the AI Email Agent, with proper security measures and a robust fallback system.
 
 The feature is production-ready with the recommendation to add password encryption for enhanced security in production environments.
-

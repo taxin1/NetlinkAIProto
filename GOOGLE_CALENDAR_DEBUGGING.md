@@ -4,11 +4,11 @@
 
 ### 1. Environment Variables
 Make sure these are set in `.env.local`:
-```env
+\`\`\`env
 GOOGLE_CLIENT_ID=783966653046-n6quk2616a8t1rk61r2mn0rtcurnt9q9.apps.googleusercontent.com
 GOOGLE_CLIENT_SECRET=your_client_secret_here
 GOOGLE_REDIRECT_URI=http://localhost:3000/api/google-calendar/callback
-```
+\`\`\`
 
 **To check:**
 - Open `.env.local` in your project root
@@ -98,7 +98,7 @@ Open browser DevTools (F12) → Console tab
 
 ### Step 1: Test Environment Variables
 Create a test file `app/api/test-google-env/route.ts`:
-```typescript
+\`\`\`typescript
 import { NextResponse } from 'next/server'
 
 export async function GET() {
@@ -114,7 +114,7 @@ export async function GET() {
     redirectUri: process.env.GOOGLE_REDIRECT_URI || 'NOT SET'
   })
 }
-```
+\`\`\`
 
 Visit: `http://localhost:3000/api/test-google-env`
 - All should be `true`
@@ -123,9 +123,9 @@ Visit: `http://localhost:3000/api/test-google-env`
 
 ### Step 2: Test Database Connection
 In Supabase SQL Editor, run:
-```sql
+\`\`\`sql
 SELECT * FROM google_calendar_connections LIMIT 1;
-```
+\`\`\`
 
 Should return empty result (no error = table exists)
 
@@ -137,22 +137,22 @@ Should return empty result (no error = table exists)
 
 ### Step 4: Check Database After Attempt
 After trying to connect, check if tokens were stored:
-```sql
+\`\`\`sql
 SELECT user_id, 
        CASE WHEN access_token IS NOT NULL THEN 'HAS TOKEN' ELSE 'NO TOKEN' END as token_status,
        created_at 
 FROM google_calendar_connections;
-```
+\`\`\`
 
 ## Manual Testing
 
 ### Test 1: Direct API Call
-```bash
+\`\`\`bash
 # Get auth URL
 curl http://localhost:3000/api/google-calendar/auth
 
 # Should return JSON with authUrl
-```
+\`\`\`
 
 ### Test 2: Check Callback Route
 Visit: `http://localhost:3000/api/google-calendar/callback?code=test`
@@ -195,4 +195,3 @@ When asking for help, provide:
 3. Browser console errors
 4. Environment variable status (without showing secrets)
 5. Database migration status
-

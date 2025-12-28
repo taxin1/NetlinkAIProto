@@ -55,4 +55,3 @@ create trigger update_google_calendar_connections_updated_at
 
 -- Enable real-time for Google Calendar connections
 alter publication supabase_realtime add table public.google_calendar_connections;
-
