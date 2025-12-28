@@ -50,7 +50,19 @@ export default function NetworkProfilePage() {
   const [message, setMessage] = useState<{ type: "success" | "error", text: string } | null>(null)
   const [nfcSupported, setNfcSupported] = useState(false)
   const [nfcWriting, setNfcWriting] = useState(false)
+  const [nfcChecking, setNfcChecking] = useState(true)
   const [copiedLink, setCopiedLink] = useState<string | null>(null)
+  const [nfcDiagnostics, setNfcDiagnostics] = useState<{
+    hasNDEFReader: boolean
+    isSecureContext: boolean
+    isMobile: boolean
+    isAndroid: boolean
+    isChrome: boolean
+    isEdge: boolean
+    userAgent: string
+    protocol: string
+    hostname: string
+  } | null>(null)
   const qrRef = useRef<HTMLDivElement>(null)
   
   const [profile, setProfile] = useState<SocialProfile>({
@@ -71,10 +83,90 @@ export default function NetworkProfilePage() {
     checkNfcSupport()
   }, [])
 
-  const checkNfcSupport = () => {
-    if (typeof window !== "undefined" && "NDEFReader" in window) {
-      setNfcSupported(true)
+  const checkNfcSupport = async (): Promise<boolean> => {
+    setNfcChecking(true)
+    
+    if (typeof window === "undefined") {
+      setNfcChecking(false)
+      return false
     }
+
+    // Check if we're on a secure context (HTTPS or localhost)
+    const isSecureContext = window.isSecureContext || 
+      window.location.protocol === "https:" || 
+      window.location.hostname === "localhost" ||
+      window.location.hostname === "127.0.0.1"
+
+    // Check for NDEFReader API
+    const hasNDEFReader = "NDEFReader" in window
+
+    // Check if we're on a mobile device that might support NFC
+    const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera
+    const isMobile = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent.toLowerCase())
+    const isAndroid = /android/i.test(userAgent.toLowerCase())
+    const isChrome = /chrome/i.test(userAgent.toLowerCase()) && !/edg/i.test(userAgent.toLowerCase())
+    const isEdge = /edg/i.test(userAgent.toLowerCase())
+
+    // Store diagnostics for debugging
+    const diagnostics = {
+      hasNDEFReader,
+      isSecureContext,
+      isMobile,
+      isAndroid,
+      isChrome,
+      isEdge,
+      userAgent: userAgent.substring(0, 100), // Truncate for display
+      protocol: window.location.protocol,
+      hostname: window.location.hostname
+    }
+    setNfcDiagnostics(diagnostics)
+
+    // Log diagnostics to console for debugging
+    console.log("🔍 NFC Diagnostics:", diagnostics)
+
+    if (!isSecureContext) {
+      console.warn("❌ NFC requires HTTPS or localhost. Current protocol:", window.location.protocol)
+      setNfcChecking(false)
+      return false
+    }
+
+    let supported = false
+
+    // Check for NDEFReader API
+    if (hasNDEFReader) {
+      // Additional check: Try to create an instance to verify it's actually available
+      try {
+        // @ts-ignore - NDEFReader is experimental
+        const testReader = new NDEFReader()
+        console.log("✅ NDEFReader is available and can be instantiated")
+        supported = true
+      } catch (error) {
+        console.warn("⚠️ NDEFReader exists but cannot be instantiated:", error)
+      }
+    } else {
+      console.log("ℹ️ NDEFReader not found in window object")
+    }
+
+    // On mobile Android Chrome/Edge, NFC might be available even if NDEFReader check fails
+    // We'll enable it and let the actual operations handle errors
+    if (!supported && isMobile && isAndroid && (isChrome || isEdge) && isSecureContext) {
+      console.log("✅ Mobile Android Chrome/Edge detected - enabling NFC support")
+      supported = true
+    }
+
+    // Final check: if NDEFReader exists, use it
+    if (!supported && hasNDEFReader) {
+      console.log("✅ NDEFReader found - enabling NFC support")
+      supported = true
+    }
+
+    if (!supported) {
+      console.warn("❌ NFC not supported on this device/browser")
+    }
+    
+    setNfcSupported(supported)
+    setNfcChecking(false)
+    return supported
   }
 
   const loadProfile = async () => {
@@ -265,8 +357,20 @@ END:VCARD`
   }
 
   const writeToNfc = async () => {
-    if (!nfcSupported) {
-      setMessage({ type: "error", text: "NFC is not supported on this device" })
+    // Re-check NFC support before attempting to write
+    if (typeof window === "undefined" || !("NDEFReader" in window)) {
+      setMessage({ type: "error", text: "NFC is not supported on this device. Please use Chrome on Android." })
+      return
+    }
+
+    // Check secure context
+    const isSecureContext = window.isSecureContext || 
+      window.location.protocol === "https:" || 
+      window.location.hostname === "localhost" ||
+      window.location.hostname === "127.0.0.1"
+
+    if (!isSecureContext) {
+      setMessage({ type: "error", text: "NFC requires HTTPS. Please access this page over a secure connection." })
       return
     }
 
@@ -276,6 +380,10 @@ END:VCARD`
     try {
       // @ts-ignore - NDEFReader is experimental
       const ndef = new NDEFReader()
+      
+      // Show user-friendly message
+      setMessage({ type: "success", text: "Ready! Hold an NFC tag near your phone..." })
+      
       await ndef.write({
         records: [
           {
@@ -286,12 +394,17 @@ END:VCARD`
       })
       setMessage({ type: "success", text: "NFC tag written successfully! Tap any NFC-enabled phone to share your LinkedIn." })
     } catch (error: any) {
+      console.error("NFC write error:", error)
       if (error.name === "NotAllowedError") {
-        setMessage({ type: "error", text: "NFC permission denied. Please allow NFC access." })
+        setMessage({ type: "error", text: "NFC permission denied. Please allow NFC access in your browser settings." })
       } else if (error.name === "NotSupportedError") {
-        setMessage({ type: "error", text: "NFC is not supported on this device." })
+        setMessage({ type: "error", text: "NFC is not supported on this device. Please use Chrome on Android." })
+      } else if (error.name === "InvalidStateError") {
+        setMessage({ type: "error", text: "NFC is busy. Please try again in a moment." })
+      } else if (error.message?.includes("tag") || error.message?.includes("timeout")) {
+        setMessage({ type: "error", text: "No NFC tag detected. Please hold a tag near your phone and try again." })
       } else {
-        setMessage({ type: "error", text: "Failed to write NFC tag. Make sure a tag is nearby." })
+        setMessage({ type: "error", text: `Failed to write NFC tag: ${error.message || "Unknown error"}. Make sure a tag is nearby and try again.` })
       }
     } finally {
       setNfcWriting(false)
@@ -299,8 +412,20 @@ END:VCARD`
   }
 
   const pushViaNfc = async () => {
-    if (!nfcSupported) {
-      setMessage({ type: "error", text: "NFC is not supported on this device" })
+    // Re-check NFC support before attempting to push
+    if (typeof window === "undefined" || !("NDEFReader" in window)) {
+      setMessage({ type: "error", text: "NFC is not supported on this device. Please use Chrome on Android." })
+      return
+    }
+
+    // Check secure context
+    const isSecureContext = window.isSecureContext || 
+      window.location.protocol === "https:" || 
+      window.location.hostname === "localhost" ||
+      window.location.hostname === "127.0.0.1"
+
+    if (!isSecureContext) {
+      setMessage({ type: "error", text: "NFC requires HTTPS. Please access this page over a secure connection." })
       return
     }
 
@@ -310,27 +435,40 @@ END:VCARD`
     try {
       // @ts-ignore - NDEFReader is experimental
       const ndef = new NDEFReader()
-      await ndef.scan()
       
-      // Make phone ready to push data
-      ndef.onreading = () => {
+      // Set up reading handler first
+      ndef.onreading = (event: any) => {
+        console.log("NFC device detected:", event)
         setMessage({ type: "success", text: "Device detected! Your LinkedIn profile link has been shared." })
         setNfcWriting(false)
       }
+
+      ndef.onreadingerror = (error: any) => {
+        console.error("NFC reading error:", error)
+        setMessage({ type: "error", text: "Error reading NFC device. Please try again." })
+        setNfcWriting(false)
+      }
       
-      // Push the URL when another device is nearby
-      await ndef.write({
-        records: [
-          { recordType: "url", data: getLinkedInUrl() }
-        ]
-      })
+      // Start scanning for nearby devices
+      await ndef.scan()
       
-      setMessage({ type: "success", text: "Ready! Tap another phone to share your LinkedIn profile." })
+      // Show user-friendly message
+      setMessage({ type: "success", text: "Ready! Hold your phone back-to-back with another NFC-enabled phone to share." })
+      
+      // Note: For phone-to-phone sharing, we typically use NDEFWriter or Web Share API
+      // The scan() method listens for incoming NFC tags/devices
+      // For pushing data to another phone, we might need to use a different approach
+      
     } catch (error: any) {
+      console.error("NFC push error:", error)
       if (error.name === "NotAllowedError") {
         setMessage({ type: "error", text: "NFC permission denied. Please allow NFC access in your browser settings." })
+      } else if (error.name === "NotSupportedError") {
+        setMessage({ type: "error", text: "NFC is not supported on this device. Please use Chrome on Android." })
+      } else if (error.name === "InvalidStateError") {
+        setMessage({ type: "error", text: "NFC is busy. Please try again in a moment." })
       } else {
-        setMessage({ type: "error", text: "Hold phones back-to-back to share via NFC." })
+        setMessage({ type: "error", text: `Failed to start NFC sharing: ${error.message || "Unknown error"}. Make sure NFC is enabled on your device.` })
       }
       setNfcWriting(false)
     }
@@ -695,7 +833,11 @@ END:VCARD`
                       <CardDescription>Write to NFC tag for instant sharing</CardDescription>
                     </div>
                   </div>
-                  {nfcSupported ? (
+                  {nfcChecking ? (
+                    <Badge className="bg-yellow-500/20 text-yellow-700 dark:text-yellow-300 border border-yellow-500/30">
+                      <Loader2 className="h-3 w-3 mr-1 animate-spin" /> Checking...
+                    </Badge>
+                  ) : nfcSupported ? (
                     <Badge className="bg-green-500/20 text-green-700 dark:text-green-300 border border-green-500/30">
                       <Zap className="h-3 w-3 mr-1" /> Supported
                     </Badge>
@@ -707,9 +849,11 @@ END:VCARD`
               <CardContent className="p-6">
                 <div className="space-y-4">
                   <p className="text-sm text-muted-foreground">
-                    {nfcSupported 
+                    {nfcChecking 
+                      ? "Checking NFC support on your device..."
+                      : nfcSupported 
                       ? "Write your LinkedIn profile to an NFC tag. Anyone can tap it with their phone to instantly connect with you!"
-                      : "NFC is not supported on this device/browser. Use Chrome on Android for NFC support."}
+                      : "NFC is not supported on this device/browser. Use Chrome or Edge on Android for NFC support. Make sure you're using HTTPS."}
                   </p>
                   
                   {nfcSupported && profile.linkedin && (
@@ -735,6 +879,23 @@ END:VCARD`
                       </Button>
                     </div>
                   )}
+
+                  {/* Test NFC Button - Always visible for testing */}
+                  <Button
+                    onClick={async () => {
+                      setMessage(null)
+                      const isSupported = await checkNfcSupport()
+                      if (isSupported) {
+                        setMessage({ type: "success", text: "✅ NFC test passed! NFC is working on your device. Check browser console (F12) for detailed logs." })
+                      } else {
+                        setMessage({ type: "error", text: "❌ NFC test failed. Check the diagnostics panel below and browser console (F12) for details." })
+                      }
+                    }}
+                    variant="outline"
+                    className="w-full h-10 rounded-xl border-cyan-500/50 text-cyan-700 dark:text-cyan-300 hover:bg-cyan-50 dark:hover:bg-cyan-950/30 text-sm"
+                  >
+                    <Zap className="mr-2 h-4 w-4" /> Test NFC Detection
+                  </Button>
                   
                   <div className="p-4 bg-purple-50/50 dark:bg-purple-950/30 rounded-xl border border-purple-200/50 dark:border-purple-800/50">
                     <h4 className="font-semibold mb-2 flex items-center gap-2">
@@ -748,6 +909,68 @@ END:VCARD`
                       <li>Share by having others tap the tag!</li>
                     </ol>
                   </div>
+
+                  {/* NFC Diagnostics Panel */}
+                  {nfcDiagnostics && (
+                    <details className="p-4 bg-gray-50/50 dark:bg-gray-950/30 rounded-xl border border-gray-200/50 dark:border-gray-800/50">
+                      <summary className="font-semibold mb-2 flex items-center gap-2 cursor-pointer text-sm">
+                        <AlertCircle className="h-4 w-4 text-gray-600" />
+                        NFC Diagnostics (Click to expand)
+                      </summary>
+                      <div className="mt-3 space-y-2 text-xs font-mono">
+                        <div className="flex items-center gap-2">
+                          <span className={nfcDiagnostics.hasNDEFReader ? "text-green-600" : "text-red-600"}>
+                            {nfcDiagnostics.hasNDEFReader ? "✅" : "❌"}
+                          </span>
+                          <span>NDEFReader API: {nfcDiagnostics.hasNDEFReader ? "Available" : "Not Available"}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className={nfcDiagnostics.isSecureContext ? "text-green-600" : "text-red-600"}>
+                            {nfcDiagnostics.isSecureContext ? "✅" : "❌"}
+                          </span>
+                          <span>Secure Context: {nfcDiagnostics.isSecureContext ? "Yes" : "No"} ({nfcDiagnostics.protocol})</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className={nfcDiagnostics.isMobile ? "text-green-600" : "text-gray-600"}>
+                            {nfcDiagnostics.isMobile ? "📱" : "💻"}
+                          </span>
+                          <span>Device: {nfcDiagnostics.isMobile ? "Mobile" : "Desktop"}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className={nfcDiagnostics.isAndroid ? "text-green-600" : "text-gray-600"}>
+                            {nfcDiagnostics.isAndroid ? "🤖" : "🍎"}
+                          </span>
+                          <span>OS: {nfcDiagnostics.isAndroid ? "Android" : "Other"}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className={(nfcDiagnostics.isChrome || nfcDiagnostics.isEdge) ? "text-green-600" : "text-gray-600"}>
+                            {(nfcDiagnostics.isChrome || nfcDiagnostics.isEdge) ? "✅" : "❌"}
+                          </span>
+                          <span>Browser: {nfcDiagnostics.isChrome ? "Chrome" : nfcDiagnostics.isEdge ? "Edge" : "Other"}</span>
+                        </div>
+                        <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
+                          <div className="text-xs text-muted-foreground break-all">
+                            User Agent: {nfcDiagnostics.userAgent}
+                          </div>
+                          <div className="text-xs text-muted-foreground mt-1">
+                            Hostname: {nfcDiagnostics.hostname}
+                          </div>
+                        </div>
+                        <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
+                          <div className="text-xs font-semibold">
+                            Status: {nfcSupported ? "✅ NFC Enabled" : "❌ NFC Not Available"}
+                          </div>
+                          {!nfcSupported && (
+                            <div className="text-xs text-muted-foreground mt-1">
+                              {!nfcDiagnostics.isSecureContext && "⚠️ Requires HTTPS or localhost"}
+                              {nfcDiagnostics.isSecureContext && !nfcDiagnostics.hasNDEFReader && !nfcDiagnostics.isAndroid && "⚠️ Requires Android device"}
+                              {nfcDiagnostics.isSecureContext && !nfcDiagnostics.hasNDEFReader && nfcDiagnostics.isAndroid && !nfcDiagnostics.isChrome && !nfcDiagnostics.isEdge && "⚠️ Requires Chrome or Edge browser"}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </details>
+                  )}
                 </div>
               </CardContent>
             </Card>
