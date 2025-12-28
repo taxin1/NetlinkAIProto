@@ -27,9 +27,9 @@ The system now uses goal-specific templates that are filled in with your context
 
 ### AI Generation (Optional)
 If you want AI-generated prompts, set this environment variable:
-```bash
+\`\`\`bash
 USE_AI_FOR_CALL_PROMPTS=true
-```
+\`\`\`
 
 The system will try AI first, but automatically fall back to templates if AI fails.
 
@@ -70,4 +70,3 @@ Just use the call prompt generation as normal - it will automatically use templa
 - **File**: `lib/voice-agent/template-prompt-generator.ts`
 - **API**: `app/api/voice-call/route.ts` (updated to use templates by default)
 - **Fallback**: If AI is enabled and fails, automatically uses templates
-

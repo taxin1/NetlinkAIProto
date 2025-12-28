@@ -65,7 +65,7 @@ Supported voice commands:
 
 ### Example Commands:
 
-```
+\`\`\`
 Voice: "Send email to john@example.com"
 → AI confirms email details
 → Click "Confirm & Send"
@@ -77,7 +77,7 @@ Voice: "Add contact Sarah Johnson at sarah@company.com"
 
 Voice: "Show my upcoming events"
 → AI reads your events list aloud
-```
+\`\`\`
 
 ## 🎨 UI Controls
 
@@ -107,7 +107,7 @@ Voice: "Show my upcoming events"
 
 ## 🔧 Technical Stack
 
-```
+\`\`\`
 Frontend:
 - React hooks (useVoiceAssistant)
 - Web Speech API
@@ -125,7 +125,7 @@ AI Processing:
 - Context-aware responses
 - Intent classification
 - Parameter extraction
-```
+\`\`\`
 
 ## 🚀 What Makes This Special
 
@@ -138,7 +138,7 @@ AI Processing:
 
 ## 📊 Action Flow Example
 
-```
+\`\`\`
 User says: "Send email to Sarah about tomorrow's meeting"
     ↓
 [Speech Recognition] → Transcript captured
@@ -156,7 +156,7 @@ User says: "Send email to Sarah about tomorrow's meeting"
 [Email API] → Email sent via configured SMTP
     ↓
 [Success Response] → "Email sent successfully!" (spoken)
-```
+\`\`\`
 
 ## 💡 Tips for Best Results
 
@@ -221,4 +221,3 @@ The voice assistant is **fully functional** and ready to use right now!
 ---
 
 Need help? Check out `VOICE_ASSISTANT_GUIDE.md` for detailed instructions!
-

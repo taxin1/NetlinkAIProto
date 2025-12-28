@@ -18,7 +18,7 @@ You already have the hook ready: `lib/hooks/use-elevenlabs-conversation.ts`
 
 Create a new component for browser-based calls:
 
-```typescript
+\`\`\`typescript
 "use client"
 
 import { useElevenLabsConversation } from '@/lib/hooks/use-elevenlabs-conversation'
@@ -56,7 +56,7 @@ export function BrowserVoiceCall({ userId, contact, context }) {
     </div>
   )
 }
-```
+\`\`\`
 
 ## Pros & Cons
 
@@ -86,4 +86,3 @@ export function BrowserVoiceCall({ userId, contact, context }) {
 - Professional outbound outreach
 
 Would you like me to implement this browser-based solution?
-

@@ -51,7 +51,7 @@ Each event card displays:
 ## 🎨 Design Elements
 
 ### Color System:
-```
+\`\`\`
 Today Badge:     Green (#10B981)
 Tomorrow Badge:  Blue (#3B82F6)
 This Week:       Purple (#A855F7)
@@ -61,25 +61,25 @@ Later:           Gray (muted)
 Date Block:      Primary color gradient
 Accent Line:     Primary color gradient
 Background:      Subtle primary/5% overlay
-```
+\`\`\`
 
 ### Typography:
-```
+\`\`\`
 Card Title:      16px, font-semibold
 Date Day:        24px, font-bold
 Date Month:      12px, font-semibold, uppercase
 Meta Info:       12px, regular
 Description:     14px, muted
-```
+\`\`\`
 
 ### Spacing:
-```
+\`\`\`
 Card Padding:    16px
 Gap Between:     12px
 Date Block:      64x64px
 Icon Size:       14px (3.5w/h)
 Badge Height:    auto
-```
+\`\`\`
 
 ---
 
@@ -108,15 +108,15 @@ Badge Height:    auto
 ## 🎭 Visual Features Breakdown
 
 ### Header Section:
-```
+\`\`\`
 ┌─────────────────────────────────────────┐
 │ 📅 Upcoming Events       [+ Add Event]  │
 │    Your schedule at a glance            │
 └─────────────────────────────────────────┘
-```
+\`\`\`
 
 ### Event Card Layout:
-```
+\`\`\`
 ┌──────────────────────────────────────────────┐
 │ │  ╔════╗                                    │
 │ │  ║ 15 ║  Event Title        [Today]       │
@@ -124,10 +124,10 @@ Badge Height:    auto
 │ │  ╚════╝  🕐 2:30 PM  📍 Office  👤 John   │
 │                                          →   │
 └──────────────────────────────────────────────┘
-```
+\`\`\`
 
 ### Empty State:
-```
+\`\`\`
 ┌──────────────────────────┐
 │       ╭────────╮          │
 │       │   📅   │          │
@@ -138,7 +138,7 @@ Badge Height:    auto
 │                           │
 │  [✨ Create first event]  │
 └──────────────────────────┘
-```
+\`\`\`
 
 ---
 
@@ -187,37 +187,37 @@ Only shows data that exists:
 ## 🎨 Animation Details
 
 ### Card Hover:
-```css
+\`\`\`css
 transition: all 300ms ease-in-out
 - Background: → accent/50
 - Shadow: → elevated
 - Scale: → 1.01
 - Arrow: opacity 0 → 1
 - Title color: → primary
-```
+\`\`\`
 
 ### Staggered Load:
-```
+\`\`\`
 Card 1: 0ms delay
 Card 2: 100ms delay
 Card 3: 200ms delay
 Card 4: 300ms delay
 Card 5: 400ms delay
-```
+\`\`\`
 
 ### Button Interactions:
-```
+\`\`\`
 View All: Arrow translates right on hover
 Add Event: Smooth color transition
 Empty State: Glow effect on icon
-```
+\`\`\`
 
 ---
 
 ## 📊 Visual Comparison
 
 ### Before:
-```
+\`\`\`
 ┌─────────────────────────┐
 │ 📅 Upcoming Events      │
 ├─────────────────────────┤
@@ -228,10 +228,10 @@ Empty State: Glow effect on icon
 │ Conference              │
 │ Dec 16, 2024 at 9:00 AM │
 └─────────────────────────┘
-```
+\`\`\`
 
 ### After:
-```
+\`\`\`
 ┌─────────────────────────────────────────┐
 │ 📅 Upcoming Events                      │
 │    Your schedule at a glance [+ Add]    │
@@ -246,7 +246,7 @@ Empty State: Glow effect on icon
 │ │ ║DEC║ Annual tech summit keynote      │
 │ │ ╚═══╝ 🕐 9:00 AM 📍 Convention Ctr →│
 └─────────────────────────────────────────┘
-```
+\`\`\`
 
 ---
 
@@ -327,13 +327,13 @@ Potential additions:
 ## 🚀 Quick Start
 
 To see the new design:
-```bash
+\`\`\`bash
 1. Navigate to Dashboard
 2. Scroll to "Upcoming Events" section
 3. Add some events if empty
 4. Hover over event cards to see animations
 5. Check different time ranges (today, tomorrow, later)
-```
+\`\`\`
 
 ---
 
@@ -347,15 +347,14 @@ To see the new design:
 - **Gray Badge** (Later) - Future reference
 
 ### Date Block Variants:
-```
+\`\`\`
 Single Digit:    Double Digit:
 ┌────────┐       ┌────────┐
 │   5    │       │   25   │
 │  JAN   │       │  DEC   │
 └────────┘       └────────┘
-```
+\`\`\`
 
 ---
 
 Enjoy your beautiful new Events section! 🎉✨
-

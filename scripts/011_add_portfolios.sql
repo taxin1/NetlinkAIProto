@@ -60,4 +60,3 @@ create trigger update_portfolios_updated_at
   before update on public.portfolios
   for each row
   execute function update_updated_at_column();
-

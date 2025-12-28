@@ -336,4 +336,3 @@ async function extractBusinessCardInfoWithBytezModel(
 
   throw new Error(`No valid JSON found in Bytez response for model ${modelId}`)
 }
-

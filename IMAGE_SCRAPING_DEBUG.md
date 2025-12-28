@@ -12,7 +12,7 @@ Go to `/dashboard/events` and paste an event URL (e.g., from Eventbrite or Meetu
 
 You should see detailed logs like this:
 
-```
+\`\`\`
 === META TAG EXTRACTION ===
 Preview Image URL: https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F...
 Preview Title: Tech Summit 2025
@@ -31,7 +31,7 @@ Image URL in response: https://img.evbuc.com/...
 === FRONTEND: AI EXTRACTED DATA ===
 Full data: {title: "Tech Summit 2025", imageUrl: "https://img.evbuc.com/...", ...}
 Image URL: https://img.evbuc.com/...
-```
+\`\`\`
 
 ### Step 4: Verify Image Display
 
@@ -56,13 +56,13 @@ Look at the preview card:
 **Problem**: Image URL is found but fails to load.
 
 **Check Console for**:
-```
+\`\`\`
 GET https://example.com/image.jpg 403 (Forbidden)
-```
+\`\`\`
 or
-```
+\`\`\`
 GET https://example.com/image.jpg 404 (Not Found)
-```
+\`\`\`
 
 **Possible Reasons**:
 - Image URL requires authentication
@@ -76,9 +76,9 @@ GET https://example.com/image.jpg 404 (Not Found)
 **Problem**: Image URL is extracted but it's not the main event image.
 
 **Check Console**:
-```
+\`\`\`
 Preview Image URL: https://example.com/logo.png
-```
+\`\`\`
 
 **Reason**: The site's `og:image` meta tag points to their logo instead of event image.
 
@@ -95,9 +95,9 @@ Preview Image URL: https://example.com/logo.png
 
 ### Test with Real Events:
 Try pasting a real Eventbrite event URL like:
-```
+\`\`\`
 https://www.eventbrite.com/e/[any-actual-event]
-```
+\`\`\`
 
 ## Manual Verification
 
@@ -114,22 +114,22 @@ If it doesn't exist → No image will show (expected)
 ## Expected Behavior
 
 ### With Image:
-```
+\`\`\`
 ┌──────────────────────────┐
 │  📸 [REAL EVENT IMAGE]   │
 │  (Dark overlay)          │
 │  [Platform Badge]        │
 └──────────────────────────┘
-```
+\`\`\`
 
 ### Without Image:
-```
+\`\`\`
 ┌──────────────────────────┐
 │  🎨 Gradient Background  │
 │  📸 Image Icon           │
 │  "Event Preview"         │
 └──────────────────────────┘
-```
+\`\`\`
 
 ## Debug Checklist
 
@@ -145,7 +145,7 @@ If it doesn't exist → No image will show (expected)
 
 ## How the System Works
 
-```
+\`\`\`
 1. User pastes URL
    ↓
 2. Fetch webpage HTML
@@ -161,24 +161,24 @@ If it doesn't exist → No image will show (expected)
 7. Frontend receives imageUrl
    ↓
 8. Display image (or fallback if error)
-```
+\`\`\`
 
 ## What Gets Logged
 
 ### Backend (Terminal/Server Console):
-```
+\`\`\`
 HTML length: 245678
 === META TAG EXTRACTION ===
 Preview Image URL: https://...
 === FINAL EVENT DATA ===
 {"imageUrl": "https://..."}
-```
+\`\`\`
 
 ### Frontend (Browser Console):
-```
+\`\`\`
 === FRONTEND: AI EXTRACTED DATA ===
 Image URL: https://...
-```
+\`\`\`
 
 ## Still Not Working?
 
@@ -189,4 +189,3 @@ If you followed all steps and images still don't show:
 3. **Check if the URL has og:image** in page source
 
 Most likely: The website doesn't provide image meta tags, which is normal for some sites!
-

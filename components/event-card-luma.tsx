@@ -185,4 +185,3 @@ export function EventCardLuma({ event, onDelete }: EventCardLumaProps) {
     </Card>
   )
 }
-

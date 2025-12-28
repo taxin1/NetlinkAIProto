@@ -44,10 +44,10 @@ Now includes **TWO** buttons:
 
 #### **Email Configuration (Already Done):**
 Your `.env.local` has:
-```
+\`\`\`
 GMAIL_USER=cognisorai@gmail.com
 GMAIL_APP_PASSWORD=qffz djsz byrw dkdo
-```
+\`\`\`
 
 This uses Gmail's SMTP server to send emails.
 
@@ -59,12 +59,12 @@ You need to add the `sent_at` column to your database:
 3. Run the script from `scripts/007_add_sent_at_to_emails.sql`
 
 Or copy-paste this:
-```sql
+\`\`\`sql
 ALTER TABLE public.emails 
 ADD COLUMN IF NOT EXISTS sent_at timestamp with time zone;
 
 CREATE INDEX IF NOT EXISTS emails_sent_at_idx ON public.emails(sent_at);
-```
+\`\`\`
 
 ## 📧 Email Statuses
 
@@ -75,15 +75,15 @@ CREATE INDEX IF NOT EXISTS emails_sent_at_idx ON public.emails(sent_at);
 ## 🔧 Technical Details
 
 ### SMTP Configuration:
-```
+\`\`\`
 Host: smtp.gmail.com
 Port: 587
 Security: TLS
 From: cognisorai@gmail.com
-```
+\`\`\`
 
 ### API Endpoint:
-```
+\`\`\`
 POST /api/send-email
 Body: {
   emailId: string,
@@ -91,15 +91,15 @@ Body: {
   subject: string,
   body: string
 }
-```
+\`\`\`
 
 ### Response:
-```json
+\`\`\`json
 {
   "success": true,
   "message": "Email sent successfully"
 }
-```
+\`\`\`
 
 ## ⚠️ Important Notes
 
@@ -151,4 +151,3 @@ Want to enhance the email feature? Consider adding:
 **Status**: ✅ Email sending fully functional
 **Dependencies**: nodemailer installed
 **Configuration**: Gmail SMTP configured
-

@@ -1,11 +1,11 @@
 # Fix for useConversation Hook Usage
 
 ## Your Current Code:
-```typescript
+\`\`\`typescript
 import { useConversation } from '@elevenlabs/react';
 
 const conversation = useConversation();
-```
+\`\`\`
 
 ## What's Missing:
 
@@ -15,7 +15,7 @@ const conversation = useConversation();
 
 ## Fixed Version:
 
-```typescript
+\`\`\`typescript
 "use client"
 
 import { useConversation } from '@elevenlabs/react';
@@ -63,13 +63,13 @@ function MyComponent() {
     </button>
   );
 }
-```
+\`\`\`
 
 ## Quick Fix for Your Code:
 
 Replace your current code with:
 
-```typescript
+\`\`\`typescript
 import { useConversation } from '@elevenlabs/react';
 
 function YourComponent() {
@@ -88,5 +88,4 @@ function YourComponent() {
     });
   };
 }
-```
-
+\`\`\`

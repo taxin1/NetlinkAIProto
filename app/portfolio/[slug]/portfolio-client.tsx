@@ -461,4 +461,3 @@ export function PortfolioClient({ portfolio: portfolioData, networkProfile }: Po
     </div>
   )
 }
-

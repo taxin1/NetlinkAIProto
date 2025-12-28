@@ -111,11 +111,3 @@ Instead of API-based telephony, you can use:
 4. **Use browser widget** as immediate alternative
 
 The code is working correctly - the issue is that telephony isn't available for your account yet.
-
-
-
-
-
-
-
-

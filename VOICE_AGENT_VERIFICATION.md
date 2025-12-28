@@ -66,7 +66,7 @@ If calls aren't working, check the ElevenLabs API documentation for the correct 
 
 To verify everything works:
 
-```typescript
+\`\`\`typescript
 // Test 1: Generate system prompt
 import { generateContextualSystemPrompt } from '@/lib/voice-agent/system-prompt'
 
@@ -94,7 +94,7 @@ console.log(prompt) // Should show full prompt with context
 // Generate a call prompt
 // Initiate a call
 // Verify the agent follows the system prompt rules
-```
+\`\`\`
 
 ## 📋 Checklist
 
@@ -176,4 +176,3 @@ console.log(prompt) // Should show full prompt with context
 - Test with a real call to verify behavior
 
 The code is ready. Once you configure the agent in the dashboard, it will work exactly as specified in your system prompt!
-

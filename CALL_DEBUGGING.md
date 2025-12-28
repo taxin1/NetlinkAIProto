@@ -6,16 +6,16 @@ If everything is configured but calls aren't working, follow these steps:
 
 When you click "Test Call", check your **server console** (where you run `npm run dev`). You should see logs like:
 
-```
+\`\`\`
 [Telephony] Endpoint: https://api.elevenlabs.io/v1/convai/conversation/outbound_call
 [Telephony] Status: 200
 [Telephony] Response: {...}
-```
+\`\`\`
 
 Or if there's an error:
-```
+\`\`\`
 [Telephony] Endpoint failed: { status: 400, error: {...} }
-```
+\`\`\`
 
 **Look for:**
 - What status code is returned (200 = success, 400/401/403/404 = error)
@@ -110,23 +110,23 @@ When you click "Test Call", the alert will show detailed error information. Look
 ## Quick Diagnostic Commands
 
 ### Check Environment Variables
-```bash
+\`\`\`bash
 # In your terminal
 echo $ELEVENLABS_API_KEY
 echo $ELEVENLABS_AGENT_ID
-```
+\`\`\`
 
 ### Test API Key Directly
-```bash
+\`\`\`bash
 curl -X GET "https://api.elevenlabs.io/v1/convai/agents" \
   -H "xi-api-key: YOUR_API_KEY"
-```
+\`\`\`
 
 ### Test Agent Access
-```bash
+\`\`\`bash
 curl -X GET "https://api.elevenlabs.io/v1/convai/agents/YOUR_AGENT_ID" \
   -H "xi-api-key: YOUR_API_KEY"
-```
+\`\`\`
 
 ## Still Not Working?
 
@@ -146,4 +146,3 @@ When a call is successfully initiated, you should see:
 - ✅ Phone rings
 
 If you get a call ID but the phone doesn't ring, the issue is likely in Twilio configuration, not the API call.
-

@@ -101,4 +101,3 @@ Rules: Make it realistic and professional. Use the username to infer name struct
     )
   }
 }
-

@@ -16,7 +16,7 @@ To run this application, you'll need to set up the following environment variabl
 
 ### 1. Create `.env.local` file in the root directory:
 
-```env
+\`\`\`env
 # AI API Configuration (required)
 # Get your Gemini API key from: https://aistudio.google.com/app/apikey
 GEMINI_API_KEY=your_gemini_api_key_here
@@ -25,7 +25,7 @@ GEMINI_API_KEY=your_gemini_api_key_here
 # Get these from your Supabase project settings
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url_here
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key_here
-```
+\`\`\`
 
 ### 2. Get your Gemini API Key:
 
@@ -45,13 +45,13 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key_here
 
 ## Installation
 
-```bash
+\`\`\`bash
 # Install dependencies
 npm install
 
 # Run the development server
 npm run dev
-```
+\`\`\`
 
 ## Troubleshooting
 

@@ -21,9 +21,9 @@ Your app is using: `http://localhost:3000/api/google-calendar/callback`
 
 3. **Add Authorized Redirect URIs**
    In the "Authorized redirect URIs" section, add **EXACTLY** this:
-   ```
+   \`\`\`
    http://localhost:3000/api/google-calendar/callback
-   ```
+   \`\`\`
 
    **IMPORTANT:**
    - ✅ Must be **exactly** this (no trailing slash)
@@ -38,18 +38,18 @@ Your app is using: `http://localhost:3000/api/google-calendar/callback`
 ### Step 3: Verify Your .env.local
 
 Make sure your `.env.local` has:
-```env
+\`\`\`env
 GOOGLE_REDIRECT_URI=http://localhost:3000/api/google-calendar/callback
-```
+\`\`\`
 
 ### Step 4: Restart Your Dev Server
 
 After making changes:
-```bash
+\`\`\`bash
 # Stop your server (Ctrl+C)
 # Then restart:
 npm run dev
-```
+\`\`\`
 
 ### Step 5: Try Again
 
@@ -71,9 +71,9 @@ npm run dev
 ## For Production
 
 When deploying to production, you'll need to add your production URL:
-```
+\`\`\`
 https://yourdomain.com/api/google-calendar/callback
-```
+\`\`\`
 
 Make sure to:
 1. Add it to Google Cloud Console
@@ -100,9 +100,8 @@ Make sure to:
 ## Debug Endpoint
 
 Visit this to see what redirect URI your app is using:
-```
+\`\`\`
 http://localhost:3000/api/google-calendar/test
-```
+\`\`\`
 
 Look for the `redirectUri` field in the response.
-

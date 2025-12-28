@@ -289,4 +289,3 @@ REMEMBER: Use dashes (-) ONLY for bullets. NO asterisks (*), NO markdown (**bold
     )
   }
 }
-

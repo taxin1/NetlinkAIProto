@@ -86,4 +86,3 @@ export interface CallActions {
   next_step_date?: string
   tags?: string[]
 }
-

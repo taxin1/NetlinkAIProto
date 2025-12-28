@@ -137,4 +137,3 @@ export function EventUrlPreview({ url, eventData }: EventUrlPreviewProps) {
     </Card>
   )
 }
-

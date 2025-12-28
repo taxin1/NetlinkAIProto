@@ -6,10 +6,10 @@ You've connected Twilio! Here's what to do next:
 
 Make sure you have these in your `.env.local` file:
 
-```bash
+\`\`\`bash
 ELEVENLABS_API_KEY=your_api_key_here
 ELEVENLABS_AGENT_ID=your_agent_id_here
-```
+\`\`\`
 
 ### How to Get These:
 
@@ -67,14 +67,14 @@ This will show you:
 3. Check the response
 
 ### Expected Success Response:
-```json
+\`\`\`json
 {
   "success": true,
   "callId": "call_123...",
   "status": "initiated",
   "phoneNumber": "+448072497474"
 }
-```
+\`\`\`
 
 ## Step 5: Make Your First Call
 
@@ -139,4 +139,3 @@ This will show you:
 3. **Test Connection:** Visit `/api/test-telephony-connection` in your app
 
 Once all these are set, your telephony should work! 🎉
-

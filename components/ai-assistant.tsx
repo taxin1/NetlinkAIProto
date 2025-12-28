@@ -270,4 +270,3 @@ export function AIAssistant({ userId }: AIAssistantProps) {
     </div>
   )
 }
-

@@ -366,4 +366,3 @@ export default async function CalendarPage({
     </>
   )
 }
-
