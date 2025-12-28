@@ -2,9 +2,6 @@
   "name": "my-v0-project",
   "version": "0.1.0",
   "private": true,
-  "engines": {
-    "node": ">=20.9.0"
-  },
   "scripts": {
     "build": "next build --webpack",
     "dev": "next dev",
@@ -88,5 +85,8 @@
     "tailwindcss": "^4.1.9",
     "tw-animate-css": "1.3.3",
     "typescript": "^5"
+  },
+  "engines": {
+    "node": ">=20.9.0"
   }
 }
