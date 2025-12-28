@@ -21,6 +21,11 @@ const nextConfig = {
     }
     return config;
   },
+  turbopack: {
+    // Turbopack configuration
+    // Node.js module fallbacks (fs, net, tls) are handled automatically by Turbopack
+    // for client-side code, so explicit configuration may not be needed
+  },
 }
 
 export default nextConfig
