@@ -10,6 +10,19 @@ export interface GoogleCalendarToken {
   scope?: string
 }
 
+// Required scopes for Google Calendar API
+const REQUIRED_SCOPES = [
+  'https://www.googleapis.com/auth/calendar',
+  'https://www.googleapis.com/auth/calendar.events',
+]
+
+export class InsufficientScopesError extends Error {
+  constructor(message: string = 'The stored Google Calendar token does not have the required permissions. Please reconnect your Google Calendar account.') {
+    super(message)
+    this.name = 'InsufficientScopesError'
+  }
+}
+
 export async function getGoogleCalendarClient(token: GoogleCalendarToken) {
   const oauth2Client = new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID,
@@ -53,37 +66,46 @@ export async function createGoogleCalendarEvent(
   },
   calendarId: string = 'primary'
 ) {
-  const { client } = await getGoogleCalendarClient(token)
-  const calendar = google.calendar({ version: 'v3', auth: client })
+  try {
+    const { client } = await getGoogleCalendarClient(token)
+    const calendar = google.calendar({ version: 'v3', auth: client })
 
-  const googleEvent = {
-    summary: event.title,
-    description: event.description || '',
-    location: event.location || '',
-    start: {
-      dateTime: event.startTime,
-      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-    },
-    end: {
-      dateTime: event.endTime || event.startTime,
-      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-    },
-    attendees: event.attendees?.map(email => ({ email })) || [],
-    reminders: {
-      useDefault: false,
-      overrides: [
-        { method: 'popup', minutes: 15 },
-        { method: 'email', minutes: 60 },
-      ],
-    },
+    const googleEvent = {
+      summary: event.title,
+      description: event.description || '',
+      location: event.location || '',
+      start: {
+        dateTime: event.startTime,
+        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      },
+      end: {
+        dateTime: event.endTime || event.startTime,
+        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      },
+      attendees: event.attendees?.map(email => ({ email })) || [],
+      reminders: {
+        useDefault: false,
+        overrides: [
+          { method: 'popup', minutes: 15 },
+          { method: 'email', minutes: 60 },
+        ],
+      },
+    }
+
+    const response = await calendar.events.insert({
+      calendarId,
+      requestBody: googleEvent,
+    })
+
+    return response.data
+  } catch (error: any) {
+    // Check if the error is due to insufficient scopes
+    if (error?.code === 403 && error?.message?.includes('insufficient authentication scopes')) {
+      throw new InsufficientScopesError()
+    }
+    // Re-throw other errors
+    throw error
   }
-
-  const response = await calendar.events.insert({
-    calendarId,
-    requestBody: googleEvent,
-  })
-
-  return response.data
 }
 
 export async function updateGoogleCalendarEvent(
@@ -98,37 +120,46 @@ export async function updateGoogleCalendarEvent(
   },
   calendarId: string = 'primary'
 ) {
-  const { client } = await getGoogleCalendarClient(token)
-  const calendar = google.calendar({ version: 'v3', auth: client })
+  try {
+    const { client } = await getGoogleCalendarClient(token)
+    const calendar = google.calendar({ version: 'v3', auth: client })
 
-  // Get existing event first
-  const existingEvent = await calendar.events.get({
-    calendarId,
-    eventId,
-  })
+    // Get existing event first
+    const existingEvent = await calendar.events.get({
+      calendarId,
+      eventId,
+    })
 
-  const googleEvent = {
-    ...existingEvent.data,
-    summary: event.title || existingEvent.data.summary,
-    description: event.description !== undefined ? event.description : existingEvent.data.description,
-    location: event.location !== undefined ? event.location : existingEvent.data.location,
-    start: event.startTime ? {
-      dateTime: event.startTime,
-      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-    } : existingEvent.data.start,
-    end: event.endTime ? {
-      dateTime: event.endTime,
-      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-    } : existingEvent.data.end,
+    const googleEvent = {
+      ...existingEvent.data,
+      summary: event.title || existingEvent.data.summary,
+      description: event.description !== undefined ? event.description : existingEvent.data.description,
+      location: event.location !== undefined ? event.location : existingEvent.data.location,
+      start: event.startTime ? {
+        dateTime: event.startTime,
+        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      } : existingEvent.data.start,
+      end: event.endTime ? {
+        dateTime: event.endTime,
+        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      } : existingEvent.data.end,
+    }
+
+    const response = await calendar.events.update({
+      calendarId,
+      eventId,
+      requestBody: googleEvent,
+    })
+
+    return response.data
+  } catch (error: any) {
+    // Check if the error is due to insufficient scopes
+    if (error?.code === 403 && error?.message?.includes('insufficient authentication scopes')) {
+      throw new InsufficientScopesError()
+    }
+    // Re-throw other errors
+    throw error
   }
-
-  const response = await calendar.events.update({
-    calendarId,
-    eventId,
-    requestBody: googleEvent,
-  })
-
-  return response.data
 }
 
 export async function deleteGoogleCalendarEvent(
@@ -136,13 +167,22 @@ export async function deleteGoogleCalendarEvent(
   eventId: string,
   calendarId: string = 'primary'
 ) {
-  const { client } = await getGoogleCalendarClient(token)
-  const calendar = google.calendar({ version: 'v3', auth: client })
+  try {
+    const { client } = await getGoogleCalendarClient(token)
+    const calendar = google.calendar({ version: 'v3', auth: client })
 
-  await calendar.events.delete({
-    calendarId,
-    eventId,
-  })
+    await calendar.events.delete({
+      calendarId,
+      eventId,
+    })
+  } catch (error: any) {
+    // Check if the error is due to insufficient scopes
+    if (error?.code === 403 && error?.message?.includes('insufficient authentication scopes')) {
+      throw new InsufficientScopesError()
+    }
+    // Re-throw other errors
+    throw error
+  }
 }
 
 export async function listGoogleCalendarEvents(
@@ -151,19 +191,28 @@ export async function listGoogleCalendarEvents(
   timeMax?: string,
   calendarId: string = 'primary'
 ) {
-  const { client } = await getGoogleCalendarClient(token)
-  const calendar = google.calendar({ version: 'v3', auth: client })
+  try {
+    const { client } = await getGoogleCalendarClient(token)
+    const calendar = google.calendar({ version: 'v3', auth: client })
 
-  const response = await calendar.events.list({
-    calendarId,
-    timeMin: timeMin || new Date().toISOString(),
-    timeMax,
-    maxResults: 100,
-    singleEvents: true,
-    orderBy: 'startTime',
-  })
+    const response = await calendar.events.list({
+      calendarId,
+      timeMin: timeMin || new Date().toISOString(),
+      timeMax,
+      maxResults: 100,
+      singleEvents: true,
+      orderBy: 'startTime',
+    })
 
-  return response.data.items || []
+    return response.data.items || []
+  } catch (error: any) {
+    // Check if the error is due to insufficient scopes
+    if (error?.code === 403 && error?.message?.includes('insufficient authentication scopes')) {
+      throw new InsufficientScopesError()
+    }
+    // Re-throw other errors
+    throw error
+  }
 }
 
 export function getGoogleCalendarAuthUrl() {

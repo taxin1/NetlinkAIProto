@@ -2,6 +2,20 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getGoogleCalendarTokens } from '@/lib/google-calendar'
 
+const REQUIRED_SCOPES = [
+  'https://www.googleapis.com/auth/calendar',
+  'https://www.googleapis.com/auth/calendar.events',
+]
+
+function validateScopes(tokenScope?: string): boolean {
+  if (!tokenScope) return false
+  
+  const scopes = tokenScope.split(' ')
+  return REQUIRED_SCOPES.every(requiredScope => 
+    scopes.includes(requiredScope)
+  )
+}
+
 // Optimized timeout helper
 function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
   return Promise.race([
@@ -52,6 +66,17 @@ export async function GET(request: NextRequest) {
     if (!tokens || !tokens.access_token) {
       console.error('[Google Calendar Process] No access token in response')
       throw new Error('No access token received')
+    }
+
+    // Validate that the token has the required scopes
+    if (!validateScopes(tokens.scope)) {
+      console.error('[Google Calendar Process] Token missing required scopes')
+      console.error('[Google Calendar Process] Token scope:', tokens.scope)
+      console.error('[Google Calendar Process] Required scopes:', REQUIRED_SCOPES.join(', '))
+      return NextResponse.redirect(
+        new URL('/dashboard/settings?error=insufficient_scopes', request.url),
+        { status: 307 }
+      )
     }
 
     // Step 3: Store tokens in database

@@ -24,7 +24,8 @@ import {
   Upload,
   FileText,
   X,
-  Image as ImageIcon
+  Image as ImageIcon,
+  RefreshCw
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { Portfolio, PortfolioSection } from "@/types/portfolio"
@@ -58,6 +59,7 @@ export function PortfolioBuilder({ userId }: PortfolioBuilderProps) {
   const [editingSectionId, setEditingSectionId] = useState<string | null>(null)
   const [profileImage, setProfileImage] = useState<File | null>(null)
   const [isUploadingImage, setIsUploadingImage] = useState(false)
+  const [isSyncingGoogle, setIsSyncingGoogle] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const imageInputRef = useRef<HTMLInputElement>(null)
 
@@ -221,10 +223,23 @@ export function PortfolioBuilder({ userId }: PortfolioBuilderProps) {
       })
 
       if (!response.ok) {
-        throw new Error("Failed to upload image")
+        // Try to extract error message from response
+        let errorMessage = "Failed to upload image"
+        try {
+          const errorData = await response.json()
+          errorMessage = errorData.error || errorMessage
+        } catch {
+          // If response is not JSON, use status text
+          errorMessage = response.statusText || errorMessage
+        }
+        throw new Error(errorMessage)
       }
 
       const { url } = await response.json()
+
+      if (!url) {
+        throw new Error("No image URL returned from server")
+      }
 
       // Update portfolio with image URL
       if (portfolio) {
@@ -237,7 +252,8 @@ export function PortfolioBuilder({ userId }: PortfolioBuilderProps) {
       }
     } catch (error) {
       console.error("Error uploading image:", error)
-      setMessage({ type: "error", text: "Failed to upload image. Please try again." })
+      const errorMessage = error instanceof Error ? error.message : "Failed to upload image. Please try again."
+      setMessage({ type: "error", text: errorMessage })
     } finally {
       setIsUploadingImage(false)
       if (imageInputRef.current) {
@@ -256,6 +272,42 @@ export function PortfolioBuilder({ userId }: PortfolioBuilderProps) {
     } catch (error) {
       console.error("Error removing image:", error)
       setMessage({ type: "error", text: "Failed to remove image" })
+    }
+  }
+
+  const syncGooglePicture = async () => {
+    setIsSyncingGoogle(true)
+    setMessage(null)
+
+    try {
+      const response = await fetch("/api/portfolio/sync-google-picture", {
+        method: "POST",
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || "Failed to sync Google picture")
+      }
+
+      const { url } = await response.json()
+
+      // Update portfolio with synced image URL
+      if (portfolio) {
+        const updatedPortfolio = { ...portfolio, profile_image_url: url }
+        setPortfolio(updatedPortfolio)
+        setMessage({ type: "success", text: "Profile picture synced from Google successfully" })
+      } else {
+        // If no portfolio exists yet, save URL for when portfolio is created
+        setMessage({ type: "success", text: "Profile picture synced. It will be saved when you generate the portfolio." })
+      }
+    } catch (error) {
+      console.error("Error syncing Google picture:", error)
+      setMessage({ 
+        type: "error", 
+        text: error instanceof Error ? error.message : "Failed to sync Google picture. Please ensure you're signed in with Google or have connected your Gmail account." 
+      })
+    } finally {
+      setIsSyncingGoogle(false)
     }
   }
 
@@ -278,10 +330,25 @@ export function PortfolioBuilder({ userId }: PortfolioBuilderProps) {
       })
 
       if (!response.ok) {
-        throw new Error("Failed to improve CV data")
+        // Try to extract error message from response
+        let errorMessage = "Failed to improve CV data"
+        try {
+          const errorData = await response.json()
+          errorMessage = errorData.error || errorMessage
+        } catch {
+          // If response is not JSON, use status text
+          errorMessage = response.statusText || errorMessage
+        }
+        throw new Error(errorMessage)
       }
 
-      const { cvData: improvedData } = await response.json()
+      const responseData = await response.json()
+
+      if (!responseData.cvData) {
+        throw new Error("No improved data received from server")
+      }
+
+      const { cvData: improvedData } = responseData
       setCvData(improvedData)
 
       // Update additional info with improved CV data
@@ -328,7 +395,8 @@ export function PortfolioBuilder({ userId }: PortfolioBuilderProps) {
       setMessage({ type: "success", text: "CV/Resume improved successfully with AI! The enhanced information has been updated." })
     } catch (error) {
       console.error("Error improving CV data:", error)
-      setMessage({ type: "error", text: "Failed to improve CV data. Please try again." })
+      const errorMessage = error instanceof Error ? error.message : "Failed to improve CV data. Please try again."
+      setMessage({ type: "error", text: errorMessage })
     } finally {
       setIsImprovingCV(false)
     }
@@ -477,13 +545,62 @@ export function PortfolioBuilder({ userId }: PortfolioBuilderProps) {
 
       const { data, error } = result
 
-      if (error) throw error
+      if (error) {
+        // Extract meaningful error message from Supabase error
+        // Supabase errors can have: message, code, details, hint, etc.
+        let errorMessage = "Failed to save portfolio"
+        
+        if (error.message) {
+          errorMessage = error.message
+        } else if (error.code) {
+          errorMessage = `Database error (${error.code})`
+          if ((error as any).details) {
+            errorMessage += `: ${(error as any).details}`
+          }
+          if ((error as any).hint) {
+            errorMessage += ` (${(error as any).hint})`
+          }
+        } else if (typeof error === 'string') {
+          errorMessage = error
+        } else {
+          // Try to stringify the error object for debugging
+          try {
+            const errorStr = JSON.stringify(error, Object.getOwnPropertyNames(error))
+            if (errorStr && errorStr !== '{}') {
+              errorMessage = errorStr
+            }
+          } catch {
+            // If stringify fails, use default message
+          }
+        }
+        
+        // Provide user-friendly messages for common errors
+        const lowerMessage = errorMessage.toLowerCase()
+        if (lowerMessage.includes("violates row-level security") || lowerMessage.includes("new row violates") || lowerMessage.includes("rls policy")) {
+          errorMessage = "Permission denied. Please ensure you're logged in and have permission to save portfolios. This may be a database configuration issue."
+        } else if (lowerMessage.includes("duplicate key") || lowerMessage.includes("unique constraint") || lowerMessage.includes("already exists")) {
+          errorMessage = "A portfolio with this slug already exists. Please try generating again or change the portfolio title."
+        } else if (lowerMessage.includes("foreign key") || lowerMessage.includes("user_id")) {
+          errorMessage = "Invalid user account. Please log in again."
+        } else if (lowerMessage.includes("invalid input") || lowerMessage.includes("syntax")) {
+          errorMessage = "Invalid portfolio data. Please check your portfolio content and try again."
+        } else if (lowerMessage.includes("json") || lowerMessage.includes("jsonb")) {
+          errorMessage = "Invalid portfolio sections format. Please regenerate the portfolio."
+        }
+        
+        throw new Error(errorMessage)
+      }
+
+      if (!data) {
+        throw new Error("No data returned from save operation")
+      }
 
       setPortfolio(data as Portfolio)
       setMessage({ type: "success", text: "Portfolio saved successfully!" })
     } catch (error) {
       console.error("Error saving portfolio:", error)
-      setMessage({ type: "error", text: "Failed to save portfolio. Please try again." })
+      const errorMessage = error instanceof Error ? error.message : "Failed to save portfolio. Please try again."
+      setMessage({ type: "error", text: errorMessage })
     } finally {
       setIsSaving(false)
     }
@@ -592,7 +709,55 @@ export function PortfolioBuilder({ userId }: PortfolioBuilderProps) {
       }
 
       const { data, error } = result
-      if (error) throw error
+      if (error) {
+        // Extract meaningful error message from Supabase error
+        // Supabase errors can have: message, code, details, hint, etc.
+        let errorMessage = "Failed to save portfolio"
+        
+        if (error.message) {
+          errorMessage = error.message
+        } else if (error.code) {
+          errorMessage = `Database error (${error.code})`
+          if ((error as any).details) {
+            errorMessage += `: ${(error as any).details}`
+          }
+          if ((error as any).hint) {
+            errorMessage += ` (${(error as any).hint})`
+          }
+        } else if (typeof error === 'string') {
+          errorMessage = error
+        } else {
+          // Try to stringify the error object for debugging
+          try {
+            const errorStr = JSON.stringify(error, Object.getOwnPropertyNames(error))
+            if (errorStr && errorStr !== '{}') {
+              errorMessage = errorStr
+            }
+          } catch {
+            // If stringify fails, use default message
+          }
+        }
+        
+        // Provide user-friendly messages for common errors
+        const lowerMessage = errorMessage.toLowerCase()
+        if (lowerMessage.includes("violates row-level security") || lowerMessage.includes("new row violates") || lowerMessage.includes("rls policy")) {
+          errorMessage = "Permission denied. Please ensure you're logged in and have permission to save portfolios. This may be a database configuration issue."
+        } else if (lowerMessage.includes("duplicate key") || lowerMessage.includes("unique constraint") || lowerMessage.includes("already exists")) {
+          errorMessage = "A portfolio with this slug already exists. Please try generating again or change the portfolio title."
+        } else if (lowerMessage.includes("foreign key") || lowerMessage.includes("user_id")) {
+          errorMessage = "Invalid user account. Please log in again."
+        } else if (lowerMessage.includes("invalid input") || lowerMessage.includes("syntax")) {
+          errorMessage = "Invalid portfolio data. Please check your portfolio content and try again."
+        } else if (lowerMessage.includes("json") || lowerMessage.includes("jsonb")) {
+          errorMessage = "Invalid portfolio sections format. Please regenerate the portfolio."
+        }
+        
+        throw new Error(errorMessage)
+      }
+
+      if (!data) {
+        throw new Error("No data returned from save operation")
+      }
 
       // Update state with saved portfolio
       setPortfolio(data as Portfolio)
@@ -602,7 +767,8 @@ export function PortfolioBuilder({ userId }: PortfolioBuilderProps) {
       window.open(url, "_blank")
     } catch (error) {
       console.error("Error saving portfolio:", error)
-      setMessage({ type: "error", text: "Failed to save portfolio. Please try again." })
+      const errorMessage = error instanceof Error ? error.message : "Failed to save portfolio. Please try again."
+      setMessage({ type: "error", text: errorMessage })
     } finally {
       setIsSaving(false)
     }
@@ -675,41 +841,89 @@ export function PortfolioBuilder({ userId }: PortfolioBuilderProps) {
               <Label>Profile Image (Optional)</Label>
               <div className="space-y-2">
                 {portfolio?.profile_image_url ? (
-                  <div className="flex items-center gap-4 p-4 border rounded-lg bg-muted/50">
-                    <img 
-                      src={portfolio.profile_image_url} 
-                      alt="Profile" 
-                      className="w-20 h-20 rounded-full object-cover border-2 border-primary/20"
-                    />
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">Profile image uploaded</p>
-                      <p className="text-xs text-muted-foreground">Will be displayed on your portfolio</p>
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-4 p-4 border rounded-lg bg-muted/50">
+                      <img 
+                        src={portfolio.profile_image_url} 
+                        alt="Profile" 
+                        className="w-20 h-20 rounded-full object-cover border-2 border-primary/20"
+                      />
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">Profile image uploaded</p>
+                        <p className="text-xs text-muted-foreground">Will be displayed on your portfolio</p>
+                      </div>
+                      <Button
+                        onClick={removeProfileImage}
+                        variant="ghost"
+                        size="sm"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
                     </div>
-                    <Button
-                      onClick={removeProfileImage}
-                      variant="ghost"
-                      size="sm"
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <Input
+                        ref={imageInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageSelect}
+                        className="cursor-pointer flex-1"
+                        disabled={isUploadingImage || isSyncingGoogle}
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={syncGooglePicture}
+                        disabled={isUploadingImage || isSyncingGoogle}
+                        className="w-full sm:w-auto"
+                      >
+                        {isSyncingGoogle ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" /> Syncing...
+                          </>
+                        ) : (
+                          <>
+                            <RefreshCw className="h-4 w-4 mr-2" /> Sync from Google
+                          </>
+                        )}
+                      </Button>
+                    </div>
                   </div>
                 ) : (
-                  <div className="flex items-center gap-2">
-                    <Input
-                      ref={imageInputRef}
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageSelect}
-                      className="cursor-pointer"
-                      disabled={isUploadingImage}
-                    />
-                    {isUploadingImage && (
-                      <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                    )}
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-2">
+                      <Input
+                        ref={imageInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageSelect}
+                        className="cursor-pointer flex-1"
+                        disabled={isUploadingImage || isSyncingGoogle}
+                      />
+                      {isUploadingImage && (
+                        <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                      )}
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={syncGooglePicture}
+                      disabled={isUploadingImage || isSyncingGoogle}
+                      className="w-full sm:w-auto"
+                    >
+                      {isSyncingGoogle ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" /> Syncing...
+                        </>
+                      ) : (
+                        <>
+                          <RefreshCw className="h-4 w-4 mr-2" /> Sync from Google
+                        </>
+                      )}
+                    </Button>
                   </div>
                 )}
                 <p className="text-xs text-muted-foreground">
-                  Upload a profile photo (will be automatically compressed to save storage)
+                  Upload a profile photo or sync from your Google account (will be automatically compressed to save storage)
                 </p>
               </div>
             </div>
@@ -842,6 +1056,98 @@ export function PortfolioBuilder({ userId }: PortfolioBuilderProps) {
               <CardTitle>Basic Information</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              {/* Profile Image Upload - Always visible in editor */}
+              <div className="space-y-2">
+                <Label>Profile Image (Optional)</Label>
+                <div className="space-y-2">
+                  {portfolio?.profile_image_url ? (
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-4 p-4 border rounded-lg bg-muted/50">
+                        <img 
+                          src={portfolio.profile_image_url} 
+                          alt="Profile" 
+                          className="w-20 h-20 rounded-full object-cover border-2 border-primary/20"
+                        />
+                        <div className="flex-1">
+                          <p className="text-sm font-medium">Profile image uploaded</p>
+                          <p className="text-xs text-muted-foreground">Will be displayed on your portfolio</p>
+                        </div>
+                        <Button
+                          onClick={removeProfileImage}
+                          variant="ghost"
+                          size="sm"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      <div className="flex flex-col sm:flex-row gap-2">
+                        <Input
+                          ref={imageInputRef}
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageSelect}
+                          className="cursor-pointer flex-1"
+                          disabled={isUploadingImage || isSyncingGoogle}
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={syncGooglePicture}
+                          disabled={isUploadingImage || isSyncingGoogle}
+                          className="w-full sm:w-auto"
+                        >
+                          {isSyncingGoogle ? (
+                            <>
+                              <Loader2 className="h-4 w-4 mr-2 animate-spin" /> Syncing...
+                            </>
+                          ) : (
+                            <>
+                              <RefreshCw className="h-4 w-4 mr-2" /> Sync from Google
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-center gap-2">
+                        <Input
+                          ref={imageInputRef}
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageSelect}
+                          className="cursor-pointer flex-1"
+                          disabled={isUploadingImage || isSyncingGoogle}
+                        />
+                        {isUploadingImage && (
+                          <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                        )}
+                      </div>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={syncGooglePicture}
+                        disabled={isUploadingImage || isSyncingGoogle}
+                        className="w-full sm:w-auto"
+                      >
+                        {isSyncingGoogle ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" /> Syncing...
+                          </>
+                        ) : (
+                          <>
+                            <RefreshCw className="h-4 w-4 mr-2" /> Sync from Google
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  )}
+                  <p className="text-xs text-muted-foreground">
+                    Upload a profile photo or sync from your Google account (will be automatically compressed to save storage)
+                  </p>
+                </div>
+              </div>
+
               <div className="space-y-2">
                 <Label>Title</Label>
                 <Input

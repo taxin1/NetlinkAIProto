@@ -44,7 +44,7 @@ export default async function CalendarPage({
     .select('*')
     .eq('user_id', user.id)
     .eq('sync_enabled', true)
-    .single()
+    .maybeSingle()
 
   if (googleConnection) {
     try {
@@ -68,9 +68,32 @@ export default async function CalendarPage({
         .from('google_calendar_connections')
         .update({ last_sync_at: new Date().toISOString() })
         .eq('user_id', user.id)
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching Google Calendar events:', error)
-      // Continue with local events only
+      
+      // If it's an insufficient scopes error, disable sync to prevent repeated failures
+      // Check error name or message pattern since instanceof may not work in server components
+      const isInsufficientScopes = 
+        error?.name === 'InsufficientScopesError' ||
+        error?.constructor?.name === 'InsufficientScopesError' ||
+        error?.message?.includes('insufficient authentication scopes') ||
+        error?.message?.includes('required permissions') ||
+        (error?.code === 403 && error?.message?.includes('insufficient'))
+      
+      if (isInsufficientScopes) {
+        console.log('Insufficient scopes detected, disabling Google Calendar sync')
+        try {
+          await supabase
+            .from('google_calendar_connections')
+            .update({ sync_enabled: false })
+            .eq('user_id', user.id)
+        } catch (updateError) {
+          console.error('Failed to disable sync:', updateError)
+          // Continue anyway - don't fail the page
+        }
+      }
+      // Continue with local events only - don't re-throw the error
+      googleEvents = [] // Ensure googleEvents is set to empty array on error
     }
   }
 

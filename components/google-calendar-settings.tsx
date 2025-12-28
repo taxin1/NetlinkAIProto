@@ -100,6 +100,9 @@ export function GoogleCalendarSettings() {
           case 'no_code':
             message = 'No authorization code received. Please try connecting again.'
             break
+          case 'insufficient_scopes':
+            message = 'The authorization did not grant the required calendar permissions. Please disconnect and reconnect your Google Calendar, making sure to grant all requested permissions.'
+            break
           default:
             message = `Connection error: ${error}. Please check the console for details.`
         }
