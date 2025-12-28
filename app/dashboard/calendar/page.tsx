@@ -167,38 +167,38 @@ export default async function CalendarPage({
   return (
     <>
       <MeetingReminders userId={user.id} />
-      <div className="p-8 max-w-7xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
+      <div className="p-3 sm:p-4 md:p-6 lg:p-8 max-w-7xl mx-auto">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-balance">Calendar</h1>
-            <p className="text-muted-foreground mt-2">View your networking events in calendar format</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-balance">Calendar</h1>
+            <p className="text-muted-foreground mt-1 sm:mt-2 text-sm sm:text-base">View your networking events in calendar format</p>
           </div>
-          <Button asChild size="lg">
+          <Button asChild size="default" className="w-full sm:w-auto">
             <Link href="/events/new">
-              <Plus className="mr-2 h-5 w-5" />
+              <Plus className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
               Add Event
             </Link>
           </Button>
         </div>
 
         <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-2xl">
+          <CardHeader className="p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0">
+              <CardTitle className="text-xl sm:text-2xl">
                 {format(currentDate, "MMMM yyyy")}
               </CardTitle>
               <div className="flex gap-2">
-                <Button variant="outline" size="sm" asChild>
+                <Button variant="outline" size="sm" className="h-9 px-3" asChild>
                   <Link href={prevUrl}>
                     <ChevronLeft className="h-4 w-4" />
                   </Link>
                 </Button>
-                <Button variant="outline" size="sm" asChild>
+                <Button variant="outline" size="sm" className="h-9 px-3" asChild>
                   <Link href={nextUrl}>
                     <ChevronRight className="h-4 w-4" />
                   </Link>
                 </Button>
-                <Button variant="outline" size="sm" asChild>
+                <Button variant="outline" size="sm" className="h-9 px-3 text-sm" asChild>
                   <Link href="/dashboard/calendar">
                     Today
                   </Link>
@@ -206,15 +206,17 @@ export default async function CalendarPage({
               </div>
             </div>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-7 gap-px bg-border rounded-lg overflow-hidden border">
+          <CardContent className="p-2 sm:p-4 md:p-6">
+            <div className="overflow-x-auto">
+              <div className="grid grid-cols-7 gap-px bg-border rounded-lg overflow-hidden border w-full min-w-[600px] sm:min-w-0">
               {/* Week day headers */}
               {weekDays.map((day) => (
                 <div
                   key={day}
-                  className="bg-muted/50 p-2 text-center text-sm font-medium text-muted-foreground"
+                  className="bg-muted/50 p-1.5 sm:p-2 text-center text-xs sm:text-sm font-medium text-muted-foreground min-w-[40px]"
                 >
-                  {day}
+                  <span className="hidden sm:inline">{day}</span>
+                  <span className="sm:hidden">{day.slice(0, 1)}</span>
                 </div>
               ))}
 
@@ -228,11 +230,11 @@ export default async function CalendarPage({
                 return (
                   <div
                     key={`${dayKey}-${index}`}
-                    className={`min-h-[100px] p-2 bg-background ${
+                    className={`min-h-[60px] sm:min-h-[80px] md:min-h-[100px] p-1 sm:p-1.5 md:p-2 bg-background ${
                       !isCurrentMonth ? "opacity-40" : ""
-                    } ${isCurrentDay ? "ring-2 ring-primary ring-offset-2" : ""}`}
+                    } ${isCurrentDay ? "ring-1 sm:ring-2 ring-primary ring-offset-1 sm:ring-offset-2" : ""}`}
                   >
-                    <div className={`text-sm font-medium mb-1 ${
+                    <div className={`text-xs sm:text-sm font-medium mb-0.5 sm:mb-1 ${
                       isCurrentDay 
                         ? "text-primary font-bold" 
                         : isCurrentMonth 
@@ -241,8 +243,8 @@ export default async function CalendarPage({
                     }`}>
                       {format(day, "d")}
                     </div>
-                    <div className="space-y-1">
-                      {dayEvents.slice(0, 3).map((event: any) => {
+                    <div className="space-y-0.5 sm:space-y-1">
+                      {dayEvents.slice(0, 2).map((event: any) => {
                         const isGoogleEvent = event.source === 'google'
                         const bgColor = isGoogleEvent ? 'bg-blue-500/10' : 'bg-primary/10'
                         const textColor = isGoogleEvent ? 'text-blue-600 dark:text-blue-400' : 'text-primary'
@@ -251,104 +253,107 @@ export default async function CalendarPage({
                         return (
                           <div
                             key={event.id}
-                            className={`block text-xs p-1.5 rounded ${bgColor} ${textColor} ${hoverBg} transition-colors cursor-pointer group`}
+                            className={`block text-[10px] sm:text-xs p-1 sm:p-1.5 rounded ${bgColor} ${textColor} ${hoverBg} transition-colors cursor-pointer group`}
                             title={`${event.title} - ${format(new Date(event.start_time), "h:mm a")}${isGoogleEvent ? ' (Google Calendar)' : ''}`}
                           >
-                            <div className="flex items-center gap-1 mb-0.5">
+                            <div className="hidden sm:flex items-center gap-1 mb-0.5">
                               <Clock className="h-3 w-3 shrink-0" />
                               <span className="truncate text-[10px]">{format(new Date(event.start_time), "h:mm a")}</span>
                               {isGoogleEvent && (
                                 <ExternalLink className="h-2.5 w-2.5 shrink-0 opacity-60 group-hover:opacity-100" />
                               )}
                             </div>
-                            <div className="truncate font-medium">{event.title}</div>
+                            <div className="truncate font-medium leading-tight">{event.title}</div>
                           </div>
                         )
                       })}
-                      {dayEvents.length > 3 && (
-                        <div className="text-xs text-muted-foreground px-1.5">
-                          +{dayEvents.length - 3} more
+                      {dayEvents.length > 2 && (
+                        <div className="text-[10px] sm:text-xs text-muted-foreground px-1 sm:px-1.5">
+                          +{dayEvents.length - 2} more
                         </div>
                       )}
                     </div>
                   </div>
                 )
               })}
+              </div>
             </div>
           </CardContent>
         </Card>
 
         {/* Upcoming events sidebar */}
         {allEvents && allEvents.length > 0 && (
-          <Card className="mt-6">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                Upcoming Events This Month
+          <Card className="mt-4 sm:mt-6">
+            <CardHeader className="p-4 sm:p-6">
+              <CardTitle className="flex flex-col sm:flex-row sm:items-center gap-2 text-lg sm:text-xl">
+                <span>Upcoming Events This Month</span>
                 {googleConnection && (
-                  <span className="text-sm font-normal text-muted-foreground">
+                  <span className="text-xs sm:text-sm font-normal text-muted-foreground">
                     ({localEventsFormatted.length} local, {googleEventsFormatted.length} from Google)
                   </span>
                 )}
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
+            <CardContent className="p-4 sm:p-6">
+              <div className="space-y-3 sm:space-y-4">
                 {allEvents.slice(0, 10).map((event: any) => {
                   const isGoogleEvent = event.source === 'google'
                   
                   return (
                     <div
                       key={event.id}
-                      className={`flex items-start gap-4 p-4 rounded-lg border hover:bg-accent/50 transition-colors ${
+                      className={`flex items-start gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg border hover:bg-accent/50 transition-colors ${
                         isGoogleEvent ? 'border-blue-500/20 bg-blue-500/5' : ''
                       }`}
                     >
-                      <div className="flex flex-col items-center min-w-[60px]">
-                        <div className={`text-2xl font-bold ${isGoogleEvent ? 'text-blue-600 dark:text-blue-400' : 'text-primary'}`}>
+                      <div className="flex flex-col items-center min-w-[50px] sm:min-w-[60px] flex-shrink-0">
+                        <div className={`text-xl sm:text-2xl font-bold ${isGoogleEvent ? 'text-blue-600 dark:text-blue-400' : 'text-primary'}`}>
                           {format(new Date(event.start_time), "d")}
                         </div>
-                        <div className="text-xs text-muted-foreground uppercase">
+                        <div className="text-[10px] sm:text-xs text-muted-foreground uppercase">
                           {format(new Date(event.start_time), "MMM")}
                         </div>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-semibold text-lg">{event.title}</h3>
-                          {isGoogleEvent && (
-                            <a
-                              href={event.htmlLink}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-blue-600 dark:text-blue-400 hover:underline"
-                              title="Open in Google Calendar"
-                            >
-                              <ExternalLink className="h-4 w-4" />
-                            </a>
-                          )}
-                          {isGoogleEvent && (
-                            <span className="text-xs px-2 py-0.5 rounded bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-500/30">
-                              Google
-                            </span>
-                          )}
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-1">
+                          <h3 className="font-semibold text-base sm:text-lg leading-tight">{event.title}</h3>
+                          <div className="flex items-center gap-2">
+                            {isGoogleEvent && (
+                              <a
+                                href={event.htmlLink}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 dark:text-blue-400 hover:underline flex-shrink-0"
+                                title="Open in Google Calendar"
+                              >
+                                <ExternalLink className="h-4 w-4" />
+                              </a>
+                            )}
+                            {isGoogleEvent && (
+                              <span className="text-[10px] sm:text-xs px-2 py-0.5 rounded bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-500/30 whitespace-nowrap">
+                                Google
+                              </span>
+                            )}
+                          </div>
                         </div>
                         {event.description && (
-                          <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
+                          <p className="text-xs sm:text-sm text-muted-foreground mb-2 line-clamp-2">
                             {event.description}
                           </p>
                         )}
-                        <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+                        <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
                           <div className="flex items-center gap-1">
-                            <Clock className="h-4 w-4" />
-                            {format(new Date(event.start_time), "h:mm a")}
+                            <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
+                            <span>{format(new Date(event.start_time), "h:mm a")}</span>
                           </div>
                           {event.location && (
                             <div className="flex items-center gap-1">
-                              <MapPin className="h-4 w-4" />
-                              {event.location}
+                              <MapPin className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
+                              <span className="truncate">{event.location}</span>
                             </div>
                           )}
                           {event.contacts && (
-                            <div className="text-muted-foreground">
+                            <div className="text-muted-foreground truncate">
                               with {event.contacts.name}
                               {event.contacts.company && ` (${event.contacts.company})`}
                             </div>

@@ -27,30 +27,30 @@ export default async function EmailsPage() {
     .order("created_at", { ascending: false })
 
   return (
-    <div className="relative z-10 p-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-balance flex items-center gap-2">
-          <Mail className="h-8 w-8 text-primary" />
+    <div className="relative z-10 p-4 sm:p-6 lg:p-8">
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-balance flex items-center gap-2">
+          <Mail className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
           Emails & Campaigns
         </h1>
-        <p className="text-muted-foreground mt-2">
+        <p className="text-muted-foreground mt-2 text-sm sm:text-base">
           Send personalized emails, create AI-powered campaigns, and manage all your communications
         </p>
       </div>
 
-      <Tabs defaultValue="emails" className="space-y-6">
-        <TabsList className="grid w-full max-w-2xl grid-cols-3">
-          <TabsTrigger value="emails" className="flex items-center gap-2">
-            <Send className="h-4 w-4" />
-            Individual Emails
+      <Tabs defaultValue="emails" className="space-y-4 sm:space-y-6">
+        <TabsList className="grid w-full max-w-2xl grid-cols-3 h-auto">
+          <TabsTrigger value="emails" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-4 py-2">
+            <Send className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="hidden sm:inline">Individual </span>Emails
           </TabsTrigger>
-          <TabsTrigger value="replies" className="flex items-center gap-2">
-            <MessageSquare className="h-4 w-4" />
+          <TabsTrigger value="replies" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-4 py-2">
+            <MessageSquare className="h-3 w-3 sm:h-4 sm:w-4" />
             Replies
           </TabsTrigger>
-          <TabsTrigger value="campaigns" className="flex items-center gap-2">
-            <Bot className="h-4 w-4" />
-            AI Campaigns
+          <TabsTrigger value="campaigns" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-4 py-2">
+            <Bot className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="hidden sm:inline">AI </span>Campaigns
           </TabsTrigger>
         </TabsList>
 

@@ -620,17 +620,17 @@ export function AIEmailAgent({ userId }: AIEmailAgentProps) {
   }
 
   return (
-    <div id="ai-agent" className="space-y-6">
+    <div id="ai-agent" className="space-y-4 sm:space-y-6">
       {/* Header */}
       <Card className="border-slate-800/50 bg-slate-900/80 backdrop-blur-xl">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-white">
-            <Bot className="h-6 w-6 text-cyan-400" />
+        <CardHeader className="p-4 sm:p-6">
+          <CardTitle className="flex items-center gap-2 text-white text-lg sm:text-xl">
+            <Bot className="h-5 w-5 sm:h-6 sm:w-6 text-cyan-400" />
             AI Email Agent
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <p className="text-slate-400">
+        <CardContent className="p-4 sm:p-6 pt-0">
+          <p className="text-slate-400 text-sm sm:text-base">
             Automatically send personalized cold emails to multiple contacts using AI
           </p>
         </CardContent>
@@ -638,13 +638,13 @@ export function AIEmailAgent({ userId }: AIEmailAgentProps) {
 
       {/* Create Campaign */}
       <Card className="border-slate-800/50 bg-slate-900/80 backdrop-blur-xl">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-white">
-            <Settings className="h-5 w-5 text-cyan-400" />
+        <CardHeader className="p-4 sm:p-6">
+          <CardTitle className="flex items-center gap-2 text-white text-base sm:text-lg">
+            <Settings className="h-4 w-4 sm:h-5 sm:w-5 text-cyan-400" />
             Create Email Campaign
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 p-4 sm:p-6 pt-0">
           {/* AI Generate All Button */}
           <div className="flex justify-end">
             <Button
@@ -652,17 +652,19 @@ export function AIEmailAgent({ userId }: AIEmailAgentProps) {
               variant="outline"
               onClick={generateAll}
               disabled={isGeneratingAll || !campaignName.trim()}
-              className="border-cyan-500/50 text-cyan-400 hover:bg-cyan-500/10 hover:text-cyan-300"
+              className="border-cyan-500/50 text-cyan-400 hover:bg-cyan-500/10 hover:text-cyan-300 text-xs sm:text-sm px-2 sm:px-4"
             >
               {isGeneratingAll ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Generating...
+                  <Loader2 className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
+                  <span className="hidden sm:inline">Generating...</span>
+                  <span className="sm:hidden">Gen...</span>
                 </>
               ) : (
                 <>
-                  <Wand2 className="mr-2 h-4 w-4" />
-                  Generate All with AI
+                  <Wand2 className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="hidden sm:inline">Generate All with AI</span>
+                  <span className="sm:hidden">Generate All</span>
                 </>
               )}
             </Button>
@@ -670,33 +672,34 @@ export function AIEmailAgent({ userId }: AIEmailAgentProps) {
 
           <div className="grid gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="campaign-name" className="text-slate-300">Campaign Name</Label>
+              <Label htmlFor="campaign-name" className="text-slate-300 text-sm sm:text-base">Campaign Name</Label>
               <Input
                 id="campaign-name"
                 value={campaignName}
                 onChange={(e) => setCampaignName(e.target.value)}
                 placeholder="e.g., Q1 Outreach Campaign"
-                className="bg-slate-800/50 border-slate-700/50 text-white placeholder:text-slate-500"
+                className="bg-slate-800/50 border-slate-700/50 text-white placeholder:text-slate-500 text-sm sm:text-base h-9 sm:h-10"
               />
             </div>
             
             <div className="grid gap-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="campaign-purpose" className="text-slate-300">Email Purpose</Label>
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <Label htmlFor="campaign-purpose" className="text-slate-300 text-sm sm:text-base">Email Purpose</Label>
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
                   onClick={generatePurpose}
                   disabled={isGeneratingPurpose || !campaignName.trim()}
-                  className="text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10 h-8 px-2"
+                  className="text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10 h-7 sm:h-8 px-2 text-xs sm:text-sm"
                 >
                   {isGeneratingPurpose ? (
                     <Loader2 className="h-3 w-3 animate-spin" />
                   ) : (
                     <>
                       <Sparkles className="h-3 w-3 mr-1" />
-                      Generate
+                      <span className="hidden sm:inline">Generate</span>
+                      <span className="sm:hidden">Gen</span>
                     </>
                   )}
                 </Button>
@@ -706,28 +709,29 @@ export function AIEmailAgent({ userId }: AIEmailAgentProps) {
                 value={campaignPurpose}
                 onChange={(e) => setCampaignPurpose(e.target.value)}
                 placeholder="e.g., Schedule a product demo, Invite to event..."
-                className="bg-slate-800/50 border-slate-700/50 text-white placeholder:text-slate-500"
+                className="bg-slate-800/50 border-slate-700/50 text-white placeholder:text-slate-500 text-sm sm:text-base"
                 rows={3}
               />
             </div>
             
             <div className="grid gap-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="campaign-subject" className="text-slate-300">Email Subject</Label>
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <Label htmlFor="campaign-subject" className="text-slate-300 text-sm sm:text-base">Email Subject</Label>
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
                   onClick={generateSubject}
                   disabled={isGeneratingSubject || !campaignName.trim()}
-                  className="text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10 h-8 px-2"
+                  className="text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10 h-7 sm:h-8 px-2 text-xs sm:text-sm"
                 >
                   {isGeneratingSubject ? (
                     <Loader2 className="h-3 w-3 animate-spin" />
                   ) : (
                     <>
                       <Sparkles className="h-3 w-3 mr-1" />
-                      Generate
+                      <span className="hidden sm:inline">Generate</span>
+                      <span className="sm:hidden">Gen</span>
                     </>
                   )}
                 </Button>
@@ -737,33 +741,33 @@ export function AIEmailAgent({ userId }: AIEmailAgentProps) {
                 value={campaignSubject}
                 onChange={(e) => setCampaignSubject(e.target.value)}
                 placeholder="e.g., Quick question about your business"
-                className="bg-slate-800/50 border-slate-700/50 text-white placeholder:text-slate-500"
+                className="bg-slate-800/50 border-slate-700/50 text-white placeholder:text-slate-500 text-sm sm:text-base h-9 sm:h-10"
               />
             </div>
           </div>
 
           {/* Contact Selection */}
           <div className="space-y-3">
-            <Label className="text-slate-300">Select Contacts ({selectedContacts.length} selected)</Label>
+            <Label className="text-slate-300 text-sm sm:text-base">Select Contacts ({selectedContacts.length} selected)</Label>
             <div className="grid gap-2 max-h-40 overflow-y-auto">
               {contacts.map((contact) => (
                 <div
                   key={contact.id}
-                  className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-colors ${
+                  className={`flex items-center justify-between p-2 sm:p-3 rounded-lg border cursor-pointer transition-colors ${
                     selectedContacts.includes(contact.id)
                       ? 'bg-cyan-500/10 border-cyan-500/50'
                       : 'bg-slate-800/50 border-slate-700/50 hover:bg-slate-800'
                   }`}
                   onClick={() => toggleContactSelection(contact.id)}
                 >
-                  <div>
-                    <p className="font-medium text-white">{contact.name}</p>
-                    <p className="text-sm text-slate-400">
-                      {contact.company} • {contact.email}
+                  <div className="flex-1 min-w-0 pr-2">
+                    <p className="font-medium text-white text-sm sm:text-base truncate">{contact.name}</p>
+                    <p className="text-xs sm:text-sm text-slate-400 truncate">
+                      {contact.company && contact.email ? `${contact.company} • ${contact.email}` : contact.company || contact.email || ''}
                     </p>
                   </div>
                   {selectedContacts.includes(contact.id) && (
-                    <CheckCircle2 className="h-4 w-4 text-cyan-400" />
+                    <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-cyan-400 flex-shrink-0" />
                   )}
                 </div>
               ))}
@@ -773,12 +777,13 @@ export function AIEmailAgent({ userId }: AIEmailAgentProps) {
           <Button 
             onClick={createCampaign} 
             disabled={isCreating}
-            className="w-full bg-white text-slate-900 hover:bg-slate-100"
+            className="w-full bg-white text-slate-900 hover:bg-slate-100 text-sm sm:text-base h-9 sm:h-10"
           >
             {isCreating ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Creating Campaign...
+                <span className="hidden sm:inline">Creating Campaign...</span>
+                <span className="sm:hidden">Creating...</span>
               </>
             ) : (
               <>
@@ -792,28 +797,28 @@ export function AIEmailAgent({ userId }: AIEmailAgentProps) {
 
       {/* Campaigns List */}
       <Card className="border-slate-800/50 bg-slate-900/80 backdrop-blur-xl">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-white">
-            <Users className="h-5 w-5 text-cyan-400" />
+        <CardHeader className="p-4 sm:p-6">
+          <CardTitle className="flex items-center gap-2 text-white text-base sm:text-lg">
+            <Users className="h-4 w-4 sm:h-5 sm:w-5 text-cyan-400" />
             Email Campaigns
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-4 sm:p-6 pt-0">
           {campaigns.length === 0 ? (
-            <p className="text-slate-400 text-center py-4">
+            <p className="text-slate-400 text-center py-4 text-sm sm:text-base">
               No campaigns created yet. Create your first campaign above.
             </p>
           ) : (
             <div className="space-y-4">
               {campaigns.map((campaign) => (
-                <div key={campaign.id} className="border border-slate-800/50 bg-slate-800/30 rounded-lg p-4 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="font-semibold text-white">{campaign.name}</h3>
-                      <p className="text-sm text-slate-400">{campaign.purpose}</p>
+                <div key={campaign.id} className="border border-slate-800/50 bg-slate-800/30 rounded-lg p-3 sm:p-4 space-y-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-white text-sm sm:text-base truncate">{campaign.name}</h3>
+                      <p className="text-xs sm:text-sm text-slate-400 line-clamp-2">{campaign.purpose}</p>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Badge className={getStatusColor(campaign.status)}>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <Badge className={`${getStatusColor(campaign.status)} text-xs`}>
                         {getStatusIcon(campaign.status)}
                         <span className="ml-1 capitalize">{campaign.status}</span>
                       </Badge>
@@ -822,52 +827,55 @@ export function AIEmailAgent({ userId }: AIEmailAgentProps) {
                           size="sm"
                           onClick={() => runCampaign(campaign)}
                           disabled={isRunning || currentCampaign?.id === campaign.id}
-                          className="bg-white text-slate-900 hover:bg-slate-100"
+                          className="bg-white text-slate-900 hover:bg-slate-100 text-xs sm:text-sm px-2 sm:px-3 h-7 sm:h-8"
                         >
-                          <Play className="mr-2 h-4 w-4" />
-                          Run
+                          <Play className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+                          <span className="hidden sm:inline">Run</span>
+                          <span className="sm:hidden">Run</span>
                         </Button>
                       )}
                       {campaign.status === 'completed' && (
-                        <div className="flex gap-2">
+                        <div className="flex gap-1 sm:gap-2 flex-wrap">
                           <Button
                             size="sm"
                             onClick={() => runCampaign(campaign, true)}
                             disabled={isRunning || currentCampaign?.id === campaign.id}
                             variant="outline"
-                            className="border-cyan-500/50 text-cyan-400 hover:bg-cyan-500/10 hover:text-cyan-300"
+                            className="border-cyan-500/50 text-cyan-400 hover:bg-cyan-500/10 hover:text-cyan-300 text-xs sm:text-sm px-2 sm:px-3 h-7 sm:h-8"
                           >
-                            <Play className="mr-2 h-4 w-4" />
-                            Re-run Unsent
+                            <Play className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+                            <span className="hidden sm:inline">Re-run Unsent</span>
+                            <span className="sm:hidden">Unsent</span>
                           </Button>
                           <Button
                             size="sm"
                             onClick={() => rerunCampaign(campaign)}
                             disabled={isRunning || currentCampaign?.id === campaign.id}
-                            className="bg-white text-slate-900 hover:bg-slate-100"
+                            className="bg-white text-slate-900 hover:bg-slate-100 text-xs sm:text-sm px-2 sm:px-3 h-7 sm:h-8"
                           >
-                            <Play className="mr-2 h-4 w-4" />
-                            Re-run All
+                            <Play className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+                            <span className="hidden sm:inline">Re-run All</span>
+                            <span className="sm:hidden">All</span>
                           </Button>
                         </div>
                       )}
                     </div>
                   </div>
                   
-                  <div className="flex items-center justify-between text-sm text-slate-400">
+                  <div className="flex items-center justify-between text-xs sm:text-sm text-slate-400">
                     <span>{campaign.contacts.length} contacts</span>
                     <span>{campaign.sent_count}/{campaign.total_count} sent</span>
                   </div>
 
                   {currentCampaign?.id === campaign.id && isRunning && (
                     <div className="space-y-2">
-                      <div className="flex items-center justify-between text-sm text-white">
+                      <div className="flex items-center justify-between text-xs sm:text-sm text-white">
                         <span>Sending emails...</span>
                         <span>{sendingProgress}%</span>
                       </div>
-                      <div className="w-full bg-slate-700 rounded-full h-2">
+                      <div className="w-full bg-slate-700 rounded-full h-1.5 sm:h-2">
                         <div 
-                          className="bg-cyan-400 h-2 rounded-full transition-all duration-300"
+                          className="bg-cyan-400 h-1.5 sm:h-2 rounded-full transition-all duration-300"
                           style={{ width: `${sendingProgress}%` }}
                         />
                       </div>
