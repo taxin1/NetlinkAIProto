@@ -217,548 +217,677 @@ export function PublicAboutPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/20 relative overflow-hidden">
-      {/* Animated Background */}
+    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 relative overflow-hidden">
+      {/* Dark Tech Background */}
       <div className="fixed inset-0 z-0 overflow-hidden">
-        <motion.div
-          className="absolute top-0 -left-20 w-96 h-96 bg-cyan-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20"
-          animate={{
-            scale: [1, 1.2, 1],
-            x: [0, 50, 0],
-            y: [0, 30, 0],
-          }}
-          transition={{
-            duration: 8,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-        />
-        <motion.div
-          className="absolute top-0 right-0 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20"
-          animate={{
-            scale: [1, 1.3, 1],
-            x: [0, -40, 0],
-            y: [0, 50, 0],
-          }}
-          transition={{
-            duration: 10,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 1,
-          }}
-        />
-        <motion.div
-          className="absolute -bottom-20 left-20 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20"
-          animate={{
-            scale: [1, 1.15, 1],
-            x: [0, 60, 0],
-            y: [0, -40, 0],
-          }}
-          transition={{
-            duration: 12,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 2,
-          }}
-        />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(6,182,212,0.05),transparent_50%)]"></div>
+        <div className="absolute inset-0 bg-[linear-gradient(to_bottom,transparent_0%,rgba(6,182,212,0.03)_50%,transparent_100%)]"></div>
       </div>
 
       {/* Navigation */}
       <PublicNavigation />
 
-      {/* Hero Section */}
+      {/* Hero Section - Enhanced */}
       <motion.section 
         ref={heroRef}
         style={{ y, opacity }}
-        className="relative container mx-auto px-4 py-20 md:py-32 z-10"
+        className="relative container mx-auto px-4 py-32 md:py-40 z-10"
       >
+        <div className="max-w-5xl mx-auto">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="max-w-4xl mx-auto text-center"
-        >
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-            className="inline-block mb-6"
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            className="mb-10"
           >
-            <Badge className="px-4 py-2 text-sm bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border-cyan-500/30 text-cyan-400">
-              <Sparkles className="h-4 w-4 mr-2 inline" />
-              AI-Powered Networking Platform
-            </Badge>
+            <motion.span 
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2, duration: 0.6 }}
+              className="inline-flex items-center gap-2 px-4 py-2 mb-6 rounded-full bg-gradient-to-r from-cyan-500/10 via-blue-500/10 to-purple-500/10 border border-cyan-500/20 backdrop-blur-sm"
+            >
+              <Sparkles className="h-4 w-4 text-cyan-400" />
+              <span className="text-sm font-semibold text-cyan-400">About Us</span>
+            </motion.span>
           </motion.div>
           
           <motion.h1
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.8 }}
-            className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-cyan-600 via-blue-600 to-purple-600 bg-clip-text text-transparent leading-tight"
+            transition={{ delay: 0.3, duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+            className="text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold mb-10 leading-[1.1] tracking-tight text-white"
           >
-            About Netlink Cogni
+            <span className="block bg-gradient-to-r from-white via-cyan-100 to-blue-200 bg-clip-text text-transparent">
+              We're reimagining how
+            </span>
+            <motion.span 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.6, duration: 0.8 }}
+              className="block mt-2 bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent"
+            >
+              professionals build
+            </motion.span>
+            <motion.span 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.8, duration: 0.8 }}
+              className="block mt-2 bg-gradient-to-r from-white via-cyan-100 to-blue-200 bg-clip-text text-transparent"
+            >
+              meaningful networks
+            </motion.span>
           </motion.h1>
           
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, duration: 0.8 }}
-            className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-3xl mx-auto leading-relaxed"
+            transition={{ delay: 0.5, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            className="max-w-2xl mb-12"
           >
-            Revolutionizing professional networking with AI-powered tools that help you build meaningful connections, 
-            automate follow-ups, and grow your network globally.
-          </motion.p>
+            <p className="text-xl md:text-2xl text-slate-300 leading-relaxed font-light">
+              Netlink Cogni combines artificial intelligence with thoughtful design to eliminate the friction 
+              in professional networking. We help you connect, communicate, and grow your network—without the busywork.
+            </p>
+          </motion.div>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5, duration: 0.8 }}
-            className="flex gap-4 justify-center flex-wrap"
+            transition={{ delay: 0.7, duration: 0.6 }}
+            className="flex gap-4 flex-wrap"
           >
             <Link href="/auth/signup">
-              <Button size="lg" className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700">
-                Get Started Free
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Button size="lg" className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-semibold text-lg px-8 py-6 shadow-lg shadow-cyan-500/25">
+                  Get Started
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
+              </motion.div>
             </Link>
             <Link href="/public/networkers">
-              <Button size="lg" variant="outline">
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Button size="lg" variant="outline" className="border-2 border-slate-600 text-slate-300 hover:text-white hover:bg-slate-800/50 font-semibold text-lg px-8 py-6">
                 Explore Networkers
               </Button>
+              </motion.div>
             </Link>
           </motion.div>
-        </motion.div>
+        </div>
       </motion.section>
 
-      {/* Stats Section */}
-      <section className="relative container mx-auto px-4 py-16 z-10">
+      {/* Stats Section - Enhanced */}
+      <section className="relative container mx-auto px-4 py-24 z-10 border-y border-slate-800/50 bg-slate-900/30 backdrop-blur-sm">
+        <div className="max-w-6xl mx-auto">
         <motion.div
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true }}
+            viewport={{ once: true, margin: "-100px" }}
           variants={containerVariants}
-          className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-6xl mx-auto"
+            className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-16"
         >
           {stats.map((stat, index) => (
             <motion.div
               key={stat.label}
               variants={itemVariants}
-              whileHover={{ scale: 1.05 }}
-              className="text-center"
+                className="text-center group"
+                whileHover={{ y: -5 }}
+                transition={{ duration: 0.3 }}
             >
-              <Card className="border-2 hover:border-primary/50 transition-colors">
-                <CardContent className="p-6">
                   <motion.div
-                    animate={floatAnimation}
-                    style={{ animationDelay: `${index * 0.2}s` }}
-                    className="flex justify-center mb-4"
-                  >
-                    <div className={`w-16 h-16 rounded-full bg-gradient-to-br ${stat.icon === Users ? 'from-cyan-500 to-blue-500' : stat.icon === Network ? 'from-purple-500 to-pink-500' : stat.icon === Mail ? 'from-green-500 to-emerald-500' : 'from-orange-500 to-red-500'} flex items-center justify-center`}>
-                      <stat.icon className="h-8 w-8 text-white" />
-                    </div>
-                  </motion.div>
+                  initial={{ opacity: 0, scale: 0.5 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ 
+                    delay: index * 0.15,
+                    type: "spring",
+                    stiffness: 200,
+                    damping: 20
+                  }}
+                >
                   <motion.h3
-                    initial={{ opacity: 0 }}
-                    whileInView={{ opacity: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: index * 0.1 + 0.3 }}
-                    className="text-3xl md:text-4xl font-bold mb-2 bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent"
+                    className="text-5xl md:text-6xl font-bold mb-3 bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent"
                   >
                     {stat.number}
                   </motion.h3>
-                  <p className="text-sm text-muted-foreground font-medium">{stat.label}</p>
-                </CardContent>
-              </Card>
+                  <motion.p 
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: index * 0.15 + 0.2 }}
+                    className="text-sm md:text-base text-slate-400 font-medium uppercase tracking-wider"
+                  >
+                    {stat.label}
+                  </motion.p>
+                </motion.div>
             </motion.div>
           ))}
         </motion.div>
+        </div>
       </section>
 
-      {/* Mission & Vision Section */}
-      <section className="relative container mx-auto px-4 py-20 z-10">
+      {/* Mission & Vision Section - Enhanced */}
+      <section className="relative container mx-auto px-4 py-32 z-10">
         <div className="max-w-6xl mx-auto">
+          {/* Editorial-style header */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-16"
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            className="mb-24"
           >
-            <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
-              Our Mission & Vision
+            <motion.span
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="inline-flex items-center gap-2 px-4 py-2 mb-6 rounded-full bg-gradient-to-r from-cyan-500/10 via-blue-500/10 to-purple-500/10 border border-cyan-500/20 backdrop-blur-sm"
+            >
+              <Sparkles className="h-4 w-4 text-cyan-400" />
+              <span className="text-sm font-semibold text-cyan-400">Our Purpose</span>
+            </motion.span>
+            <h2 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-8 leading-[1.1] tracking-tight text-white">
+              <span className="block bg-gradient-to-r from-white via-cyan-100 to-blue-200 bg-clip-text text-transparent">
+                We believe networking
+              </span>
+              <motion.span 
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.3, duration: 0.8 }}
+                className="block mt-2 bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent"
+              >
+                should be meaningful,
+              </motion.span>
+              <span className="block mt-2 bg-gradient-to-r from-white via-cyan-100 to-blue-200 bg-clip-text text-transparent">not mechanical</span>
             </h2>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Building the future of professional networking, one connection at a time
-            </p>
+            <motion.div 
+              initial={{ width: 0 }}
+              whileInView={{ width: 96 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.5, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+              className="h-1 bg-gradient-to-r from-cyan-500 to-blue-500 mb-12"
+            ></motion.div>
           </motion.div>
 
-          <div className="grid md:grid-cols-2 gap-8">
+          {/* Mission - Enhanced layout */}
             <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-            >
-              <Card className="h-full border-2 hover:border-primary/50 transition-colors">
-                <CardHeader>
-                  <div className="flex items-center gap-4 mb-4">
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.9, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            className="mb-32"
+          >
+            <div className="grid md:grid-cols-[auto_1fr] gap-8 md:gap-12 items-start">
                     <motion.div
-                      animate={pulseAnimation}
-                      className="w-16 h-16 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center"
-                    >
-                      <Target className="h-8 w-8 text-white" />
+                initial={{ scaleY: 0 }}
+                whileInView={{ scaleY: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.4, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                className="flex-shrink-0 mt-2"
+              >
+                <div className="w-1 h-24 bg-gradient-to-b from-cyan-600 to-cyan-400 dark:from-cyan-400 dark:to-cyan-300"></div>
                     </motion.div>
-                    <CardTitle className="text-2xl">Our Mission</CardTitle>
+              <div className="flex-1">
+                <motion.h3 
+                  initial={{ opacity: 0, x: -20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.5, duration: 0.6 }}
+                  className="text-4xl md:text-5xl font-bold mb-8 bg-gradient-to-r from-white via-cyan-100 to-blue-200 bg-clip-text text-transparent"
+                >
+                  Mission
+                </motion.h3>
+                <div className="space-y-6 text-lg md:text-xl leading-relaxed">
+                  <motion.p 
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.6, duration: 0.6 }}
+                    className="text-2xl leading-relaxed font-semibold text-white"
+                  >
+                    We're eliminating the busywork that stands between professionals and real relationships.
+                  </motion.p>
+                  <motion.p 
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.7, duration: 0.6 }}
+                    className="text-slate-300"
+                  >
+                    Traditional networking tools force you to manage spreadsheets, remember follow-ups, and manually track every interaction. 
+                    We've built something different: an intelligent platform that handles the logistics so you can focus on what matters—building genuine connections.
+                  </motion.p>
+                  <motion.p 
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.8, duration: 0.6 }}
+                    className="text-slate-300"
+                  >
+                    Our AI doesn't replace human connection; it amplifies it. By automating routine tasks like contact extraction, 
+                    email drafting, and meeting reminders, we give you time to invest in meaningful conversations and relationships 
+                    that drive your career forward.
+                  </motion.p>
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-lg text-muted-foreground leading-relaxed mb-4">
-                    To revolutionize professional networking by combining cutting-edge AI technology with a global community 
-                    of professionals. We believe that meaningful connections should be effortless, and that's why we've built 
-                    a platform that helps you discover, connect, and engage with professionals worldwide.
-                  </p>
-                  <p className="text-lg text-muted-foreground leading-relaxed">
-                    Our mission is to eliminate the friction in networking, making it easier than ever to build and maintain 
-                    professional relationships that drive career growth and business success.
-                  </p>
-                </CardContent>
-              </Card>
+              </div>
+            </div>
             </motion.div>
 
+          {/* Vision - Enhanced layout */}
             <motion.div
-              initial={{ opacity: 0, x: 50 }}
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.9, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            className="mb-24"
+          >
+            <div className="grid md:grid-cols-[auto_1fr] gap-8 md:gap-12 items-start">
+              <motion.div 
+                initial={{ scaleY: 0 }}
+                whileInView={{ scaleY: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.5, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                className="flex-shrink-0 mt-2"
+              >
+                <div className="w-1 h-24 bg-gradient-to-b from-blue-600 to-blue-400 dark:from-blue-400 dark:to-blue-300"></div>
+              </motion.div>
+              <div className="flex-1">
+                <motion.h3 
+                  initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+                  transition={{ delay: 0.6, duration: 0.6 }}
+                  className="text-4xl md:text-5xl font-bold mb-8 bg-gradient-to-r from-white via-cyan-100 to-blue-200 bg-clip-text text-transparent"
+                >
+                  Vision
+                </motion.h3>
+                <div className="space-y-6 text-lg md:text-xl leading-relaxed">
+                  <motion.p 
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.7, duration: 0.6 }}
+                    className="text-2xl leading-relaxed font-semibold text-white"
+                  >
+                    A world where every professional has the tools to build a global network effortlessly.
+                  </motion.p>
+                  <motion.p 
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.8, duration: 0.6 }}
+                    className="text-slate-300"
+                  >
+                    We envision a future where geographic boundaries don't limit professional relationships. Where language barriers 
+                    are overcome by intelligent translation. Where time zones are managed automatically. Where your network grows 
+                    organically because the platform handles the friction.
+                  </motion.p>
+                  <motion.p 
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.9, duration: 0.6 }}
+                    className="text-slate-300"
+                  >
+                    This isn't about replacing human interaction—it's about creating more of it. By removing the administrative 
+                    burden of networking, we enable professionals to connect more frequently, more meaningfully, and more globally 
+                    than ever before.
+                  </motion.p>
+                </div>
+              </div>
+            </div>
+                    </motion.div>
+
+          {/* Key Differentiator - Enhanced */}
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.8, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            className="mt-32 pt-20 border-t"
+          >
+            <div className="max-w-4xl">
+              <motion.span
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.5, duration: 0.6 }}
+                className="inline-flex items-center gap-2 px-4 py-2 mb-6 rounded-full bg-gradient-to-r from-cyan-500/10 via-blue-500/10 to-purple-500/10 border border-cyan-500/20 backdrop-blur-sm"
+              >
+                <Sparkles className="h-4 w-4 text-cyan-400" />
+                <span className="text-sm font-semibold text-cyan-400">What Makes Us Different</span>
+              </motion.span>
+              <motion.p 
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.6, duration: 0.6 }}
+                className="text-2xl md:text-3xl leading-relaxed font-medium text-white"
+              >
+                We're not building another CRM or contact manager. We're building an 
+                <span className="bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent"> AI co-pilot for networking</span>—one that learns 
+                your communication style, understands context, and helps you maintain relationships at scale without losing 
+                the personal touch.
+              </motion.p>
+                  </div>
+            </motion.div>
+        </div>
+      </section>
+
+      {/* Features Section - Enhanced */}
+      <section className="relative container mx-auto px-4 py-32 z-10 bg-slate-900/30 backdrop-blur-sm">
+        <div className="max-w-7xl mx-auto">
+        <motion.div
+            initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            className="mb-20"
+          >
+            <motion.span
+              initial={{ opacity: 0, x: -20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
+              className="inline-flex items-center gap-2 px-4 py-2 mb-6 rounded-full bg-gradient-to-r from-cyan-500/10 via-blue-500/10 to-purple-500/10 border border-cyan-500/20 backdrop-blur-sm"
             >
-              <Card className="h-full border-2 hover:border-primary/50 transition-colors">
-                <CardHeader>
-                  <div className="flex items-center gap-4 mb-4">
-                    <motion.div
-                      animate={pulseAnimation}
-                      style={{ animationDelay: "0.5s" }}
-                      className="w-16 h-16 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center"
-                    >
-                      <Lightbulb className="h-8 w-8 text-white" />
-                    </motion.div>
-                    <CardTitle className="text-2xl">Our Vision</CardTitle>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-lg text-muted-foreground leading-relaxed mb-4">
-                    To become the world's leading AI-powered networking platform, connecting millions of professionals 
-                    across industries and borders. We envision a future where networking is seamless, intelligent, and 
-                    accessible to everyone.
+              <Sparkles className="h-4 w-4 text-cyan-400" />
+              <span className="text-sm font-semibold text-cyan-400">Our Platform</span>
+            </motion.span>
+            <h2 className="text-5xl md:text-6xl font-bold mb-8 leading-[1.1] tracking-tight text-white">
+              <span className="block bg-gradient-to-r from-white via-cyan-100 to-blue-200 bg-clip-text text-transparent">
+                Tools designed for
+              </span>
+              <span className="block mt-2 bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">modern networking</span>
+            </h2>
+            <motion.div 
+              initial={{ width: 0 }}
+              whileInView={{ width: 96 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.3, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+              className="h-1 bg-gradient-to-r from-cyan-500 to-blue-500 mb-8"
+            ></motion.div>
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.4, duration: 0.6 }}
+              className="text-xl md:text-2xl text-slate-300 max-w-3xl"
+            >
+              A comprehensive suite of AI-powered features that work together to streamline your networking workflow
+            </motion.p>
+        </motion.div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+          {features.map((feature, index) => (
+            <motion.div
+              key={feature.title}
+                initial={{ opacity: 0, y: 50, scale: 0.95 }}
+                whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ 
+                  duration: 0.6, 
+                  delay: index * 0.1,
+                  ease: [0.16, 1, 0.3, 1]
+                }}
+                whileHover={{ y: -8, transition: { duration: 0.3 } }}
+                className="group"
+              >
+                <div                 className="h-full p-8 border border-slate-700/50 rounded-xl hover:border-cyan-500/50 transition-all duration-300 bg-slate-900/70 backdrop-blur-sm hover:shadow-xl hover:shadow-cyan-500/10">
+                  <motion.div 
+                    className="w-14 h-14 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center mb-6 shadow-lg shadow-cyan-500/25"
+                    whileHover={{ scale: 1.1, rotate: 5 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                  >
+                    <feature.icon className="h-7 w-7 text-white" />
+                  </motion.div>
+                  <h3 className="text-xl md:text-2xl font-bold mb-4 text-white">{feature.title}</h3>
+                  <p className="text-slate-300 leading-relaxed text-base">
+                    {feature.description}
                   </p>
-                  <p className="text-lg text-muted-foreground leading-relaxed">
-                    We're building a global ecosystem where professionals can discover opportunities, share knowledge, 
-                    and grow together, powered by AI that understands context, intent, and the art of meaningful connection.
-                  </p>
-                </CardContent>
-              </Card>
+                </div>
             </motion.div>
+          ))}
           </div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="relative container mx-auto px-4 py-20 z-10">
+      {/* How It Works Section - Enhanced */}
+      <section className="relative container mx-auto px-4 py-32 z-10 bg-slate-900/30 backdrop-blur-sm border-t border-slate-800/50">
+        <div className="max-w-5xl mx-auto">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-16"
-        >
-          <Badge className="mb-4 px-4 py-2 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border-cyan-500/30 text-cyan-400">
-            Powerful Features
-          </Badge>
-          <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
-            Everything You Need to Network Smarter
-          </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Comprehensive tools powered by AI to help you build, manage, and grow your professional network
-          </p>
-        </motion.div>
-
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
-          {features.map((feature, index) => (
-            <motion.div
-              key={feature.title}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            className="mb-20"
+          >
+            <motion.span
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: feature.delay }}
-              whileHover={{ y: -10, transition: { duration: 0.3 } }}
+              transition={{ duration: 0.6 }}
+              className="inline-flex items-center gap-2 px-4 py-2 mb-6 rounded-full bg-gradient-to-r from-cyan-500/10 via-blue-500/10 to-purple-500/10 border border-cyan-500/20 backdrop-blur-sm"
             >
-              <Card className="h-full border-2 hover:border-primary/50 transition-all duration-300 hover:shadow-xl">
-                <CardContent className="p-6">
-                  <motion.div
-                    whileHover={{ scale: 1.1, rotate: 5 }}
-                    className={`w-14 h-14 rounded-xl bg-gradient-to-br ${feature.color} flex items-center justify-center mb-4 shadow-lg`}
-                  >
-                    <feature.icon className="h-7 w-7 text-white" />
-                  </motion.div>
-                  <h3 className="text-xl font-bold mb-2">{feature.title}</h3>
-                  <p className="text-muted-foreground leading-relaxed">
-                    {feature.description}
-                  </p>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
-      </section>
-
-      {/* How It Works Section */}
-      <section className="relative container mx-auto px-4 py-20 z-10">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-16"
-        >
-          <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
-            How It Works
-          </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Get started in minutes and begin building your professional network today
-          </p>
+              <Sparkles className="h-4 w-4 text-cyan-400" />
+              <span className="text-sm font-semibold text-cyan-400">Getting Started</span>
+            </motion.span>
+            <h2 className="text-5xl md:text-6xl font-bold mb-8 leading-[1.1] tracking-tight bg-gradient-to-r from-white via-cyan-100 to-blue-200 bg-clip-text text-transparent">
+              How it works
+            </h2>
+            <motion.div 
+              initial={{ width: 0 }}
+              whileInView={{ width: 96 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.3, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+              className="h-1 bg-gradient-to-r from-cyan-500 to-blue-500"
+            ></motion.div>
         </motion.div>
 
-        <div className="max-w-6xl mx-auto">
-          <div className="relative">
-            {/* Animated Vertical Connection Line */}
-            <div className="hidden md:block absolute left-1/2 top-0 bottom-0 w-0.5 transform -translate-x-1/2 z-0">
-              <motion.div
-                initial={{ scaleY: 0 }}
-                whileInView={{ scaleY: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 1.5, ease: "easeInOut" }}
-                className="h-full w-full bg-gradient-to-b from-cyan-500 via-blue-500 to-purple-500 origin-top"
-              />
-            </div>
+          <div className="space-y-8 md:space-y-12 relative">
+            {/* Connecting line */}
+            <motion.div
+              initial={{ scaleY: 0 }}
+              whileInView={{ scaleY: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+              className="hidden md:block absolute left-6 top-0 bottom-0 w-0.5 bg-gradient-to-b from-cyan-500 via-blue-500 to-purple-500"
+            />
             
-            {/* Animated Dots on the Line */}
-            <div className="hidden md:block absolute left-1/2 transform -translate-x-1/2 w-full h-full z-10">
-              {howItWorks.map((_, index) => {
-                const positions = [0, 0.33, 0.66, 1]
-                return (
-                  <motion.div
-                    key={`dot-${index}`}
-                    initial={{ scale: 0, opacity: 0 }}
-                    whileInView={{ scale: 1, opacity: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ 
-                      delay: index * 0.3 + 0.5,
-                      duration: 0.5,
-                      type: "spring",
-                      stiffness: 200
-                    }}
-                    className="absolute left-1/2 transform -translate-x-1/2 -translate-y-1/2"
-                    style={{ top: `${positions[index] * 100}%` }}
-                  >
-                    <motion.div
-                      animate={{ 
-                        scale: [1, 1.2, 1],
-                        boxShadow: [
-                          "0 0 0 0 rgba(6, 182, 212, 0.7)",
-                          "0 0 0 10px rgba(6, 182, 212, 0)",
-                          "0 0 0 0 rgba(6, 182, 212, 0)"
-                        ]
-                      }}
-                      transition={{
-                        duration: 2,
-                        repeat: Infinity,
-                        ease: "easeInOut"
-                      }}
-                      className="w-4 h-4 rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 border-2 border-white shadow-lg"
-                    />
-                  </motion.div>
-                )
-              })}
-            </div>
-            
-            <div className="space-y-16 md:space-y-20 relative z-20">
               {howItWorks.map((step, index) => (
                 <motion.div
                   key={step.step}
-                  initial={{ opacity: 0, y: 50 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-100px" }}
+                initial={{ opacity: 0, x: -50 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
                   transition={{ 
-                    duration: 0.8, 
+                  duration: 0.7, 
                     delay: index * 0.2,
-                    type: "spring",
-                    stiffness: 100
+                  ease: [0.16, 1, 0.3, 1]
                   }}
-                  className="relative"
+                whileHover={{ x: 10, transition: { duration: 0.3 } }}
+                className="flex gap-6 md:gap-8 items-start relative group"
                 >
-                  <div className={`flex flex-col md:flex-row items-center gap-6 md:gap-8 ${
-                    index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'
-                  }`}>
-                    {/* Card Section */}
                     <motion.div 
-                      className="flex-1 w-full md:w-auto"
-                      whileHover={{ scale: 1.02 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <Card className="border-2 hover:border-primary/50 transition-all duration-300 hover:shadow-xl bg-background/50 backdrop-blur-sm">
-                        <CardContent className="p-6 md:p-8">
-                          <div className="flex flex-col md:flex-row items-start md:items-center gap-4 mb-4">
-                            <motion.div
+                  className="flex-shrink-0 relative z-10"
                               initial={{ scale: 0, rotate: -180 }}
                               whileInView={{ scale: 1, rotate: 0 }}
                               viewport={{ once: true }}
                               transition={{ 
                                 delay: index * 0.2 + 0.3,
                                 type: "spring",
-                                stiffness: 200
+                    stiffness: 200,
+                    damping: 20
                               }}
                               whileHover={{ scale: 1.1, rotate: 5 }}
-                              className="w-16 h-16 rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center text-white font-bold text-xl shadow-lg flex-shrink-0"
                             >
-                              {step.step}
-                            </motion.div>
-                            <div className="flex-1">
-                              <h3 className="text-2xl md:text-3xl font-bold mb-2 bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
-                                {step.title}
-                              </h3>
-                              <p className="text-base md:text-lg text-muted-foreground leading-relaxed">
-                                {step.description}
-                              </p>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </motion.div>
-
-                    {/* Icon Circle - Always centered on line */}
+                  <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-cyan-500/25 border-4 border-slate-900">
+                    {step.step}
+                  </div>
+                </motion.div>
+                <div className="flex-1 pt-2">
+                  <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: index * 0.2 + 0.4, duration: 0.6 }}
+                    className="flex items-center gap-4 mb-4"
+                  >
                     <motion.div
-                      initial={{ scale: 0, opacity: 0 }}
-                      whileInView={{ scale: 1, opacity: 1 }}
-                      viewport={{ once: true }}
-                      transition={{ 
-                        delay: index * 0.2 + 0.5,
-                        type: "spring",
-                        stiffness: 200
-                      }}
-                      whileHover={{ 
-                        scale: 1.15, 
-                        rotate: [0, -10, 10, -10, 0],
-                        transition: { duration: 0.5 }
-                      }}
-                      className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-gradient-to-br from-cyan-500 via-blue-500 to-purple-500 flex items-center justify-center shadow-2xl relative z-20 border-4 border-background flex-shrink-0"
+                      whileHover={{ scale: 1.2, rotate: 10 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 17 }}
                     >
-                      <motion.div
-                        animate={{ 
-                          rotate: [0, 360],
-                        }}
-                        transition={{
-                          duration: 20,
-                          repeat: Infinity,
-                          ease: "linear"
-                        }}
-                      >
-                        <step.icon className="h-10 w-10 md:h-12 md:w-12 text-white" />
-                      </motion.div>
-                      {/* Glow effect */}
-                      <motion.div
-                        animate={{
-                          scale: [1, 1.3, 1],
-                          opacity: [0.5, 0.8, 0.5]
-                        }}
-                        transition={{
-                          duration: 2,
-                          repeat: Infinity,
-                          ease: "easeInOut"
-                        }}
-                        className="absolute inset-0 rounded-full bg-gradient-to-br from-cyan-400 to-blue-400 blur-xl -z-10"
-                      />
+                      <step.icon className="h-7 w-7 text-cyan-400" />
                     </motion.div>
-
-                    {/* Spacer for alignment on opposite side */}
-                    <div className="flex-1 hidden md:block"></div>
+                    <h3 className="text-2xl md:text-3xl font-bold text-white">{step.title}</h3>
+                  </motion.div>
+                  <motion.p 
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: index * 0.2 + 0.5, duration: 0.6 }}
+                    className="text-lg md:text-xl text-slate-300 leading-relaxed"
+                  >
+                    {step.description}
+                  </motion.p>
                   </div>
                 </motion.div>
               ))}
-            </div>
           </div>
         </div>
       </section>
 
-      {/* Values Section */}
-      <section className="relative container mx-auto px-4 py-20 z-10">
+      {/* Values Section - Enhanced */}
+      <section className="relative container mx-auto px-4 py-32 z-10 bg-slate-900/20">
+        <div className="max-w-6xl mx-auto">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-16"
-        >
-          <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
-            Our Core Values
-          </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            The principles that guide everything we do
-          </p>
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            className="mb-20"
+          >
+            <motion.span
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="inline-flex items-center gap-2 px-4 py-2 mb-6 rounded-full bg-gradient-to-r from-cyan-500/10 via-blue-500/10 to-purple-500/10 border border-cyan-500/20 backdrop-blur-sm"
+            >
+              <Sparkles className="h-4 w-4 text-cyan-400" />
+              <span className="text-sm font-semibold text-cyan-400">Our Principles</span>
+            </motion.span>
+            <h2 className="text-5xl md:text-6xl font-bold mb-8 leading-[1.1] tracking-tight bg-gradient-to-r from-white via-cyan-100 to-blue-200 bg-clip-text text-transparent">
+              What drives us
+            </h2>
+            <motion.div 
+              initial={{ width: 0 }}
+              whileInView={{ width: 96 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.3, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+              className="h-1 bg-gradient-to-r from-cyan-500 to-blue-500"
+            ></motion.div>
         </motion.div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-10 md:gap-16">
           {values.map((value, index) => (
             <motion.div
               key={value.title}
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              whileHover={{ y: -10 }}
-            >
-              <Card className="h-full border-2 hover:border-primary/50 transition-all duration-300 text-center">
-                <CardContent className="p-6">
+                initial={{ opacity: 0, y: 50, x: index % 2 === 0 ? -30 : 30 }}
+                whileInView={{ opacity: 1, y: 0, x: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ 
+                  duration: 0.7, 
+                  delay: index * 0.15,
+                  ease: [0.16, 1, 0.3, 1]
+                }}
+                whileHover={{ x: index % 2 === 0 ? 5 : -5, transition: { duration: 0.3 } }}
+                className="flex gap-6 items-start group"
+              >
                   <motion.div
-                    animate={floatAnimation}
-                    style={{ animationDelay: `${index * 0.2}s` }}
-                    className={`w-16 h-16 rounded-full bg-gradient-to-br ${value.color} flex items-center justify-center mx-auto mb-4 shadow-lg`}
+                  className="flex-shrink-0"
+                  whileHover={{ scale: 1.1, rotate: 5 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                >
+                  <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/25">
+                    <value.icon className="h-7 w-7 text-white" />
+                  </div>
+                </motion.div>
+                <div className="flex-1 pt-1">
+                  <motion.h3 
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: index * 0.15 + 0.2, duration: 0.6 }}
+                    className="text-2xl md:text-3xl font-bold mb-4 text-white"
                   >
-                    <value.icon className="h-8 w-8 text-white" />
-                  </motion.div>
-                  <h3 className="text-xl font-bold mb-2">{value.title}</h3>
-                  <p className="text-muted-foreground leading-relaxed">
+                    {value.title}
+                  </motion.h3>
+                  <motion.p 
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: index * 0.15 + 0.3, duration: 0.6 }}
+                    className="text-slate-300 leading-relaxed text-lg"
+                  >
                     {value.description}
-                  </p>
-                </CardContent>
-              </Card>
+                  </motion.p>
+                </div>
             </motion.div>
           ))}
+          </div>
         </div>
       </section>
 
-      {/* Technology Stack Section */}
-      <section className="relative container mx-auto px-4 py-20 z-10">
+      {/* Technology Stack Section - Enhanced */}
+      <section className="relative container mx-auto px-4 py-32 z-10 border-t border-slate-800/50 bg-slate-900/30 backdrop-blur-sm">
+        <div className="max-w-6xl mx-auto">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-12"
-        >
-          <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
-            Built with Modern Technology
-          </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Powered by cutting-edge AI and cloud infrastructure
-          </p>
-        </motion.div>
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            className="mb-20"
+          >
+            <motion.span
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="inline-flex items-center gap-2 px-4 py-2 mb-6 rounded-full bg-gradient-to-r from-cyan-500/10 via-blue-500/10 to-purple-500/10 border border-cyan-500/20 backdrop-blur-sm"
+            >
+              <Sparkles className="h-4 w-4 text-cyan-400" />
+              <span className="text-sm font-semibold text-cyan-400">Technology</span>
+            </motion.span>
+            <h2 className="text-5xl md:text-6xl font-bold mb-8 leading-[1.1] tracking-tight bg-gradient-to-r from-white via-cyan-100 to-blue-200 bg-clip-text text-transparent">
+              Built for scale and security
+            </h2>
+            <motion.div 
+              initial={{ width: 0 }}
+              whileInView={{ width: 96 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.3, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+              className="h-1 bg-gradient-to-r from-cyan-500 to-blue-500 mb-8"
+            ></motion.div>
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.4, duration: 0.6 }}
+              className="text-xl md:text-2xl text-slate-300 max-w-3xl"
+            >
+              Our platform is built on modern infrastructure designed for reliability, security, and global scale
+            </motion.p>
+          </motion.div>
 
-        <motion.div
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          variants={containerVariants}
-          className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto"
-        >
+          <div className="grid md:grid-cols-3 gap-6 md:gap-8">
           {[
             { icon: Brain, title: "AI & Machine Learning", description: "Advanced AI models for natural language processing and intelligent automation" },
             { icon: Cloud, title: "Cloud Infrastructure", description: "Scalable, secure cloud architecture for global accessibility" },
@@ -766,62 +895,89 @@ export function PublicAboutPage() {
           ].map((tech, index) => (
             <motion.div
               key={tech.title}
-              variants={itemVariants}
-              whileHover={{ scale: 1.05 }}
-            >
-              <Card className="h-full border-2 hover:border-primary/50 transition-colors">
-                <CardContent className="p-6 text-center">
-                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center mx-auto mb-4">
-                    <tech.icon className="h-8 w-8 text-white" />
-                  </div>
-                  <h3 className="text-xl font-bold mb-2">{tech.title}</h3>
-                  <p className="text-muted-foreground">{tech.description}</p>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
+                initial={{ opacity: 0, y: 50, scale: 0.95 }}
+                whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ 
+                  duration: 0.6, 
+                  delay: index * 0.15,
+                  ease: [0.16, 1, 0.3, 1]
+                }}
+                whileHover={{ y: -8, transition: { duration: 0.3 } }}
+                className="p-8 border border-slate-700/50 rounded-xl hover:border-cyan-500/50 transition-all duration-300 bg-slate-900/70 backdrop-blur-sm hover:shadow-xl hover:shadow-cyan-500/10"
+              >
+                <motion.div 
+                  className="w-14 h-14 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center mb-6 shadow-lg shadow-cyan-500/25"
+                  whileHover={{ scale: 1.1, rotate: 5 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                >
+                  <tech.icon className="h-7 w-7 text-white" />
+                </motion.div>
+                <h3 className="text-xl md:text-2xl font-bold mb-4 text-white">{tech.title}</h3>
+                <p className="text-slate-300 leading-relaxed text-base">{tech.description}</p>
         </motion.div>
+            ))}
+          </div>
+        </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="relative container mx-auto px-4 py-20 z-10">
+      {/* CTA Section - Enhanced */}
+      <section className="relative container mx-auto px-4 py-32 z-10">
         <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          className="max-w-4xl mx-auto text-center"
         >
-          <Card className="bg-gradient-to-r from-cyan-600 via-blue-600 to-purple-600 text-white border-0 overflow-hidden relative">
-            <div className="absolute inset-0 bg-grid-white/10 [mask-image:linear-gradient(0deg,white,transparent)]"></div>
-            <CardContent className="p-12 md:p-16 text-center relative z-10">
+          <motion.h2 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.2, duration: 0.6 }}
+            className="text-5xl md:text-6xl font-bold mb-8 leading-[1.1] tracking-tight bg-gradient-to-r from-white via-cyan-100 to-blue-200 bg-clip-text text-transparent"
+          >
+            Ready to get started?
+          </motion.h2>
+          <motion.p 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.3, duration: 0.6 }}
+            className="text-xl md:text-2xl text-slate-300 mb-12 leading-relaxed font-light"
+          >
+            Join professionals who are building stronger networks with AI-powered tools. 
+            No credit card required.
+          </motion.p>
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.4, duration: 0.6 }}
+            className="flex gap-4 justify-center flex-wrap"
+          >
+            <Link href="/auth/signup">
               <motion.div
-                animate={pulseAnimation}
-                className="inline-block mb-6"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
-                <Rocket className="h-16 w-16 mx-auto text-white" />
+                <Button size="lg" className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-semibold text-lg px-8 py-6 shadow-lg shadow-cyan-500/25">
+                  Start Free Trial
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
               </motion.div>
-              <h2 className="text-4xl md:text-5xl font-bold mb-4">Ready to Transform Your Networking?</h2>
-              <p className="text-xl mb-8 opacity-90 max-w-2xl mx-auto">
-                Join thousands of professionals who are already building stronger networks with AI-powered tools
-              </p>
-              <div className="flex gap-4 justify-center flex-wrap">
-                <Link href="/auth/signup">
-                  <Button size="lg" variant="secondary" className="bg-white text-cyan-600 hover:bg-cyan-50">
-                    Start Free Trial
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Button>
-                </Link>
-                <Link href="/public/networkers">
-                  <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
-                    Explore Networkers
-                  </Button>
-                </Link>
-              </div>
-              <p className="mt-6 text-sm opacity-75">
-                No credit card required • 14-day free trial • Cancel anytime
-              </p>
-            </CardContent>
-          </Card>
+            </Link>
+            <Link href="/public/networkers">
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Button size="lg" variant="outline" className="border-2 border-slate-600 text-slate-300 hover:text-white hover:bg-slate-800/50 font-semibold text-lg px-8 py-6">
+                  Explore Networkers
+                </Button>
+              </motion.div>
+            </Link>
+          </motion.div>
         </motion.div>
       </section>
 

@@ -1,9 +1,10 @@
-import { createClient } from "@/lib/supabase/server"
+import { createPublicClient } from "@/lib/supabase/public-server"
 import { NetworkersPage } from "@/components/networkers-page"
 
 export default async function NetworkersPageRoute() {
   try {
-    const supabase = await createClient()
+    // Use public client to ensure we can access all profiles regardless of auth state
+    const supabase = await createPublicClient()
     
     // Fetch network profiles and portfolios separately since there's no direct foreign key
     const [profilesResult, portfoliosResult] = await Promise.all([
@@ -21,11 +22,15 @@ export default async function NetworkersPageRoute() {
     // Handle errors gracefully
     if (profilesResult.error) {
       console.error("Error fetching profiles:", profilesResult.error.message || profilesResult.error)
+      console.error("Error details:", JSON.stringify(profilesResult.error, null, 2))
       return <NetworkersPage profiles={[]} />
     }
 
     const allProfiles = profilesResult.data || []
     const allPortfolios = portfoliosResult.data || []
+    
+    // Debug: Log how many profiles we fetched
+    console.log(`Fetched ${allProfiles.length} network profiles`)
 
     // Create a map of portfolios by user_id for quick lookup
     const portfoliosByUserId = new Map<string, any[]>()

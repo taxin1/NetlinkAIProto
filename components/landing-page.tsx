@@ -87,6 +87,20 @@ export function LandingPage() {
   const [showNfcDetails, setShowNfcDetails] = useState(false)
   const [showPortfolioDetails, setShowPortfolioDetails] = useState(false)
 
+  // Store random particle positions to avoid hydration mismatch
+  const [particleConfigs, setParticleConfigs] = useState<Array<{ x: string; y: string; duration: number }> | null>(null)
+
+  // Initialize particle configs only on client
+  useEffect(() => {
+    setParticleConfigs(
+      Array.from({ length: 5 }, () => ({
+        x: Math.random() * 100 + "%",
+        y: Math.random() * 100 + "%",
+        duration: 2 + Math.random(),
+      }))
+    )
+  }, [])
+
   // Show preview for 4 seconds, then switch to details
   useEffect(() => {
     const timer = setTimeout(() => setShowCardDetails(true), 4000)
@@ -502,13 +516,13 @@ export function LandingPage() {
                             />
                             
                             {/* Floating Particles */}
-                            {[...Array(5)].map((_, i) => (
+                            {particleConfigs?.map((config, i) => (
                               <motion.div
                                 key={i}
                                 className="absolute w-1 h-1 bg-blue-400 rounded-full"
                                 initial={{
-                                  x: Math.random() * 100 + "%",
-                                  y: Math.random() * 100 + "%",
+                                  x: config.x,
+                                  y: config.y,
                                   opacity: 0,
                                 }}
                                 animate={{
@@ -516,7 +530,7 @@ export function LandingPage() {
                                   opacity: [0, 1, 0],
                                 }}
                                 transition={{
-                                  duration: 2 + Math.random(),
+                                  duration: config.duration,
                                   repeat: Infinity,
                                   delay: i * 0.4,
                                 }}
