@@ -11,13 +11,14 @@ import { Label } from "@/components/ui/label"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useState, useEffect } from "react"
-import { Chrome, LayoutDashboard } from "lucide-react"
+import { Chrome, LayoutDashboard, Eye, EyeOff } from "lucide-react"
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
   const [isCheckingAuth, setIsCheckingAuth] = useState(true)
   const router = useRouter()
 
@@ -111,14 +112,28 @@ export default function LoginPage() {
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="password" className="text-slate-300">Password</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="bg-slate-800/50 border-slate-700/50 text-white placeholder:text-slate-500"
-                  />
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="bg-slate-800/50 border-slate-700/50 text-white placeholder:text-slate-500 pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((prev) => !prev)}
+                      className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-200"
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
+                  <div className="flex justify-end">
+                    <Link href="/auth/forgot-password" className="text-xs text-cyan-400 hover:text-cyan-300 underline">
+                      Forgot password?
+                    </Link>
+                  </div>
                 </div>
                 {error && <p className="text-sm text-red-400">{error}</p>}
                 <Button type="submit" className="w-full bg-white text-slate-900 hover:bg-slate-100 font-medium" disabled={isLoading}>
