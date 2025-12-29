@@ -17,7 +17,7 @@ You have:
 
 Create or update your `.env.local` file in the project root:
 
-```env
+\`\`\`env
 # Google Calendar OAuth
 GOOGLE_CLIENT_ID=783966653046-n6quk2616a8t1rk61r2mn0rtcurnt9q9.apps.googleusercontent.com
 GOOGLE_CLIENT_SECRET=your_client_secret_here
@@ -25,7 +25,7 @@ GOOGLE_REDIRECT_URI=http://localhost:3000/api/google-calendar/callback
 
 # Optional: If different from default
 NEXT_PUBLIC_APP_URL=http://localhost:3000
-```
+\`\`\`
 
 **Important:** 
 - Replace `your_client_secret_here` with your actual Google OAuth Client Secret
@@ -120,4 +120,3 @@ Once connected, your app will:
 - [Google Calendar API Documentation](https://developers.google.com/calendar/api)
 - [OAuth 2.0 Setup Guide](./GOOGLE_CALENDAR_SETUP.md)
 - [Database Schema](./scripts/009_add_google_calendar_integration.sql)
-

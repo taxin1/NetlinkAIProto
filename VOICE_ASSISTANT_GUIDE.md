@@ -77,33 +77,33 @@ The voice assistant can execute the following actions:
 ## Voice Command Examples
 
 ### Email Commands
-```
+\`\`\`
 "Send email to john@example.com"
 "Email Sarah about the project update"
 "Compose an email to my colleague Mike"
-```
+\`\`\`
 
 ### Contact Commands
-```
+\`\`\`
 "Add contact John Smith, email john@example.com, company ABC Corp"
 "Create a new contact for Jane Doe at jane@example.com"
 "Add Sarah to my contacts"
-```
+\`\`\`
 
 ### Information Commands
-```
+\`\`\`
 "Show my contacts"
 "What are my upcoming events?"
 "How many emails have I sent?"
 "Show my dashboard statistics"
-```
+\`\`\`
 
 ### General Commands
-```
+\`\`\`
 "Help me write a professional email"
 "Give me networking tips"
 "How do I follow up with a contact?"
-```
+\`\`\`
 
 ## Action Confirmation
 
@@ -165,7 +165,7 @@ If your browser doesn't support voice features, the microphone buttons won't app
 ## Technical Details
 
 ### Architecture
-```
+\`\`\`
 User Voice Input
     ↓
 Web Speech API (Browser)
@@ -179,7 +179,7 @@ Gemini AI (Intent Parsing)
 Action Execution
     ↓
 Text-to-Speech Response
-```
+\`\`\`
 
 ### API Endpoint
 - **POST** `/api/voice-command`
@@ -213,4 +213,3 @@ If you encounter issues or have suggestions:
 ---
 
 Enjoy hands-free networking with the Voice Assistant! 🎤✨
-

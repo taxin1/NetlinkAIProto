@@ -6,9 +6,9 @@ This guide explains how to test all voice functionality in the application.
 
 Run the automated test script:
 
-```bash
+\`\`\`bash
 node scripts/test-voice-system.mjs
-```
+\`\`\`
 
 This will test:
 - ✅ ElevenLabs TTS endpoint
@@ -22,9 +22,9 @@ This will test:
 ### 1. Test Browser Voice (Chatbot)
 
 1. **Start the development server:**
-   ```bash
+   \`\`\`bash
    npm run dev
-   ```
+   \`\`\`
 
 2. **Navigate to:** `http://localhost:3000/dashboard/ai-assistant`
 
@@ -65,48 +65,48 @@ This will test:
 
 #### Test ElevenLabs TTS
 
-```bash
+\`\`\`bash
 curl -X POST http://localhost:3000/api/elevenlabs-tts \
   -H "Content-Type: application/json" \
   -d '{"text": "Hello, this is a test"}'
-```
+\`\`\`
 
 Expected: Audio file (audio/mpeg)
 
 #### Test ElevenLabs TTS Audio (for phone calls)
 
-```bash
+\`\`\`bash
 curl "http://localhost:3000/api/elevenlabs-tts-audio?text=Hello%20test"
-```
+\`\`\`
 
 Expected: Audio file (audio/mpeg)
 
 #### Test ElevenLabs STT
 
-```bash
+\`\`\`bash
 # Note: This requires an actual audio file
 curl -X POST http://localhost:3000/api/elevenlabs-stt \
   -F "audio=@test-audio.webm"
-```
+\`\`\`
 
 Expected: JSON with transcribed text
 
 #### Test Twilio Telephony (without making call)
 
-```bash
+\`\`\`bash
 curl -X POST http://localhost:3000/api/twilio-telephony \
   -H "Content-Type: application/json" \
   -d '{
     "phoneNumber": "+10000000000",
     "userId": "test-user-id"
   }'
-```
+\`\`\`
 
 Expected: Error about invalid phone number (but endpoint should work)
 
 #### Test Voice Call API
 
-```bash
+\`\`\`bash
 curl -X POST http://localhost:3000/api/voice-call \
   -H "Content-Type: application/json" \
   -d '{
@@ -129,7 +129,7 @@ curl -X POST http://localhost:3000/api/voice-call \
     },
     "userId": "test-user-id"
   }'
-```
+\`\`\`
 
 Expected: JSON with call prompt
 
@@ -139,10 +139,10 @@ Open browser console (F12) and test:
 
 ### Test ElevenLabs Voice Hook
 
-```javascript
+\`\`\`javascript
 // In browser console on any page with voice functionality
 // The hook should be available in components using it
-```
+\`\`\`
 
 ### Check for Errors
 
@@ -191,7 +191,7 @@ Open browser console (F12) and test:
 
 Before testing, ensure these are set in `.env.local`:
 
-```env
+\`\`\`env
 # Required for voice
 ELEVENLABS_API_KEY=your_key_here
 
@@ -207,7 +207,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 
 # Required for AI
 OPENROUTER_API_KEY=your_key_here
-```
+\`\`\`
 
 ## Integration Tests
 
@@ -268,4 +268,3 @@ After testing:
 5. ✅ ElevenLabs voice is used everywhere
 
 If all tests pass, the system is ready for use! 🎉
-

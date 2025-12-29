@@ -34,7 +34,7 @@ From your Twilio account dashboard:
 
 Add to your `.env.local`:
 
-```env
+\`\`\`env
 # ElevenLabs
 ELEVENLABS_API_KEY=your_elevenlabs_api_key
 ELEVENLABS_AGENT_ID=your_agent_id_here
@@ -43,7 +43,7 @@ ELEVENLABS_AGENT_ID=your_agent_id_here
 TWILIO_ACCOUNT_SID=your_twilio_account_sid
 TWILIO_AUTH_TOKEN=your_twilio_auth_token
 TWILIO_PHONE_NUMBER=+1234567890
-```
+\`\`\`
 
 **Note**: The Twilio credentials in `.env.local` are optional since ElevenLabs handles the connection. But you can add them if you need direct Twilio access.
 
@@ -127,4 +127,3 @@ Remember: Your system prompt is passed automatically via API on every call - no 
 - ✅ Phone numbers are formatted correctly
 
 **You're ready to make calls! 🎉**
-

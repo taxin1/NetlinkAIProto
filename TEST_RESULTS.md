@@ -72,9 +72,9 @@
 ### For Local Testing
 
 1. **Start the development server:**
-   ```bash
+   \`\`\`bash
    npm run dev
-   ```
+   \`\`\`
 
 2. **Test browser voice:**
    - Navigate to `/dashboard/ai-assistant`
@@ -82,23 +82,23 @@
    - Verify ElevenLabs voice responds
 
 3. **Test phone calls (requires ngrok):**
-   ```bash
+   \`\`\`bash
    # In another terminal
    ngrok http 3000
-   ```
+   \`\`\`
    - Update `NEXT_PUBLIC_APP_URL` to ngrok URL
    - Test phone call functionality
 
 ### For Production
 
 1. **Set environment variables:**
-   ```env
+   \`\`\`env
    NEXT_PUBLIC_APP_URL=https://your-domain.com
    ELEVENLABS_API_KEY=your_key
    TWILIO_ACCOUNT_SID=your_sid
    TWILIO_AUTH_TOKEN=your_token
    TWILIO_PHONE_NUMBER=+1234567890
-   ```
+   \`\`\`
 
 2. **Deploy and test:**
    - All endpoints should work with production URL
@@ -118,4 +118,3 @@
 🎉 **The system is properly configured and ready for use!**
 
 All voice agents are using ElevenLabs as intended. The test failures are expected for local testing without a public URL or server running.
-

@@ -25,11 +25,17 @@ function getTimeLabel(date: Date) {
 export async function UpcomingEvents({ userId }: UpcomingEventsProps) {
   const supabase = await createClient()
 
+  // Calculate date range: from now to 1 year from now
+  const now = new Date()
+  const oneYearFromNow = new Date(now)
+  oneYearFromNow.setFullYear(now.getFullYear() + 1)
+
   const { data: events } = await supabase
     .from("calendar_events")
     .select("*, contacts(name)")
     .eq("user_id", userId)
-    .gte("start_time", new Date().toISOString())
+    .gte("start_time", now.toISOString())
+    .lte("start_time", oneYearFromNow.toISOString())
     .order("start_time", { ascending: true })
     .limit(5)
 

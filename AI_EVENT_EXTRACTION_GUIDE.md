@@ -6,7 +6,7 @@ The smart event creator now **actually fetches and reads webpage content** using
 
 ### Architecture
 
-```
+\`\`\`
 User pastes URL
     ↓
 1. Check if video conference link (Zoom/Meet/Teams)
@@ -27,7 +27,7 @@ User pastes URL
    - Organizer
     ↓
 6. Display extracted data (user can edit before saving)
-```
+\`\`\`
 
 ### Supported Platforms
 
@@ -56,9 +56,9 @@ From the actual webpage content:
 ### Examples
 
 #### Example 1: Eventbrite Event
-```
+\`\`\`
 URL: https://eventbrite.com/e/tech-summit-2025-san-francisco
-```
+\`\`\`
 
 **AI Extracts:**
 - ✅ Title: "Tech Summit 2025"
@@ -68,9 +68,9 @@ URL: https://eventbrite.com/e/tech-summit-2025-san-francisco
 - ✅ Organizer: "Tech Events Inc."
 
 #### Example 2: Meetup Event
-```
+\`\`\`
 URL: https://meetup.com/javascript-group/events/monthly-coding-session
-```
+\`\`\`
 
 **AI Extracts:**
 - ✅ Title: "Monthly Coding Session"
@@ -79,9 +79,9 @@ URL: https://meetup.com/javascript-group/events/monthly-coding-session
 - ✅ Location: "123 Main St, New York, NY"
 
 #### Example 3: Zoom Meeting
-```
+\`\`\`
 URL: https://zoom.us/j/123456789
-```
+\`\`\`
 
 **Instant Parse (No AI needed):**
 - ✅ Title: "Zoom Meeting #123456789"
@@ -160,4 +160,3 @@ Try these URLs to see it in action:
 6. Event registration pages
 
 The system is smart enough to handle different formats!
-

@@ -58,7 +58,7 @@ This guide will help you set up Google Calendar integration for the Netlink-Cogn
 
 Add the following to your `.env.local` file:
 
-```env
+\`\`\`env
 # Google Calendar OAuth
 GOOGLE_CLIENT_ID=your_client_id_here
 GOOGLE_CLIENT_SECRET=your_client_secret_here
@@ -66,7 +66,7 @@ GOOGLE_REDIRECT_URI=http://localhost:3000/api/google-calendar/callback
 
 # Optional: If different from default
 NEXT_PUBLIC_APP_URL=http://localhost:3000
-```
+\`\`\`
 
 For production, update the redirect URI to match your production domain.
 
@@ -74,15 +74,15 @@ For production, update the redirect URI to match your production domain.
 
 Execute the database migration to add the necessary tables:
 
-```sql
+\`\`\`sql
 -- Run scripts/009_add_google_calendar_integration.sql in your Supabase SQL editor
-```
+\`\`\`
 
 Or use the Supabase CLI:
 
-```bash
+\`\`\`bash
 supabase db push
-```
+\`\`\`
 
 ## Usage
 
@@ -149,4 +149,3 @@ supabase db push
 - Access tokens are automatically refreshed when expired
 - Users can disconnect their calendar at any time
 - All API requests use OAuth 2.0 authentication
-

@@ -90,4 +90,3 @@ Based on the error you're seeing, here are your options:
 3. Or sign up for Twilio (easiest option)
 
 **Which would you prefer?** I can help implement any of these!
-

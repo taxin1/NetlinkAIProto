@@ -14,26 +14,26 @@ You're getting `Error 400: redirect_uri_mismatch` because your Supabase project 
 
 In the **Redirect URLs** section, add these URLs:
 
-```
+\`\`\`
 http://localhost:3000/auth/callback
 http://localhost:3000/**
-```
+\`\`\`
 
 In the **Site URL** section, set:
 
-```
+\`\`\`
 http://localhost:3000
-```
+\`\`\`
 
 ### 3. Update Additional URLs (if present)
 
 **Allowed Redirect URLs** (add all of these):
-```
+\`\`\`
 http://localhost:3000/auth/callback
 http://localhost:3000
 http://127.0.0.1:3000/auth/callback
 http://127.0.0.1:3000
-```
+\`\`\`
 
 ### 4. Save Changes
 Click **Save** at the bottom of the URL Configuration page.
@@ -41,11 +41,11 @@ Click **Save** at the bottom of the URL Configuration page.
 ### 5. Restart Your Development Server
 
 In your terminal:
-```powershell
+\`\`\`powershell
 # Stop the current server (if running)
 # Then restart:
 pnpm dev
-```
+\`\`\`
 
 ## What We Fixed
 
@@ -73,10 +73,10 @@ If users need to confirm their email, make sure:
 
 ### Verify Environment Variables
 Make sure your `.env.local` has:
-```
+\`\`\`
 NEXT_PUBLIC_SUPABASE_URL=https://kaqptbreyakggqybftjc.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-```
+\`\`\`
 
 ### Check Browser Console
 Open DevTools (F12) and check for any error messages in the Console tab.
@@ -85,12 +85,12 @@ Open DevTools (F12) and check for any error messages in the Console tab.
 
 When deploying to production (Vercel, etc.), add your production URLs:
 
-```
+\`\`\`
 https://your-domain.com/auth/callback
 https://your-domain.com
 https://your-domain.vercel.app/auth/callback
 https://your-domain.vercel.app
-```
+\`\`\`
 
 ## Need More Help?
 
@@ -103,4 +103,3 @@ If you continue to have issues:
 
 **Status**: ✅ Local configuration updated
 **Action Required**: Configure redirect URLs in Supabase Dashboard
-

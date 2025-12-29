@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { Network, Sparkles } from "lucide-react"
-import { motion } from "framer-motion"
+/* Removed unused framer-motion import */
 
 interface LoadingScreenProps {
   onComplete?: () => void
@@ -82,7 +82,10 @@ export function LoadingScreen({ onComplete }: LoadingScreenProps) {
             <div className="absolute inset-0 -m-6 border border-cyan-400/10 rounded-full animate-spin-slow" />
 
             {/* Pulsing background circle */}
-            <div className="absolute inset-0 -m-2 bg-cyan-400/5 rounded-full animate-pulse" style={{ animationDuration: "3s" }} />
+            <div
+              className="absolute inset-0 -m-2 bg-cyan-400/5 rounded-full animate-pulse"
+              style={{ animationDuration: "3s" }}
+            />
 
             {/* Main icon container */}
             <div className="relative p-8 bg-gradient-to-br from-cyan-500/10 to-blue-500/10 rounded-3xl backdrop-blur-sm border border-cyan-400/20 shadow-xl">

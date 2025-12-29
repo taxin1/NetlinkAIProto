@@ -252,4 +252,3 @@ export function EditEmailDialog({ email, userId, open, onOpenChange }: EditEmail
     </Dialog>
   )
 }
-

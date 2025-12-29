@@ -4,7 +4,7 @@ The `useConversation` hook from `@elevenlabs/react` requires configuration optio
 
 ## Basic Usage
 
-```typescript
+\`\`\`typescript
 import { useConversation } from '@elevenlabs/react';
 
 function MyComponent() {
@@ -72,11 +72,11 @@ function MyComponent() {
     </div>
   );
 }
-```
+\`\`\`
 
 ## Complete Example with State Management
 
-```typescript
+\`\`\`typescript
 "use client"
 
 import { useConversation } from '@elevenlabs/react';
@@ -167,7 +167,7 @@ export function ConversationComponent() {
     </div>
   );
 }
-```
+\`\`\`
 
 ## Configuration Options
 
@@ -195,9 +195,9 @@ The `useConversation` hook accepts these options:
 3. Copy the Agent ID
 4. Add it to your `.env.local`:
 
-```env
+\`\`\`env
 NEXT_PUBLIC_ELEVENLABS_AGENT_ID=your-agent-id-here
-```
+\`\`\`
 
 ## Notes
 
@@ -205,4 +205,3 @@ NEXT_PUBLIC_ELEVENLABS_AGENT_ID=your-agent-id-here
 - For private agents, you'll need to obtain a `conversationToken` from your backend
 - The conversation uses WebRTC for real-time audio streaming
 - Make sure your ElevenLabs API key is configured (already set up in your codebase)
-

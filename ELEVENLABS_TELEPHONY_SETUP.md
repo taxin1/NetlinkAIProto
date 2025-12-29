@@ -12,9 +12,9 @@ ElevenLabs telephony integration allows you to make real phone calls using their
 
 Add your ElevenLabs API key to your environment variables:
 
-```env
+\`\`\`env
 ELEVENLABS_API_KEY=your_api_key_here
-```
+\`\`\`
 
 You can get your API key from: https://elevenlabs.io/app/settings/api-keys
 
@@ -47,9 +47,9 @@ If you want to use a specific agent for calls:
 4. Copy the Agent ID
 5. Add to environment variables:
 
-```env
+\`\`\`env
 ELEVENLABS_AGENT_ID=your_agent_id_here
-```
+\`\`\`
 
 ### 4. Test the Integration
 
@@ -67,7 +67,7 @@ The application includes a test button to call **08072497474**.
 ## API Endpoints
 
 ### Initiate Call
-```
+\`\`\`
 POST /api/elevenlabs-telephony
 Body: {
   phoneNumber: string,
@@ -75,20 +75,20 @@ Body: {
   agentId?: string,
   context?: object
 }
-```
+\`\`\`
 
 ### Test Call
-```
+\`\`\`
 POST /api/elevenlabs-telephony/test
 Body: {
   phoneNumber?: string (defaults to 08072497474)
 }
-```
+\`\`\`
 
 ### Get Call Status
-```
+\`\`\`
 GET /api/elevenlabs-telephony?callId={callId}
-```
+\`\`\`
 
 ## Troubleshooting
 
@@ -138,4 +138,3 @@ Once telephony is configured:
 - [ElevenLabs Telephony Documentation](https://elevenlabs.io/docs/conversational-ai/telephony)
 - [Twilio Integration Guide](https://elevenlabs.io/agents/integrations/twilio)
 - [SIP Trunking Guide](https://elevenlabs.io/conversational-ai/integrations/sip-trunking)
-

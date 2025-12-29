@@ -3,7 +3,7 @@
   publish = ".next"
 
 [build.environment]
-  NODE_VERSION = "18"
+  NODE_VERSION = "20.9.0"
   NPM_FLAGS = "--version"
   PNPM_VERSION = "10.19.0"
 
@@ -29,4 +29,3 @@
   from = "/*"
   to = "/index.html"
   status = 200
-

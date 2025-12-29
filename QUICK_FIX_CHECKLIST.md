@@ -19,11 +19,11 @@
    - Check if status changed to "Active"
 
 4. **Restart Your Dev Server**
-   ```bash
+   \`\`\`bash
    # Stop the server (Ctrl+C)
    # Then restart:
    npm run dev
-   ```
+   \`\`\`
 
 5. **Try Test Call Again**
    - Go to `/dashboard/voice-call`
@@ -34,9 +34,9 @@
 Check your **server console** (terminal where `npm run dev` is running):
 
 Look for a line like:
-```
+\`\`\`
 ElevenLabs telephony error: {"detail":"Not Found"}
-```
+\`\`\`
 
 **What does it say exactly?** The error message will tell us what's wrong.
 
@@ -51,7 +51,7 @@ ElevenLabs telephony error: {"detail":"Not Found"}
 
 Run this in your browser console (F12 → Console):
 
-```javascript
+\`\`\`javascript
 fetch('/api/elevenlabs-telephony/test', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
@@ -59,9 +59,8 @@ fetch('/api/elevenlabs-telephony/test', {
 })
 .then(r => r.json())
 .then(console.log)
-```
+\`\`\`
 
 This will show you the exact error message!
 
 **Share the error message and I'll help you fix it!** 🚀
-

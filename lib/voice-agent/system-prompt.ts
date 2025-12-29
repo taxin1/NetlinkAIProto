@@ -212,4 +212,3 @@ Remember: Use this context to personalize your conversation naturally. Reference
 
   return NETLINK_VOICE_AGENT_SYSTEM_PROMPT + contextSection
 }
-

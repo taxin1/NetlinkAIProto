@@ -13,6 +13,8 @@ interface Event {
   description: string | null
   event_url: string | null
   url_preview_image: string | null
+  url_preview_title: string | null
+  url_preview_description: string | null
   start_time: string
   end_time: string | null
   location: string | null
@@ -54,10 +56,18 @@ export function EventsList({ userId }: EventsListProps) {
 
   const loadEvents = async () => {
     const supabase = createClient()
+    
+    // Calculate date range: from now to 1 year from now
+    const now = new Date()
+    const oneYearFromNow = new Date(now)
+    oneYearFromNow.setFullYear(now.getFullYear() + 1)
+    
     const { data } = await supabase
       .from("calendar_events")
       .select("*, contacts(name, company)")
       .eq("user_id", userId)
+      .gte("start_time", now.toISOString())
+      .lte("start_time", oneYearFromNow.toISOString())
       .order("start_time", { ascending: true })
 
     setEvents(data || [])
@@ -235,4 +245,3 @@ export function EventsList({ userId }: EventsListProps) {
     </div>
   )
 }
-

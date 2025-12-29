@@ -22,6 +22,7 @@ import {
   Sparkles
 } from "lucide-react"
 import { GoogleCalendarSettings } from "@/components/google-calendar-settings"
+import { GmailSettings } from "@/components/gmail-settings"
 
 interface EmailSettings {
   id?: string
@@ -581,10 +582,12 @@ export default function SettingsPage() {
         </CardContent>
       </Card>
 
+      {/* Gmail Integration Card */}
+      <GmailSettings />
+
       {/* Google Calendar Integration Card */}
       <GoogleCalendarSettings />
       </div>
     </div>
   )
 }
-

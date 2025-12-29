@@ -19,10 +19,10 @@ This model is used for:
 
 The model is configured in `lib/gemini.ts`:
 
-```typescript
+\`\`\`typescript
 export const OPENROUTER_MODEL = "qwen/qwen3-14b:free"
 export const OPENROUTER_TEXT_MODEL = "qwen/qwen3-14b:free" // Same as OPENROUTER_MODEL
-```
+\`\`\`
 
 Both constants point to the same model for consistency.
 
@@ -65,10 +65,10 @@ If business card scanning doesn't work well, you can temporarily use a vision mo
 
 To change the model for all AI tasks, update `lib/gemini.ts`:
 
-```typescript
+\`\`\`typescript
 export const OPENROUTER_MODEL = "your-model-name-here"
 export const OPENROUTER_TEXT_MODEL = "your-model-name-here"
-```
+\`\`\`
 
 All AI features will automatically use the new model.
 
@@ -76,7 +76,6 @@ All AI features will automatically use the new model.
 
 Make sure you have `OPENROUTER_API_KEY` set in your `.env.local` file:
 
-```bash
+\`\`\`bash
 OPENROUTER_API_KEY=your-api-key-here
-```
-
+\`\`\`

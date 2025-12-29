@@ -37,7 +37,15 @@ export async function updateSession(request: NextRequest) {
       data: { user },
     } = await supabase.auth.getUser()
 
-    if (!user && !request.nextUrl.pathname.startsWith("/auth") && request.nextUrl.pathname !== "/" && !request.nextUrl.pathname.startsWith("/api")) {
+    // Allow public routes: home, auth pages, privacy, terms, public pages, portfolio pages, and API routes
+    const publicPaths = ["/", "/privacy", "/terms"]
+    const isPublicPath = publicPaths.includes(request.nextUrl.pathname) || 
+                        request.nextUrl.pathname.startsWith("/auth") || 
+                        request.nextUrl.pathname.startsWith("/api") ||
+                        request.nextUrl.pathname.startsWith("/public") ||
+                        request.nextUrl.pathname.startsWith("/portfolio")
+    
+    if (!user && !isPublicPath) {
       const url = request.nextUrl.clone()
       url.pathname = "/auth/login"
       return NextResponse.redirect(url)

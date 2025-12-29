@@ -175,4 +175,3 @@ export function MeetingReminders({ userId }: MeetingRemindersProps) {
     </div>
   )
 }
-

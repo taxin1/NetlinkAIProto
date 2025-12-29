@@ -25,7 +25,7 @@ If you need to configure SIP in code, you would need a SIP client library. Howev
 
 The good news: Your existing code should work! The API endpoint is the same:
 
-```typescript
+\`\`\`typescript
 // Your existing code already does this:
 POST /api/elevenlabs-telephony
 {
@@ -33,7 +33,7 @@ POST /api/elevenlabs-telephony
   agentId: "your-agent-id",
   context: { ... }
 }
-```
+\`\`\`
 
 ## Important Notes
 
@@ -64,4 +64,3 @@ For quick testing without Twilio:
 3. **Or use SIP trunking** if you have SIP infrastructure
 
 The browser-based option is the fastest way to test without any additional setup!
-

@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import nodemailer from 'nodemailer'
+import { sendGmailMessage, GmailToken } from '@/lib/gmail'
 
 export async function POST(request: Request) {
-  const { emailId, contactEmail, subject, body } = await request.json()
+  const { emailId, contactEmail, subject, body, useGmailApi } = await request.json()
   const supabase = await createClient()
   
   try {
@@ -17,6 +18,57 @@ export async function POST(request: Request) {
       )
     }
 
+    // Check if Gmail API is connected and should be used
+    if (useGmailApi !== false) {
+      const { data: gmailConnection } = await supabase
+        .from('gmail_connections')
+        .select('*')
+        .eq('user_id', user.id)
+        .single()
+
+      if (gmailConnection) {
+        try {
+          const token: GmailToken = {
+            access_token: gmailConnection.access_token,
+            refresh_token: gmailConnection.refresh_token || undefined,
+            expiry_date: gmailConnection.token_expires_at 
+              ? new Date(gmailConnection.token_expires_at).getTime() 
+              : undefined,
+          }
+
+          // Send via Gmail API
+          const result = await sendGmailMessage(
+            token,
+            contactEmail.trim(),
+            subject,
+            body.replace(/\n/g, '<br>')
+          )
+
+          // Update email status to 'sent' in database
+          if (emailId) {
+            await supabase
+              .from('emails')
+              .update({ 
+                status: 'sent',
+                sent_at: new Date().toISOString()
+              })
+              .eq('id', emailId)
+          }
+
+          return NextResponse.json({ 
+            success: true,
+            message: 'Email sent successfully via Gmail API',
+            messageId: result.id,
+            threadId: result.threadId,
+          })
+        } catch (gmailError: any) {
+          console.error('Gmail API error, falling back to SMTP:', gmailError)
+          // Fall through to SMTP method
+        }
+      }
+    }
+
+    // Fallback to SMTP (existing logic)
     // Get user's personal email settings
     const { data: settings, error: settingsError } = await supabase
       .from('user_email_settings')

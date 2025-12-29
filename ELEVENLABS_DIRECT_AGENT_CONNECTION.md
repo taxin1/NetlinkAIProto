@@ -4,7 +4,7 @@ This guide shows you how to use the `useConversation` hook to **directly connect
 
 ## Quick Start
 
-```typescript
+\`\`\`typescript
 "use client"
 
 import { useElevenLabsConversation } from '@/lib/hooks/use-elevenlabs-conversation';
@@ -50,7 +50,7 @@ function MyComponent() {
     </div>
   );
 }
-```
+\`\`\`
 
 ## Setup
 
@@ -64,20 +64,20 @@ function MyComponent() {
 
 Add to `.env.local`:
 
-```env
+\`\`\`env
 NEXT_PUBLIC_ELEVENLABS_AGENT_ID=your-agent-id-here
-```
+\`\`\`
 
 Then you can use the hook without passing agentId:
 
-```typescript
+\`\`\`typescript
 const { startSession } = useElevenLabsConversation();
 // Automatically uses NEXT_PUBLIC_ELEVENLABS_AGENT_ID
-```
+\`\`\`
 
 ### 3. Use the Hook
 
-```typescript
+\`\`\`typescript
 // Option 1: Pass agentId directly
 const { startSession } = useElevenLabsConversation({
   agentId: 'your-agent-id'
@@ -90,7 +90,7 @@ const { startSession } = useElevenLabsConversation();
 const { startSession } = useElevenLabsConversation({
   conversationToken: 'your-conversation-token'
 });
-```
+\`\`\`
 
 ## How It Works
 
@@ -101,7 +101,7 @@ const { startSession } = useElevenLabsConversation({
 
 ## Connection Flow
 
-```
+\`\`\`
 startSession() called
     ↓
 Request microphone permission
@@ -113,7 +113,7 @@ WebSocket connects to ElevenLabs
 onConnect() callback fired → Agent is connected!
     ↓
 You can now talk to the agent
-```
+\`\`\`
 
 ## Key Points
 
@@ -124,7 +124,7 @@ You can now talk to the agent
 
 ## Example: Full Component
 
-```typescript
+\`\`\`typescript
 "use client"
 
 import { useState } from 'react';
@@ -217,7 +217,7 @@ export function VoiceAgentComponent() {
     </div>
   );
 }
-```
+\`\`\`
 
 ## Notes
 
@@ -225,4 +225,3 @@ export function VoiceAgentComponent() {
 - Make sure microphone permissions are granted (the hook handles this)
 - The connection is **direct** - no intermediate servers (besides ElevenLabs)
 - Your agent must be created and published in the ElevenLabs dashboard first
-

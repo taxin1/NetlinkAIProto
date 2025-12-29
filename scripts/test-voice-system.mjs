@@ -244,4 +244,3 @@ runTests().catch(error => {
   logError(`\nFatal error: ${error.message}`)
   process.exit(1)
 })
-

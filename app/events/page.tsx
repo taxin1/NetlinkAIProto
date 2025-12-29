@@ -14,10 +14,17 @@ export default async function EventsPage() {
 
   if (!user) return null
 
+  // Calculate date range: from now to 1 year from now
+  const now = new Date()
+  const oneYearFromNow = new Date(now)
+  oneYearFromNow.setFullYear(now.getFullYear() + 1)
+
   const { data: events } = await supabase
     .from("calendar_events")
     .select("*, contacts(name, company)")
     .eq("user_id", user.id)
+    .gte("start_time", now.toISOString())
+    .lte("start_time", oneYearFromNow.toISOString())
     .order("start_time", { ascending: true })
 
   return (

@@ -52,4 +52,3 @@ CREATE TRIGGER user_email_settings_updated_at
   BEFORE UPDATE ON user_email_settings
   FOR EACH ROW
   EXECUTE FUNCTION update_user_email_settings_updated_at();
-
