@@ -236,6 +236,27 @@ export function LandingPage() {
               </span>
             </Link>
             <div className="flex items-center gap-3">
+              <Link href="/">
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button variant="ghost" className="text-slate-400 hover:text-white hover:bg-slate-800/50 font-medium">
+                  Home
+                </Button>
+                </motion.div>
+              </Link>
+              <Link href="/public/about">
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button variant="ghost" className="text-slate-400 hover:text-white hover:bg-slate-800/50 font-medium">
+                  About
+                </Button>
+                </motion.div>
+              </Link>
+              <Link href="/public/networkers">
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button variant="ghost" className="text-slate-400 hover:text-white hover:bg-slate-800/50 font-medium">
+                  Networkers
+                </Button>
+                </motion.div>
+              </Link>
               <Link href="/auth/login">
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 <Button variant="ghost" className="text-slate-400 hover:text-white hover:bg-slate-800/50 font-medium">
@@ -2257,8 +2278,32 @@ export function LandingPage() {
           </motion.p>
           <motion.div
             variants={itemVariants}
-            className="flex justify-center gap-6 text-sm"
+            className="flex justify-center gap-6 text-sm flex-wrap"
           >
+            <Link href="/">
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                className="text-slate-400 hover:text-cyan-400 transition-colors cursor-pointer underline-offset-4 hover:underline"
+            >
+              Home
+              </motion.div>
+            </Link>
+            <Link href="/public/about">
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                className="text-slate-400 hover:text-cyan-400 transition-colors cursor-pointer underline-offset-4 hover:underline"
+            >
+              About
+              </motion.div>
+            </Link>
+            <Link href="/public/networkers">
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                className="text-slate-400 hover:text-cyan-400 transition-colors cursor-pointer underline-offset-4 hover:underline"
+            >
+              Networkers
+              </motion.div>
+            </Link>
             <Link href="/privacy">
               <motion.div
                 whileHover={{ scale: 1.05 }}

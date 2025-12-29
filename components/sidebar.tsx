@@ -6,7 +6,7 @@ import { useState, useEffect } from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { LayoutDashboard, Users, Mail, BarChart3, LogOut, Network, Bot, Settings, Calendar, Menu, X, Share2, Phone, CheckCircle2, CalendarDays, Briefcase } from "lucide-react"
+import { LayoutDashboard, Users, Mail, BarChart3, LogOut, Network, Bot, Settings, Calendar, Menu, X, Share2, Phone, CheckCircle2, CalendarDays, Briefcase, Home, Info, UserCircle } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { useMobile } from "@/lib/hooks/use-mobile"
@@ -33,6 +33,12 @@ const navigation = [
   { name: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
   { name: "AI Assistant", href: "/dashboard/ai-assistant", icon: Bot },
   { name: "Settings", href: "/dashboard/settings", icon: Settings },
+]
+
+const publicNavigation = [
+  { name: "Home", href: "/", icon: Home },
+  { name: "About", href: "/public/about", icon: Info },
+  { name: "Networkers", href: "/public/networkers", icon: UserCircle },
 ]
 
 export function Sidebar({ user }: SidebarProps) {
@@ -101,7 +107,7 @@ export function Sidebar({ user }: SidebarProps) {
         )}
       </div>
 
-      <nav className="flex-1 space-y-1 p-4">
+      <nav className="flex-1 space-y-1 p-4 overflow-y-auto">
         {navigation.map((item) => {
           const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname?.startsWith(item.href))
           const showGoogleCalendarBadge = (item.name === "Calendar" || item.name === "Events") && googleCalendarConnected
@@ -140,6 +146,34 @@ export function Sidebar({ user }: SidebarProps) {
                   NEW
                 </Badge>
               )}
+            </Link>
+          )
+        })}
+        
+        {/* Divider */}
+        <div className="my-4 border-t border-slate-800/50"></div>
+        
+        {/* Public Pages Section */}
+        <div className="mb-2 px-4">
+          <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Public Pages</p>
+        </div>
+        {publicNavigation.map((item) => {
+          const isActive = pathname === item.href || pathname?.startsWith(item.href)
+          
+          return (
+            <Link
+              key={item.name}
+              href={item.href}
+              onClick={onItemClick}
+              className={cn(
+                "flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all duration-200",
+                isActive
+                  ? "bg-white text-slate-900 shadow-md"
+                  : "text-slate-400 hover:text-white hover:bg-slate-800/50",
+              )}
+            >
+              <item.icon className="h-5 w-5" />
+              <span className="flex-1">{item.name}</span>
             </Link>
           )
         })}

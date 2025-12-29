@@ -596,6 +596,42 @@ export function PortfolioBuilder({ userId }: PortfolioBuilderProps) {
       }
 
       setPortfolio(data as Portfolio)
+      
+      // If portfolio is public, ensure network profile is also public
+      if (portfolioData.is_public) {
+        try {
+          const { data: existingProfile } = await supabase
+            .from("network_profiles")
+            .select("*")
+            .eq("user_id", userId)
+            .maybeSingle()
+          
+          if (existingProfile) {
+            await supabase
+              .from("network_profiles")
+              .update({ is_public_profile: true })
+              .eq("user_id", userId)
+            setNetworkProfile({ ...existingProfile, is_public_profile: true })
+          } else {
+            // Create network profile if it doesn't exist
+            const { data: newProfile } = await supabase
+              .from("network_profiles")
+              .insert({
+                user_id: userId,
+                is_public_profile: true,
+              })
+              .select()
+              .single()
+            if (newProfile) {
+              setNetworkProfile(newProfile)
+            }
+          }
+        } catch (error) {
+          console.error("Error updating network profile:", error)
+          // Don't fail the save if this fails
+        }
+      }
+      
       setMessage({ type: "success", text: "Portfolio saved successfully!" })
     } catch (error) {
       console.error("Error saving portfolio:", error)
@@ -1197,6 +1233,48 @@ export function PortfolioBuilder({ userId }: PortfolioBuilderProps) {
                   onCheckedChange={(checked) =>
                     setPortfolio({ ...portfolio, is_public: checked })
                   }
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label>Show in Networkers Directory</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Make your profile visible in the public Networkers section for global networking
+                  </p>
+                </div>
+                <Switch
+                  checked={networkProfile?.is_public_profile || false}
+                  onCheckedChange={async (checked) => {
+                    try {
+                      const supabase = createClient()
+                      if (networkProfile) {
+                        await supabase
+                          .from("network_profiles")
+                          .update({ is_public_profile: checked })
+                          .eq("user_id", userId)
+                        setNetworkProfile({ ...networkProfile, is_public_profile: checked })
+                      } else {
+                        // Create network profile if it doesn't exist
+                        const { data: user } = await supabase.auth.getUser()
+                        if (user.user) {
+                          const { data: newProfile } = await supabase
+                            .from("network_profiles")
+                            .insert({
+                              user_id: userId,
+                              is_public_profile: checked,
+                            })
+                            .select()
+                            .single()
+                          if (newProfile) {
+                            setNetworkProfile(newProfile)
+                          }
+                        }
+                      }
+                    } catch (error) {
+                      console.error("Error updating public profile:", error)
+                      setMessage({ type: "error", text: "Failed to update public profile setting" })
+                    }
+                  }}
                 />
               </div>
               <div className="flex items-center justify-between">
