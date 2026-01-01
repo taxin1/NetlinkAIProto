@@ -50,6 +50,44 @@ const itemVariants = {
   },
 }
 
+// Typewriter component
+function TypewriterText({ 
+  text, 
+  className = "", 
+  speed = 50,
+  delay = 0 
+}: { 
+  text: string; 
+  className?: string;
+  speed?: number;
+  delay?: number;
+}) {
+  const [displayedText, setDisplayedText] = useState("")
+  const [currentIndex, setCurrentIndex] = useState(0)
+  const [isComplete, setIsComplete] = useState(false)
+
+  useEffect(() => {
+    if (currentIndex < text.length) {
+      const timeout = setTimeout(() => {
+        setDisplayedText(text.slice(0, currentIndex + 1))
+        setCurrentIndex(currentIndex + 1)
+      }, currentIndex === 0 ? delay : speed)
+      return () => clearTimeout(timeout)
+    } else {
+      setIsComplete(true)
+    }
+  }, [currentIndex, text, speed, delay])
+
+  return (
+    <span className={className}>
+      {displayedText}
+      {!isComplete && (
+        <span className="animate-pulse">|</span>
+      )}
+    </span>
+  )
+}
+
 const fadeInUp = {
   hidden: { opacity: 0, y: 30 },
   visible: {
@@ -271,6 +309,13 @@ export function LandingPage() {
                 </Button>
                 </motion.div>
               </Link>
+              <Link href="/pricing">
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button variant="ghost" className="text-slate-400 hover:text-white hover:bg-slate-800/50 font-medium">
+                  Pricing
+                </Button>
+                </motion.div>
+              </Link>
               <Link href="/auth/login">
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 <Button variant="ghost" className="text-slate-400 hover:text-white hover:bg-slate-800/50 font-medium">
@@ -311,11 +356,19 @@ export function LandingPage() {
               className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-6 text-white tracking-tight leading-tight"
             >
               <span className="bg-gradient-to-r from-white via-cyan-100 to-blue-200 bg-clip-text text-transparent">
-                Transform Your Networking
+                <TypewriterText 
+                  text="Transform Your Networking"
+                  speed={80}
+                  delay={500}
+                />
               </span>
               <br />
               <span className="bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
-                with AI Intelligence
+                <TypewriterText 
+                  text="with AI Intelligence"
+                  speed={80}
+                  delay={2500}
+                />
               </span>
             </motion.h1>
             <motion.p
@@ -338,6 +391,18 @@ export function LandingPage() {
                   >
                     Start Free Trial
                     <Zap className="ml-2 h-5 w-5" />
+                  </Button>
+                </motion.div>
+              </Link>
+              <Link href="/pricing">
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="border-2 border-cyan-500/50 text-cyan-400 hover:text-white hover:bg-cyan-500/10 font-semibold text-lg px-8 py-6"
+                  >
+                    View Pricing
+                    <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </motion.div>
               </Link>
@@ -2232,6 +2297,18 @@ export function LandingPage() {
                         >
                       Start Free Trial
                       <Zap className="ml-2 h-5 w-5" />
+                    </Button>
+                      </motion.div>
+                  </Link>
+                  <Link href="/pricing">
+                      <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                        <Button
+                          size="lg"
+                          variant="outline"
+                          className="text-lg px-8 py-6 border-2 border-white/30 text-white hover:bg-white/10 font-semibold"
+                        >
+                      View Pricing
+                      <ArrowRight className="ml-2 h-5 w-5" />
                     </Button>
                       </motion.div>
                   </Link>

@@ -4,6 +4,7 @@ import { GeistSans } from 'geist/font/sans'
 import { GeistMono } from 'geist/font/mono'
 import { Analytics } from '@vercel/analytics/next'
 import { ThemeProvider } from '@/components/theme-provider'
+import { PayPalErrorHandler } from '@/components/paypal-error-handler'
 import './globals.css'
 
 const inter = Inter({ 
@@ -32,6 +33,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} ${GeistSans.variable} ${GeistMono.variable} font-sans antialiased`} suppressHydrationWarning>
+        <PayPalErrorHandler />
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"

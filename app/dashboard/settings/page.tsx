@@ -24,6 +24,7 @@ import {
 import { GoogleCalendarSettings } from "@/components/google-calendar-settings"
 import { GmailSettings } from "@/components/gmail-settings"
 import { AITrainer } from "@/components/ai-trainer"
+import { SubscriptionManagement } from "@/components/subscription-management"
 
 interface EmailSettings {
   id?: string
@@ -247,14 +248,29 @@ export default function SettingsPage() {
               </div>
               <div>
                 <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                  Email Settings
+                  Settings
                 </h1>
                 <p className="text-muted-foreground mt-1">
-                  Configure your email for the AI Email Agent ✨
+                  Manage your account settings and preferences ✨
                 </p>
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Subscription Management Card - Moved to top */}
+        <div id="subscription-management">
+          {userId ? (
+            <SubscriptionManagement userId={userId} />
+          ) : (
+            <Card className="backdrop-blur-md bg-white/70 dark:bg-gray-900/70 border-white/60 dark:border-gray-800/60 shadow-2xl">
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
 
         {/* Message notification with animation */}

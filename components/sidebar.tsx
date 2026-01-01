@@ -6,7 +6,7 @@ import { useState, useEffect } from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { LayoutDashboard, Users, Mail, BarChart3, LogOut, Network, Bot, Settings, Calendar, Menu, X, Share2, Phone, CheckCircle2, CalendarDays, Briefcase, Home, Info, UserCircle, Sparkles, Wand2 } from "lucide-react"
+import { LayoutDashboard, Users, Mail, BarChart3, LogOut, Network, Bot, Settings, Calendar, Menu, X, Share2, Phone, CheckCircle2, CalendarDays, Briefcase, Home, Info, UserCircle, Sparkles, Wand2, Crown, CreditCard } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { useMobile } from "@/lib/hooks/use-mobile"
@@ -15,9 +15,11 @@ import {
   DialogContent,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { Subscription } from "@/types/subscription"
 
 interface SidebarProps {
   user: {
+    id?: string
     email?: string
   }
 }
@@ -49,6 +51,7 @@ export function Sidebar({ user }: SidebarProps) {
   const { isMobile } = useMobile()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [googleCalendarConnected, setGoogleCalendarConnected] = useState(false)
+  const [subscription, setSubscription] = useState<Subscription | null>(null)
 
   const handleSignOut = async () => {
     const supabase = createClient()
@@ -87,6 +90,34 @@ export function Sidebar({ user }: SidebarProps) {
 
     checkGoogleCalendar()
   }, [])
+
+  // Fetch subscription info
+  useEffect(() => {
+    const fetchSubscription = async () => {
+      if (!user.id) return
+      
+      try {
+        const supabase = createClient()
+        const { data, error } = await supabase
+          .from("subscriptions")
+          .select("*")
+          .eq("user_id", user.id)
+          .eq("status", "active")
+          .single()
+
+        if (error && error.code !== 'PGRST116') {
+          console.error("Error fetching subscription:", error)
+          return
+        }
+
+        setSubscription(data || null)
+      } catch (error) {
+        console.error("Error fetching subscription:", error)
+      }
+    }
+
+    fetchSubscription()
+  }, [user.id])
 
   const SidebarContent = ({ onItemClick }: { onItemClick?: () => void }) => (
     <>
@@ -184,8 +215,48 @@ export function Sidebar({ user }: SidebarProps) {
       <div className="border-t border-slate-800/50 p-4">
         <div className="mb-3 px-4">
           <p className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">Account</p>
-          <p className="text-sm font-medium text-slate-300 truncate">{user.email}</p>
+          <p className="text-sm font-medium text-slate-300 truncate mb-2">{user.email}</p>
+          {subscription ? (
+            <Badge 
+              variant={subscription.plan_name === 'free' ? 'secondary' : 'default'}
+              className="text-[10px] px-2 py-0.5 flex items-center gap-1 w-fit"
+            >
+              {subscription.plan_name === 'professional' || subscription.plan_name === 'enterprise' ? (
+                <Crown className="h-2.5 w-2.5" />
+              ) : null}
+              {subscription.plan_name === 'free' ? 'Free' : subscription.plan_name === 'professional' ? 'Pro' : 'Enterprise'}
+            </Badge>
+          ) : (
+            <Badge 
+              variant="secondary"
+              className="text-[10px] px-2 py-0.5 w-fit"
+            >
+              Free
+            </Badge>
+          )}
         </div>
+        <Link
+          href="/dashboard/settings#subscription-management"
+          onClick={(e) => {
+            onItemClick?.()
+            // Small delay to ensure page loads before scrolling
+            setTimeout(() => {
+              const element = document.getElementById('subscription-management')
+              if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+              }
+            }, 100)
+          }}
+          className={cn(
+            "flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium transition-all duration-200 mb-2",
+            pathname === "/dashboard/settings"
+              ? "bg-white text-slate-900 shadow-md"
+              : "text-slate-400 hover:text-white hover:bg-slate-800/50",
+          )}
+        >
+          <CreditCard className="h-4 w-4" />
+          <span className="flex-1">Manage Subscription</span>
+        </Link>
         <Button
           variant="ghost"
           className="w-full justify-start text-slate-400 hover:text-white hover:bg-slate-800/50 font-medium"

@@ -53,6 +53,9 @@ export function PublicNavigation() {
             <Link href="/public/networkers">
               <Button variant="ghost">Networkers</Button>
             </Link>
+            <Link href="/pricing">
+              <Button variant="ghost">Pricing</Button>
+            </Link>
             {!isLoading && (
               <>
                 {user ? (
