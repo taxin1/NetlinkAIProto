@@ -13,4 +13,5 @@ export interface Subscription {
   canceled_at: string | null
   created_at: string
   updated_at: string
+  networking_mode_usage?: number
 }

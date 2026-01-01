@@ -1,17 +1,31 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
-import { Sparkles, WifiOff, MailCheck, Lightbulb, Loader2, CheckCircle2 } from "lucide-react"
+import { Sparkles, WifiOff, MailCheck, Lightbulb, Loader2, CheckCircle2, AlertCircle, Crown } from "lucide-react"
 import { BusinessCardScanner } from "./business-card-scanner"
+import Link from "next/link"
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/components/ui/alert"
 
 interface NetworkingModeSectionProps {
   userId: string
+}
+
+interface UsageInfo {
+  allowed: boolean
+  usage: number
+  limit: number | null
+  remaining: number | null
+  isPro: boolean
 }
 
 export function NetworkingModeSection({ userId }: NetworkingModeSectionProps) {
@@ -24,6 +38,51 @@ export function NetworkingModeSection({ userId }: NetworkingModeSectionProps) {
   const [isGeneratingTemplate, setIsGeneratingTemplate] = useState(false)
   const [templatePrepared, setTemplatePrepared] = useState(false)
   const [isEditingTemplate, setIsEditingTemplate] = useState(false)
+  const [usageInfo, setUsageInfo] = useState<UsageInfo | null>(null)
+  const [isLoadingUsage, setIsLoadingUsage] = useState(true)
+
+  // Fetch usage info on mount and when enabled changes
+  useEffect(() => {
+    fetchUsageInfo()
+  }, [enabled])
+
+  const fetchUsageInfo = async () => {
+    try {
+      setIsLoadingUsage(true)
+      const response = await fetch("/api/networking-mode/check-usage")
+      if (!response.ok) throw new Error("Failed to fetch usage")
+      const data = await response.json()
+      setUsageInfo(data)
+      
+      // If usage limit reached and user tries to enable, disable it
+      if (!data.allowed && enabled) {
+        setEnabled(false)
+      }
+    } catch (error) {
+      console.error("Error fetching usage info:", error)
+    } finally {
+      setIsLoadingUsage(false)
+    }
+  }
+
+  const handleToggleEnabled = async (checked: boolean) => {
+    // Check usage before enabling
+    if (checked) {
+      const response = await fetch(`/api/networking-mode/check-usage?userId=${userId}`)
+      if (response.ok) {
+        const data = await response.json()
+        if (!data.allowed) {
+          alert(`You've reached your free trial limit of 100 networking mode uses. Please upgrade to Pro for unlimited usage.`)
+          return
+        }
+        setUsageInfo({
+          ...data,
+          isPro: data.remaining === null,
+        })
+      }
+    }
+    setEnabled(checked)
+  }
 
 
   return (
@@ -42,8 +101,9 @@ export function NetworkingModeSection({ userId }: NetworkingModeSectionProps) {
             <Switch
               id="networking-mode-switch"
               checked={enabled}
-              onCheckedChange={setEnabled}
+              onCheckedChange={handleToggleEnabled}
               aria-label="Enable networking mode"
+              disabled={!usageInfo?.allowed && !isLoadingUsage}
             />
           </div>
         </div>
@@ -51,8 +111,48 @@ export function NetworkingModeSection({ userId }: NetworkingModeSectionProps) {
           <strong>Before the event:</strong> Prepare your email template below. 
           <strong>At the event:</strong> When enabled, scanning cards will automatically send customized emails using your prepared template.
         </p>
+        {/* Usage Info */}
+        {!isLoadingUsage && usageInfo && (
+          <div className="mt-3 pt-3 border-t">
+            {usageInfo.isPro ? (
+              <div className="flex items-center gap-2 text-sm">
+                <Crown className="h-4 w-4 text-primary" />
+                <span className="text-muted-foreground">Pro Plan: Unlimited networking mode usage</span>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">
+                  Free Trial: {usageInfo.usage} / {usageInfo.limit} uses
+                </span>
+                {usageInfo.remaining !== null && (
+                  <Badge variant={usageInfo.remaining > 10 ? "default" : "destructive"}>
+                    {usageInfo.remaining} remaining
+                  </Badge>
+                )}
+              </div>
+            )}
+          </div>
+        )}
       </CardHeader>
       <CardContent className="space-y-6">
+        {/* Upgrade Alert */}
+        {!isLoadingUsage && usageInfo && !usageInfo.allowed && (
+          <Alert className="border-orange-500 bg-orange-50 dark:bg-orange-950/20">
+            <AlertCircle className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+            <AlertTitle className="text-orange-800 dark:text-orange-200">Free Trial Limit Reached</AlertTitle>
+            <AlertDescription className="text-orange-700 dark:text-orange-300">
+              You've used all {usageInfo.limit} free networking mode uses. Upgrade to Pro for unlimited usage and access to all premium features.
+              <div className="mt-3">
+                <Link href="/checkout?plan=professional">
+                  <Button size="sm" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white">
+                    <Crown className="mr-2 h-4 w-4" />
+                    Upgrade to Pro
+                  </Button>
+                </Link>
+              </div>
+            </AlertDescription>
+          </Alert>
+        )}
         {/* Step 1: Prepare Email Template (Before Event) */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">

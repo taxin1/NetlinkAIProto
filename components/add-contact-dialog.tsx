@@ -18,6 +18,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Plus } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
+import { checkUsageLimitClient } from "@/lib/plan-features-client"
 
 interface AddContactDialogProps {
   userId: string
@@ -36,6 +37,14 @@ export function AddContactDialog({ userId }: AddContactDialogProps) {
     const supabase = createClient()
 
     try {
+      // Check contact limit before creating
+      const contactLimitCheck = await checkUsageLimitClient(userId, 'contacts')
+      if (!contactLimitCheck.allowed) {
+        alert(contactLimitCheck.message || "Contact limit reached. Please upgrade your plan.")
+        setIsLoading(false)
+        return
+      }
+
       const { error } = await supabase.from("contacts").insert({
         user_id: userId,
         name: formData.get("name") as string,

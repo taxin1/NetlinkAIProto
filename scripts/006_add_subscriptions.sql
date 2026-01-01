@@ -19,6 +19,11 @@ create table if not exists public.subscriptions (
 -- Enable RLS
 alter table public.subscriptions enable row level security;
 
+-- Drop existing policies if they exist (for idempotency)
+drop policy if exists "Users can view their own subscriptions" on public.subscriptions;
+drop policy if exists "Users can insert their own subscriptions" on public.subscriptions;
+drop policy if exists "Users can update their own subscriptions" on public.subscriptions;
+
 -- Subscriptions policies
 create policy "Users can view their own subscriptions"
   on public.subscriptions for select
@@ -36,6 +41,9 @@ create policy "Users can update their own subscriptions"
 create index if not exists subscriptions_user_id_idx on public.subscriptions(user_id);
 create index if not exists subscriptions_status_idx on public.subscriptions(status);
 create index if not exists subscriptions_paypal_order_id_idx on public.subscriptions(paypal_order_id);
+
+-- Drop existing trigger if it exists (for idempotency)
+drop trigger if exists update_subscriptions_updated_at on public.subscriptions;
 
 -- Create trigger for updated_at
 create trigger update_subscriptions_updated_at 

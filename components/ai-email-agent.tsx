@@ -21,9 +21,17 @@ import {
   Pause,
   StopCircle,
   Sparkles,
-  Wand2
+  Wand2,
+  Crown,
+  AlertCircle
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
+import Link from "next/link"
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/components/ui/alert"
 
 interface Contact {
   id: string
@@ -70,9 +78,20 @@ export function AIEmailAgent({ userId }: AIEmailAgentProps) {
   // Current running campaign
   const [currentCampaign, setCurrentCampaign] = useState<EmailCampaign | null>(null)
   const [sendingProgress, setSendingProgress] = useState(0)
+  
+  // Usage tracking
+  const [usageInfo, setUsageInfo] = useState<{
+    allowed: boolean
+    usage: number
+    limit: number
+    remaining: number | null
+    isPro: boolean
+  } | null>(null)
+  const [isLoadingUsage, setIsLoadingUsage] = useState(true)
 
   useEffect(() => {
     loadData()
+    fetchUsageInfo()
     
     // Check for pre-filled campaign data from event creation
     const savedCampaignData = sessionStorage.getItem('campaignData')
@@ -96,6 +115,23 @@ export function AIEmailAgent({ userId }: AIEmailAgentProps) {
       }
     }
   }, [userId])
+  
+  const fetchUsageInfo = async () => {
+    try {
+      setIsLoadingUsage(true)
+      const response = await fetch(`/api/ai-campaign/check-usage?userId=${userId}`)
+      if (!response.ok) throw new Error("Failed to fetch usage")
+      const data = await response.json()
+      setUsageInfo({
+        ...data,
+        isPro: data.remaining === null, // null remaining means unlimited (Pro plan)
+      })
+    } catch (error) {
+      console.error("Error fetching usage info:", error)
+    } finally {
+      setIsLoadingUsage(false)
+    }
+  }
 
   const loadData = async () => {
     const supabase = createClient()
@@ -148,6 +184,14 @@ export function AIEmailAgent({ userId }: AIEmailAgentProps) {
     const supabase = createClient()
 
     try {
+      // Check campaign contact limit
+      const campaignLimitCheck = await checkUsageLimitClient(userId, 'campaignContacts', selectedContacts.length)
+      if (!campaignLimitCheck.allowed) {
+        alert(campaignLimitCheck.message || "Campaign contact limit exceeded. Please upgrade your plan.")
+        setIsCreating(false)
+        return
+      }
+
       // Create campaign
       const { data: campaign, error: campaignError } = await supabase
         .from("email_campaigns")
@@ -213,6 +257,20 @@ export function AIEmailAgent({ userId }: AIEmailAgentProps) {
   const runCampaign = async (campaign: EmailCampaign, skipAlreadySent: boolean = false) => {
     if (!campaign.contacts.length) return
 
+    // Check usage before running campaign
+    const usageResponse = await fetch(`/api/ai-campaign/check-usage?userId=${userId}`)
+    if (usageResponse.ok) {
+      const usageData = await usageResponse.json()
+      if (!usageData.allowed) {
+        alert(usageData.message || `You've reached your free trial limit of 100 AI campaign runs. Please upgrade to Pro for unlimited usage.`)
+        return
+      }
+      setUsageInfo({
+        ...usageData,
+        isPro: usageData.remaining === null,
+      })
+    }
+
     setIsRunning(true)
     setCurrentCampaign(campaign)
     setSendingProgress(0)
@@ -222,6 +280,20 @@ export function AIEmailAgent({ userId }: AIEmailAgentProps) {
     let totalToProcess = campaign.contacts.length
 
     try {
+      // Increment usage when campaign starts (only once per campaign run)
+      try {
+        await fetch("/api/ai-campaign/increment-usage", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId }),
+        })
+        // Refresh usage info
+        await fetchUsageInfo()
+      } catch (usageError) {
+        console.error("Failed to increment usage:", usageError)
+        // Don't fail the whole operation if usage tracking fails
+      }
+
       // Update campaign status
       await supabase
         .from("email_campaigns")
@@ -450,8 +522,9 @@ export function AIEmailAgent({ userId }: AIEmailAgentProps) {
         })
         .eq("id", campaign.id)
 
-      // Reload data
+      // Reload data and usage
       await loadData()
+      await fetchUsageInfo()
     } catch (error) {
       console.error("Error running campaign:", error)
       alert("Failed to run campaign. Please try again.")
@@ -643,8 +716,49 @@ export function AIEmailAgent({ userId }: AIEmailAgentProps) {
           <p className="text-slate-400 text-sm sm:text-base">
             Automatically send personalized cold emails to multiple contacts using AI
           </p>
+          {/* Usage Info */}
+          {!isLoadingUsage && usageInfo && (
+            <div className="mt-4 pt-4 border-t border-slate-700/50">
+              {usageInfo.isPro ? (
+                <div className="flex items-center gap-2 text-sm">
+                  <Crown className="h-4 w-4 text-cyan-400" />
+                  <span className="text-slate-400">Pro Plan: Unlimited AI campaign runs</span>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-slate-400">
+                    Free Trial: {usageInfo.usage} / {usageInfo.limit} runs
+                  </span>
+                  {usageInfo.remaining !== null && (
+                    <Badge variant={usageInfo.remaining > 10 ? "default" : "destructive"} className="text-xs">
+                      {usageInfo.remaining} remaining
+                    </Badge>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
         </CardContent>
       </Card>
+
+      {/* Upgrade Alert */}
+      {!isLoadingUsage && usageInfo && !usageInfo.allowed && (
+        <Alert className="border-orange-500 bg-orange-50 dark:bg-orange-950/20">
+          <AlertCircle className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+          <AlertTitle className="text-orange-800 dark:text-orange-200">Free Trial Limit Reached</AlertTitle>
+          <AlertDescription className="text-orange-700 dark:text-orange-300">
+            You've used all {usageInfo.limit} free AI campaign runs. Upgrade to Pro for unlimited usage and access to all premium features.
+            <div className="mt-3">
+              <Link href="/checkout?plan=professional">
+                <Button size="sm" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white">
+                  <Crown className="mr-2 h-4 w-4" />
+                  Upgrade to Pro
+                </Button>
+              </Link>
+            </div>
+          </AlertDescription>
+        </Alert>
+      )}
 
       {/* Create Campaign */}
       <Card className="border-slate-800/50 bg-slate-900/80 backdrop-blur-xl">

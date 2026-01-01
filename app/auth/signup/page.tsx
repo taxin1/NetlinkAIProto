@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useState, useEffect } from "react"
 import { Chrome, Eye, EyeOff } from "lucide-react"
 
@@ -22,6 +22,8 @@ export default function SignUpPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [isCheckingAuth, setIsCheckingAuth] = useState(true)
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const redirectPath = searchParams.get("redirect") || "/onboarding"
 
   // Check if user is already authenticated
   useEffect(() => {
@@ -57,13 +59,13 @@ export default function SignUpPage() {
       return
     }
 
-    const { data, error } = await authService.signUp(email, password)
+    const { data, error } = await authService.signUp(email, password, redirectPath)
     
     if (error) {
       setError(error)
     } else if (data?.session) {
       // User is immediately signed in (email confirmation disabled)
-      router.push("/onboarding")
+      router.push(redirectPath)
     } else if (data?.user && !data.session) {
       // Email confirmation is required
       router.push("/auth/check-email")
@@ -85,7 +87,7 @@ export default function SignUpPage() {
       return
     }
 
-    const { data, error } = await authService.signInWithOAuth('google')
+    const { data, error } = await authService.signInWithOAuth('google', redirectPath)
     
     if (error) {
       setError(error)
@@ -112,7 +114,11 @@ export default function SignUpPage() {
         <Card className="border-border">
           <CardHeader>
             <CardTitle className="text-2xl">Create an account</CardTitle>
-            <CardDescription className="text-muted-foreground">Start building your network today</CardDescription>
+            <CardDescription className="text-muted-foreground">
+              {redirectPath.includes('checkout')
+                ? "Sign up to start your subscription"
+                : "Start building your network today"}
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSignUp}>
@@ -198,7 +204,10 @@ export default function SignUpPage() {
               </Button>
               <div className="mt-4 text-center text-sm text-muted-foreground">
                 Already have an account?{" "}
-                <Link href="/auth/login" className="text-primary underline underline-offset-4">
+                <Link 
+                  href={`/auth/login${redirectPath && redirectPath !== '/onboarding' ? `?redirect=${encodeURIComponent(redirectPath)}` : ''}`} 
+                  className="text-primary underline underline-offset-4"
+                >
                   Sign in
                 </Link>
               </div>

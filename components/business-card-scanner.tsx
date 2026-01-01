@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Upload, Scan, Loader2, CheckCircle2, Camera, X } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
+import { checkUsageLimitClient } from "@/lib/plan-features-client"
 
 interface BusinessCardScannerProps {
   userId: string
@@ -141,7 +142,7 @@ export function BusinessCardScanner({
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ imageBase64: base64 }),
+        body: JSON.stringify({ imageBase64: base64, userId }),
       })
 
       if (!response.ok) {
@@ -161,6 +162,14 @@ export function BusinessCardScanner({
 
       console.log("[v0] Extracted info:", info)
       setExtractedInfo(info)
+
+      // Check contact limit before saving
+      const contactLimitCheck = await checkUsageLimitClient(userId, 'contacts')
+      if (!contactLimitCheck.allowed) {
+        alert(contactLimitCheck.message || "Contact limit reached. Please upgrade your plan.")
+        setIsScanning(false)
+        return
+      }
 
       // Save to database
       const supabase = createClient()
@@ -242,6 +251,38 @@ export function BusinessCardScanner({
       if (!networkingModeEnabled || !info?.email || !networkingMessage?.trim()) return
 
       try {
+        // Check usage limit before sending
+        const usageCheckRes = await fetch("/api/networking-mode/check-usage")
+        if (!usageCheckRes.ok) {
+          const errorData = await usageCheckRes.json().catch(() => ({}))
+          if (errorData.requiresPro) {
+            alert(`You've reached your free trial limit of 100 networking mode emails. Please upgrade to Professional for unlimited networking mode.`)
+            return
+          }
+          throw new Error("Failed to check usage")
+        }
+
+        const usageCheck = await usageCheckRes.json()
+        if (!usageCheck.allowed) {
+          alert(usageCheck.requiresPro 
+            ? `You've reached your free trial limit of 100 networking mode emails. Please upgrade to Professional for unlimited networking mode.`
+            : "Networking mode limit reached. Please upgrade to continue.")
+          return
+        }
+
+        // Increment usage before sending
+        const incrementRes = await fetch("/api/networking-mode/increment-usage", {
+          method: "POST"
+        })
+        
+        if (!incrementRes.ok) {
+          const errorData = await incrementRes.json().catch(() => ({}))
+          if (errorData.requiresPro) {
+            alert(`You've reached your free trial limit of 100 networking mode emails. Please upgrade to Professional for unlimited networking mode.`)
+            return
+          }
+          throw new Error("Failed to increment usage")
+        }
         let purpose = networkingMessage.trim()
         
         // If the message looks like a full email template (contains greeting/signature), 
@@ -297,6 +338,28 @@ export function BusinessCardScanner({
           console.error("Failed to send email:", err)
         } else {
           console.log("Email sent successfully to", info.email)
+          
+          // Increment networking mode usage after successful email send
+          try {
+            await fetch("/api/networking-mode/increment-usage", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ userId }),
+            })
+          } catch (usageError) {
+            console.error("Failed to increment usage:", usageError)
+            // Don't fail the whole operation if usage tracking fails
+          }
+          
+          // Increment networking mode usage count
+          try {
+            await fetch("/api/networking-mode/increment-usage", {
+              method: "POST",
+            })
+          } catch (usageError) {
+            console.error("Failed to increment usage:", usageError)
+            // Don't fail the whole operation if usage tracking fails
+          }
         }
       } catch (error) {
         console.error("Networking auto-send error:", error)

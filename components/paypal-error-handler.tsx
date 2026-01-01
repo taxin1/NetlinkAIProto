@@ -12,6 +12,62 @@ export function PayPalErrorHandler() {
     // Store original error handlers
     const originalOnError = window.onerror;
     const originalOnUnhandledRejection = window.onunhandledrejection;
+    const originalConsoleError = console.error;
+    const originalConsoleWarn = console.warn;
+
+    // Intercept console.error to catch PayPal SDK errors that are logged directly
+    console.error = (...args: any[]) => {
+      const errorMessage = args.map(arg => 
+        typeof arg === 'string' ? arg : 
+        typeof arg === 'object' && arg !== null ? JSON.stringify(arg) : 
+        String(arg)
+      ).join(' ');
+      const errorStr = errorMessage.toLowerCase();
+
+      // Check if this is the PayPal SDK v5 unhandled exception
+      if (
+        errorStr.includes("paypal_js_sdk_v5_unhandled_exception") ||
+        (args.length > 0 &&
+          typeof args[0] === "string" &&
+          args[0].includes("paypal_js_sdk_v5_unhandled_exception")) ||
+        (args.length > 0 &&
+          typeof args[0] === "object" &&
+          args[0] !== null &&
+          Object.keys(args[0]).length === 0 &&
+          errorStr.includes("paypal"))
+      ) {
+        // Silently suppress this known non-critical PayPal SDK issue
+        // This error is harmless and doesn't affect functionality
+        return; // Don't call original console.error
+      }
+
+      // Call original console.error for all other errors
+      originalConsoleError.apply(console, args);
+    };
+
+    // Intercept console.warn for PayPal SDK warnings
+    console.warn = (...args: any[]) => {
+      const warningMessage = args.map(arg => 
+        typeof arg === 'string' ? arg : 
+        typeof arg === 'object' && arg !== null ? JSON.stringify(arg) : 
+        String(arg)
+      ).join(' ');
+      const warningStr = warningMessage.toLowerCase();
+
+      // Suppress PayPal SDK v5 unhandled exception warnings
+      if (
+        warningStr.includes("paypal_js_sdk_v5_unhandled_exception") ||
+        (args.length > 0 &&
+          typeof args[0] === "string" &&
+          args[0].includes("paypal_js_sdk_v5_unhandled_exception"))
+      ) {
+        // Silently suppress
+        return;
+      }
+
+      // Call original console.warn for all other warnings
+      originalConsoleWarn.apply(console, args);
+    };
 
     // Global error handler for PayPal SDK
     const handleError = (
@@ -35,13 +91,6 @@ export function PayPalErrorHandler() {
 
       if (isPayPalUnhandledException) {
         // Silently suppress this known non-critical PayPal SDK issue
-        // Only log in development mode
-        if (process.env.NODE_ENV === "development") {
-          console.warn(
-            "[PayPal SDK] Suppressed unhandled exception (non-critical):",
-            { message, source }
-          );
-        }
         // Return true to prevent default error handling
         return true;
       }
@@ -56,7 +105,7 @@ export function PayPalErrorHandler() {
       if (isPayPalError && !isPayPalUnhandledException) {
         // Log other PayPal errors but don't suppress them
         if (process.env.NODE_ENV === "development") {
-          console.error("[PayPal SDK] Error:", { message, source, error });
+          originalConsoleError("[PayPal SDK] Error:", { message, source, error });
         }
       }
 
@@ -82,12 +131,6 @@ export function PayPalErrorHandler() {
 
       if (isPayPalUnhandledException) {
         // Silently suppress this known non-critical PayPal SDK issue
-        if (process.env.NODE_ENV === "development") {
-          console.warn(
-            "[PayPal SDK] Suppressed unhandled promise rejection (non-critical):",
-            reason
-          );
-        }
         event.preventDefault(); // Prevent default browser error handling
         return;
       }
@@ -108,7 +151,7 @@ export function PayPalErrorHandler() {
       if (isPayPalError && !isPayPalUnhandledException) {
         // Log other PayPal errors but don't suppress them
         if (process.env.NODE_ENV === "development") {
-          console.error("[PayPal SDK] Promise rejection:", reason);
+          originalConsoleError("[PayPal SDK] Promise rejection:", reason);
         }
       }
 
@@ -126,6 +169,8 @@ export function PayPalErrorHandler() {
     return () => {
       window.onerror = originalOnError;
       window.onunhandledrejection = originalOnUnhandledRejection;
+      console.error = originalConsoleError;
+      console.warn = originalConsoleWarn;
     };
   }, []);
 

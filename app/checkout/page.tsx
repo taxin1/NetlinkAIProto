@@ -147,10 +147,24 @@ export default function CheckoutPage() {
         }),
       });
 
-      const data = await response.json();
+      let data;
+      try {
+        data = await response.json();
+      } catch (jsonError) {
+        // If response is not valid JSON, get text instead
+        const text = await response.text();
+        console.error("Subscription creation failed - invalid JSON response:", text);
+        throw new Error(`Failed to create subscription: ${response.status} ${response.statusText}`);
+      }
 
       if (!response.ok) {
-        throw new Error(data.error || "Failed to create subscription");
+        console.error("Subscription creation failed:", data);
+        const errorMessage = data?.error 
+          ? (data.details 
+              ? `${data.error}: ${data.details}` 
+              : data.error)
+          : data?.message || `Failed to create subscription (${response.status})`;
+        throw new Error(errorMessage);
       }
 
       // Redirect to success page

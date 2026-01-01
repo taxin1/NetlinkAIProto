@@ -28,13 +28,13 @@ export class AuthService {
     }
   }
 
-  async signUp(email: string, password: string) {
+  async signUp(email: string, password: string, redirectPath?: string) {
     try {
       const { data, error } = await this.supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/onboarding`,
+          emailRedirectTo: `${window.location.origin}${redirectPath || '/onboarding'}`,
         },
       })
 
@@ -51,12 +51,17 @@ export class AuthService {
     }
   }
 
-  async signInWithOAuth(provider: 'google' | 'github' | 'discord') {
+  async signInWithOAuth(provider: 'google' | 'github' | 'discord', redirectPath?: string) {
     try {
+      const redirectTo = new URL(`${window.location.origin}/auth/callback`)
+      if (redirectPath) {
+        redirectTo.searchParams.set('next', redirectPath)
+      }
+
       const { data, error } = await this.supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`
+          redirectTo: redirectTo.toString()
         }
       })
 

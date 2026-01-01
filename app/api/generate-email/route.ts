@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { generateEmailWithGemini } from "@/lib/gemini"
+import { checkUsageLimit } from "@/lib/plan-features"
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,6 +12,22 @@ export async function POST(request: NextRequest) {
         { error: "Contact name and purpose are required" },
         { status: 400 }
       )
+    }
+
+    // Check AI email generation limit
+    if (userId) {
+      const emailLimitCheck = await checkUsageLimit(userId, 'aiEmailGeneration')
+      if (!emailLimitCheck.allowed) {
+        return NextResponse.json(
+          { 
+            error: emailLimitCheck.message || "You've reached your monthly AI email generation limit. Upgrade to Professional for unlimited AI emails.",
+            limitReached: true,
+            limit: emailLimitCheck.limit,
+            remaining: emailLimitCheck.remaining
+          },
+          { status: 403 }
+        )
+      }
     }
 
     const supabase = await createClient()

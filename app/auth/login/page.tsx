@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useState, useEffect } from "react"
 import { Chrome, LayoutDashboard, Eye, EyeOff } from "lucide-react"
 
@@ -21,6 +21,8 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [isCheckingAuth, setIsCheckingAuth] = useState(true)
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const redirectPath = searchParams.get("redirect") || "/dashboard"
 
   // Check if user is already authenticated
   useEffect(() => {
@@ -30,8 +32,8 @@ export default function LoginPage() {
         const { data: { user } } = await supabase.auth.getUser()
         
         if (user) {
-          // User is already signed in, redirect to dashboard
-          router.push("/dashboard")
+          // User is already signed in, redirect to intended page
+          router.push(redirectPath)
           router.refresh()
         }
       } catch (error) {
@@ -42,7 +44,7 @@ export default function LoginPage() {
     }
     
     checkAuth()
-  }, [router])
+  }, [router, redirectPath])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -54,7 +56,7 @@ export default function LoginPage() {
     if (error) {
       setError(error)
     } else if (data?.session) {
-      router.push("/dashboard")
+      router.push(redirectPath)
       router.refresh()
     }
     
@@ -65,7 +67,7 @@ export default function LoginPage() {
     setIsLoading(true)
     setError(null)
 
-    const { data, error } = await authService.signInWithOAuth('google')
+    const { data, error } = await authService.signInWithOAuth('google', redirectPath)
     
     if (error) {
       setError(error)
@@ -93,7 +95,11 @@ export default function LoginPage() {
         <Card className="border-slate-800/50 bg-slate-900/80 backdrop-blur-xl">
           <CardHeader>
             <CardTitle className="text-2xl text-white font-bold tracking-tight">Welcome back</CardTitle>
-            <CardDescription className="text-slate-400 font-light">Sign in to your Netlink account</CardDescription>
+            <CardDescription className="text-slate-400 font-light">
+              {redirectPath.includes('checkout') 
+                ? "Sign in to complete your subscription" 
+                : "Sign in to your Netlink account"}
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleLogin}>
@@ -162,7 +168,10 @@ export default function LoginPage() {
               </Button>
               <div className="mt-4 text-center text-sm text-slate-400">
                 Don&apos;t have an account?{" "}
-                <Link href="/auth/signup" className="text-cyan-400 hover:text-cyan-300 underline underline-offset-4 font-medium">
+                <Link 
+                  href={`/auth/signup${redirectPath && redirectPath !== '/dashboard' ? `?redirect=${encodeURIComponent(redirectPath)}` : ''}`} 
+                  className="text-cyan-400 hover:text-cyan-300 underline underline-offset-4 font-medium"
+                >
                   Sign up
                 </Link>
               </div>

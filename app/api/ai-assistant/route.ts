@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { generateAIResponse } from "@/lib/ai/assistant"
+import { checkUsageLimit } from "@/lib/plan-features"
 
 export async function POST(request: NextRequest) {
   try {
@@ -9,6 +10,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: "Message and userId are required" },
         { status: 400 }
+      )
+    }
+
+    // Check AI assistant message limit
+    const messageLimitCheck = await checkUsageLimit(userId, 'aiAssistantMessages')
+    if (!messageLimitCheck.allowed) {
+      return NextResponse.json(
+        { 
+          error: messageLimitCheck.message || "You've reached your daily AI assistant message limit. Upgrade to Professional for unlimited messages.",
+          limitReached: true,
+          limit: messageLimitCheck.limit,
+          remaining: messageLimitCheck.remaining
+        },
+        { status: 403 }
       )
     }
 

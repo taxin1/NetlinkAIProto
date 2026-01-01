@@ -66,37 +66,56 @@ PAYPAL_CLIENT_ID=AeA1QIZXiflr1_-dAzPxX1gx_6h3QZ0g5LxX1gx_6h3QZ0g5LxX1gx
 PAYPAL_CLIENT_SECRET=ELxX1gx_6h3QZ0g5LxX1gx_6h3QZ0g5LxX1gx_6h3QZ0g5LxX1gx_6h3QZ0g5LxX1gx
 ```
 
-### Step 4: Restart Your Development Server
+### Step 4: Verify Your Configuration
 
-After adding environment variables:
+We have provided a script to automatically check your configuration:
 
 ```bash
-# Stop your current dev server (Ctrl+C)
-# Then restart it
-npm run dev
-# or
-pnpm dev
+node scripts/check-paypal-config.mjs
 ```
 
 ### Step 5: Test the Integration
 
-1. Navigate to `/checkout?plan=professional` in your app
-2. You should see the PayPal payment button
-3. For testing, use PayPal sandbox test accounts:
+1. Start your development server:
+   ```bash
+   npm run dev
+   ```
+
+2. **New!** Navigate to the dedicated test page:
+   - Go to `http://localhost:3000/test-payment`
+   - This page will verify your environment variables and allow you to run a $1.00 test transaction without going through the full checkout flow.
+
+3. Alternatively, navigate to `/checkout?plan=professional` in your app to test the full flow.
+
+4. For testing, use PayPal sandbox test accounts:
    - Go to [PayPal Sandbox](https://developer.paypal.com/dashboard/accounts)
    - Create test buyer and seller accounts
    - Use the buyer account to test payments
 
-## 🧪 Testing
+## ❓ Troubleshooting
 
-### Sandbox Test Accounts
+### Common Errors
 
-1. Go to PayPal Developer Dashboard → **Accounts** → **Sandbox**
-2. Create a **Personal** account (buyer)
-3. Create a **Business** account (seller - this is your app)
-4. Use the buyer account credentials to test payments
+1. **401 Unauthorized**
+   - **Cause**: Incorrect Client ID or Client Secret.
+   - **Fix**: Check your `.env.local` file. Ensure no extra spaces. Verify you copied the *Sandbox* credentials for development.
 
-### Test Card Numbers
+2. **422 Unprocessable Entity**
+   - **Cause**: 
+     - Trying to use a Live Client ID in Sandbox mode (or vice versa).
+     - Using a currency not supported by the buyer account.
+     - Trying to pay yourself (using the same account for buyer and seller).
+   - **Fix**: Use a distinct Sandbox Personal account for buying. Check `PAYPAL_ENVIRONMENT`.
+
+3. **Buttons not showing**
+   - **Cause**: Script failed to load or Client ID is invalid.
+   - **Fix**: Check console for errors. Run `node scripts/check-paypal-config.mjs`.
+
+4. **"Subscription not found" on Success Page**
+   - **Cause**: Database insertion failed or delay in webhook/processing.
+   - **Fix**: Check the server logs for database errors.
+
+## 📚 References
 
 For card payments (guest checkout), PayPal provides test card numbers:
 
