@@ -226,7 +226,7 @@ export function AddEventForm({ userId, contacts }: AddEventFormProps) {
     
     // Store in sessionStorage to pre-fill AI agent
     sessionStorage.setItem('campaignData', JSON.stringify(campaignData))
-    router.push("/dashboard#ai-agent")
+    router.push("/dashboard/campaigns")
     router.refresh()
   }
 

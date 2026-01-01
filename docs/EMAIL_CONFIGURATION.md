@@ -1,6 +1,6 @@
 # User Email Configuration Guide
 
-This guide explains how to configure and use your own email account for sending emails through Netlink Cogni's AI Email Agent.
+This guide explains how to configure and use your own email account for sending emails through Netlink's AI Email Agent.
 
 ## Overview
 
@@ -31,7 +31,7 @@ Users can now configure their own email accounts to send emails instead of using
 ## How to Configure Your Email
 
 ### Step 1: Access Settings
-1. Log in to your Netlink Cogni account
+1. Log in to your Netlink account
 2. Navigate to **Dashboard** → **Settings** in the sidebar
 
 ### Step 2: Choose Email Provider

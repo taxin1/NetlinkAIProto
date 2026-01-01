@@ -68,6 +68,8 @@ export default function NetworkProfilePage() {
     hostname: string
   } | null>(null)
   const qrRef = useRef<HTMLDivElement>(null)
+  // Temporary flag to keep NFC logic available but hidden in the UI
+  const isNfcFeatureEnabled = false
   
   const [profile, setProfile] = useState<SocialProfile>({
     linkedin: "",
@@ -84,7 +86,11 @@ export default function NetworkProfilePage() {
 
   useEffect(() => {
     loadProfile()
-    checkNfcSupport()
+    if (isNfcFeatureEnabled) {
+      checkNfcSupport()
+    } else {
+      setNfcChecking(false)
+    }
   }, [])
 
   const checkNfcSupport = async (): Promise<boolean> => {
@@ -626,7 +632,7 @@ N:${lastName};${firstName};;;`
                 </h1>
                 <p className={`text-muted-foreground ${isMobile ? 'text-sm sm:text-base' : 'text-lg'} flex ${isMobile ? 'flex-col sm:flex-row' : 'flex-row'} items-start sm:items-center gap-2`}>
                   <Zap className={`${isMobile ? 'h-4 w-4' : 'h-5 w-5'} text-cyan-500 flex-shrink-0 mt-0.5 sm:mt-0`} />
-                  <span>{isMobile ? 'Share instantly with QR codes & NFC' : 'Share your profile instantly with QR codes & NFC'}</span>
+                  <span>{isMobile ? 'Share instantly with QR codes' : 'Share your profile instantly with QR codes'}</span>
                 </p>
               </div>
             </div>
@@ -924,199 +930,203 @@ N:${lastName};${firstName};;;`
               </CardContent>
             </Card>
 
-            {/* Simplified NFC Card - Mobile optimized */}
-            <Card className="backdrop-blur-sm bg-white/70 dark:bg-gray-900/70 border-white/60 dark:border-gray-800/60 shadow-xl">
-              <CardHeader className={`border-b border-gray-200/50 dark:border-gray-800/50 ${isMobile ? 'p-4' : 'p-6'}`}>
-                <div className={`flex ${isMobile ? 'flex-col sm:flex-row' : 'flex-row'} items-start sm:items-center ${isMobile ? 'gap-3' : ''} justify-between`}>
-                  <div className={`flex items-center ${isMobile ? 'gap-2.5' : 'gap-3'} flex-1`}>
-                    <div className={`${isMobile ? 'p-2' : 'p-2.5'} bg-gradient-to-br from-purple-500 to-pink-600 ${isMobile ? 'rounded-md' : 'rounded-lg'} shadow-md flex-shrink-0`}>
-                      <Nfc className={`${isMobile ? 'h-5 w-5' : 'h-6 w-6'} text-white`} />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <CardTitle className={isMobile ? "text-lg" : "text-xl"}>NFC Tap to Share</CardTitle>
-                      <CardDescription className={isMobile ? "text-xs" : ""}>{isMobile ? "Write to NFC tag" : "Write to NFC tag for instant sharing"}</CardDescription>
-                    </div>
-                  </div>
-                  <div className={isMobile ? "self-start sm:self-center" : ""}>
-                    {nfcChecking ? (
-                      <Badge className={`bg-yellow-500/20 text-yellow-700 dark:text-yellow-300 border border-yellow-500/30 ${isMobile ? 'text-[10px] px-2 py-0.5' : ''}`}>
-                        <Loader2 className={`${isMobile ? 'h-2.5 w-2.5' : 'h-3 w-3'} mr-1 animate-spin`} /> Checking...
-                      </Badge>
-                    ) : nfcSupported ? (
-                      <Badge className={`bg-green-500/20 text-green-700 dark:text-green-300 border border-green-500/30 ${isMobile ? 'text-[10px] px-2 py-0.5' : ''}`}>
-                        <Zap className={`${isMobile ? 'h-2.5 w-2.5' : 'h-3 w-3'} mr-1`} /> Supported
-                      </Badge>
-                    ) : (
-                      <Badge variant="secondary" className={isMobile ? 'text-[10px] px-2 py-0.5' : ''}>Not Available</Badge>
-                    )}
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className={isMobile ? "p-4" : "p-6"}>
-                <div className={isMobile ? "space-y-3" : "space-y-4"}>
-                  <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-muted-foreground`}>
-                    {nfcChecking 
-                      ? "Checking NFC support on your device..."
-                      : nfcSupported 
-                      ? isMobile 
-                        ? "Write your LinkedIn profile to an NFC tag. Anyone can tap it to connect!"
-                        : "Write your LinkedIn profile to an NFC tag. Anyone can tap it with their phone to instantly connect with you!"
-                      : nfcDiagnostics?.isMobile && !nfcDiagnostics?.isAndroid
-                      ? isMobile
-                        ? "⚠️ Web NFC is not available on iOS. Use the QR code feature above instead."
-                        : "⚠️ Web NFC is not available on iOS devices. iOS doesn't support the Web NFC API. Please use an Android device with Chrome or Edge browser, or use the QR code feature above to share your profile."
-                      : "NFC is not supported on this device/browser. Use Chrome or Edge on Android for NFC support. Make sure you're using HTTPS."}
-                  </p>
-                  
-                  {nfcSupported && profile.linkedin && (
-                    <div className={isMobile ? "space-y-2.5" : "space-y-3"}>
-                      <Button
-                        onClick={pushViaNfc}
-                        disabled={nfcWriting || !profile.linkedin}
-                        className={`w-full ${isMobile ? 'h-12 text-base rounded-lg' : 'h-12 rounded-xl'} bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white font-semibold shadow-lg`}
-                      >
-                        {nfcWriting ? (
-                          <><Loader2 className={`mr-2 ${isMobile ? 'h-5 w-5' : 'h-5 w-5'} animate-spin`} /> {isMobile ? 'Tapping...' : 'Tap phones together...'}</>
+            {isNfcFeatureEnabled && (
+              <>
+                {/* Simplified NFC Card - Mobile optimized */}
+                <Card className="backdrop-blur-sm bg-white/70 dark:bg-gray-900/70 border-white/60 dark:border-gray-800/60 shadow-xl">
+                  <CardHeader className={`border-b border-gray-200/50 dark:border-gray-800/50 ${isMobile ? 'p-4' : 'p-6'}`}>
+                    <div className={`flex ${isMobile ? 'flex-col sm:flex-row' : 'flex-row'} items-start sm:items-center ${isMobile ? 'gap-3' : ''} justify-between`}>
+                      <div className={`flex items-center ${isMobile ? 'gap-2.5' : 'gap-3'} flex-1`}>
+                        <div className={`${isMobile ? 'p-2' : 'p-2.5'} bg-gradient-to-br from-purple-500 to-pink-600 ${isMobile ? 'rounded-md' : 'rounded-lg'} shadow-md flex-shrink-0`}>
+                          <Nfc className={`${isMobile ? 'h-5 w-5' : 'h-6 w-6'} text-white`} />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <CardTitle className={isMobile ? "text-lg" : "text-xl"}>NFC Tap to Share</CardTitle>
+                          <CardDescription className={isMobile ? "text-xs" : ""}>{isMobile ? "Write to NFC tag" : "Write to NFC tag for instant sharing"}</CardDescription>
+                        </div>
+                      </div>
+                      <div className={isMobile ? "self-start sm:self-center" : ""}>
+                        {nfcChecking ? (
+                          <Badge className={`bg-yellow-500/20 text-yellow-700 dark:text-yellow-300 border border-yellow-500/30 ${isMobile ? 'text-[10px] px-2 py-0.5' : ''}`}>
+                            <Loader2 className={`${isMobile ? 'h-2.5 w-2.5' : 'h-3 w-3'} mr-1 animate-spin`} /> Checking...
+                          </Badge>
+                        ) : nfcSupported ? (
+                          <Badge className={`bg-green-500/20 text-green-700 dark:text-green-300 border border-green-500/30 ${isMobile ? 'text-[10px] px-2 py-0.5' : ''}`}>
+                            <Zap className={`${isMobile ? 'h-2.5 w-2.5' : 'h-3 w-3'} mr-1`} /> Supported
+                          </Badge>
                         ) : (
-                          <><Smartphone className={`mr-2 ${isMobile ? 'h-5 w-5' : 'h-5 w-5'}`} /> {isMobile ? 'Tap to Share' : 'Tap to Share (Phone-to-Phone)'}</>
+                          <Badge variant="secondary" className={isMobile ? 'text-[10px] px-2 py-0.5' : ''}>Not Available</Badge>
                         )}
-                      </Button>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className={isMobile ? "p-4" : "p-6"}>
+                    <div className={isMobile ? "space-y-3" : "space-y-4"}>
+                      <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-muted-foreground`}>
+                        {nfcChecking 
+                          ? "Checking NFC support on your device..."
+                          : nfcSupported 
+                          ? isMobile 
+                            ? "Write your LinkedIn profile to an NFC tag. Anyone can tap it to connect!"
+                            : "Write your LinkedIn profile to an NFC tag. Anyone can tap it with their phone to instantly connect with you!"
+                          : nfcDiagnostics?.isMobile && !nfcDiagnostics?.isAndroid
+                          ? isMobile
+                            ? "⚠️ Web NFC is not available on iOS. Use the QR code feature above instead."
+                            : "⚠️ Web NFC is not available on iOS devices. iOS doesn't support the Web NFC API. Please use an Android device with Chrome or Edge browser, or use the QR code feature above to share your profile."
+                          : "NFC is not supported on this device/browser. Use Chrome or Edge on Android for NFC support. Make sure you're using HTTPS."}
+                      </p>
+                      
+                      {nfcSupported && profile.linkedin && (
+                        <div className={isMobile ? "space-y-2.5" : "space-y-3"}>
+                          <Button
+                            onClick={pushViaNfc}
+                            disabled={nfcWriting || !profile.linkedin}
+                            className={`w-full ${isMobile ? 'h-12 text-base rounded-lg' : 'h-12 rounded-xl'} bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white font-semibold shadow-lg`}
+                          >
+                            {nfcWriting ? (
+                              <><Loader2 className={`mr-2 ${isMobile ? 'h-5 w-5' : 'h-5 w-5'} animate-spin`} /> {isMobile ? 'Tapping...' : 'Tap phones together...'}</>
+                            ) : (
+                              <><Smartphone className={`mr-2 ${isMobile ? 'h-5 w-5' : 'h-5 w-5'}`} /> {isMobile ? 'Tap to Share' : 'Tap to Share (Phone-to-Phone)'}</>
+                            )}
+                          </Button>
+                          <Button
+                            onClick={writeToNfc}
+                            variant="outline"
+                            disabled={nfcWriting || !profile.linkedin}
+                            className={`w-full ${isMobile ? 'h-12 text-base rounded-lg' : 'h-11 rounded-xl'} border-purple-500/50 text-purple-700 dark:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-950/30`}
+                          >
+                            <Nfc className={`mr-2 ${isMobile ? 'h-4 w-4' : 'h-4 w-4'}`} /> {isMobile ? 'Write to NFC Tag' : 'Write to NFC Tag/Sticker'}
+                          </Button>
+                        </div>
+                      )}
+
+                      {/* iOS Alternative Options - Simplified - Mobile optimized */}
+                      {!nfcSupported && nfcDiagnostics?.isMobile && !nfcDiagnostics?.isAndroid && profile.linkedin && (
+                        <div className={`${isMobile ? 'p-3' : 'p-4'} bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 ${isMobile ? 'rounded-lg' : 'rounded-xl'} border-2 border-blue-200 dark:border-blue-800`}>
+                          <div className={`text-center ${isMobile ? 'mb-2.5' : 'mb-3'}`}>
+                            <h4 className={`font-bold text-blue-900 dark:text-blue-100 mb-1 ${isMobile ? 'text-base' : 'text-lg'}`}>
+                              📱 Easy iOS Sharing
+                            </h4>
+                            <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-blue-700 dark:text-blue-300`}>
+                              Just like Android NFC, but for iOS!
+                            </p>
+                          </div>
+                          <div className={isMobile ? "space-y-2" : "space-y-2"}>
+                            <Button
+                              onClick={shareViaIOS}
+                              className={`w-full ${isMobile ? 'h-12 text-base rounded-lg' : 'h-12 rounded-xl'} bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold shadow-lg`}
+                            >
+                              <Share2 className={`mr-2 ${isMobile ? 'h-5 w-5' : 'h-5 w-5'}`} /> {isMobile ? 'Tap to Share' : 'Tap to Share (AirDrop, Messages, etc.)'}
+                            </Button>
+                            <p className={`${isMobile ? 'text-[10px]' : 'text-xs'} text-center text-blue-600 dark:text-blue-400`}>
+                              Opens iOS share menu - choose AirDrop, Messages, or any app!
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Test NFC Button - Always visible for testing - Mobile optimized */}
                       <Button
-                        onClick={writeToNfc}
+                        onClick={async () => {
+                          setMessage(null)
+                          const isSupported = await checkNfcSupport()
+                          if (isSupported) {
+                            setMessage({ type: "success", text: "✅ NFC test passed! NFC is working on your device. Check browser console (F12) for detailed logs." })
+                          } else {
+                            setMessage({ type: "error", text: "❌ NFC test failed. Check the diagnostics panel below and browser console (F12) for details." })
+                          }
+                        }}
                         variant="outline"
-                        disabled={nfcWriting || !profile.linkedin}
-                        className={`w-full ${isMobile ? 'h-12 text-base rounded-lg' : 'h-11 rounded-xl'} border-purple-500/50 text-purple-700 dark:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-950/30`}
+                        className={`w-full ${isMobile ? 'h-10 text-xs rounded-lg' : 'h-10 rounded-xl'} border-cyan-500/50 text-cyan-700 dark:text-cyan-300 hover:bg-cyan-50 dark:hover:bg-cyan-950/30 ${isMobile ? 'text-xs' : 'text-sm'}`}
                       >
-                        <Nfc className={`mr-2 ${isMobile ? 'h-4 w-4' : 'h-4 w-4'}`} /> {isMobile ? 'Write to NFC Tag' : 'Write to NFC Tag/Sticker'}
+                        <Zap className={`mr-2 ${isMobile ? 'h-3.5 w-3.5' : 'h-4 w-4'}`} /> Test NFC Detection
                       </Button>
-                    </div>
-                  )}
-
-                  {/* iOS Alternative Options - Simplified - Mobile optimized */}
-                  {!nfcSupported && nfcDiagnostics?.isMobile && !nfcDiagnostics?.isAndroid && profile.linkedin && (
-                    <div className={`${isMobile ? 'p-3' : 'p-4'} bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 ${isMobile ? 'rounded-lg' : 'rounded-xl'} border-2 border-blue-200 dark:border-blue-800`}>
-                      <div className={`text-center ${isMobile ? 'mb-2.5' : 'mb-3'}`}>
-                        <h4 className={`font-bold text-blue-900 dark:text-blue-100 mb-1 ${isMobile ? 'text-base' : 'text-lg'}`}>
-                          📱 Easy iOS Sharing
+                      
+                      <div className={`${isMobile ? 'p-3' : 'p-4'} bg-purple-50/50 dark:bg-purple-950/30 ${isMobile ? 'rounded-lg' : 'rounded-xl'} border border-purple-200/50 dark:border-purple-800/50`}>
+                        <h4 className={`font-semibold ${isMobile ? 'mb-1.5 text-sm' : 'mb-2'} flex items-center gap-2`}>
+                          <Smartphone className={`${isMobile ? 'h-3.5 w-3.5' : 'h-4 w-4'} text-purple-600`} />
+                          How NFC Works
                         </h4>
-                        <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-blue-700 dark:text-blue-300`}>
-                          Just like Android NFC, but for iOS!
-                        </p>
+                        <ol className={`${isMobile ? 'text-xs' : 'text-sm'} text-muted-foreground ${isMobile ? 'space-y-0.5' : 'space-y-1'} list-decimal list-inside`}>
+                          <li>Get an NFC tag/sticker (cheap on Amazon)</li>
+                          <li>Click "Write to NFC Tag" above</li>
+                          <li>Hold the tag near your phone's NFC reader</li>
+                          <li>Share by having others tap the tag!</li>
+                        </ol>
                       </div>
-                      <div className={isMobile ? "space-y-2" : "space-y-2"}>
-                        <Button
-                          onClick={shareViaIOS}
-                          className={`w-full ${isMobile ? 'h-12 text-base rounded-lg' : 'h-12 rounded-xl'} bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold shadow-lg`}
-                        >
-                          <Share2 className={`mr-2 ${isMobile ? 'h-5 w-5' : 'h-5 w-5'}`} /> {isMobile ? 'Tap to Share' : 'Tap to Share (AirDrop, Messages, etc.)'}
-                        </Button>
-                        <p className={`${isMobile ? 'text-[10px]' : 'text-xs'} text-center text-blue-600 dark:text-blue-400`}>
-                          Opens iOS share menu - choose AirDrop, Messages, or any app!
-                        </p>
-                      </div>
-                    </div>
-                  )}
 
-                  {/* Test NFC Button - Always visible for testing - Mobile optimized */}
-                  <Button
-                    onClick={async () => {
-                      setMessage(null)
-                      const isSupported = await checkNfcSupport()
-                      if (isSupported) {
-                        setMessage({ type: "success", text: "✅ NFC test passed! NFC is working on your device. Check browser console (F12) for detailed logs." })
-                      } else {
-                        setMessage({ type: "error", text: "❌ NFC test failed. Check the diagnostics panel below and browser console (F12) for details." })
-                      }
-                    }}
-                    variant="outline"
-                    className={`w-full ${isMobile ? 'h-10 text-xs rounded-lg' : 'h-10 rounded-xl'} border-cyan-500/50 text-cyan-700 dark:text-cyan-300 hover:bg-cyan-50 dark:hover:bg-cyan-950/30 ${isMobile ? 'text-xs' : 'text-sm'}`}
-                  >
-                    <Zap className={`mr-2 ${isMobile ? 'h-3.5 w-3.5' : 'h-4 w-4'}`} /> Test NFC Detection
-                  </Button>
-                  
-                  <div className={`${isMobile ? 'p-3' : 'p-4'} bg-purple-50/50 dark:bg-purple-950/30 ${isMobile ? 'rounded-lg' : 'rounded-xl'} border border-purple-200/50 dark:border-purple-800/50`}>
-                    <h4 className={`font-semibold ${isMobile ? 'mb-1.5 text-sm' : 'mb-2'} flex items-center gap-2`}>
-                      <Smartphone className={`${isMobile ? 'h-3.5 w-3.5' : 'h-4 w-4'} text-purple-600`} />
-                      How NFC Works
-                    </h4>
-                    <ol className={`${isMobile ? 'text-xs' : 'text-sm'} text-muted-foreground ${isMobile ? 'space-y-0.5' : 'space-y-1'} list-decimal list-inside`}>
-                      <li>Get an NFC tag/sticker (cheap on Amazon)</li>
-                      <li>Click "Write to NFC Tag" above</li>
-                      <li>Hold the tag near your phone's NFC reader</li>
-                      <li>Share by having others tap the tag!</li>
-                    </ol>
-                  </div>
-
-                  {/* NFC Diagnostics Panel - Mobile optimized */}
-                  {nfcDiagnostics && (
-                    <details className={`${isMobile ? 'p-3' : 'p-4'} bg-gray-50/50 dark:bg-gray-950/30 ${isMobile ? 'rounded-lg' : 'rounded-xl'} border border-gray-200/50 dark:border-gray-800/50`}>
-                      <summary className={`font-semibold mb-2 flex items-center gap-2 cursor-pointer ${isMobile ? 'text-xs' : 'text-sm'}`}>
-                        <AlertCircle className={`${isMobile ? 'h-3.5 w-3.5' : 'h-4 w-4'} text-gray-600`} />
-                        NFC Diagnostics {isMobile ? '(Tap to expand)' : '(Click to expand)'}
-                      </summary>
-                      <div className={`mt-3 space-y-2 ${isMobile ? 'text-[10px]' : 'text-xs'} font-mono`}>
-                        <div className="flex items-center gap-2">
-                          <span className={nfcDiagnostics.hasNDEFReader ? "text-green-600" : "text-red-600"}>
-                            {nfcDiagnostics.hasNDEFReader ? "✅" : "❌"}
-                          </span>
-                          <span>NDEFReader API: {nfcDiagnostics.hasNDEFReader ? "Available" : "Not Available"}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className={nfcDiagnostics.isSecureContext ? "text-green-600" : "text-red-600"}>
-                            {nfcDiagnostics.isSecureContext ? "✅" : "❌"}
-                          </span>
-                          <span>Secure Context: {nfcDiagnostics.isSecureContext ? "Yes" : "No"} ({nfcDiagnostics.protocol})</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className={nfcDiagnostics.isMobile ? "text-green-600" : "text-gray-600"}>
-                            {nfcDiagnostics.isMobile ? "📱" : "💻"}
-                          </span>
-                          <span>Device: {nfcDiagnostics.isMobile ? "Mobile" : "Desktop"}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className={nfcDiagnostics.isAndroid ? "text-green-600" : "text-gray-600"}>
-                            {nfcDiagnostics.isAndroid ? "🤖" : "🍎"}
-                          </span>
-                          <span>OS: {nfcDiagnostics.isAndroid ? "Android" : "Other"}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className={(nfcDiagnostics.isChrome || nfcDiagnostics.isEdge) ? "text-green-600" : "text-gray-600"}>
-                            {(nfcDiagnostics.isChrome || nfcDiagnostics.isEdge) ? "✅" : "❌"}
-                          </span>
-                          <span>Browser: {nfcDiagnostics.isChrome ? "Chrome" : nfcDiagnostics.isEdge ? "Edge" : "Other"}</span>
-                        </div>
-                        <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
-                          <div className="text-xs text-muted-foreground break-all">
-                            User Agent: {nfcDiagnostics.userAgent}
-                          </div>
-                          <div className="text-xs text-muted-foreground mt-1">
-                            Hostname: {nfcDiagnostics.hostname}
-                          </div>
-                        </div>
-                        <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
-                          <div className="text-xs font-semibold">
-                            Status: {nfcSupported ? "✅ NFC Enabled" : "❌ NFC Not Available"}
-                          </div>
-                          {!nfcSupported && (
-                            <div className="text-xs text-muted-foreground mt-1">
-                              {!nfcDiagnostics.isSecureContext && "⚠️ Requires HTTPS or localhost"}
-                              {nfcDiagnostics.isSecureContext && !nfcDiagnostics.hasNDEFReader && !nfcDiagnostics.isAndroid && nfcDiagnostics.isMobile && (
-                                <div className="space-y-1">
-                                  <div>⚠️ iOS doesn't support Web NFC API</div>
-                                  <div className="text-green-600 dark:text-green-400">💡 Use QR Code feature above instead!</div>
+                      {/* NFC Diagnostics Panel - Mobile optimized */}
+                      {nfcDiagnostics && (
+                        <details className={`${isMobile ? 'p-3' : 'p-4'} bg-gray-50/50 dark:bg-gray-950/30 ${isMobile ? 'rounded-lg' : 'rounded-xl'} border border-gray-200/50 dark:border-gray-800/50`}>
+                          <summary className={`font-semibold mb-2 flex items-center gap-2 cursor-pointer ${isMobile ? 'text-xs' : 'text-sm'}`}>
+                            <AlertCircle className={`${isMobile ? 'h-3.5 w-3.5' : 'h-4 w-4'} text-gray-600`} />
+                            NFC Diagnostics {isMobile ? '(Tap to expand)' : '(Click to expand)'}
+                          </summary>
+                          <div className={`mt-3 space-y-2 ${isMobile ? 'text-[10px]' : 'text-xs'} font-mono`}>
+                            <div className="flex items-center gap-2">
+                              <span className={nfcDiagnostics.hasNDEFReader ? "text-green-600" : "text-red-600"}>
+                                {nfcDiagnostics.hasNDEFReader ? "✅" : "❌"}
+                              </span>
+                              <span>NDEFReader API: {nfcDiagnostics.hasNDEFReader ? "Available" : "Not Available"}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className={nfcDiagnostics.isSecureContext ? "text-green-600" : "text-red-600"}>
+                                {nfcDiagnostics.isSecureContext ? "✅" : "❌"}
+                              </span>
+                              <span>Secure Context: {nfcDiagnostics.isSecureContext ? "Yes" : "No"} ({nfcDiagnostics.protocol})</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className={nfcDiagnostics.isMobile ? "text-green-600" : "text-gray-600"}>
+                                {nfcDiagnostics.isMobile ? "📱" : "💻"}
+                              </span>
+                              <span>Device: {nfcDiagnostics.isMobile ? "Mobile" : "Desktop"}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className={nfcDiagnostics.isAndroid ? "text-green-600" : "text-gray-600"}>
+                                {nfcDiagnostics.isAndroid ? "🤖" : "🍎"}
+                              </span>
+                              <span>OS: {nfcDiagnostics.isAndroid ? "Android" : "Other"}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className={(nfcDiagnostics.isChrome || nfcDiagnostics.isEdge) ? "text-green-600" : "text-gray-600"}>
+                                {(nfcDiagnostics.isChrome || nfcDiagnostics.isEdge) ? "✅" : "❌"}
+                              </span>
+                              <span>Browser: {nfcDiagnostics.isChrome ? "Chrome" : nfcDiagnostics.isEdge ? "Edge" : "Other"}</span>
+                            </div>
+                            <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
+                              <div className="text-xs text-muted-foreground break-all">
+                                User Agent: {nfcDiagnostics.userAgent}
+                              </div>
+                              <div className="text-xs text-muted-foreground mt-1">
+                                Hostname: {nfcDiagnostics.hostname}
+                              </div>
+                            </div>
+                            <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
+                              <div className="text-xs font-semibold">
+                                Status: {nfcSupported ? "✅ NFC Enabled" : "❌ NFC Not Available"}
+                              </div>
+                              {!nfcSupported && (
+                                <div className="text-xs text-muted-foreground mt-1">
+                                  {!nfcDiagnostics.isSecureContext && "⚠️ Requires HTTPS or localhost"}
+                                  {nfcDiagnostics.isSecureContext && !nfcDiagnostics.hasNDEFReader && !nfcDiagnostics.isAndroid && nfcDiagnostics.isMobile && (
+                                    <div className="space-y-1">
+                                      <div>⚠️ iOS doesn't support Web NFC API</div>
+                                      <div className="text-green-600 dark:text-green-400">💡 Use QR Code feature above instead!</div>
+                                    </div>
+                                  )}
+                                  {nfcDiagnostics.isSecureContext && !nfcDiagnostics.hasNDEFReader && !nfcDiagnostics.isAndroid && !nfcDiagnostics.isMobile && "⚠️ Requires Android device"}
+                                  {nfcDiagnostics.isSecureContext && !nfcDiagnostics.hasNDEFReader && nfcDiagnostics.isAndroid && !nfcDiagnostics.isChrome && !nfcDiagnostics.isEdge && "⚠️ Requires Chrome or Edge browser"}
                                 </div>
                               )}
-                              {nfcDiagnostics.isSecureContext && !nfcDiagnostics.hasNDEFReader && !nfcDiagnostics.isAndroid && !nfcDiagnostics.isMobile && "⚠️ Requires Android device"}
-                              {nfcDiagnostics.isSecureContext && !nfcDiagnostics.hasNDEFReader && nfcDiagnostics.isAndroid && !nfcDiagnostics.isChrome && !nfcDiagnostics.isEdge && "⚠️ Requires Chrome or Edge browser"}
                             </div>
-                          )}
-                        </div>
-                      </div>
-                    </details>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+                          </div>
+                        </details>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </>
+            )}
 
             {/* Quick Share Buttons - Mobile optimized */}
             <Card className="backdrop-blur-md bg-white/70 dark:bg-gray-900/70 border-white/60 dark:border-gray-800/60 shadow-xl">

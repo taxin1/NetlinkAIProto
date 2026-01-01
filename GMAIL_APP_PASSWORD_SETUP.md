@@ -32,10 +32,10 @@ Gmail App Passwords **only work** if 2FA is enabled.
 2. You might need to sign in again
 
 3. **Select app**: Choose "Mail" or "Other (Custom name)"
-   - If "Other", type: "Netlink-Cogni" or "SMTP App"
+   - If "Other", type: "Netlink" or "SMTP App"
 
 4. **Select device**: Choose "Other (Custom name)"
-   - Type: "Netlink-Cogni Server" or "Node.js App"
+   - Type: "Netlink Server" or "Node.js App"
 
 5. Click **"Generate"**
 
@@ -178,7 +178,7 @@ If you continue to have problems:
    - Create a new Gmail account specifically for sending
    - Generate App Password for that account
 
-4. **Use Netlink-Cogni's email settings**:
+4. **Use Netlink's email settings**:
    - Go to Dashboard → Settings → Email Configuration
    - Configure SMTP settings there
 

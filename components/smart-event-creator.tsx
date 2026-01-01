@@ -287,7 +287,7 @@ export function SmartEventCreator({ userId, contacts }: SmartEventCreatorProps) 
           subject: `You're invited: ${formData.title}`,
         }
         sessionStorage.setItem('campaignData', JSON.stringify(campaignData))
-        router.push("/dashboard#ai-agent")
+        router.push("/dashboard/campaigns")
       } else {
         router.refresh()
         // Reset form

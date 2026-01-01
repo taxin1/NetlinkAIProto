@@ -150,6 +150,27 @@ export async function POST(request: Request) {
         .eq('id', emailId)
     }
 
+    // Auto-train AI with this email (background, non-blocking)
+    if (user && body && subject) {
+      // Don't await - let it run in background
+      supabase
+        .from("ai_trainer_memories")
+        .upsert({
+          user_id: user.id,
+          memory_type: "email_style",
+          memory_key: `email_${Date.now()}`,
+          memory_value: JSON.stringify({ subject, body_preview: body.substring(0, 200) }),
+          importance_score: 3,
+          usage_count: 0,
+        })
+        .then(() => {
+          console.log("Auto-trained AI with new email")
+        })
+        .catch((err) => {
+          console.error("Auto-training error:", err)
+        })
+    }
+
     return NextResponse.json({ 
       success: true,
       message: 'Email sent successfully' 

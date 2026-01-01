@@ -4,8 +4,8 @@ import { Network, ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy | Netlink-Cogni',
-  description: 'Privacy Policy for Netlink-Cogni - AI-Powered Business Networking Platform',
+  title: 'Privacy Policy | Netlink',
+  description: 'Privacy Policy for Netlink - AI-Powered Business Networking Platform',
 }
 
 const lastUpdated = 'January 1, 2025'
@@ -22,7 +22,7 @@ export default function PrivacyPolicyPage() {
                 <Network className="h-7 w-7 text-white group-hover:text-cyan-400 transition-colors" />
               </div>
               <span className="text-xl font-semibold text-white tracking-tight">
-                Netlink<span className="text-cyan-400">-Cogni</span>
+                Netlink
               </span>
             </Link>
             <Link href="/">
@@ -45,7 +45,7 @@ export default function PrivacyPolicyPage() {
             <section>
               <h2 className="text-2xl font-semibold text-white mb-4">1. Introduction</h2>
               <p>
-                Welcome to Netlink-Cogni ("we," "our," or "us"). We are committed to protecting your privacy and ensuring you have a positive experience on our platform. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our AI-powered business networking platform.
+                Welcome to Netlink ("we," "our," or "us"). We are committed to protecting your privacy and ensuring you have a positive experience on our platform. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our AI-powered business networking platform.
               </p>
             </section>
 
@@ -152,7 +152,7 @@ export default function PrivacyPolicyPage() {
                 If you have any questions about this Privacy Policy or our data practices, please contact us at:
               </p>
               <p className="mt-4">
-                <strong>Email:</strong> privacy@netlink-cogni.com<br />
+                <strong>Email:</strong> privacy@netlink.com<br />
                 <strong>Address:</strong> [Your Company Address]
               </p>
             </section>
@@ -165,10 +165,10 @@ export default function PrivacyPolicyPage() {
         <div className="max-w-7xl mx-auto text-center">
           <div className="flex items-center justify-center gap-2 mb-4">
             <Network className="h-6 w-6 text-cyan-400" />
-            <span className="text-xl font-bold text-white">Netlink-Cogni</span>
+            <span className="text-xl font-bold text-white">Netlink</span>
           </div>
           <p className="text-slate-400 mb-4">
-            © 2025 Netlink-Cogni. All rights reserved.
+            © 2025 Netlink. All rights reserved.
           </p>
           <div className="flex justify-center gap-6 text-sm">
             <Link href="/privacy" className="text-slate-400 hover:text-cyan-400 transition-colors">

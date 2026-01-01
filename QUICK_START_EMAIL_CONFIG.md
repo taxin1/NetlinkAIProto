@@ -58,7 +58,7 @@ That's it! Now when you:
 2. **Generate App Password**
    - Go to: https://myaccount.google.com/apppasswords
    - Select "Mail" as the app
-   - Select "Other" as the device and name it "Netlink Cogni"
+   - Select "Other" as the device and name it "Netlink"
    - Click "Generate"
    - Copy the 16-character password (remove spaces)
 

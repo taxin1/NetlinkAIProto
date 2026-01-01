@@ -10,11 +10,17 @@ import { createClient } from "@/lib/supabase/client"
 
 interface BusinessCardScannerProps {
   userId: string
+  networkingModeEnabled?: boolean
+  networkingMessage?: string
 }
 
 type ScanMode = "upload" | "camera"
 
-export function BusinessCardScanner({ userId }: BusinessCardScannerProps) {
+export function BusinessCardScanner({
+  userId,
+  networkingModeEnabled = false,
+  networkingMessage,
+}: BusinessCardScannerProps) {
   const [isScanning, setIsScanning] = useState(false)
   const [preview, setPreview] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
@@ -24,6 +30,7 @@ export function BusinessCardScanner({ userId }: BusinessCardScannerProps) {
   const [isCameraLoading, setIsCameraLoading] = useState(false)
   const [autoDetect, setAutoDetect] = useState(false)
   const [cameraError, setCameraError] = useState<string | null>(null)
+  const [lastContactId, setLastContactId] = useState<string | null>(null)
   
   const videoRef = useRef<HTMLVideoElement>(null)
   const streamRef = useRef<MediaStream | null>(null)
@@ -177,6 +184,7 @@ export function BusinessCardScanner({ userId }: BusinessCardScannerProps) {
       }
 
       console.log("[v0] Contact saved:", data)
+      setLastContactId(data?.id || null)
 
       // Log event
       await supabase.from("events").insert({
@@ -187,6 +195,11 @@ export function BusinessCardScanner({ userId }: BusinessCardScannerProps) {
       })
 
       setSuccess(true)
+      
+      // Auto-send email if networking mode is enabled and email exists
+      if (networkingModeEnabled && info.email && networkingMessage) {
+        await autoSendNetworkingEmail(data, info)
+      }
       
       // Don't stop camera automatically - let user decide
       // They can continue capturing or manually close the camera
@@ -223,6 +236,74 @@ export function BusinessCardScanner({ userId }: BusinessCardScannerProps) {
       setIsScanning(false)
     }
   }, [userId, scanMode])
+
+  const autoSendNetworkingEmail = useCallback(
+    async (contactRecord: any, info: any) => {
+      if (!networkingModeEnabled || !info?.email || !networkingMessage?.trim()) return
+
+      try {
+        let purpose = networkingMessage.trim()
+        
+        // If the message looks like a full email template (contains greeting/signature), 
+        // use it as a base template to customize
+        if (purpose.length > 200 && (purpose.includes("Hi") || purpose.includes("Hello") || purpose.includes("Dear"))) {
+          purpose = `Use this email template as the base and customize it for ${info.name || "the contact"}${info.company ? ` from ${info.company}` : ""}:\n\n${purpose}\n\nCustomize the greeting, add specific details about meeting them, and personalize the content while keeping the same tone and structure.`
+        }
+
+        // Generate customized email for this specific contact
+        const generateRes = await fetch("/api/generate-email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contactName: info.name || "there",
+            contactCompany: info.company || "",
+            purpose,
+            contactId: contactRecord?.id,
+            userId,
+          }),
+        })
+
+        if (!generateRes.ok) {
+          const err = await generateRes.json().catch(() => ({}))
+          console.error("Failed to generate email:", err)
+          return
+        }
+
+        const { emailBody } = await generateRes.json()
+        if (!emailBody) {
+          console.error("No email body returned")
+          return
+        }
+
+        // Auto-send the customized email
+        const subject =
+          purpose.length > 80
+            ? `${purpose.substring(0, 77)}...`
+            : purpose || "Great to meet you!"
+
+        const sendRes = await fetch("/api/send-email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contactEmail: info.email,
+            subject,
+            body: emailBody,
+            emailId: null,
+          }),
+        })
+
+        if (!sendRes.ok) {
+          const err = await sendRes.json().catch(() => ({}))
+          console.error("Failed to send email:", err)
+        } else {
+          console.log("Email sent successfully to", info.email)
+        }
+      } catch (error) {
+        console.error("Networking auto-send error:", error)
+      }
+    },
+    [networkingModeEnabled, networkingMessage, userId]
+  )
 
   // Capture and scan
   const captureAndScan = useCallback(async () => {
@@ -463,6 +544,12 @@ export function BusinessCardScanner({ userId }: BusinessCardScannerProps) {
                           </p>
                         )}
                       </div>
+                      {networkingModeEnabled && extractedInfo.email && (
+                        <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
+                          <CheckCircle2 className="h-4 w-4" />
+                          <span>Email sent automatically!</span>
+                        </div>
+                      )}
                     </div>
                   )}
                   
@@ -556,6 +643,12 @@ export function BusinessCardScanner({ userId }: BusinessCardScannerProps) {
                       </p>
                     )}
                   </div>
+                  {networkingModeEnabled && extractedInfo.email && (
+                    <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
+                      <CheckCircle2 className="h-4 w-4" />
+                      <span>Email sent automatically!</span>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

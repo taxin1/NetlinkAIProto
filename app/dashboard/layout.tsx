@@ -3,6 +3,7 @@ import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { Sidebar } from "@/components/sidebar"
 import { BackgroundPaths } from "@/components/kokonutui/background-paths"
+import { GlobalNetworkerOptInPrompt } from "@/components/global-networker-optin"
 
 export default async function DashboardLayout({
   children,
@@ -40,7 +41,10 @@ export default async function DashboardLayout({
       {/* Sidebar - handles mobile/desktop rendering internally */}
       <Sidebar user={user} />
 
-      <main className="flex-1 overflow-y-auto overflow-x-hidden relative z-10 w-full lg:w-auto overscroll-contain">{children}</main>
+      <main className="flex-1 overflow-y-auto overflow-x-hidden relative z-10 w-full lg:w-auto overscroll-contain">
+        <GlobalNetworkerOptInPrompt userId={user.id} />
+        {children}
+      </main>
     </div>
   )
 }

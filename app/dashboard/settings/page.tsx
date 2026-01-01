@@ -23,6 +23,7 @@ import {
 } from "lucide-react"
 import { GoogleCalendarSettings } from "@/components/google-calendar-settings"
 import { GmailSettings } from "@/components/gmail-settings"
+import { AITrainer } from "@/components/ai-trainer"
 
 interface EmailSettings {
   id?: string
@@ -36,6 +37,7 @@ interface EmailSettings {
 }
 
 export default function SettingsPage() {
+  const [userId, setUserId] = useState<string>("")
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
@@ -56,6 +58,15 @@ export default function SettingsPage() {
     const safetyTimeout = setTimeout(() => {
       setIsLoading(false)
     }, 3000)
+
+    // Get user ID
+    const getUser = async () => {
+      const { createClient } = await import("@/lib/supabase/client")
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) setUserId(user.id)
+    }
+    getUser()
 
     loadSettings()
 
@@ -581,6 +592,11 @@ export default function SettingsPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* AI Trainer Card */}
+      {userId && (
+        <AITrainer userId={userId} />
+      )}
 
       {/* Gmail Integration Card */}
       <GmailSettings />

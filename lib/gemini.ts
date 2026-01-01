@@ -179,6 +179,13 @@ interface EmailGenerationContext {
     description?: string
     created_at?: string
   }>
+  userId?: string
+  aiMemories?: Array<{
+    memory_type: string
+    memory_key: string
+    memory_value: string
+    importance_score: number
+  }>
 }
 
 export async function generateEmailWithGemini(
@@ -194,7 +201,8 @@ export async function generateEmailWithGemini(
     userProfile,
     purpose,
     previousEmails,
-    recentInteractions
+    recentInteractions,
+    aiMemories
   } = context
 
   const senderName = userProfile?.name || userProfile?.displayName || "I"
@@ -214,6 +222,63 @@ export async function generateEmailWithGemini(
     ).join('\n')}`
   }
 
+  // Build AI memory context from trained memories
+  let aiMemoryContext = ""
+  if (aiMemories && aiMemories.length > 0) {
+    const styleMemories = aiMemories.filter(m => m.memory_type === "email_style")
+    const networkingMemories = aiMemories.filter(m => m.memory_type === "networking_preference")
+    const patternMemories = aiMemories.filter(m => m.memory_type === "communication_pattern")
+
+    if (styleMemories.length > 0) {
+      const styleInfo = styleMemories.map(m => {
+        try {
+          if (m.memory_key === "common_phrases") {
+            const phrases = JSON.parse(m.memory_value)
+            return `Common phrases: ${Array.isArray(phrases) ? phrases.join(", ") : m.memory_value}`
+          }
+          return `${m.memory_key}: ${m.memory_value}`
+        } catch {
+          return `${m.memory_key}: ${m.memory_value}`
+        }
+      }).join("\n")
+      aiMemoryContext += `\n\nUSER'S EMAIL WRITING STYLE (learned from past emails):\n${styleInfo}`
+    }
+
+    if (networkingMemories.length > 0) {
+      const networkingInfo = networkingMemories.map(m => {
+        try {
+          if (m.memory_key === "target_industries") {
+            const industries = JSON.parse(m.memory_value)
+            return `Target industries: ${Array.isArray(industries) ? industries.join(", ") : m.memory_value}`
+          }
+          return `${m.memory_key}: ${m.memory_value}`
+        } catch {
+          return `${m.memory_key}: ${m.memory_value}`
+        }
+      }).join("\n")
+      aiMemoryContext += `\n\nUSER'S NETWORKING PREFERENCES:\n${networkingInfo}`
+    }
+
+    if (patternMemories.length > 0) {
+      const patternInfo = patternMemories.map(m => {
+        try {
+          if (m.memory_key === "preferred_interaction_types") {
+            const types = JSON.parse(m.memory_value)
+            return `Preferred interaction types: ${Object.entries(types).map(([k, v]) => `${k} (${v} times)`).join(", ")}`
+          }
+          return `${m.memory_key}: ${m.memory_value}`
+        } catch {
+          return `${m.memory_key}: ${m.memory_value}`
+        }
+      }).join("\n")
+      aiMemoryContext += `\n\nUSER'S COMMUNICATION PATTERNS:\n${patternInfo}`
+    }
+
+    if (aiMemoryContext) {
+      aiMemoryContext += "\n\nIMPORTANT: Use the user's learned writing style, tone, and preferences when writing this email. Match their natural communication patterns."
+    }
+  }
+
   const prompt = `You are an expert email writer helping ${senderName} write a highly personalized, authentic email. This is NOT a template - write a genuine, specific email that sounds like it came directly from ${senderName}.
 
 YOUR ROLE:
@@ -230,7 +295,7 @@ RECIPIENT INFORMATION:
 - Position: ${contactPosition || 'Not specified'}
 - Notes about contact: ${contactNotes || 'None'}
 - LinkedIn: ${contactLinkedIn || 'Not provided'}
-- Tags/Categories: ${contactTags?.join(', ') || 'None'}${previousEmailContext}${interactionContext}
+- Tags/Categories: ${contactTags?.join(', ') || 'None'}${previousEmailContext}${interactionContext}${aiMemoryContext}
 
 SENDER INFORMATION:
 - Sender Name: ${senderName}
@@ -374,7 +439,7 @@ async function callOpenRouterChatModel(
         "Content-Type": "application/json",
         "Authorization": `Bearer ${apiKey}`,
         "HTTP-Referer": process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
-        "X-Title": "Netlink Cogni"
+        "X-Title": "Netlink"
       },
       body: JSON.stringify({
         model,

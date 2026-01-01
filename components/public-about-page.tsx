@@ -193,7 +193,7 @@ export function PublicAboutPage() {
     {
       step: "01",
       title: "Sign Up & Create Profile",
-      description: "Join Netlink Cogni in seconds. Create your professional profile and connect your accounts.",
+      description: "Join Netlink in seconds. Create your professional profile and connect your accounts.",
       icon: UserCircle,
     },
     {
@@ -285,7 +285,7 @@ export function PublicAboutPage() {
             className="max-w-2xl mb-12"
           >
             <p className="text-xl md:text-2xl text-slate-300 leading-relaxed font-light">
-              Netlink Cogni combines artificial intelligence with thoughtful design to eliminate the friction 
+              Netlink combines artificial intelligence with thoughtful design to eliminate the friction 
               in professional networking. We help you connect, communicate, and grow your network—without the busywork.
             </p>
           </motion.div>
@@ -986,7 +986,7 @@ export function PublicAboutPage() {
         <div className="container mx-auto px-4 py-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p className="text-muted-foreground text-sm">
-              © {new Date().getFullYear()} Netlink Cogni. All rights reserved.
+              © {new Date().getFullYear()} Netlink. All rights reserved.
             </p>
             <div className="flex gap-4 mt-4 md:mt-0">
               <Link href="/" className="text-sm text-muted-foreground hover:text-foreground">

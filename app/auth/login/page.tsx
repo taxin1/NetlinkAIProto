@@ -93,7 +93,7 @@ export default function LoginPage() {
         <Card className="border-slate-800/50 bg-slate-900/80 backdrop-blur-xl">
           <CardHeader>
             <CardTitle className="text-2xl text-white font-bold tracking-tight">Welcome back</CardTitle>
-            <CardDescription className="text-slate-400 font-light">Sign in to your Netlink-Cogni account</CardDescription>
+            <CardDescription className="text-slate-400 font-light">Sign in to your Netlink account</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleLogin}>

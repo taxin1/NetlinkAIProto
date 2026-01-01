@@ -29,6 +29,7 @@ export async function POST(request: NextRequest) {
           displayName: user.user_metadata?.full_name || user.email?.split('@')[0] || ''
         }
       }
+
     }
 
     // Fetch detailed contact information if contactId provided
@@ -86,6 +87,31 @@ export async function POST(request: NextRequest) {
         )
       }
 
+      // Get AI memories if available
+      let aiMemories: any[] = []
+      if (userId) {
+        const { data: memories } = await supabase
+          .from("ai_trainer_memories")
+          .select("*")
+          .eq("user_id", userId)
+          .order("importance_score", { ascending: false })
+          .limit(20)
+        aiMemories = memories || []
+
+        // Update usage count for memories used (increment in database)
+        if (memories && memories.length > 0) {
+          for (const memory of memories) {
+            await supabase
+              .from("ai_trainer_memories")
+              .update({ 
+                usage_count: (memory.usage_count || 0) + 1,
+                last_used_at: new Date().toISOString()
+              })
+              .eq("id", memory.id)
+          }
+        }
+      }
+
       const emailBody = await generateEmailWithGemini({
         contactName: contactDetails.name || contactName,
         contactCompany: contactDetails.company || contactCompany || "",
@@ -96,7 +122,9 @@ export async function POST(request: NextRequest) {
         userProfile: Object.keys(userProfile).length > 0 ? userProfile : undefined,
         purpose: purpose,
         previousEmails: previousEmails.length > 0 ? previousEmails : undefined,
-        recentInteractions: (contactDetails.recentInteractions && contactDetails.recentInteractions.length > 0) ? contactDetails.recentInteractions : undefined
+        recentInteractions: (contactDetails.recentInteractions && contactDetails.recentInteractions.length > 0) ? contactDetails.recentInteractions : undefined,
+        userId: userId,
+        aiMemories: aiMemories.length > 0 ? aiMemories : undefined
       })
       
       if (!emailBody || typeof emailBody !== 'string') {

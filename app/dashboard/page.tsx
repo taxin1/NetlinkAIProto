@@ -2,7 +2,8 @@ import { createClient } from "@/lib/supabase/server"
 import { BusinessCardScanner } from "@/components/business-card-scanner"
 import { QuickStats } from "@/components/quick-stats"
 import { UpcomingEvents } from "@/components/upcoming-events"
-import { AIEmailAgent } from "@/components/ai-email-agent"
+import { EmailHighlights } from "@/components/email-highlights"
+import { NetworkingEventsSummary } from "@/components/networking-events-summary"
 import { RealtimeNotifications } from "@/components/realtime-notifications"
 import { MeetingReminders } from "@/components/meeting-reminders"
 
@@ -52,9 +53,20 @@ export default async function DashboardPage() {
           <UpcomingEvents userId={user.id} />
         </div>
 
-        {/* AI Email Agent */}
+        {/* Highlights Section */}
         <div className="mt-8 sm:mt-12 lg:mt-16 animate-fade-in-up delay-700">
-          <AIEmailAgent userId={user.id} />
+          <div className="mb-6">
+            <h2 className="text-2xl sm:text-3xl font-bold text-balance mb-2">
+              Highlights & Summary
+            </h2>
+            <p className="text-muted-foreground text-sm sm:text-base">
+              Key insights from your emails and networking activity
+            </p>
+          </div>
+          <div className="grid gap-6 lg:grid-cols-2">
+            <EmailHighlights />
+            <NetworkingEventsSummary userId={user.id} />
+          </div>
         </div>
       </div>
     </>

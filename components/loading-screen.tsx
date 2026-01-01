@@ -96,7 +96,7 @@ export function LoadingScreen({ onComplete }: LoadingScreenProps) {
 
         {/* Brand name with smooth gradient */}
         <h1 className="text-5xl sm:text-6xl font-bold mb-4 bg-gradient-to-r from-cyan-400 via-blue-400 to-indigo-400 bg-clip-text text-transparent animate-gradient-flow">
-          Netlink<span className="text-cyan-400">-Cogni</span>
+          Netlink
         </h1>
 
         {/* Subtitle */}

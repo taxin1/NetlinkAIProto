@@ -11,7 +11,7 @@ export default async function NetworkersPageRoute() {
       supabase
         .from("network_profiles")
         .select("*")
-        .order("is_public_profile", { ascending: false }) // Public profiles first
+        .eq("is_public_profile", true)
         .order("created_at", { ascending: false }),
       supabase
         .from("portfolios")
@@ -26,7 +26,10 @@ export default async function NetworkersPageRoute() {
       return <NetworkersPage profiles={[]} />
     }
 
-    const allProfiles = profilesResult.data || []
+    // Only show profiles that have explicitly been made public
+    const allProfiles = (profilesResult.data || []).filter(
+      (profile) => profile?.is_public_profile
+    )
     const allPortfolios = portfoliosResult.data || []
     
     // Debug: Log how many profiles we fetched

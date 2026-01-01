@@ -2,7 +2,7 @@
 
 ## ✅ What's Been Added
 
-Your Netlink-Cogni app now has a **fully functional voice assistant** with speech recognition, text-to-speech, and the ability to execute actions like sending emails!
+Your Netlink app now has a **fully functional voice assistant** with speech recognition, text-to-speech, and the ability to execute actions like sending emails!
 
 ## 🎯 Key Features Implemented
 

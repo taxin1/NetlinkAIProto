@@ -6,7 +6,7 @@ import { useState, useEffect } from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { LayoutDashboard, Users, Mail, BarChart3, LogOut, Network, Bot, Settings, Calendar, Menu, X, Share2, Phone, CheckCircle2, CalendarDays, Briefcase, Home, Info, UserCircle } from "lucide-react"
+import { LayoutDashboard, Users, Mail, BarChart3, LogOut, Network, Bot, Settings, Calendar, Menu, X, Share2, Phone, CheckCircle2, CalendarDays, Briefcase, Home, Info, UserCircle, Sparkles, Wand2 } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { useMobile } from "@/lib/hooks/use-mobile"
@@ -27,9 +27,11 @@ const navigation = [
   { name: "Network Profile", href: "/dashboard/profile", icon: Share2 },
   { name: "Portfolio", href: "/dashboard/portfolio", icon: Briefcase },
   { name: "Contacts", href: "/dashboard/contacts", icon: Users },
+  { name: "Networking Mode", href: "/dashboard/networking", icon: Sparkles },
   { name: "Calendar", href: "/dashboard/calendar", icon: CalendarDays },
   { name: "Events", href: "/dashboard/events", icon: Calendar },
   { name: "Emails", href: "/dashboard/emails", icon: Mail },
+  { name: "AI Campaigns", href: "/dashboard/campaigns", icon: Wand2 },
   { name: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
   { name: "AI Assistant", href: "/dashboard/ai-assistant", icon: Bot },
   { name: "Settings", href: "/dashboard/settings", icon: Settings },
@@ -92,7 +94,7 @@ export function Sidebar({ user }: SidebarProps) {
         <Link href="/dashboard" className="flex items-center gap-3 group" onClick={onItemClick}>
           <Network className="h-6 w-6 text-white group-hover:text-cyan-400 transition-colors" />
           <span className="text-lg font-semibold text-white tracking-tight">
-            Netlink<span className="text-cyan-400">-Cogni</span>
+            Netlink
           </span>
         </Link>
         {isMobile && (

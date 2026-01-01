@@ -451,7 +451,7 @@ export function PortfolioClient({ portfolio: portfolioData, networkProfile }: Po
       >
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-2">
           <p className="text-sm text-muted-foreground">
-            Powered by <span className="font-semibold text-foreground">Netlink-Cogni</span>
+            Powered by <span className="font-semibold text-foreground">Netlink</span>
           </p>
           <p className="text-xs text-muted-foreground/80">
             Professional portfolio created with AI-powered tools

@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Voice Assistant feature adds powerful voice control capabilities to your Netlink-Cogni application. Users can now:
+The Voice Assistant feature adds powerful voice control capabilities to your Netlink application. Users can now:
 - **Talk to the AI** using voice commands
 - **Hear responses** with text-to-speech
 - **Send emails** by voice

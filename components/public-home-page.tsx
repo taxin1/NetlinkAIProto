@@ -140,7 +140,7 @@ export function PublicHomePage() {
               <Sparkles className="h-12 w-12 mx-auto mb-4" />
               <h2 className="text-3xl font-bold mb-4">Ready to Expand Your Network?</h2>
               <p className="text-xl mb-8 opacity-90">
-                Join thousands of professionals already connecting on Netlink Cogni
+                Join thousands of professionals already connecting on Netlink
               </p>
               <div className="flex gap-4 justify-center">
                 <Link href="/auth/signup">
@@ -164,7 +164,7 @@ export function PublicHomePage() {
         <div className="container mx-auto px-4 py-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p className="text-muted-foreground text-sm">
-              © {new Date().getFullYear()} Netlink Cogni. All rights reserved.
+              © {new Date().getFullYear()} Netlink. All rights reserved.
             </p>
             <div className="flex gap-4 mt-4 md:mt-0">
               <Link href="/public/about" className="text-sm text-muted-foreground hover:text-foreground">

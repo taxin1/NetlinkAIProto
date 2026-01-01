@@ -63,7 +63,7 @@ export default function SignUpPage() {
       setError(error)
     } else if (data?.session) {
       // User is immediately signed in (email confirmation disabled)
-      router.push("/dashboard")
+      router.push("/onboarding")
     } else if (data?.user && !data.session) {
       // Email confirmation is required
       router.push("/auth/check-email")

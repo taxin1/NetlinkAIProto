@@ -470,6 +470,16 @@ export function AIEmailAgent({ userId }: AIEmailAgentProps) {
     )
   }
 
+  const toggleSelectAll = () => {
+    if (selectedContacts.length === contacts.length) {
+      // Deselect all
+      setSelectedContacts([])
+    } else {
+      // Select all
+      setSelectedContacts(contacts.map(contact => contact.id))
+    }
+  }
+
   const generatePurpose = async () => {
     if (!campaignName.trim()) {
       alert("Please enter a campaign name first")
@@ -748,7 +758,20 @@ export function AIEmailAgent({ userId }: AIEmailAgentProps) {
 
           {/* Contact Selection */}
           <div className="space-y-3">
-            <Label className="text-slate-300 text-sm sm:text-base">Select Contacts ({selectedContacts.length} selected)</Label>
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <Label className="text-slate-300 text-sm sm:text-base">Select Contacts ({selectedContacts.length} selected)</Label>
+              {contacts.length > 0 && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={toggleSelectAll}
+                  className="text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10 h-7 sm:h-8 px-2 sm:px-3 text-xs sm:text-sm"
+                >
+                  {selectedContacts.length === contacts.length ? "Deselect All" : "Select All"}
+                </Button>
+              )}
+            </div>
             <div className="grid gap-2 max-h-40 overflow-y-auto">
               {contacts.map((contact) => (
                 <div

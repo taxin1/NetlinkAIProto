@@ -119,7 +119,7 @@ export async function POST(request: NextRequest) {
       ? campaigns.map(c => `"${c.name}" (${c.status}, ${c.sent_count || 0}/${c.total_count || 0} sent)`).join(", ")
       : "No campaigns yet"
 
-    const prompt = `You are a voice command parser for Netlink Cogni, an AI-powered business networking platform.
+    const prompt = `You are a voice command parser for Netlink, an AI-powered business networking platform.
 
 AVAILABLE VOICE ACTIONS:
 - write_email: Generate/write an email for a contact (requires: recipient name/email, purpose/topic)
@@ -181,7 +181,7 @@ Respond with ONLY a JSON object:
               role: "user",
               parts: [
                 {
-                  text: `You are a voice command parser for Netlink Cogni. Always respond with ONLY a valid JSON object, no other text.\n\n${prompt}`
+                  text: `You are a voice command parser for Netlink. Always respond with ONLY a valid JSON object, no other text.\n\n${prompt}`
                 }
               ]
             }

@@ -1,9 +1,9 @@
 import { createClient } from "@/lib/supabase/server"
 import { EmailsList } from "@/components/emails-list"
-import { AIEmailAgent } from "@/components/ai-email-agent"
 import { GmailReplies } from "@/components/gmail-replies"
+import { EmailHighlights } from "@/components/email-highlights"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Mail, Bot, Send, MessageSquare } from "lucide-react"
+import { Mail, Send, MessageSquare, Sparkles } from "lucide-react"
 
 export default async function EmailsPage() {
   const supabase = await createClient()
@@ -31,10 +31,10 @@ export default async function EmailsPage() {
       <div className="mb-6 sm:mb-8">
         <h1 className="text-2xl sm:text-3xl font-bold text-balance flex items-center gap-2">
           <Mail className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
-          Emails & Campaigns
+          Emails
         </h1>
         <p className="text-muted-foreground mt-2 text-sm sm:text-base">
-          Send personalized emails, create AI-powered campaigns, and manage all your communications
+          Send personalized emails, manage replies, and view your email highlights
         </p>
       </div>
 
@@ -48,9 +48,9 @@ export default async function EmailsPage() {
             <MessageSquare className="h-3 w-3 sm:h-4 sm:w-4" />
             Replies
           </TabsTrigger>
-          <TabsTrigger value="campaigns" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-4 py-2">
-            <Bot className="h-3 w-3 sm:h-4 sm:w-4" />
-            <span className="hidden sm:inline">AI </span>Campaigns
+          <TabsTrigger value="highlights" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-4 py-2">
+            <Sparkles className="h-3 w-3 sm:h-4 sm:w-4" />
+            Highlights
           </TabsTrigger>
         </TabsList>
 
@@ -62,8 +62,8 @@ export default async function EmailsPage() {
           <GmailReplies userId={user.id} />
         </TabsContent>
 
-        <TabsContent value="campaigns" className="space-y-4">
-          <AIEmailAgent userId={user.id} />
+        <TabsContent value="highlights" className="space-y-4">
+          <EmailHighlights />
         </TabsContent>
       </Tabs>
     </div>

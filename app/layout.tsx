@@ -13,7 +13,7 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: 'Netlink-Cogni | AI-Powered Business Networking',
+  title: 'Netlink | AI-Powered Business Networking',
   description: 'Enterprise-grade AI platform for intelligent contact management, automated networking, and business intelligence. Transform your professional network with cutting-edge technology.',
   generator: 'v0.app',
   viewport: {

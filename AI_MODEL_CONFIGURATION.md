@@ -1,7 +1,7 @@
 # AI Model Configuration - Unified Model
 
 ## Overview
-All AI tasks in Netlink Cogni now use a **single unified OpenRouter model** for consistency and simplicity.
+All AI tasks in Netlink now use a **single unified OpenRouter model** for consistency and simplicity.
 
 ## Current Configuration
 

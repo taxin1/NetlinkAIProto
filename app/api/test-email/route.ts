@@ -86,7 +86,7 @@ async function sendTestEmail() {
       }
 
       senderEmail = gmailUser
-      senderName = "Netlink Cogni"
+      senderName = "Netlink"
 
       transporter = nodemailer.createTransport({
         service: "gmail",
@@ -99,21 +99,21 @@ async function sendTestEmail() {
 
     // Send test email to the sender's email address
     const testEmailContent = `
-      <h2>🎉 Netlink Cogni Test Email</h2>
-      <p>This is a test email from your Netlink Cogni application.</p>
+      <h2>🎉 Netlink Test Email</h2>
+      <p>This is a test email from your Netlink application.</p>
       <p><strong>Status:</strong> ✅ Email sending is working correctly!</p>
       <p><strong>Sent from:</strong> ${senderEmail}</p>
       <p><strong>Time:</strong> ${new Date().toLocaleString()}</p>
       <hr>
       <p>Your email integration is configured properly and ready to send emails.</p>
-      <p><em>Powered by Netlink Cogni AI Email Agent</em></p>
+      <p><em>Powered by Netlink AI Email Agent</em></p>
     `
 
     const info = await transporter.sendMail({
       from: `"${senderName}" <${senderEmail}>`,
       to: senderEmail, // Send to yourself
-      subject: "✅ Test Email - Netlink Cogni Email Agent",
-      text: "This is a test email from Netlink Cogni. If you're reading this, email sending is working!",
+      subject: "✅ Test Email - Netlink Email Agent",
+      text: "This is a test email from Netlink. If you're reading this, email sending is working!",
       html: testEmailContent,
     })
 

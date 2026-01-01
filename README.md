@@ -1,4 +1,4 @@
-# Netlink Cogni - AI-Powered Business Networking Platform
+# Netlink - AI-Powered Business Networking Platform
 
 A comprehensive business networking platform with AI-powered features including business card scanning, email generation, and contact management.
 

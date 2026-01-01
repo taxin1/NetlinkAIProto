@@ -136,7 +136,7 @@ Benefits:
 
 ### First Time User:
 \`\`\`
-1. Signs up for Netlink-Cogni
+1. Signs up for Netlink
 2. Goes to Settings
 3. Configures their Gmail/Outlook/etc
 4. Starts sending emails from their account

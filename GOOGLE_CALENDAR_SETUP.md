@@ -1,6 +1,6 @@
 # Google Calendar Integration Setup Guide
 
-This guide will help you set up Google Calendar integration for the Netlink-Cogni networking app.
+This guide will help you set up Google Calendar integration for the Netlink networking app.
 
 ## Features
 
@@ -31,7 +31,7 @@ This guide will help you set up Google Calendar integration for the Netlink-Cogn
 1. Go to "APIs & Services" > "OAuth consent screen"
 2. Choose "External" (unless you have a Google Workspace)
 3. Fill in the required information:
-   - App name: Netlink-Cogni
+   - App name: Netlink
    - User support email: your email
    - Developer contact: your email
 4. Add scopes:
@@ -45,7 +45,7 @@ This guide will help you set up Google Calendar integration for the Netlink-Cogn
 2. Click "Create Credentials" > "OAuth client ID"
 3. Choose "Web application"
 4. Configure:
-   - Name: Netlink-Cogni Web Client
+   - Name: Netlink Web Client
    - Authorized JavaScript origins:
      - `http://localhost:3000` (for development)
      - `https://your-domain.com` (for production)
