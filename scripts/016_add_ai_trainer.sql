@@ -31,31 +31,38 @@ alter table public.ai_trainer_memories enable row level security;
 alter table public.ai_trainer_status enable row level security;
 
 -- AI trainer memories policies
+drop policy if exists "Users can view their own AI memories" on public.ai_trainer_memories;
 create policy "Users can view their own AI memories"
   on public.ai_trainer_memories for select
   using (auth.uid() = user_id);
 
+drop policy if exists "Users can insert their own AI memories" on public.ai_trainer_memories;
 create policy "Users can insert their own AI memories"
   on public.ai_trainer_memories for insert
   with check (auth.uid() = user_id);
 
+drop policy if exists "Users can update their own AI memories" on public.ai_trainer_memories;
 create policy "Users can update their own AI memories"
   on public.ai_trainer_memories for update
   using (auth.uid() = user_id);
 
+drop policy if exists "Users can delete their own AI memories" on public.ai_trainer_memories;
 create policy "Users can delete their own AI memories"
   on public.ai_trainer_memories for delete
   using (auth.uid() = user_id);
 
 -- AI trainer status policies
+drop policy if exists "Users can view their own AI trainer status" on public.ai_trainer_status;
 create policy "Users can view their own AI trainer status"
   on public.ai_trainer_status for select
   using (auth.uid() = user_id);
 
+drop policy if exists "Users can insert their own AI trainer status" on public.ai_trainer_status;
 create policy "Users can insert their own AI trainer status"
   on public.ai_trainer_status for insert
   with check (auth.uid() = user_id);
 
+drop policy if exists "Users can update their own AI trainer status" on public.ai_trainer_status;
 create policy "Users can update their own AI trainer status"
   on public.ai_trainer_status for update
   using (auth.uid() = user_id);
@@ -65,12 +72,15 @@ create index if not exists ai_trainer_memories_user_id_idx on public.ai_trainer_
 create index if not exists ai_trainer_memories_type_idx on public.ai_trainer_memories(user_id, memory_type);
 create index if not exists ai_trainer_memories_importance_idx on public.ai_trainer_memories(user_id, importance_score desc);
 
--- Create function to update updated_at timestamp
+-- Create triggers to update updated_at timestamp
+-- Note: update_updated_at_column() function should already exist from 005_add_realtime_triggers.sql
+drop trigger if exists update_ai_trainer_memories_updated_at on public.ai_trainer_memories;
 create trigger update_ai_trainer_memories_updated_at
   before update on public.ai_trainer_memories
   for each row
   execute function update_updated_at_column();
 
+drop trigger if exists update_ai_trainer_status_updated_at on public.ai_trainer_status;
 create trigger update_ai_trainer_status_updated_at
   before update on public.ai_trainer_status
   for each row
