@@ -582,7 +582,7 @@ export function VoiceAgent({ userId }: VoiceAgentProps) {
             body: JSON.stringify({
               userId,
               to: pendingAction.parameters.recipient || pendingAction.parameters.to,
-              subject: pendingAction.parameters.subject || "Message from Netlink",
+              subject: pendingAction.parameters.subject || "Message from Network Link AI",
               body: pendingAction.parameters.body || pendingAction.parameters.message || "",
             }),
           })

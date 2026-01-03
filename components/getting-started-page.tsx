@@ -6,9 +6,9 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { PublicNavigation } from "@/components/public-navigation"
-import { 
-  Rocket, 
-  CheckCircle2, 
+import {
+  Rocket,
+  CheckCircle2,
   ArrowRight,
   BookOpen,
   Settings,
@@ -41,7 +41,7 @@ const itemVariants = {
     y: 0,
     transition: {
       duration: 0.5,
-      ease: "easeOut",
+      ease: "easeOut" as const,
     },
   },
 }
@@ -50,7 +50,7 @@ const steps = [
   {
     number: "01",
     title: "Create Your Account",
-    description: "Sign up for Netlink using your email address. No credit card required to get started.",
+    description: "Sign up for Network Link AI using your email address. No credit card required to get started.",
     icon: Users,
     color: "from-blue-500 to-cyan-500"
   },
@@ -130,7 +130,7 @@ export function GettingStartedPage() {
       <PublicNavigation />
       <div className="relative overflow-hidden">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000_70%,transparent_110%)]" />
-        
+
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16">
           {/* Header */}
           <motion.div
@@ -143,14 +143,14 @@ export function GettingStartedPage() {
               <ArrowLeft className="h-4 w-4" />
               <span>Back to Resources</span>
             </Link>
-            
+
             <motion.div variants={itemVariants} className="text-center mb-8">
               <div className="inline-flex items-center gap-2 px-4 py-2 mb-6 rounded-full bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border border-primary/20 backdrop-blur-xl">
                 <Rocket className="h-4 w-4 text-primary" />
                 <span className="text-sm font-semibold text-primary">Getting Started</span>
               </div>
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-4 bg-gradient-to-br from-foreground via-foreground to-foreground/70 bg-clip-text text-transparent">
-                Welcome to Netlink
+                Welcome to Network Link AI
               </h1>
               <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto">
                 Your complete guide to getting started with Netlink. Follow these simple steps to begin your networking journey.

@@ -171,7 +171,7 @@ async function extractBusinessCardInfoWithGemini(imageBase64: string): Promise<B
   if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
     const text = data.candidates[0].content.parts[0].text
     console.log("Gemini response text:", text)
-    
+
     const jsonMatch = text.match(/\{[\s\S]*\}/)
     if (jsonMatch) {
       try {
@@ -222,7 +222,7 @@ async function extractBusinessCardInfoWithOpenRouterModel(
         "Content-Type": "application/json",
         "Authorization": `Bearer ${apiKey}`,
         "HTTP-Referer": process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
-        "X-Title": "Netlink"
+        "X-Title": "Network Link AI"
       },
       body: JSON.stringify({
         model,

@@ -103,7 +103,7 @@ export function Sidebar({ user }: SidebarProps) {
   useEffect(() => {
     const fetchSubscription = async () => {
       if (!user.id) return
-      
+
       try {
         const supabase = createClient()
         const { data, error } = await supabase
@@ -133,7 +133,7 @@ export function Sidebar({ user }: SidebarProps) {
         <Link href="/dashboard" className="flex items-center gap-3 group" onClick={onItemClick}>
           <Network className="h-6 w-6 text-white group-hover:text-cyan-400 transition-colors" />
           <span className="text-lg font-semibold text-white tracking-tight">
-            Netlink
+            Network Link AI
           </span>
         </Link>
         {isMobile && (
@@ -152,7 +152,7 @@ export function Sidebar({ user }: SidebarProps) {
         {navigation.map((item) => {
           const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname?.startsWith(item.href))
           const showGoogleCalendarBadge = (item.name === "Calendar" || item.name === "Events") && googleCalendarConnected
-          
+
           // Map navigation items to tour data attributes
           const tourDataAttr: Record<string, string> = {
             "Dashboard": "dashboard-nav",
@@ -168,7 +168,7 @@ export function Sidebar({ user }: SidebarProps) {
             "AI Assistant": "ai-assistant-nav",
             "Settings": "settings-nav",
           }
-          
+
           return (
             <Link
               key={item.name}
@@ -186,8 +186,8 @@ export function Sidebar({ user }: SidebarProps) {
               <span className="flex-1">{item.name}</span>
               {showGoogleCalendarBadge && (
                 <div className="flex items-center gap-1.5">
-                  <Badge 
-                    variant="secondary" 
+                  <Badge
+                    variant="secondary"
                     className="text-[10px] px-1.5 py-0 h-4 bg-green-500/20 text-green-400 border-green-500/30"
                     title="Google Calendar connected"
                   >
@@ -197,8 +197,8 @@ export function Sidebar({ user }: SidebarProps) {
                 </div>
               )}
               {item.name === "Events" && !googleCalendarConnected && (
-                <Badge 
-                  variant="outline" 
+                <Badge
+                  variant="outline"
                   className="text-[10px] px-1.5 py-0 h-4 bg-blue-500/10 text-blue-400 border-blue-500/30"
                 >
                   NEW
@@ -207,17 +207,17 @@ export function Sidebar({ user }: SidebarProps) {
             </Link>
           )
         })}
-        
+
         {/* Divider */}
         <div className="my-4 border-t border-slate-800/50"></div>
-        
+
         {/* Resources Section */}
         <div className="mb-2 px-4">
           <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Resources</p>
         </div>
         {resourcesNavigation.map((item) => {
           const isActive = pathname === item.href || pathname?.startsWith(item.href)
-          
+
           return (
             <Link
               key={item.name}
@@ -238,14 +238,14 @@ export function Sidebar({ user }: SidebarProps) {
 
         {/* Divider */}
         <div className="my-4 border-t border-slate-800/50"></div>
-        
+
         {/* Public Pages Section */}
         <div className="mb-2 px-4">
           <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Public Pages</p>
         </div>
         {publicNavigation.map((item) => {
           const isActive = pathname === item.href || pathname?.startsWith(item.href)
-          
+
           return (
             <Link
               key={item.name}
@@ -270,7 +270,7 @@ export function Sidebar({ user }: SidebarProps) {
           <p className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">Account</p>
           <p className="text-sm font-medium text-slate-300 truncate mb-2">{user.email}</p>
           {subscription ? (
-            <Badge 
+            <Badge
               variant={subscription.plan_name === 'free' ? 'secondary' : 'default'}
               className="text-[10px] px-2 py-0.5 flex items-center gap-1 w-fit"
             >
@@ -280,7 +280,7 @@ export function Sidebar({ user }: SidebarProps) {
               {subscription.plan_name === 'free' ? 'Free' : subscription.plan_name === 'professional' ? 'Pro' : 'Enterprise'}
             </Badge>
           ) : (
-            <Badge 
+            <Badge
               variant="secondary"
               className="text-[10px] px-2 py-0.5 w-fit"
             >

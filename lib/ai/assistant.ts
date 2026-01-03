@@ -135,10 +135,10 @@ function classifyChatError(provider: ChatProvider, error: unknown): ChatProvider
 export async function generateAIResponse(context: AssistantContext): Promise<AIResponse> {
   const { message, contacts, recentEmails, conversationHistory } = context
 
-  const systemPrompt = `You are an AI networking assistant for Netlink, a comprehensive AI-powered business networking and contact management platform.
+  const systemPrompt = `You are an AI networking assistant for Network Link AI, a comprehensive AI-powered business networking and contact management platform.
 
-ABOUT NETLINK COGNI:
-Netlink helps professionals build, manage, and grow their professional networks through AI-powered features:
+ABOUT NETWORK LINK AI:
+Network Link AI helps professionals build, manage, and grow their professional networks through AI-powered features:
 
 PLATFORM FEATURES:
 - Business Card Scanner: Upload photos to automatically extract contact information using AI
@@ -172,7 +172,7 @@ CRITICAL FORMATTING RULES - MUST FOLLOW STRICTLY:
 3. For bullet points: ALWAYS use plain dash (-) only, NEVER asterisks
 4. Do not use asterisks in any formatting, anywhere, for any reason
 5. Keep responses concise, professional, and actionable
-6. Reference specific Netlink features when relevant
+6. Reference specific Network Link AI features when relevant
 7. Use clear, readable formatting with plain text only - no markdown, no asterisks, no special formatting characters
 
 CORRECT Example of formatting:
@@ -185,7 +185,7 @@ WRONG Examples (NEVER DO THIS):
 * Business Networking
 * Contact Management
 
-Provide helpful, actionable advice. If the user asks about specific contacts or emails, reference the context. When explaining features, describe how they work within the Netlink platform.`
+Provide helpful, actionable advice. If the user asks about specific contacts or emails, reference the context. When explaining features, describe how they work within the Network Link AI platform.`
 
   const conversationContext = conversationHistory
     .slice(-6)
@@ -197,7 +197,7 @@ Provide helpful, actionable advice. If the user asks about specific contacts or 
   try {
     const response = await generateText(fullPrompt)
     const suggestions = generateSuggestions(message, contacts, recentEmails)
-    
+
     return {
       content: response,
       suggestions
@@ -210,7 +210,7 @@ Provide helpful, actionable advice. If the user asks about specific contacts or 
 
 function generateSuggestions(message: string, contacts: any[], recentEmails: any[]): string[] {
   const lowerMessage = message.toLowerCase()
-  
+
   if (lowerMessage.includes("email") || lowerMessage.includes("write") || lowerMessage.includes("send")) {
     return [
       "Help me write a follow-up email",
@@ -219,7 +219,7 @@ function generateSuggestions(message: string, contacts: any[], recentEmails: any
       "Draft a meeting request email"
     ]
   }
-  
+
   if (lowerMessage.includes("contact") || lowerMessage.includes("network") || lowerMessage.includes("connection")) {
     return [
       "Analyze my contact network",
@@ -228,7 +228,7 @@ function generateSuggestions(message: string, contacts: any[], recentEmails: any
       "Create a networking strategy"
     ]
   }
-  
+
   if (lowerMessage.includes("follow") || lowerMessage.includes("next") || lowerMessage.includes("plan")) {
     return [
       "Create a follow-up timeline",
@@ -237,7 +237,7 @@ function generateSuggestions(message: string, contacts: any[], recentEmails: any
       "Set relationship goals"
     ]
   }
-  
+
   return [
     "Help me write an email",
     "Give me networking tips",
@@ -279,7 +279,7 @@ export async function analyzeContactNetwork(contacts: any[]): Promise<string> {
 
   const companies = contacts.filter(c => c.company).map(c => c.company)
   const uniqueCompanies = [...new Set(companies)]
-  
+
   const prompt = `Analyze this contact network and provide insights:
 
 Total contacts: ${contacts.length}
@@ -292,10 +292,10 @@ Provide insights about network diversity, potential opportunities, and suggestio
 }
 
 export async function generateChatResponse(message: string): Promise<string> {
-  const systemPrompt = `You are a helpful AI assistant for Netlink, a comprehensive AI-powered business networking platform. You help users with business networking, contact management, and professional communication.
+  const systemPrompt = `You are a helpful AI assistant for Network Link AI, a comprehensive AI-powered business networking platform. You help users with business networking, contact management, and professional communication.
 
-ABOUT NETLINK COGNI PLATFORM:
-Netlink is an AI-powered business networking and contact management platform that helps professionals build, manage, and grow their professional networks. The platform includes:
+ABOUT NETWORK LINK AI PLATFORM:
+Network Link AI is an AI-powered business networking and contact management platform that helps professionals build, manage, and grow their professional networks. The platform includes:
 
 CORE FEATURES:
 - Business Card Scanner: AI-powered OCR to extract contact information from business card photos
@@ -342,7 +342,7 @@ WRONG Examples (NEVER DO THIS):
 * Business Networking
 * Contact Management
 
-Be friendly, professional, and knowledgeable about the platform's capabilities. When users ask about features, explain how they work within Netlink.`
+Be friendly, professional, and knowledgeable about the platform's capabilities. When users ask about features, explain how they work within Network Link AI.`
 
   const providerErrors: ChatProviderError[] = []
 
@@ -437,7 +437,7 @@ async function callOpenRouterChatModel(
         "Content-Type": "application/json",
         "Authorization": `Bearer ${apiKey}`,
         "HTTP-Referer": process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
-        "X-Title": "Netlink"
+        "X-Title": "Network Link AI"
       },
       body: JSON.stringify({
         model,

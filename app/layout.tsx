@@ -5,16 +5,17 @@ import { GeistMono } from 'geist/font/mono'
 import { Analytics } from '@vercel/analytics/next'
 import { ThemeProvider } from '@/components/theme-provider'
 import { PayPalErrorHandler } from '@/components/paypal-error-handler'
+import { ClientLoadingWrapper } from '@/components/client-loading-wrapper'
 import './globals.css'
 
-const inter = Inter({ 
+const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
   display: 'swap',
 })
 
 export const metadata: Metadata = {
-  title: 'Netlink | AI-Powered Business Networking',
+  title: 'Network Link AI | AI-Powered Business Networking',
   description: 'Enterprise-grade AI platform for intelligent contact management, automated networking, and business intelligence. Transform your professional network with cutting-edge technology.',
   generator: 'v0.app',
   viewport: {
@@ -33,16 +34,18 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} ${GeistSans.variable} ${GeistMono.variable} font-sans antialiased`} suppressHydrationWarning>
-        <PayPalErrorHandler />
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem
-          disableTransitionOnChange
-        >
-          {children}
-        </ThemeProvider>
-        <Analytics />
+        <ClientLoadingWrapper>
+          <PayPalErrorHandler />
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="dark"
+            enableSystem
+            disableTransitionOnChange
+          >
+            {children}
+          </ThemeProvider>
+          <Analytics />
+        </ClientLoadingWrapper>
       </body>
     </html>
   )

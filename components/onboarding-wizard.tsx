@@ -185,7 +185,7 @@ export function OnboardingWizard({ userId, initialEmail = "", existingProfile }:
                     <Label htmlFor="company">Where you work</Label>
                     <Input
                       id="company"
-                      placeholder="Netlink Labs"
+                      placeholder="Network Link AI Labs"
                       value={form.company}
                       onChange={(e) => setForm((prev) => ({ ...prev, company: e.target.value }))}
                       autoComplete="organization"
@@ -246,11 +246,10 @@ export function OnboardingWizard({ userId, initialEmail = "", existingProfile }:
 
                 {message && (
                   <div
-                    className={`text-sm rounded-md px-3 py-2 ${
-                      message.type === "error"
+                    className={`text-sm rounded-md px-3 py-2 ${message.type === "error"
                         ? "bg-destructive/10 text-destructive"
                         : "bg-emerald-100 text-emerald-700"
-                    }`}
+                      }`}
                   >
                     {message.text}
                   </div>

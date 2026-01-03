@@ -47,33 +47,33 @@ export async function retryWithBackoff<T>(
   baseDelay: number = 2000
 ): Promise<T> {
   let lastError: Error | null = null
-  
+
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
       return await fn()
     } catch (error: any) {
       lastError = error instanceof Error ? error : new Error(String(error))
-      
-      const isRetryable = 
-        (error instanceof Error && 
-         (error.message.includes("503") || 
-          error.message.includes("429") || 
-          error.message.includes("overloaded") ||
-          error.message.includes("UNAVAILABLE") ||
-          error.message.includes("network") ||
-          error.message.includes("ECONNRESET"))) ||
+
+      const isRetryable =
+        (error instanceof Error &&
+          (error.message.includes("503") ||
+            error.message.includes("429") ||
+            error.message.includes("overloaded") ||
+            error.message.includes("UNAVAILABLE") ||
+            error.message.includes("network") ||
+            error.message.includes("ECONNRESET"))) ||
         (error?.response?.status === 503 || error?.response?.status === 429)
-      
+
       if (!isRetryable || attempt === maxRetries - 1) {
         throw lastError
       }
-      
+
       const delay = baseDelay * Math.pow(2, attempt) + Math.random() * 1000
       console.log(`API call failed (attempt ${attempt + 1}/${maxRetries}), retrying in ${Math.round(delay)}ms...`)
       await new Promise(resolve => setTimeout(resolve, delay))
     }
   }
-  
+
   throw lastError || new Error("Failed after retries")
 }
 
@@ -96,10 +96,10 @@ function getBytezApiKey(): string {
 export async function callGemini(prompt: string, systemInstruction?: string): Promise<string> {
   await throttle()
   const apiKey = getApiKey()
-  
+
   const noAsterisksRule = "CRITICAL: Never use asterisks (*) in your responses. Use plain dashes (-) for bullet points. No markdown formatting."
-  
-  const systemContent = systemInstruction 
+
+  const systemContent = systemInstruction
     ? `${systemInstruction}\n\n${noAsterisksRule}`
     : noAsterisksRule
 
@@ -207,17 +207,17 @@ export async function generateEmailWithGemini(
 
   const senderName = userProfile?.name || userProfile?.displayName || "I"
   const senderEmail = userProfile?.email || ""
-  
+
   let previousEmailContext = ""
   if (previousEmails && previousEmails.length > 0) {
-    previousEmailContext = `\n\nPREVIOUS EMAILS SENT TO THIS CONTACT:\n${previousEmails.map((email, idx) => 
+    previousEmailContext = `\n\nPREVIOUS EMAILS SENT TO THIS CONTACT:\n${previousEmails.map((email, idx) =>
       `${idx + 1}. ${email.subject || 'No subject'} (${email.created_at ? new Date(email.created_at).toLocaleDateString() : 'Unknown date'})\n   ${email.body ? email.body.substring(0, 150) + '...' : ''}`
     ).join('\n\n')}`
   }
 
   let interactionContext = ""
   if (recentInteractions && recentInteractions.length > 0) {
-    interactionContext = `\n\nRECENT INTERACTIONS WITH THIS CONTACT:\n${recentInteractions.map((event, idx) => 
+    interactionContext = `\n\nRECENT INTERACTIONS WITH THIS CONTACT:\n${recentInteractions.map((event, idx) =>
       `${idx + 1}. ${event.event_type || 'Interaction'} - ${event.description || 'No description'} (${event.created_at ? new Date(event.created_at).toLocaleDateString() : 'Unknown date'})`
     ).join('\n')}`
   }
@@ -439,7 +439,7 @@ async function callOpenRouterChatModel(
         "Content-Type": "application/json",
         "Authorization": `Bearer ${apiKey}`,
         "HTTP-Referer": process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
-        "X-Title": "Netlink"
+        "X-Title": "Network Link AI"
       },
       body: JSON.stringify({
         model,

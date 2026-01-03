@@ -4,13 +4,13 @@ import { useState, useEffect, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { 
-  X, 
-  ChevronRight, 
-  ChevronLeft, 
-  Sparkles, 
-  Users, 
-  Mail, 
+import {
+  X,
+  ChevronRight,
+  ChevronLeft,
+  Sparkles,
+  Users,
+  Mail,
   Calendar,
   LayoutDashboard,
   BarChart3,
@@ -44,7 +44,7 @@ export function GuidedTour({ userId }: { userId: string }) {
   const tourSteps: TourStep[] = [
     {
       id: "welcome",
-      title: "Welcome to Netlink! 👋",
+      title: "Welcome to Network Link AI! 👋",
       description: "Let's take a quick tour of the key features that will help you grow your network. You can skip this anytime.",
       icon: <Sparkles className="h-6 w-6" />,
       position: "center",
@@ -127,7 +127,7 @@ export function GuidedTour({ userId }: { userId: string }) {
     {
       id: "complete",
       title: "You're All Set! 🎉",
-      description: "You now know the key features of Netlink. Start networking and grow your professional connections!",
+      description: "You now know the key features of Network Link AI. Start networking and grow your professional connections!",
       icon: <Sparkles className="h-6 w-6" />,
       position: "center",
     },
@@ -136,7 +136,7 @@ export function GuidedTour({ userId }: { userId: string }) {
   useEffect(() => {
     // Check if user has already completed the tour
     const hasCompletedTour = localStorage.getItem(`${TOUR_STORAGE_KEY}-${userId}`)
-    
+
     // Check if user is new (account created in last 7 days)
     const accountAge = localStorage.getItem(`netlink-account-created-${userId}`)
     if (!accountAge) {
@@ -169,7 +169,7 @@ export function GuidedTour({ userId }: { userId: string }) {
           setTargetElement(null)
         }
       }, 300)
-      
+
       return () => clearTimeout(timer)
     } else {
       setTargetElement(null)
@@ -270,11 +270,11 @@ export function GuidedTour({ userId }: { userId: string }) {
     }
 
     updatePosition()
-    
+
     // Update position on scroll and resize
     window.addEventListener("scroll", updatePosition, true)
     window.addEventListener("resize", updatePosition)
-    
+
     // Also update after a short delay to ensure element is positioned
     const timeoutId = setTimeout(updatePosition, 100)
 
@@ -307,7 +307,7 @@ export function GuidedTour({ userId }: { userId: string }) {
               <motion.div
                 className="absolute rounded-lg border-4 border-primary shadow-[0_0_0_9999px_rgba(0,0,0,0.6)]"
                 initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ 
+                animate={{
                   scale: 1,
                   opacity: 1,
                   ...(() => {
@@ -330,9 +330,9 @@ export function GuidedTour({ userId }: { userId: string }) {
           <motion.div
             ref={tooltipRef}
             initial={{ opacity: 0, scale: 0.8, y: 20 }}
-            animate={{ 
-              opacity: 1, 
-              scale: 1, 
+            animate={{
+              opacity: 1,
+              scale: 1,
               y: 0,
             }}
             exit={{ opacity: 0, scale: 0.8, y: 20 }}
@@ -364,8 +364,8 @@ export function GuidedTour({ userId }: { userId: string }) {
                         <motion.div
                           className="h-full bg-primary rounded-full"
                           initial={{ width: 0 }}
-                          animate={{ 
-                            width: `${((currentStep + 1) / tourSteps.length) * 100}%` 
+                          animate={{
+                            width: `${((currentStep + 1) / tourSteps.length) * 100}%`
                           }}
                           transition={{ duration: 0.3 }}
                         />

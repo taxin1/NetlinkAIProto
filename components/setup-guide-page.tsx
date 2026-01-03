@@ -82,7 +82,7 @@ export function SetupGuidePage() {
                 Your Complete Setup Guide
               </h1>
               <p className="text-base sm:text-lg lg:text-xl text-muted-foreground max-w-2xl">
-                Step-by-step instructions to set up your Netlink account and configure all features. Follow these guides to get the most out of your networking platform.
+                Step-by-step instructions to set up your Network Link AI account and configure all features. Follow these guides to get the most out of your networking platform.
               </p>
             </motion.div>
           </motion.div>
@@ -211,7 +211,7 @@ export function SetupGuidePage() {
                       <div className="space-y-2 sm:space-y-3 text-sm sm:text-base text-muted-foreground">
                         <p>Configure who can see your profile:</p>
                         <ul className="list-disc list-inside space-y-1.5 sm:space-y-2 ml-3 sm:ml-4">
-                          <li><strong>Public Profile:</strong> Make your profile visible to all Netlink users</li>
+                          <li><strong>Public Profile:</strong> Make your profile visible to all Network Link AI users</li>
                           <li><strong>Contact Information:</strong> Choose what contact details are visible</li>
                           <li><strong>Social Links:</strong> Control which social links are public</li>
                           <li><strong>Portfolio Visibility:</strong> Set who can view your portfolio</li>
@@ -271,7 +271,7 @@ export function SetupGuidePage() {
                       <div>
                         <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Why Connect Google Calendar?</h3>
                         <ul className="list-disc list-inside space-y-1.5 sm:space-y-2 text-sm sm:text-base text-muted-foreground ml-2">
-                          <li>Automatically sync your calendar events with Netlink</li>
+                          <li>Automatically sync your calendar events with Network Link AI</li>
                           <li>Get intelligent meeting reminders</li>
                           <li>Create events directly from emails</li>
                           <li>Track networking activities and meetings</li>
@@ -285,10 +285,10 @@ export function SetupGuidePage() {
                           <li>Go to <strong>Dashboard</strong> → <strong>Settings</strong> → <strong>Integrations</strong></li>
                           <li>Find the <strong>Google Calendar</strong> section</li>
                           <li>Click the <strong>"Connect Google Calendar"</strong> button</li>
-                          <li>You'll be redirected to Google to authorize Netlink</li>
+                          <li>You'll be redirected to Google to authorize Network Link AI</li>
                           <li>Select the Google account you want to connect</li>
                           <li>Review and approve the permissions requested</li>
-                          <li>You'll be redirected back to Netlink</li>
+                          <li>You'll be redirected back to Network Link AI</li>
                           <li>You should see a confirmation message that Calendar is connected</li>
                         </ol>
                       </div>
@@ -298,7 +298,7 @@ export function SetupGuidePage() {
                         <ul className="list-disc list-inside space-y-1.5 sm:space-y-2 text-sm sm:text-base text-muted-foreground ml-2">
                           <li>Your calendar events will sync automatically</li>
                           <li>You'll see a "Synced" badge on the Calendar and Events pages</li>
-                          <li>New events created in Netlink will appear in your Google Calendar</li>
+                          <li>New events created in Network Link AI will appear in your Google Calendar</li>
                           <li>You can enable/disable sync anytime from Settings</li>
                         </ul>
                       </div>
@@ -309,7 +309,7 @@ export function SetupGuidePage() {
                           Security Note
                         </h4>
                         <p className="text-xs sm:text-sm text-muted-foreground">
-                          Netlink only requests read and write access to your calendar events. We never access your emails, contacts, or other Google data. You can revoke access at any time from your Google Account settings.
+                          Network Link AI only requests read and write access to your calendar events. We never access your emails, contacts, or other Google data. You can revoke access at any time from your Google Account settings.
                         </p>
                       </div>
                     </CardContent>
@@ -329,7 +329,7 @@ export function SetupGuidePage() {
                       <div>
                         <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Why Connect Gmail?</h3>
                         <ul className="list-disc list-inside space-y-1.5 sm:space-y-2 text-sm sm:text-base text-muted-foreground ml-2">
-                          <li>Send emails directly from Netlink</li>
+                          <li>Send emails directly from Network Link AI</li>
                           <li>Track email conversations with contacts</li>
                           <li>Use AI to draft and personalize emails</li>
                           <li>Manage email campaigns</li>
@@ -652,7 +652,7 @@ export function SetupGuidePage() {
                       <span>Connect Integrations</span>
                     </h4>
                     <p className="text-xs sm:text-sm text-muted-foreground ml-5 sm:ml-6">
-                      Connect Google Calendar and Gmail to unlock the full power of Netlink.
+                      Connect Google Calendar and Gmail to unlock the full power of Network Link AI.
                     </p>
                   </div>
                   <div className="space-y-1.5 sm:space-y-2">

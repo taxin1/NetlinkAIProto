@@ -5,11 +5,11 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { PublicNavigation } from "@/components/public-navigation"
-import { 
-  BookOpen, 
-  Rocket, 
-  Settings, 
-  DollarSign, 
+import {
+  BookOpen,
+  Rocket,
+  Settings,
+  DollarSign,
   HelpCircle,
   ArrowRight,
   FileText,
@@ -34,7 +34,7 @@ const itemVariants = {
     y: 0,
     transition: {
       duration: 0.5,
-      ease: "easeOut",
+      ease: "easeOut" as const,
     },
   },
 }
@@ -42,7 +42,7 @@ const itemVariants = {
 const resourceSections = [
   {
     title: "Getting Started",
-    description: "New to Netlink? Start here to learn the basics and get up and running quickly.",
+    description: "New to Network Link AI? Start here to learn the basics and get up and running quickly.",
     href: "/resources/getting-started",
     icon: Rocket,
     color: "from-blue-500 to-cyan-500",
@@ -66,7 +66,7 @@ const resourceSections = [
   },
   {
     title: "FAQ",
-    description: "Find answers to frequently asked questions about Netlink and its features.",
+    description: "Find answers to frequently asked questions about Network Link AI and its features.",
     href: "/resources/faq",
     icon: HelpCircle,
     color: "from-orange-500 to-red-500",
@@ -86,7 +86,7 @@ export function ResourcesHomePage() {
         className="relative overflow-hidden"
       >
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000_70%,transparent_110%)]" />
-        
+
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16">
           <motion.div variants={itemVariants} className="text-center mb-12">
             <div className="inline-flex items-center gap-2 px-4 py-2 mb-6 rounded-full bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border border-primary/20 backdrop-blur-xl">
@@ -97,12 +97,12 @@ export function ResourcesHomePage() {
               Everything You Need to Know
             </h1>
             <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto">
-              Comprehensive guides, setup instructions, and documentation to help you get the most out of Netlink.
+              Comprehensive guides, setup instructions, and documentation to help you get the most out of Network Link AI.
             </p>
           </motion.div>
 
           {/* Resource Cards Grid */}
-          <motion.div 
+          <motion.div
             variants={containerVariants}
             className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12"
           >

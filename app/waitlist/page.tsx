@@ -141,7 +141,7 @@ export default function WaitlistPage() {
       <nav className="relative z-10 p-6">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <Link href="/" className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-            Netlink
+            Network Link AI
           </Link>
           <div className="flex gap-4">
 
@@ -527,7 +527,7 @@ export default function WaitlistPage() {
         {/* Simple Footer */}
         <footer className="mt-20 py-8 border-t border-border/50 text-center">
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} Netlink. All rights reserved.
+            © {new Date().getFullYear()} Network Link AI. All rights reserved.
           </p>
         </footer>
       </div>

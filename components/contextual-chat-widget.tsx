@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge"
 import { EngagementToast } from "@/components/ui/toast"
 import { Bot, MessageSquare, Sparkles, User, X, Loader2 } from "lucide-react"
 
+
 type ChatRole = "user" | "assistant"
 
 interface ChatMessage {
@@ -30,7 +31,7 @@ interface ContextualChatWidgetProps {
 
 const PAGE_CONFIGS: Record<string, PageConfig> = {
   "/dashboard": {
-    title: "Ask Netlink about your dashboard",
+    title: "Ask Network Link AI about your dashboard",
     description: "Get insights on your networking activity and what to do next.",
     focusSuggestions: [
       "Who should I follow up with next?",
@@ -76,7 +77,7 @@ const PAGE_CONFIGS: Record<string, PageConfig> = {
   },
   "/dashboard/ai-assistant": {
     title: "Ask the AI assistant with context",
-    description: "Give Netlink extra context about this page for better answers.",
+    description: "Give Network Link AI extra context about this page for better answers.",
     focusSuggestions: [
       "Explain how to use this AI assistant effectively.",
       "Suggest prompts tailored to my workflow.",
@@ -88,7 +89,7 @@ const PAGE_CONFIGS: Record<string, PageConfig> = {
 function getPageConfig(pathname: string | null): PageConfig {
   if (!pathname) {
     return {
-      title: "Ask Netlink anything",
+      title: "Ask Network Link AI anything",
       description: "Get contextual help based on where you are in the app.",
       focusSuggestions: [
         "What should I focus on today?",
@@ -107,8 +108,8 @@ function getPageConfig(pathname: string | null): PageConfig {
   }
 
   return {
-    title: "Ask Netlink about this page",
-    description: "Netlink will use your current page as context for answers.",
+    title: "Ask Network Link AI about this page",
+    description: "Network Link AI will use your current page as context for answers.",
     focusSuggestions: [
       "Explain what I can do on this page.",
       "Suggest next steps from here.",
@@ -304,7 +305,7 @@ export function ContextualChatWidget({ userId }: ContextualChatWidgetProps) {
                 </div>
                 <div className="flex flex-col">
                   <CardTitle className="text-sm flex items-center gap-1.5">
-                    <span>Netlink Contextual Assistant</span>
+                    <span>Network Link AI Contextual Assistant</span>
                     <Badge
                       variant="secondary"
                       className="text-[10px] px-1.5 py-0 h-4"
@@ -350,7 +351,7 @@ export function ContextualChatWidget({ userId }: ContextualChatWidgetProps) {
                   <div className="rounded-lg border border-dashed border-muted-foreground/20 bg-muted/40 px-3 py-2 text-[11px] text-muted-foreground flex items-center gap-2">
                     <MessageSquare className="h-3.5 w-3.5" />
                     <span>
-                      Ask Netlink questions about this page, and it will use your
+                      Ask Network Link AI questions about this page, and it will use your
                       current context to answer.
                     </span>
                   </div>
@@ -367,11 +368,10 @@ export function ContextualChatWidget({ userId }: ContextualChatWidgetProps) {
                       </div>
                     )}
                     <div
-                      className={`max-w-[80%] rounded-2xl px-3 py-2 text-xs ${
-                        message.role === "user"
-                          ? "bg-primary text-primary-foreground rounded-br-none"
-                          : "bg-muted text-foreground rounded-bl-none"
-                      }`}
+                      className={`max-w-[80%] rounded-2xl px-3 py-2 text-xs ${message.role === "user"
+                        ? "bg-primary text-primary-foreground rounded-br-none"
+                        : "bg-muted text-foreground rounded-bl-none"
+                        }`}
                     >
                       {message.content}
                     </div>
@@ -432,7 +432,7 @@ export function ContextualChatWidget({ userId }: ContextualChatWidgetProps) {
         >
           <MessageSquare className="h-4 w-4" />
           <span className="text-sm font-medium">
-            {isOpen ? "Hide contextual assistant" : "Ask Netlink about this page"}
+            {isOpen ? "Hide contextual assistant" : "Ask Network Link AI about this page"}
           </span>
         </Button>
       </div>

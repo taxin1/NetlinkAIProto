@@ -30,6 +30,8 @@ import {
   MailCheck,
   Wifi,
   MapPin,
+  Menu,
+  X,
 } from "lucide-react"
 
 const containerVariants = {
@@ -123,6 +125,7 @@ export function LandingPage() {
   const [nfcStep, setNfcStep] = useState(0)
   const [portfolioStep, setPortfolioStep] = useState(0)
   const [networkingStep, setNetworkingStep] = useState(0)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   // Show preview first, then details
   const [showCardDetails, setShowCardDetails] = useState(false)
@@ -305,10 +308,10 @@ export function LandingPage() {
                 <Network className="h-7 w-7 text-white group-hover:text-cyan-400 transition-colors" />
               </motion.div>
               <span className="text-xl font-semibold text-white tracking-tight">
-                Netlink
+                Network Link AI
               </span>
             </Link>
-            <div className="flex items-center gap-3">
+            <div className="hidden lg:flex items-center gap-3">
               <Link href="/">
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                   <Button variant="ghost" className="text-slate-400 hover:text-white hover:bg-slate-800/50 font-medium">
@@ -364,8 +367,64 @@ export function LandingPage() {
                 </motion.div>
               </Link>
             </div>
+
+            {/* Mobile Menu Button */}
+            <div className="lg:hidden">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-slate-300 hover:text-white hover:bg-slate-800/50"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              >
+                {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              </Button>
+            </div>
           </div>
         </div>
+
+        {/* Mobile Menu Overlay */}
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              className="lg:hidden border-t border-slate-800/50 bg-slate-950/95 backdrop-blur-xl overflow-hidden"
+            >
+              <div className="px-6 py-6 space-y-4 flex flex-col">
+                <Link href="/" onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-white hover:bg-slate-800/50 text-lg">
+                    Home
+                  </Button>
+                </Link>
+                <Link href="/public/about" onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-white hover:bg-slate-800/50 text-lg">
+                    About
+                  </Button>
+                </Link>
+                <Link href="/pricing" onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-white hover:bg-slate-800/50 text-lg">
+                    Pricing
+                  </Button>
+                </Link>
+                <Link href="/resources" onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-white hover:bg-slate-800/50 text-lg">
+                    <BookOpen className="h-5 w-5 mr-3" />
+                    Resources
+                  </Button>
+                </Link>
+                <div className="pt-4 border-t border-slate-800/50">
+                  <Link href="/waitlist" onClick={() => setMobileMenuOpen(false)}>
+                    <Button className="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white font-medium shadow-md shadow-blue-900/20 py-6 text-lg">
+                      Join Waitlist
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.nav>
 
       {/* Hero Section */}
@@ -1742,7 +1801,7 @@ export function LandingPage() {
                                   </div>
                                   <div className="mt-3 flex items-center gap-2 text-xs text-orange-400">
                                     <Network className="h-3 w-3" />
-                                    <span>portfolio.netlink.com/john-smith</span>
+                                    <span>portfolio.networklinka.com/john-smith</span>
                                   </div>
                                 </div>
                               </motion.div>
@@ -1772,7 +1831,7 @@ export function LandingPage() {
                                       <span>Shareable link ready</span>
                                     </div>
                                     <div className="text-xs text-slate-400 text-center">
-                                      portfolio.netlink.com/john-smith
+                                      portfolio.networklinka.com/john-smith
                                     </div>
                                   </div>
                                 </div>
@@ -2772,14 +2831,14 @@ export function LandingPage() {
               <Network className="h-6 w-6 text-cyan-400" />
             </motion.div>
             <span className="text-xl font-bold text-white">
-              Netlink
+              Network Link AI
             </span>
           </motion.div>
           <motion.p
             variants={itemVariants}
             className="text-slate-400 mb-4"
           >
-            © 2025 Netlink. All rights reserved. Making networking effortless with AI.
+            © 2025 Network Link AI. All rights reserved. Making networking effortless with AI.
           </motion.p>
           <motion.div
             variants={itemVariants}
