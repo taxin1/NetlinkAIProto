@@ -51,35 +51,35 @@ After creating the app, you'll see:
 
 Create or update your `.env.local` file in the root of your project:
 
-```env
+\`\`\`env
 # PayPal Configuration
 PAYPAL_CLIENT_ID=your_sandbox_client_id_here
 PAYPAL_CLIENT_SECRET=your_sandbox_client_secret_here
 
 # For production, also set:
 # PAYPAL_ENVIRONMENT=live  # Only set this in production
-```
+\`\`\`
 
 **Example**:
-```env
+\`\`\`env
 PAYPAL_CLIENT_ID=AeA1QIZXiflr1_-dAzPxX1gx_6h3QZ0g5LxX1gx_6h3QZ0g5LxX1gx
 PAYPAL_CLIENT_SECRET=ELxX1gx_6h3QZ0g5LxX1gx_6h3QZ0g5LxX1gx_6h3QZ0g5LxX1gx_6h3QZ0g5LxX1gx
-```
+\`\`\`
 
 ### Step 4: Verify Your Configuration
 
 We have provided a script to automatically check your configuration:
 
-```bash
+\`\`\`bash
 node scripts/check-paypal-config.mjs
-```
+\`\`\`
 
 ### Step 5: Test the Integration
 
 1. Start your development server:
-   ```bash
+   \`\`\`bash
    npm run dev
-   ```
+   \`\`\`
 
 2. **New!** Navigate to the dedicated test page:
    - Go to `http://localhost:3000/test-payment`
@@ -134,11 +134,11 @@ For card payments (guest checkout), PayPal provides test card numbers:
 2. Get your live Client ID and Client Secret
 3. Update your production environment variables:
 
-```env
+\`\`\`env
 PAYPAL_CLIENT_ID=your_live_client_id
 PAYPAL_CLIENT_SECRET=your_live_client_secret
 PAYPAL_ENVIRONMENT=live
-```
+\`\`\`
 
 ### 2. Update Environment in Deployment
 
