@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
         },
       ],
       application_context: {
-        brand_name: "Netlink Cogni",
+        brand_name: "Netlink",
         landing_page: "NO_PREFERENCE", // Prioritize guest checkout (card payment)
         user_action: "PAY_NOW",
         return_url: `${request.headers.get("origin") || process.env.NEXT_PUBLIC_SITE_URL}/checkout/success`,
@@ -84,17 +84,17 @@ export async function POST(request: NextRequest) {
     });
   } catch (error: any) {
     console.error("PayPal order creation error:", error);
-    
+
     // Check if it's a PayPal API error
     let errorDetail = "Failed to create order";
     let errorDescription = error instanceof Error ? error.message : "Unknown error";
     let statusCode = 500;
-    
+
     // PayPal SDK errors often have statusCode and message
     if (error?.statusCode) {
       statusCode = error.statusCode;
       errorDescription = error.message || errorDescription;
-      
+
       // Check for authentication errors
       if (error.statusCode === 401 || error.message?.includes("invalid_client") || error.message?.includes("Client Authentication failed")) {
         errorDetail = "PayPal authentication failed. Please check your PAYPAL_CLIENT_ID and PAYPAL_CLIENT_SECRET environment variables.";
@@ -102,16 +102,16 @@ export async function POST(request: NextRequest) {
         statusCode = 401;
       }
     }
-    
+
     // Check error message for authentication issues
     if (errorDescription?.includes("invalid_client") || errorDescription?.includes("Client Authentication failed")) {
       errorDetail = "PayPal authentication failed. Please verify your PAYPAL_CLIENT_ID and PAYPAL_CLIENT_SECRET are correct and match your PayPal environment (sandbox/live).";
       errorDescription = "Client Authentication failed - invalid or missing PayPal credentials";
       statusCode = 401;
     }
-    
+
     return NextResponse.json(
-      { 
+      {
         error: errorDetail,
         error_description: errorDescription,
         details: [{ issue: "ORDER_CREATION_FAILED", description: errorDescription }],

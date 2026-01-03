@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
         },
       ],
       application_context: {
-        brand_name: "Netlink Cogni",
+        brand_name: "Netlink",
         landing_page: "BILLING", // Prioritize card payment (guest checkout) over PayPal account login
         user_action: "PAY_NOW",
         return_url: `${request.headers.get("origin") || process.env.NEXT_PUBLIC_SITE_URL}/api/paypal/capture-order?planName=${planName}`,

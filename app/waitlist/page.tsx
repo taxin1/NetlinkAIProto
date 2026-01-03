@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -25,7 +25,6 @@ import {
   Radio,
   TrendingUp,
 } from "lucide-react"
-import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 
@@ -97,7 +96,7 @@ const itemVariants = {
     y: 0,
     transition: {
       duration: 0.5,
-      ease: "easeOut",
+      ease: "easeOut" as const,
     },
   },
 }
@@ -109,73 +108,20 @@ export default function WaitlistPage() {
   const [error, setError] = useState<string | null>(null)
   const [position, setPosition] = useState<number | null>(null)
   const [earlyBird, setEarlyBird] = useState(false)
-  const [user, setUser] = useState<any>(null)
   const router = useRouter()
-
-  useEffect(() => {
-    const checkUser = async () => {
-      const supabase = createClient()
-      const { data: { user: currentUser } } = await supabase.auth.getUser()
-      setUser(currentUser)
-      
-      // If user is logged in, check if they're already on waitlist
-      if (currentUser) {
-        const { data: waitlistEntry } = await supabase
-          .from('waitlist')
-          .select('*')
-          .eq('user_id', currentUser.id)
-          .maybeSingle()
-        
-        if (waitlistEntry) {
-          setPosition(waitlistEntry.position)
-          setEarlyBird(waitlistEntry.early_bird)
-          setIsSuccess(true)
-          if (currentUser.email) {
-            setEmail(currentUser.email)
-          }
-        } else if (currentUser.email) {
-          // User exists but not on waitlist, pre-fill email
-          setEmail(currentUser.email)
-        }
-      }
-    }
-    checkUser()
-  }, [])
 
   const handleJoinWaitlist = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
     setError(null)
 
-    try {
-      const supabase = createClient()
-      const { data: { user: currentUser } } = await supabase.auth.getUser()
-      
-      const response = await fetch("/api/waitlist", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: email.trim(),
-          userId: currentUser?.id || null,
-        }),
-      })
-
-      const result = await response.json()
-
-      if (!response.ok) {
-        throw new Error(result.error || "Failed to join waitlist")
-      }
-
-      setPosition(result.position)
-      setEarlyBird(result.earlyBird)
+    // Simulate API call
+    setTimeout(() => {
+      setPosition(Math.floor(Math.random() * 500) + 100) // Mock position
+      setEarlyBird(true) // Mock early bird
       setIsSuccess(true)
-    } catch (err: any) {
-      setError(err.message || "Something went wrong. Please try again.")
-    } finally {
       setIsLoading(false)
-    }
+    }, 1500)
   }
 
   return (
@@ -194,14 +140,10 @@ export default function WaitlistPage() {
       <nav className="relative z-10 p-6">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <Link href="/" className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-            Netlink Cogni
+            Netlink
           </Link>
           <div className="flex gap-4">
-            {!user && (
-              <Link href="/auth/login">
-                <Button variant="ghost">Sign In</Button>
-              </Link>
-            )}
+
             <Link href="/">
               <Button variant="outline">Back to Home</Button>
             </Link>
@@ -223,7 +165,7 @@ export default function WaitlistPage() {
               Product Launch Coming Soon
             </Badge>
           </motion.div>
-          
+
           <motion.h1
             variants={itemVariants}
             className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 tracking-tight"
@@ -241,7 +183,7 @@ export default function WaitlistPage() {
             variants={itemVariants}
             className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-8"
           >
-            Be among the first to experience the future of professional networking. 
+            Be among the first to experience the future of professional networking.
             AI-powered contact management, intelligent email campaigns, and more.
           </motion.p>
 

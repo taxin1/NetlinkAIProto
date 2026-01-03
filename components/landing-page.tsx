@@ -48,19 +48,19 @@ const itemVariants = {
     y: 0,
     transition: {
       duration: 0.5,
-      ease: "easeOut",
+      ease: "easeOut" as const,
     },
   },
 }
 
 // Typewriter component
-function TypewriterText({ 
-  text, 
-  className = "", 
+function TypewriterText({
+  text,
+  className = "",
   speed = 50,
-  delay = 0 
-}: { 
-  text: string; 
+  delay = 0
+}: {
+  text: string;
   className?: string;
   speed?: number;
   delay?: number;
@@ -98,7 +98,7 @@ const fadeInUp = {
     y: 0,
     transition: {
       duration: 0.6,
-      ease: "easeOut",
+      ease: "easeOut" as const,
     },
   },
 }
@@ -110,7 +110,7 @@ const scaleIn = {
     scale: 1,
     transition: {
       duration: 0.5,
-      ease: "easeOut",
+      ease: "easeOut" as const,
     },
   },
 }
@@ -122,7 +122,7 @@ export function LandingPage() {
   const [nfcStep, setNfcStep] = useState(0)
   const [portfolioStep, setPortfolioStep] = useState(0)
   const [networkingStep, setNetworkingStep] = useState(0)
-  
+
   // Show preview first, then details
   const [showCardDetails, setShowCardDetails] = useState(false)
   const [showEmailDetails, setShowEmailDetails] = useState(false)
@@ -310,16 +310,16 @@ export function LandingPage() {
             <div className="flex items-center gap-3">
               <Link href="/">
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button variant="ghost" className="text-slate-400 hover:text-white hover:bg-slate-800/50 font-medium">
-                  Home
-                </Button>
+                  <Button variant="ghost" className="text-slate-400 hover:text-white hover:bg-slate-800/50 font-medium">
+                    Home
+                  </Button>
                 </motion.div>
               </Link>
               <Link href="/public/about">
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button variant="ghost" className="text-slate-400 hover:text-white hover:bg-slate-800/50 font-medium">
-                  About
-                </Button>
+                  <Button variant="ghost" className="text-slate-400 hover:text-white hover:bg-slate-800/50 font-medium">
+                    About
+                  </Button>
                 </motion.div>
               </Link>
               {/* <Link href="/public/networkers">
@@ -331,19 +331,21 @@ export function LandingPage() {
               </Link> */}
               <Link href="/pricing">
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button variant="ghost" className="text-slate-400 hover:text-white hover:bg-slate-800/50 font-medium">
-                  Pricing
-                </Button>
+                  <Button variant="ghost" className="text-slate-400 hover:text-white hover:bg-slate-800/50 font-medium">
+                    Pricing
+                  </Button>
                 </motion.div>
               </Link>
               <Link href="/resources">
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button variant="ghost" className="text-slate-400 hover:text-white hover:bg-slate-800/50 font-medium">
-                  <BookOpen className="h-4 w-4 mr-2" />
-                  Resources
-                </Button>
+                  <Button variant="ghost" className="text-slate-400 hover:text-white hover:bg-slate-800/50 font-medium">
+                    <BookOpen className="h-4 w-4 mr-2" />
+                    Resources
+                  </Button>
                 </motion.div>
               </Link>
+
+              {/* TEMPORARILY HIDDEN: Sign In Button
               <Link href="/auth/login">
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 <Button variant="ghost" className="text-slate-400 hover:text-white hover:bg-slate-800/50 font-medium">
@@ -351,11 +353,13 @@ export function LandingPage() {
                 </Button>
                 </motion.div>
               </Link>
+              */}
+
               <Link href="/waitlist">
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button className="bg-white text-slate-900 hover:bg-slate-100 font-medium shadow-md">
-                  Join Waitlist
-                </Button>
+                  <Button className="bg-white text-slate-900 hover:bg-slate-100 font-medium shadow-md">
+                    Join Waitlist
+                  </Button>
                 </motion.div>
               </Link>
             </div>
@@ -384,7 +388,7 @@ export function LandingPage() {
               className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-6 text-white tracking-tight leading-tight"
             >
               <span className="bg-gradient-to-r from-white via-cyan-100 to-blue-200 bg-clip-text text-transparent">
-                <TypewriterText 
+                <TypewriterText
                   text="Transform Your Networking"
                   speed={80}
                   delay={500}
@@ -392,7 +396,7 @@ export function LandingPage() {
               </span>
               <br />
               <span className="bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
-                <TypewriterText 
+                <TypewriterText
                   text="with AI Intelligence"
                   speed={80}
                   delay={2500}
@@ -422,18 +426,8 @@ export function LandingPage() {
                   </Button>
                 </motion.div>
               </Link>
-              <Link href="/pricing">
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="border-2 border-cyan-500/50 text-cyan-400 hover:text-white hover:bg-cyan-500/10 font-semibold text-lg px-8 py-6"
-                  >
-                    View Pricing
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Button>
-                </motion.div>
-              </Link>
+
+              {/* TEMPORARILY HIDDEN: Sign In Button
               <Link href="/auth/login">
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                   <Button
@@ -446,6 +440,20 @@ export function LandingPage() {
                   </Button>
                 </motion.div>
               </Link>
+              */}
+              <Link href="/pricing">
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="border-2 border-cyan-500/50 text-cyan-400 hover:text-white hover:bg-cyan-500/10 font-semibold text-lg px-8 py-6"
+                  >
+                    View Pricing
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </motion.div>
+              </Link>
+
             </motion.div>
             <motion.p
               variants={itemVariants}
@@ -503,7 +511,7 @@ export function LandingPage() {
                     }}
                     transition={{ duration: 3, repeat: Infinity, repeatType: "reverse" }}
                   />
-                  
+
                   <CardContent className="p-6 relative z-10">
                     <div className="flex items-center gap-3 mb-4">
                       <motion.div
@@ -527,269 +535,269 @@ export function LandingPage() {
                       <AnimatePresence mode="wait">
                         {/* Preview Animation */}
                         {!showCardDetails && (
-                        <motion.div
-                          key="preview"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          className="absolute inset-4"
-                        >
-                          <div className="relative h-full flex items-center justify-center">
-                            {/* 3D Card Flip Preview */}
-                            <motion.div
-                              className="relative"
-                              style={{ perspective: "1000px" }}
-                            >
+                          <motion.div
+                            key="preview"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="absolute inset-4"
+                          >
+                            <div className="relative h-full flex items-center justify-center">
+                              {/* 3D Card Flip Preview */}
                               <motion.div
-                                className="relative w-32 h-48"
-                                animate={{
-                                  rotateY: [0, 180, 360],
-                                }}
-                                transition={{
-                                  duration: 4,
-                                  repeat: Infinity,
-                                  ease: "easeInOut",
-                                }}
-                                style={{ transformStyle: "preserve-3d" }}
+                                className="relative"
+                                style={{ perspective: "1000px" }}
                               >
-                                {/* Front of Card */}
                                 <motion.div
-                                  className="absolute inset-0 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-slate-800 dark:to-slate-700 rounded-lg p-3 shadow-xl"
-                                  style={{ backfaceVisibility: "hidden" }}
-                                >
-                                  <div className="flex items-center gap-2 mb-2">
-                                    <div className="w-8 h-8 rounded bg-blue-600 flex items-center justify-center">
-                                      <span className="text-white text-xs font-bold">JS</span>
-                                    </div>
-                                    <div className="flex-1">
-                                      <div className="h-2 bg-blue-300 dark:bg-blue-600 rounded mb-1" />
-                                      <div className="h-1.5 bg-blue-200 dark:bg-blue-700 rounded w-2/3" />
-                                    </div>
-                                  </div>
-                                  <div className="space-y-1 mt-2">
-                                    <div className="h-1 bg-slate-300 dark:bg-slate-600 rounded" />
-                                    <div className="h-1 bg-slate-300 dark:bg-slate-600 rounded w-3/4" />
-                                  </div>
-                                </motion.div>
-                                
-                                {/* Back of Card - Extracted */}
-                                <motion.div
-                                  className="absolute inset-0 bg-gradient-to-br from-green-50 to-emerald-100 dark:from-slate-800 dark:to-green-900/30 rounded-lg p-3 shadow-xl"
-                                  style={{
-                                    backfaceVisibility: "hidden",
-                                    transform: "rotateY(180deg)",
+                                  className="relative w-32 h-48"
+                                  animate={{
+                                    rotateY: [0, 180, 360],
                                   }}
+                                  transition={{
+                                    duration: 4,
+                                    repeat: Infinity,
+                                    ease: "easeInOut",
+                                  }}
+                                  style={{ transformStyle: "preserve-3d" }}
                                 >
-                                  <div className="flex items-center gap-2 mb-2">
-                                    <CheckCircle2 className="h-4 w-4 text-green-500" />
-                                    <span className="text-xs font-semibold text-green-600 dark:text-green-400">Extracted!</span>
-                                  </div>
-                                  <div className="space-y-1 text-xs">
-                                    <p className="font-semibold text-slate-900 dark:text-white">John Smith</p>
-                                    <p className="text-slate-600 dark:text-slate-400">CEO at TechCorp</p>
-                                  </div>
+                                  {/* Front of Card */}
+                                  <motion.div
+                                    className="absolute inset-0 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-slate-800 dark:to-slate-700 rounded-lg p-3 shadow-xl"
+                                    style={{ backfaceVisibility: "hidden" }}
+                                  >
+                                    <div className="flex items-center gap-2 mb-2">
+                                      <div className="w-8 h-8 rounded bg-blue-600 flex items-center justify-center">
+                                        <span className="text-white text-xs font-bold">JS</span>
+                                      </div>
+                                      <div className="flex-1">
+                                        <div className="h-2 bg-blue-300 dark:bg-blue-600 rounded mb-1" />
+                                        <div className="h-1.5 bg-blue-200 dark:bg-blue-700 rounded w-2/3" />
+                                      </div>
+                                    </div>
+                                    <div className="space-y-1 mt-2">
+                                      <div className="h-1 bg-slate-300 dark:bg-slate-600 rounded" />
+                                      <div className="h-1 bg-slate-300 dark:bg-slate-600 rounded w-3/4" />
+                                    </div>
+                                  </motion.div>
+
+                                  {/* Back of Card - Extracted */}
+                                  <motion.div
+                                    className="absolute inset-0 bg-gradient-to-br from-green-50 to-emerald-100 dark:from-slate-800 dark:to-green-900/30 rounded-lg p-3 shadow-xl"
+                                    style={{
+                                      backfaceVisibility: "hidden",
+                                      transform: "rotateY(180deg)",
+                                    }}
+                                  >
+                                    <div className="flex items-center gap-2 mb-2">
+                                      <CheckCircle2 className="h-4 w-4 text-green-500" />
+                                      <span className="text-xs font-semibold text-green-600 dark:text-green-400">Extracted!</span>
+                                    </div>
+                                    <div className="space-y-1 text-xs">
+                                      <p className="font-semibold text-slate-900 dark:text-white">John Smith</p>
+                                      <p className="text-slate-600 dark:text-slate-400">CEO at TechCorp</p>
+                                    </div>
+                                  </motion.div>
                                 </motion.div>
                               </motion.div>
-                            </motion.div>
-                            
-                            {/* Scanning Beam Effect */}
-                            <motion.div
-                              className="absolute inset-0 opacity-20"
-                              style={{
-                                background: "linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.4), transparent)",
-                              }}
-                              animate={{
-                                x: ["-100%", "200%"],
-                              }}
-                              transition={{
-                                duration: 2,
-                                repeat: Infinity,
-                                ease: "linear",
-                              }}
-                            />
-                            
-                            {/* Floating Particles */}
-                            {particleConfigs?.map((config, i) => (
+
+                              {/* Scanning Beam Effect */}
                               <motion.div
-                                key={i}
-                                className="absolute w-1 h-1 bg-blue-400 rounded-full"
-                                initial={{
-                                  x: config.x,
-                                  y: config.y,
-                                  opacity: 0,
+                                className="absolute inset-0 opacity-20"
+                                style={{
+                                  background: "linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.4), transparent)",
                                 }}
                                 animate={{
-                                  y: [null, "-100%"],
-                                  opacity: [0, 1, 0],
+                                  x: ["-100%", "200%"],
                                 }}
                                 transition={{
-                                  duration: config.duration,
+                                  duration: 2,
                                   repeat: Infinity,
-                                  delay: i * 0.4,
+                                  ease: "linear",
                                 }}
                               />
-                            ))}
-                          </div>
-                        </motion.div>
+
+                              {/* Floating Particles */}
+                              {particleConfigs?.map((config, i) => (
+                                <motion.div
+                                  key={i}
+                                  className="absolute w-1 h-1 bg-blue-400 rounded-full"
+                                  initial={{
+                                    x: config.x,
+                                    y: config.y,
+                                    opacity: 0,
+                                  }}
+                                  animate={{
+                                    y: [null, "-100%"],
+                                    opacity: [0, 1, 0],
+                                  }}
+                                  transition={{
+                                    duration: config.duration,
+                                    repeat: Infinity,
+                                    delay: i * 0.4,
+                                  }}
+                                />
+                              ))}
+                            </div>
+                          </motion.div>
                         )}
 
                         {/* Detailed Process Steps */}
                         {showCardDetails && (
-                        <>
-                        {/* Step 1: Upload Interface */}
-                        {cardScanStep === 0 && (
-                        <motion.div
-                          key="upload"
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -20 }}
-                          transition={{ duration: 0.5 }}
-                          className="absolute inset-4"
-                        >
-                          <div className="border-2 border-dashed border-blue-500/40 rounded-lg p-6 h-full flex flex-col items-center justify-center bg-blue-500/5">
-                            <motion.div
-                              animate={{ y: [0, -5, 0] }}
-                              transition={{ duration: 2, repeat: Infinity }}
-                            >
-                              <Upload className="h-10 w-10 text-blue-400 mb-3" />
-                            </motion.div>
-                            <p className="text-sm text-blue-300 font-medium mb-1">Upload Business Card</p>
-                            <p className="text-xs text-slate-400">Click or drag to upload</p>
-                          </div>
-                        </motion.div>
-                        )}
-
-                        {/* Step 2: Card Image Appears */}
-                        {cardScanStep === 1 && (
-                        <motion.div
-                          key="card-image"
-                          initial={{ opacity: 0, scale: 0.8 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.8 }}
-                          transition={{ duration: 0.5 }}
-                          className="absolute inset-4"
-                        >
-                          <div className="bg-white dark:bg-slate-800 rounded-lg p-4 h-full shadow-xl">
-                            <div className="flex items-center gap-3 mb-3">
-                              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center">
-                                <span className="text-white text-sm font-bold">JS</span>
-                              </div>
-                              <div className="flex-1">
-                                <div className="h-3 bg-blue-200 dark:bg-blue-900 rounded mb-1.5 w-32" />
-                                <div className="h-2 bg-blue-100 dark:bg-blue-800 rounded w-24" />
-                              </div>
-                            </div>
-                            <div className="space-y-2 mt-4">
-                              <div className="h-2 bg-slate-200 dark:bg-slate-700 rounded w-full" />
-                              <div className="h-2 bg-slate-200 dark:bg-slate-700 rounded w-3/4" />
-                              <div className="h-2 bg-slate-200 dark:bg-slate-700 rounded w-2/3" />
-                            </div>
-                            <div className="mt-4 flex items-center gap-2 text-xs text-blue-600 dark:text-blue-400">
-                              <Loader2 className="h-3 w-3 animate-spin" />
-                              <span>Processing image...</span>
-                            </div>
-                          </div>
-                        </motion.div>
-                        )}
-
-                        {/* Step 3: AI Scanning Progress */}
-                        {cardScanStep === 2 && (
-                        <motion.div
-                          key="scanning"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          transition={{ duration: 0.5 }}
-                          className="absolute inset-4"
-                        >
-                          <div className="bg-slate-800 rounded-lg p-4 h-full">
-                            <div className="flex items-center gap-2 mb-4">
-                              <Scan className="h-5 w-5 text-blue-400" />
-                              <span className="text-sm font-semibold text-white">AI Scanning...</span>
-                            </div>
-                            
-                            {/* Scanning Progress Steps */}
-                            <div className="space-y-3">
-                              {[
-                                { label: "Detecting text regions", progress: 100 },
-                                { label: "Extracting name", progress: 100 },
-                                { label: "Extracting contact info", progress: 85 },
-                                { label: "Validating data", progress: 60 },
-                              ].map((step, i) => (
-                                <div key={i} className="space-y-1">
-                                  <div className="flex items-center justify-between text-xs">
-                                    <span className="text-slate-300">{step.label}</span>
-                                    <span className="text-blue-400 font-semibold">{step.progress}%</span>
-                                  </div>
-                                  <div className="w-full bg-slate-700 rounded-full h-1.5 overflow-hidden">
-                                    <motion.div
-                                      className="bg-gradient-to-r from-blue-500 to-cyan-500 h-1.5 rounded-full"
-                                      initial={{ width: "0%" }}
-                                      animate={{ width: `${step.progress}%` }}
-                                      transition={{ duration: 1, delay: i * 0.3 }}
-                                    />
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        </motion.div>
-                        )}
-
-                        {/* Step 4: Extracted Contact Card */}
-                        {cardScanStep === 3 && (
-                        <motion.div
-                          key="extracted"
-                          initial={{ opacity: 0, scale: 0.9 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.9 }}
-                          transition={{ duration: 0.5 }}
-                          className="absolute inset-4"
-                        >
-                          <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-lg p-4 h-full border-2 border-green-500/30">
-                            <div className="flex items-center gap-2 mb-3">
-                              <CheckCircle2 className="h-5 w-5 text-green-400" />
-                              <span className="text-sm font-bold text-green-400">Contact Extracted!</span>
-                            </div>
-                            
-                            <div className="bg-slate-800/50 rounded-lg p-3 space-y-2">
-                              <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
-                                  <span className="text-white text-sm font-bold">JS</span>
-                                </div>
-                                <div className="flex-1">
-                                  <p className="text-sm font-bold text-white">John Smith</p>
-                                  <p className="text-xs text-slate-400">CEO at TechCorp</p>
-                                </div>
-                              </div>
-                              
-                              <div className="space-y-1.5 pt-2 border-t border-slate-700">
-                                <div className="flex items-center gap-2 text-xs">
-                                  <Mail className="h-3 w-3 text-green-400" />
-                                  <span className="text-slate-300">john@techcorp.com</span>
-                                </div>
-                                <div className="flex items-center gap-2 text-xs">
-                                  <span className="text-green-400">📱</span>
-                                  <span className="text-slate-300">+1 (555) 123-4567</span>
-                                </div>
-                                <div className="flex items-center gap-2 text-xs">
-                                  <span className="text-green-400">🏢</span>
-                                  <span className="text-slate-300">123 Business St, San Francisco</span>
-                                </div>
-                              </div>
-                              
+                          <>
+                            {/* Step 1: Upload Interface */}
+                            {cardScanStep === 0 && (
                               <motion.div
-                                className="mt-3 bg-green-500/20 rounded px-2 py-1 text-xs text-green-400 text-center"
-                                animate={{ opacity: [0.7, 1, 0.7] }}
-                                transition={{ duration: 1.5, repeat: Infinity }}
+                                key="upload"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -20 }}
+                                transition={{ duration: 0.5 }}
+                                className="absolute inset-4"
                               >
-                                ✓ Saved to contacts
+                                <div className="border-2 border-dashed border-blue-500/40 rounded-lg p-6 h-full flex flex-col items-center justify-center bg-blue-500/5">
+                                  <motion.div
+                                    animate={{ y: [0, -5, 0] }}
+                                    transition={{ duration: 2, repeat: Infinity }}
+                                  >
+                                    <Upload className="h-10 w-10 text-blue-400 mb-3" />
+                                  </motion.div>
+                                  <p className="text-sm text-blue-300 font-medium mb-1">Upload Business Card</p>
+                                  <p className="text-xs text-slate-400">Click or drag to upload</p>
+                                </div>
                               </motion.div>
-                            </div>
-                          </div>
-                        </motion.div>
-                        )}
-                        </>
+                            )}
+
+                            {/* Step 2: Card Image Appears */}
+                            {cardScanStep === 1 && (
+                              <motion.div
+                                key="card-image"
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.8 }}
+                                transition={{ duration: 0.5 }}
+                                className="absolute inset-4"
+                              >
+                                <div className="bg-white dark:bg-slate-800 rounded-lg p-4 h-full shadow-xl">
+                                  <div className="flex items-center gap-3 mb-3">
+                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center">
+                                      <span className="text-white text-sm font-bold">JS</span>
+                                    </div>
+                                    <div className="flex-1">
+                                      <div className="h-3 bg-blue-200 dark:bg-blue-900 rounded mb-1.5 w-32" />
+                                      <div className="h-2 bg-blue-100 dark:bg-blue-800 rounded w-24" />
+                                    </div>
+                                  </div>
+                                  <div className="space-y-2 mt-4">
+                                    <div className="h-2 bg-slate-200 dark:bg-slate-700 rounded w-full" />
+                                    <div className="h-2 bg-slate-200 dark:bg-slate-700 rounded w-3/4" />
+                                    <div className="h-2 bg-slate-200 dark:bg-slate-700 rounded w-2/3" />
+                                  </div>
+                                  <div className="mt-4 flex items-center gap-2 text-xs text-blue-600 dark:text-blue-400">
+                                    <Loader2 className="h-3 w-3 animate-spin" />
+                                    <span>Processing image...</span>
+                                  </div>
+                                </div>
+                              </motion.div>
+                            )}
+
+                            {/* Step 3: AI Scanning Progress */}
+                            {cardScanStep === 2 && (
+                              <motion.div
+                                key="scanning"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                transition={{ duration: 0.5 }}
+                                className="absolute inset-4"
+                              >
+                                <div className="bg-slate-800 rounded-lg p-4 h-full">
+                                  <div className="flex items-center gap-2 mb-4">
+                                    <Scan className="h-5 w-5 text-blue-400" />
+                                    <span className="text-sm font-semibold text-white">AI Scanning...</span>
+                                  </div>
+
+                                  {/* Scanning Progress Steps */}
+                                  <div className="space-y-3">
+                                    {[
+                                      { label: "Detecting text regions", progress: 100 },
+                                      { label: "Extracting name", progress: 100 },
+                                      { label: "Extracting contact info", progress: 85 },
+                                      { label: "Validating data", progress: 60 },
+                                    ].map((step, i) => (
+                                      <div key={i} className="space-y-1">
+                                        <div className="flex items-center justify-between text-xs">
+                                          <span className="text-slate-300">{step.label}</span>
+                                          <span className="text-blue-400 font-semibold">{step.progress}%</span>
+                                        </div>
+                                        <div className="w-full bg-slate-700 rounded-full h-1.5 overflow-hidden">
+                                          <motion.div
+                                            className="bg-gradient-to-r from-blue-500 to-cyan-500 h-1.5 rounded-full"
+                                            initial={{ width: "0%" }}
+                                            animate={{ width: `${step.progress}%` }}
+                                            transition={{ duration: 1, delay: i * 0.3 }}
+                                          />
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              </motion.div>
+                            )}
+
+                            {/* Step 4: Extracted Contact Card */}
+                            {cardScanStep === 3 && (
+                              <motion.div
+                                key="extracted"
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.9 }}
+                                transition={{ duration: 0.5 }}
+                                className="absolute inset-4"
+                              >
+                                <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-lg p-4 h-full border-2 border-green-500/30">
+                                  <div className="flex items-center gap-2 mb-3">
+                                    <CheckCircle2 className="h-5 w-5 text-green-400" />
+                                    <span className="text-sm font-bold text-green-400">Contact Extracted!</span>
+                                  </div>
+
+                                  <div className="bg-slate-800/50 rounded-lg p-3 space-y-2">
+                                    <div className="flex items-center gap-3">
+                                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
+                                        <span className="text-white text-sm font-bold">JS</span>
+                                      </div>
+                                      <div className="flex-1">
+                                        <p className="text-sm font-bold text-white">John Smith</p>
+                                        <p className="text-xs text-slate-400">CEO at TechCorp</p>
+                                      </div>
+                                    </div>
+
+                                    <div className="space-y-1.5 pt-2 border-t border-slate-700">
+                                      <div className="flex items-center gap-2 text-xs">
+                                        <Mail className="h-3 w-3 text-green-400" />
+                                        <span className="text-slate-300">john@techcorp.com</span>
+                                      </div>
+                                      <div className="flex items-center gap-2 text-xs">
+                                        <span className="text-green-400">📱</span>
+                                        <span className="text-slate-300">+1 (555) 123-4567</span>
+                                      </div>
+                                      <div className="flex items-center gap-2 text-xs">
+                                        <span className="text-green-400">🏢</span>
+                                        <span className="text-slate-300">123 Business St, San Francisco</span>
+                                      </div>
+                                    </div>
+
+                                    <motion.div
+                                      className="mt-3 bg-green-500/20 rounded px-2 py-1 text-xs text-green-400 text-center"
+                                      animate={{ opacity: [0.7, 1, 0.7] }}
+                                      transition={{ duration: 1.5, repeat: Infinity }}
+                                    >
+                                      ✓ Saved to contacts
+                                    </motion.div>
+                                  </div>
+                                </div>
+                              </motion.div>
+                            )}
+                          </>
                         )}
                       </AnimatePresence>
                     </div>
@@ -819,7 +827,7 @@ export function LandingPage() {
                     }}
                     transition={{ duration: 3, repeat: Infinity, repeatType: "reverse" }}
                   />
-                  
+
                   <CardContent className="p-6 relative z-10">
                     <div className="flex items-center gap-3 mb-4">
                       <motion.div
@@ -843,287 +851,287 @@ export function LandingPage() {
                       <AnimatePresence mode="wait">
                         {/* Preview Animation */}
                         {!showEmailDetails && (
-                        <motion.div
-                          key="preview"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          className="absolute inset-4"
-                        >
-                          <div className="relative h-full">
-                            {/* Flying Email Icons */}
-                            {[...Array(4)].map((_, i) => (
-                              <motion.div
-                                key={i}
-                                className="absolute"
-                                initial={{
-                                  x: -20,
-                                  y: 20 + i * 35,
-                                  opacity: 0,
-                                  scale: 0.8,
-                                }}
-                                animate={{
-                                  x: ["-20", "100%"],
-                                  y: [20 + i * 35, 20 + i * 35 + Math.sin(i) * 10],
-                                  opacity: [0, 1, 1, 0],
-                                  scale: [0.8, 1, 1, 0.8],
-                                  rotate: [0, 5, -5, 0],
-                                }}
-                                transition={{
-                                  duration: 3,
-                                  repeat: Infinity,
-                                  delay: i * 0.6,
-                                  ease: "easeInOut",
-                                }}
-                              >
-                                <Mail className="h-5 w-5 text-purple-400" />
-                              </motion.div>
-                            ))}
-
-                            {/* AI Processing Indicator */}
-                            <motion.div
-                              className="absolute bottom-4 left-4 right-4"
-                              animate={{ opacity: [0.5, 1, 0.5], y: [0, -5, 0] }}
-                              transition={{ duration: 2, repeat: Infinity }}
-                            >
-                              <div className="flex items-center gap-2 bg-purple-500/20 rounded-lg p-2 border border-purple-500/30">
+                          <motion.div
+                            key="preview"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="absolute inset-4"
+                          >
+                            <div className="relative h-full">
+                              {/* Flying Email Icons */}
+                              {[...Array(4)].map((_, i) => (
                                 <motion.div
-                                  animate={{ rotate: 360 }}
-                                  transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                                  key={i}
+                                  className="absolute"
+                                  initial={{
+                                    x: -20,
+                                    y: 20 + i * 35,
+                                    opacity: 0,
+                                    scale: 0.8,
+                                  }}
+                                  animate={{
+                                    x: ["-20", "100%"],
+                                    y: [20 + i * 35, 20 + i * 35 + Math.sin(i) * 10],
+                                    opacity: [0, 1, 1, 0],
+                                    scale: [0.8, 1, 1, 0.8],
+                                    rotate: [0, 5, -5, 0],
+                                  }}
+                                  transition={{
+                                    duration: 3,
+                                    repeat: Infinity,
+                                    delay: i * 0.6,
+                                    ease: "easeInOut",
+                                  }}
                                 >
-                                  <Sparkle className="h-4 w-4 text-purple-400" />
+                                  <Mail className="h-5 w-5 text-purple-400" />
                                 </motion.div>
-                                <div className="flex-1">
-                                  <div className="flex items-center justify-between mb-1">
-                                    <span className="text-xs text-purple-300">Personalizing...</span>
-                                    <span className="text-xs font-semibold text-purple-400">15/25</span>
-                                  </div>
-                                  <div className="w-full bg-slate-700 rounded-full h-1.5 overflow-hidden">
-                                    <motion.div
-                                      className="bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500 h-1.5 rounded-full"
-                                      animate={{ width: ["0%", "60%", "100%"] }}
-                                      transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                                    />
+                              ))}
+
+                              {/* AI Processing Indicator */}
+                              <motion.div
+                                className="absolute bottom-4 left-4 right-4"
+                                animate={{ opacity: [0.5, 1, 0.5], y: [0, -5, 0] }}
+                                transition={{ duration: 2, repeat: Infinity }}
+                              >
+                                <div className="flex items-center gap-2 bg-purple-500/20 rounded-lg p-2 border border-purple-500/30">
+                                  <motion.div
+                                    animate={{ rotate: 360 }}
+                                    transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                                  >
+                                    <Sparkle className="h-4 w-4 text-purple-400" />
+                                  </motion.div>
+                                  <div className="flex-1">
+                                    <div className="flex items-center justify-between mb-1">
+                                      <span className="text-xs text-purple-300">Personalizing...</span>
+                                      <span className="text-xs font-semibold text-purple-400">15/25</span>
+                                    </div>
+                                    <div className="w-full bg-slate-700 rounded-full h-1.5 overflow-hidden">
+                                      <motion.div
+                                        className="bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500 h-1.5 rounded-full"
+                                        animate={{ width: ["0%", "60%", "100%"] }}
+                                        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                                      />
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
-                            </motion.div>
-                          </div>
-                        </motion.div>
+                              </motion.div>
+                            </div>
+                          </motion.div>
                         )}
 
                         {/* Detailed Process Steps */}
                         {showEmailDetails && (
-                        <>
-                        {/* Step 1: Campaign Setup */}
-                        {emailStep === 0 && (
-                        <motion.div
-                          key="setup"
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -20 }}
-                          transition={{ duration: 0.5 }}
-                          className="absolute inset-4"
-                        >
-                          <div className="bg-slate-800 rounded-lg p-4 h-full">
-                            <div className="flex items-center gap-2 mb-4">
-                              <Bot className="h-5 w-5 text-purple-400" />
-                              <span className="text-sm font-semibold text-white">Create Campaign</span>
-                            </div>
-                            <div className="space-y-3">
-                              <div>
-                                <label className="text-xs text-slate-400 mb-1 block">Campaign Name</label>
-                                <div className="bg-slate-700 rounded px-3 py-2 text-sm text-white">Q1 Product Launch</div>
-                              </div>
-                              <div>
-                                <label className="text-xs text-slate-400 mb-1 block">Purpose</label>
-                                <div className="bg-slate-700 rounded px-3 py-2 text-sm text-white">Introduce new features</div>
-                              </div>
-                              <div className="flex items-center justify-between pt-2">
-                                <span className="text-xs text-slate-400">Selected Contacts</span>
-                                <Badge className="bg-purple-600 text-xs">25 contacts</Badge>
-                              </div>
-                            </div>
-                          </div>
-                        </motion.div>
-                        )}
-
-                        {/* Step 2: AI Writing Emails */}
-                        {emailStep === 1 && (
-                        <motion.div
-                          key="writing"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          transition={{ duration: 0.5 }}
-                          className="absolute inset-4"
-                        >
-                          <div className="bg-slate-800 rounded-lg p-4 h-full">
-                            <div className="flex items-center gap-2 mb-4">
-                              <motion.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity, ease: "linear" }}>
-                                <Sparkle className="h-5 w-5 text-purple-400" />
-                              </motion.div>
-                              <span className="text-sm font-semibold text-white">AI Personalizing Emails...</span>
-                            </div>
-                            <div className="space-y-3">
-                              {[1, 2, 3].map((i) => (
-                                <div key={i} className="bg-slate-700/50 rounded-lg p-3">
-                                  <div className="flex items-center justify-between mb-2">
-                                    <span className="text-xs text-purple-300">Email {i}/25</span>
-                                    <motion.span
-                                      className="text-xs text-purple-400"
-                                      animate={{ opacity: [0.5, 1, 0.5] }}
-                                      transition={{ duration: 1, repeat: Infinity, delay: i * 0.2 }}
-                                    >
-                                      Writing...
-                                    </motion.span>
+                          <>
+                            {/* Step 1: Campaign Setup */}
+                            {emailStep === 0 && (
+                              <motion.div
+                                key="setup"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -20 }}
+                                transition={{ duration: 0.5 }}
+                                className="absolute inset-4"
+                              >
+                                <div className="bg-slate-800 rounded-lg p-4 h-full">
+                                  <div className="flex items-center gap-2 mb-4">
+                                    <Bot className="h-5 w-5 text-purple-400" />
+                                    <span className="text-sm font-semibold text-white">Create Campaign</span>
                                   </div>
-                                  <div className="space-y-1.5">
-                                    <motion.div
-                                      className="h-1.5 bg-purple-500/30 rounded"
-                                      initial={{ width: "0%" }}
-                                      animate={{ width: ["0%", "100%"] }}
-                                      transition={{ duration: 1.5, delay: i * 0.3, repeat: Infinity }}
-                                    />
-                                    <motion.div
-                                      className="h-1.5 bg-purple-500/30 rounded"
-                                      initial={{ width: "0%" }}
-                                      animate={{ width: ["0%", "85%"] }}
-                                      transition={{ duration: 1.5, delay: i * 0.3 + 0.2, repeat: Infinity }}
-                                    />
+                                  <div className="space-y-3">
+                                    <div>
+                                      <label className="text-xs text-slate-400 mb-1 block">Campaign Name</label>
+                                      <div className="bg-slate-700 rounded px-3 py-2 text-sm text-white">Q1 Product Launch</div>
+                                    </div>
+                                    <div>
+                                      <label className="text-xs text-slate-400 mb-1 block">Purpose</label>
+                                      <div className="bg-slate-700 rounded px-3 py-2 text-sm text-white">Introduce new features</div>
+                                    </div>
+                                    <div className="flex items-center justify-between pt-2">
+                                      <span className="text-xs text-slate-400">Selected Contacts</span>
+                                      <Badge className="bg-purple-600 text-xs">25 contacts</Badge>
+                                    </div>
                                   </div>
                                 </div>
-                              ))}
-                            </div>
-                          </div>
-                        </motion.div>
-                        )}
+                              </motion.div>
+                            )}
 
-                        {/* Step 3: Sending Progress */}
-                        {emailStep === 2 && (
-                        <motion.div
-                          key="sending"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          transition={{ duration: 0.5 }}
-                          className="absolute inset-4"
-                        >
-                          <div className="bg-slate-800 rounded-lg p-4 h-full">
-                            <div className="flex items-center gap-2 mb-4">
-                              <Mail className="h-5 w-5 text-purple-400" />
-                              <span className="text-sm font-semibold text-white">Sending Campaign</span>
-                            </div>
-                            <div className="space-y-4">
-                              <div>
-                                <div className="flex items-center justify-between mb-2">
-                                  <span className="text-xs text-purple-300">Progress</span>
-                                  <motion.span
-                                    className="text-xs font-semibold text-purple-400"
-                                    animate={{ opacity: [0.7, 1, 0.7] }}
+                            {/* Step 2: AI Writing Emails */}
+                            {emailStep === 1 && (
+                              <motion.div
+                                key="writing"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                transition={{ duration: 0.5 }}
+                                className="absolute inset-4"
+                              >
+                                <div className="bg-slate-800 rounded-lg p-4 h-full">
+                                  <div className="flex items-center gap-2 mb-4">
+                                    <motion.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity, ease: "linear" }}>
+                                      <Sparkle className="h-5 w-5 text-purple-400" />
+                                    </motion.div>
+                                    <span className="text-sm font-semibold text-white">AI Personalizing Emails...</span>
+                                  </div>
+                                  <div className="space-y-3">
+                                    {[1, 2, 3].map((i) => (
+                                      <div key={i} className="bg-slate-700/50 rounded-lg p-3">
+                                        <div className="flex items-center justify-between mb-2">
+                                          <span className="text-xs text-purple-300">Email {i}/25</span>
+                                          <motion.span
+                                            className="text-xs text-purple-400"
+                                            animate={{ opacity: [0.5, 1, 0.5] }}
+                                            transition={{ duration: 1, repeat: Infinity, delay: i * 0.2 }}
+                                          >
+                                            Writing...
+                                          </motion.span>
+                                        </div>
+                                        <div className="space-y-1.5">
+                                          <motion.div
+                                            className="h-1.5 bg-purple-500/30 rounded"
+                                            initial={{ width: "0%" }}
+                                            animate={{ width: ["0%", "100%"] }}
+                                            transition={{ duration: 1.5, delay: i * 0.3, repeat: Infinity }}
+                                          />
+                                          <motion.div
+                                            className="h-1.5 bg-purple-500/30 rounded"
+                                            initial={{ width: "0%" }}
+                                            animate={{ width: ["0%", "85%"] }}
+                                            transition={{ duration: 1.5, delay: i * 0.3 + 0.2, repeat: Infinity }}
+                                          />
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              </motion.div>
+                            )}
+
+                            {/* Step 3: Sending Progress */}
+                            {emailStep === 2 && (
+                              <motion.div
+                                key="sending"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                transition={{ duration: 0.5 }}
+                                className="absolute inset-4"
+                              >
+                                <div className="bg-slate-800 rounded-lg p-4 h-full">
+                                  <div className="flex items-center gap-2 mb-4">
+                                    <Mail className="h-5 w-5 text-purple-400" />
+                                    <span className="text-sm font-semibold text-white">Sending Campaign</span>
+                                  </div>
+                                  <div className="space-y-4">
+                                    <div>
+                                      <div className="flex items-center justify-between mb-2">
+                                        <span className="text-xs text-purple-300">Progress</span>
+                                        <motion.span
+                                          className="text-xs font-semibold text-purple-400"
+                                          animate={{ opacity: [0.7, 1, 0.7] }}
+                                          transition={{ duration: 1, repeat: Infinity }}
+                                        >
+                                          18/25
+                                        </motion.span>
+                                      </div>
+                                      <div className="w-full bg-slate-700 rounded-full h-2 overflow-hidden">
+                                        <motion.div
+                                          className="bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500 h-2 rounded-full"
+                                          initial={{ width: "0%" }}
+                                          animate={{ width: ["0%", "72%"] }}
+                                          transition={{ duration: 2 }}
+                                        />
+                                      </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                      <div className="flex items-center gap-2 text-xs text-green-400">
+                                        <CheckCircle2 className="h-3 w-3" />
+                                        <span>18 emails sent successfully</span>
+                                      </div>
+                                      <div className="flex items-center gap-2 text-xs text-yellow-400">
+                                        <Loader2 className="h-3 w-3 animate-spin" />
+                                        <span>7 emails queued</span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </motion.div>
+                            )}
+
+                            {/* Step 4: Email Preview */}
+                            {emailStep === 3 && (
+                              <motion.div
+                                key="preview"
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.95 }}
+                                transition={{ duration: 0.5 }}
+                                className="absolute inset-4"
+                              >
+                                <div className="bg-slate-800 rounded-lg p-4 h-full overflow-y-auto">
+                                  <div className="flex items-center gap-2 mb-3">
+                                    <Mail className="h-4 w-4 text-purple-400" />
+                                    <span className="text-xs font-semibold text-white">Email Preview</span>
+                                  </div>
+                                  <div className="bg-slate-900 rounded-lg p-3 border border-purple-500/30">
+                                    <div className="space-y-2 text-xs">
+                                      <div>
+                                        <span className="text-slate-400">To: </span>
+                                        <span className="text-white">sarah@startup.com</span>
+                                      </div>
+                                      <div>
+                                        <span className="text-slate-400">Subject: </span>
+                                        <span className="text-white">Exciting updates from TechCorp</span>
+                                      </div>
+                                      <div className="pt-2 border-t border-slate-700">
+                                        <p className="text-slate-300 leading-relaxed">
+                                          Hi Sarah,<br />
+                                          I noticed your startup is in the fintech space. We just launched new features that could help...
+                                        </p>
+                                      </div>
+                                      <div className="flex items-center gap-1 pt-2">
+                                        <Sparkle className="h-3 w-3 text-purple-400" />
+                                        <span className="text-xs text-purple-400">AI Personalized</span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </motion.div>
+                            )}
+
+                            {/* Step 5: Campaign Complete */}
+                            {emailStep === 4 && (
+                              <motion.div
+                                key="complete"
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.95 }}
+                                transition={{ duration: 0.5 }}
+                                className="absolute inset-4"
+                              >
+                                <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-lg p-4 h-full border-2 border-green-500/30 flex flex-col items-center justify-center">
+                                  <motion.div
+                                    animate={{ scale: [1, 1.1, 1] }}
                                     transition={{ duration: 1, repeat: Infinity }}
                                   >
-                                    18/25
-                                  </motion.span>
+                                    <CheckCircle2 className="h-12 w-12 text-green-400 mb-3" />
+                                  </motion.div>
+                                  <p className="text-lg font-bold text-green-400 mb-1">Campaign Complete!</p>
+                                  <p className="text-sm text-slate-300 mb-4">25 emails sent</p>
+                                  <div className="grid grid-cols-2 gap-2 w-full">
+                                    <div className="bg-slate-800/50 rounded p-2 text-center">
+                                      <p className="text-lg font-bold text-green-400">67%</p>
+                                      <p className="text-xs text-slate-400">Open Rate</p>
+                                    </div>
+                                    <div className="bg-slate-800/50 rounded p-2 text-center">
+                                      <p className="text-lg font-bold text-blue-400">12</p>
+                                      <p className="text-xs text-slate-400">Responses</p>
+                                    </div>
+                                  </div>
                                 </div>
-                                <div className="w-full bg-slate-700 rounded-full h-2 overflow-hidden">
-                                  <motion.div
-                                    className="bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500 h-2 rounded-full"
-                                    initial={{ width: "0%" }}
-                                    animate={{ width: ["0%", "72%"] }}
-                                    transition={{ duration: 2 }}
-                                  />
-                                </div>
-                              </div>
-                              <div className="space-y-2">
-                                <div className="flex items-center gap-2 text-xs text-green-400">
-                                  <CheckCircle2 className="h-3 w-3" />
-                                  <span>18 emails sent successfully</span>
-                                </div>
-                                <div className="flex items-center gap-2 text-xs text-yellow-400">
-                                  <Loader2 className="h-3 w-3 animate-spin" />
-                                  <span>7 emails queued</span>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </motion.div>
-                        )}
-
-                        {/* Step 4: Email Preview */}
-                        {emailStep === 3 && (
-                        <motion.div
-                          key="preview"
-                          initial={{ opacity: 0, scale: 0.95 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.95 }}
-                          transition={{ duration: 0.5 }}
-                          className="absolute inset-4"
-                        >
-                          <div className="bg-slate-800 rounded-lg p-4 h-full overflow-y-auto">
-                            <div className="flex items-center gap-2 mb-3">
-                              <Mail className="h-4 w-4 text-purple-400" />
-                              <span className="text-xs font-semibold text-white">Email Preview</span>
-                            </div>
-                            <div className="bg-slate-900 rounded-lg p-3 border border-purple-500/30">
-                              <div className="space-y-2 text-xs">
-                                <div>
-                                  <span className="text-slate-400">To: </span>
-                                  <span className="text-white">sarah@startup.com</span>
-                                </div>
-                                <div>
-                                  <span className="text-slate-400">Subject: </span>
-                                  <span className="text-white">Exciting updates from TechCorp</span>
-                                </div>
-                                <div className="pt-2 border-t border-slate-700">
-                                  <p className="text-slate-300 leading-relaxed">
-                                    Hi Sarah,<br />
-                                    I noticed your startup is in the fintech space. We just launched new features that could help...
-                                  </p>
-                                </div>
-                                <div className="flex items-center gap-1 pt-2">
-                                  <Sparkle className="h-3 w-3 text-purple-400" />
-                                  <span className="text-xs text-purple-400">AI Personalized</span>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </motion.div>
-                        )}
-
-                        {/* Step 5: Campaign Complete */}
-                        {emailStep === 4 && (
-                        <motion.div
-                          key="complete"
-                          initial={{ opacity: 0, scale: 0.95 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.95 }}
-                          transition={{ duration: 0.5 }}
-                          className="absolute inset-4"
-                        >
-                          <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-lg p-4 h-full border-2 border-green-500/30 flex flex-col items-center justify-center">
-                            <motion.div
-                              animate={{ scale: [1, 1.1, 1] }}
-                              transition={{ duration: 1, repeat: Infinity }}
-                            >
-                              <CheckCircle2 className="h-12 w-12 text-green-400 mb-3" />
-                            </motion.div>
-                            <p className="text-lg font-bold text-green-400 mb-1">Campaign Complete!</p>
-                            <p className="text-sm text-slate-300 mb-4">25 emails sent</p>
-                            <div className="grid grid-cols-2 gap-2 w-full">
-                              <div className="bg-slate-800/50 rounded p-2 text-center">
-                                <p className="text-lg font-bold text-green-400">67%</p>
-                                <p className="text-xs text-slate-400">Open Rate</p>
-                              </div>
-                              <div className="bg-slate-800/50 rounded p-2 text-center">
-                                <p className="text-lg font-bold text-blue-400">12</p>
-                                <p className="text-xs text-slate-400">Responses</p>
-                              </div>
-                            </div>
-                          </div>
-                        </motion.div>
-                        )}
-                        </>
+                              </motion.div>
+                            )}
+                          </>
                         )}
                       </AnimatePresence>
                     </div>
@@ -1134,321 +1142,321 @@ export function LandingPage() {
 
             {/* Feature 3: NFC - Radio Waves with Connection Animation - HIDDEN */}
             {false && (
-            <motion.div
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, amount: 0.2 }}
-              variants={itemVariants}
-              className="relative group"
-            >
               <motion.div
-                whileHover={{ y: -8, scale: 1.02 }}
-                transition={{ type: "spring", stiffness: 300 }}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, amount: 0.2 }}
+                variants={itemVariants}
+                className="relative group"
               >
-                <Card className="border-2 border-slate-700/50 bg-gradient-to-br from-slate-800/60 to-slate-900/60 backdrop-blur-xl hover:border-cyan-500/50 transition-all duration-500 h-full overflow-hidden relative">
-                  {/* Animated background glow */}
-                  <motion.div
-                    className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                    animate={{
-                      backgroundPosition: ["0% 0%", "100% 100%"],
-                    }}
-                    transition={{ duration: 3, repeat: Infinity, repeatType: "reverse" }}
-                  />
-                  
-                  <CardContent className="p-6 relative z-10">
-                    <div className="flex items-center gap-3 mb-4">
-                      <motion.div
-                        className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 via-cyan-600 to-teal-500 flex items-center justify-center shadow-lg shadow-cyan-500/30"
-                        animate={{
-                          scale: [1, 1.1, 1],
-                          rotate: [0, 180, 360],
-                        }}
-                        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                      >
-                        <Radio className="h-6 w-6 text-white" />
-                      </motion.div>
-                      <div>
-                        <h3 className="text-xl font-bold text-white">NFC Share</h3>
-                        <p className="text-sm text-slate-400">Instant Contact Exchange</p>
+                <motion.div
+                  whileHover={{ y: -8, scale: 1.02 }}
+                  transition={{ type: "spring", stiffness: 300 }}
+                >
+                  <Card className="border-2 border-slate-700/50 bg-gradient-to-br from-slate-800/60 to-slate-900/60 backdrop-blur-xl hover:border-cyan-500/50 transition-all duration-500 h-full overflow-hidden relative">
+                    {/* Animated background glow */}
+                    <motion.div
+                      className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                      animate={{
+                        backgroundPosition: ["0% 0%", "100% 100%"],
+                      }}
+                      transition={{ duration: 3, repeat: Infinity, repeatType: "reverse" }}
+                    />
+
+                    <CardContent className="p-6 relative z-10">
+                      <div className="flex items-center gap-3 mb-4">
+                        <motion.div
+                          className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 via-cyan-600 to-teal-500 flex items-center justify-center shadow-lg shadow-cyan-500/30"
+                          animate={{
+                            scale: [1, 1.1, 1],
+                            rotate: [0, 180, 360],
+                          }}
+                          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                        >
+                          <Radio className="h-6 w-6 text-white" />
+                        </motion.div>
+                        <div>
+                          <h3 className="text-xl font-bold text-white">NFC Share</h3>
+                          <p className="text-sm text-slate-400">Instant Contact Exchange</p>
+                        </div>
                       </div>
-                    </div>
 
-                    {/* Preview Animation or Detailed Process */}
-                    <div className="relative bg-slate-900/70 rounded-xl p-4 mt-4 border border-slate-700/50 overflow-hidden min-h-[280px]">
-                      <AnimatePresence mode="wait">
-                        {/* Preview Animation */}
-                        {!showNfcDetails && (
-                        <motion.div
-                          key="preview"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          className="absolute inset-4 flex items-center justify-center"
-                        >
-                          <div className="relative">
-                            {/* Concentric Radio Waves */}
-                            {[1, 2, 3, 4].map((ring, i) => (
-                              <motion.div
-                                key={ring}
-                                className="absolute rounded-full border-2 border-cyan-400/40"
-                                style={{
-                                  width: `${30 + ring * 25}px`,
-                                  height: `${30 + ring * 25}px`,
-                                }}
-                                animate={{
-                                  scale: [1, 2.5, 1],
-                                  opacity: [0.8, 0, 0.8],
-                                }}
-                                transition={{
-                                  duration: 2,
-                                  repeat: Infinity,
-                                  delay: i * 0.3,
-                                  ease: "easeOut",
-                                }}
-                              />
-                            ))}
-
-                            {/* Center Device */}
+                      {/* Preview Animation or Detailed Process */}
+                      <div className="relative bg-slate-900/70 rounded-xl p-4 mt-4 border border-slate-700/50 overflow-hidden min-h-[280px]">
+                        <AnimatePresence mode="wait">
+                          {/* Preview Animation */}
+                          {!showNfcDetails && (
                             <motion.div
-                              className="relative z-10 bg-gradient-to-br from-cyan-500 to-teal-600 rounded-lg p-3 shadow-xl"
-                              animate={{
-                                scale: [1, 1.05, 1],
-                                rotate: [0, 5, -5, 0],
-                              }}
-                              transition={{ duration: 3, repeat: Infinity }}
+                              key="preview"
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              exit={{ opacity: 0 }}
+                              className="absolute inset-4 flex items-center justify-center"
                             >
-                              <Radio className="h-6 w-6 text-white" />
-                            </motion.div>
+                              <div className="relative">
+                                {/* Concentric Radio Waves */}
+                                {[1, 2, 3, 4].map((ring, i) => (
+                                  <motion.div
+                                    key={ring}
+                                    className="absolute rounded-full border-2 border-cyan-400/40"
+                                    style={{
+                                      width: `${30 + ring * 25}px`,
+                                      height: `${30 + ring * 25}px`,
+                                    }}
+                                    animate={{
+                                      scale: [1, 2.5, 1],
+                                      opacity: [0.8, 0, 0.8],
+                                    }}
+                                    transition={{
+                                      duration: 2,
+                                      repeat: Infinity,
+                                      delay: i * 0.3,
+                                      ease: "easeOut",
+                                    }}
+                                  />
+                                ))}
 
-                            {/* Data Transfer Particles */}
-                            {[...Array(8)].map((_, i) => {
-                              const angle = (i * 360) / 8
-                              const radius = 50
-                              return (
+                                {/* Center Device */}
                                 <motion.div
-                                  key={i}
-                                  className="absolute w-1.5 h-1.5 bg-cyan-400 rounded-full"
-                                  initial={{
-                                    x: `calc(50% + ${Math.cos((angle * Math.PI) / 180) * 15}px)`,
-                                    y: `calc(50% + ${Math.sin((angle * Math.PI) / 180) * 15}px)`,
-                                  }}
+                                  className="relative z-10 bg-gradient-to-br from-cyan-500 to-teal-600 rounded-lg p-3 shadow-xl"
                                   animate={{
-                                    x: `calc(50% + ${Math.cos((angle * Math.PI) / 180) * radius}px)`,
-                                    y: `calc(50% + ${Math.sin((angle * Math.PI) / 180) * radius}px)`,
-                                    opacity: [0, 1, 1, 0],
-                                    scale: [0.5, 1, 1, 0.5],
+                                    scale: [1, 1.05, 1],
+                                    rotate: [0, 5, -5, 0],
                                   }}
-                                  transition={{
-                                    duration: 2,
-                                    repeat: Infinity,
-                                    delay: i * 0.2,
-                                    ease: "easeOut",
-                                  }}
-                                />
-                              )
-                            })}
-                          </div>
-                        </motion.div>
-                        )}
+                                  transition={{ duration: 3, repeat: Infinity }}
+                                >
+                                  <Radio className="h-6 w-6 text-white" />
+                                </motion.div>
 
-                        {/* Detailed Process Steps */}
-                        {showNfcDetails && (
-                        <>
-                        {/* Step 1: Device Detection */}
-                        {nfcStep === 0 && (
-                        <motion.div
-                          key="detect"
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -20 }}
-                          transition={{ duration: 0.5 }}
-                          className="absolute inset-4"
-                        >
-                          <div className="bg-slate-800 rounded-lg p-4 h-full flex flex-col items-center justify-center">
-                            <motion.div
-                              animate={{ scale: [1, 1.1, 1], rotate: [0, 5, -5, 0] }}
-                              transition={{ duration: 2, repeat: Infinity }}
-                            >
-                              <Radio className="h-12 w-12 text-cyan-400 mb-4" />
-                            </motion.div>
-                            <p className="text-sm font-semibold text-white mb-2">NFC Enabled</p>
-                            <p className="text-xs text-slate-400 text-center">Waiting for device...</p>
-                            <div className="mt-4 flex gap-1">
-                              {[0, 1, 2].map((i) => (
-                                <motion.div
-                                  key={i}
-                                  className="w-2 h-2 rounded-full bg-cyan-400"
-                                  animate={{
-                                    opacity: [0.3, 1, 0.3],
-                                    scale: [1, 1.2, 1],
-                                  }}
-                                  transition={{
-                                    duration: 1,
-                                    repeat: Infinity,
-                                    delay: i * 0.2,
-                                  }}
-                                />
-                              ))}
-                            </div>
-                          </div>
-                        </motion.div>
-                        )}
-
-                        {/* Step 2: Connection Established */}
-                        {nfcStep === 1 && (
-                        <motion.div
-                          key="connect"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          transition={{ duration: 0.5 }}
-                          className="absolute inset-4"
-                        >
-                          <div className="bg-slate-800 rounded-lg p-4 h-full flex flex-col items-center justify-center">
-                            {/* Two Devices */}
-                            <div className="flex items-center gap-8 mb-6">
-                              <div className="bg-gradient-to-br from-cyan-500 to-teal-600 rounded-lg p-4 shadow-xl">
-                                <Radio className="h-8 w-8 text-white" />
-                              </div>
-                              <motion.div
-                                animate={{
-                                  scale: [1, 1.2, 1],
-                                  opacity: [0.5, 1, 0.5],
-                                }}
-                                transition={{ duration: 1, repeat: Infinity }}
-                              >
-                                <ArrowRight className="h-6 w-6 text-cyan-400" />
-                              </motion.div>
-                              <div className="bg-gradient-to-br from-teal-500 to-cyan-600 rounded-lg p-4 shadow-xl">
-                                <Radio className="h-8 w-8 text-white" />
-                              </div>
-                            </div>
-                            
-                            {/* Connection Waves */}
-                            <div className="relative w-full h-16 flex items-center justify-center">
-                              {[1, 2, 3].map((ring) => (
-                                <motion.div
-                                  key={ring}
-                                  className="absolute rounded-full border-2 border-cyan-400/50"
-                                  style={{
-                                    width: `${20 + ring * 15}px`,
-                                    height: `${20 + ring * 15}px`,
-                                  }}
-                                  animate={{
-                                    scale: [1, 3, 1],
-                                    opacity: [0.8, 0, 0.8],
-                                  }}
-                                  transition={{
-                                    duration: 1.5,
-                                    repeat: Infinity,
-                                    delay: ring * 0.2,
-                                  }}
-                                />
-                              ))}
-                            </div>
-                            
-                            <div className="mt-4 flex items-center gap-2 bg-cyan-500/20 rounded-lg px-3 py-2 border border-cyan-500/30">
-                              <motion.div
-                                className="w-2 h-2 rounded-full bg-cyan-400"
-                                animate={{
-                                  scale: [1, 1.5, 1],
-                                  opacity: [0.5, 1, 0.5],
-                                }}
-                                transition={{ duration: 1, repeat: Infinity }}
-                              />
-                              <span className="text-xs text-cyan-300 font-semibold">Connected</span>
-                            </div>
-                          </div>
-                        </motion.div>
-                        )}
-
-                        {/* Step 3: Data Transfer */}
-                        {nfcStep === 2 && (
-                        <motion.div
-                          key="transfer"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          transition={{ duration: 0.5 }}
-                          className="absolute inset-4"
-                        >
-                          <div className="bg-slate-800 rounded-lg p-4 h-full">
-                            <div className="flex items-center gap-2 mb-4">
-                              <Waves className="h-5 w-5 text-cyan-400" />
-                              <span className="text-sm font-semibold text-white">Transferring Data...</span>
-                            </div>
-                            
-                            <div className="space-y-3">
-                              {[
-                                { label: "Contact Information", progress: 100 },
-                                { label: "Social Profiles", progress: 85 },
-                                { label: "Portfolio Link", progress: 60 },
-                              ].map((item, i) => (
-                                <div key={i} className="space-y-1">
-                                  <div className="flex items-center justify-between text-xs">
-                                    <span className="text-slate-300">{item.label}</span>
-                                    <span className="text-cyan-400 font-semibold">{item.progress}%</span>
-                                  </div>
-                                  <div className="w-full bg-slate-700 rounded-full h-1.5 overflow-hidden">
+                                {/* Data Transfer Particles */}
+                                {[...Array(8)].map((_, i) => {
+                                  const angle = (i * 360) / 8
+                                  const radius = 50
+                                  return (
                                     <motion.div
-                                      className="bg-gradient-to-r from-cyan-500 to-teal-500 h-1.5 rounded-full"
-                                      initial={{ width: "0%" }}
-                                      animate={{ width: `${item.progress}%` }}
-                                      transition={{ duration: 1, delay: i * 0.3 }}
+                                      key={i}
+                                      className="absolute w-1.5 h-1.5 bg-cyan-400 rounded-full"
+                                      initial={{
+                                        x: `calc(50% + ${Math.cos((angle * Math.PI) / 180) * 15}px)`,
+                                        y: `calc(50% + ${Math.sin((angle * Math.PI) / 180) * 15}px)`,
+                                      }}
+                                      animate={{
+                                        x: `calc(50% + ${Math.cos((angle * Math.PI) / 180) * radius}px)`,
+                                        y: `calc(50% + ${Math.sin((angle * Math.PI) / 180) * radius}px)`,
+                                        opacity: [0, 1, 1, 0],
+                                        scale: [0.5, 1, 1, 0.5],
+                                      }}
+                                      transition={{
+                                        duration: 2,
+                                        repeat: Infinity,
+                                        delay: i * 0.2,
+                                        ease: "easeOut",
+                                      }}
                                     />
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                            
-                            <div className="mt-4 flex items-center gap-2 text-xs text-cyan-400">
-                              <Loader2 className="h-3 w-3 animate-spin" />
-                              <span>Transferring 2.3 KB...</span>
-                            </div>
-                          </div>
-                        </motion.div>
-                        )}
-
-                        {/* Step 4: Success */}
-                        {nfcStep === 3 && (
-                        <motion.div
-                          key="success"
-                          initial={{ opacity: 0, scale: 0.95 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.95 }}
-                          transition={{ duration: 0.5 }}
-                          className="absolute inset-4"
-                        >
-                          <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-lg p-4 h-full border-2 border-green-500/30 flex flex-col items-center justify-center">
-                            <motion.div
-                              animate={{ scale: [1, 1.1, 1] }}
-                              transition={{ duration: 1, repeat: Infinity }}
-                            >
-                              <CheckCircle2 className="h-12 w-12 text-green-400 mb-3" />
-                            </motion.div>
-                            <p className="text-lg font-bold text-green-400 mb-2">Contact Shared!</p>
-                            <div className="bg-slate-800/50 rounded-lg p-3 w-full mt-4">
-                              <div className="flex items-center gap-3 mb-2">
-                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-500 to-teal-600 flex items-center justify-center">
-                                  <span className="text-white text-xs font-bold">JS</span>
-                                </div>
-                                <div>
-                                  <p className="text-sm font-semibold text-white">John Smith</p>
-                                  <p className="text-xs text-slate-400">Saved to contacts</p>
-                                </div>
+                                  )
+                                })}
                               </div>
-                            </div>
-                          </div>
-                        </motion.div>
-                        )}
-                        </>
-                        )}
-                      </AnimatePresence>
-                    </div>
-                  </CardContent>
-                </Card>
+                            </motion.div>
+                          )}
+
+                          {/* Detailed Process Steps */}
+                          {showNfcDetails && (
+                            <>
+                              {/* Step 1: Device Detection */}
+                              {nfcStep === 0 && (
+                                <motion.div
+                                  key="detect"
+                                  initial={{ opacity: 0, y: 20 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  exit={{ opacity: 0, y: -20 }}
+                                  transition={{ duration: 0.5 }}
+                                  className="absolute inset-4"
+                                >
+                                  <div className="bg-slate-800 rounded-lg p-4 h-full flex flex-col items-center justify-center">
+                                    <motion.div
+                                      animate={{ scale: [1, 1.1, 1], rotate: [0, 5, -5, 0] }}
+                                      transition={{ duration: 2, repeat: Infinity }}
+                                    >
+                                      <Radio className="h-12 w-12 text-cyan-400 mb-4" />
+                                    </motion.div>
+                                    <p className="text-sm font-semibold text-white mb-2">NFC Enabled</p>
+                                    <p className="text-xs text-slate-400 text-center">Waiting for device...</p>
+                                    <div className="mt-4 flex gap-1">
+                                      {[0, 1, 2].map((i) => (
+                                        <motion.div
+                                          key={i}
+                                          className="w-2 h-2 rounded-full bg-cyan-400"
+                                          animate={{
+                                            opacity: [0.3, 1, 0.3],
+                                            scale: [1, 1.2, 1],
+                                          }}
+                                          transition={{
+                                            duration: 1,
+                                            repeat: Infinity,
+                                            delay: i * 0.2,
+                                          }}
+                                        />
+                                      ))}
+                                    </div>
+                                  </div>
+                                </motion.div>
+                              )}
+
+                              {/* Step 2: Connection Established */}
+                              {nfcStep === 1 && (
+                                <motion.div
+                                  key="connect"
+                                  initial={{ opacity: 0 }}
+                                  animate={{ opacity: 1 }}
+                                  exit={{ opacity: 0 }}
+                                  transition={{ duration: 0.5 }}
+                                  className="absolute inset-4"
+                                >
+                                  <div className="bg-slate-800 rounded-lg p-4 h-full flex flex-col items-center justify-center">
+                                    {/* Two Devices */}
+                                    <div className="flex items-center gap-8 mb-6">
+                                      <div className="bg-gradient-to-br from-cyan-500 to-teal-600 rounded-lg p-4 shadow-xl">
+                                        <Radio className="h-8 w-8 text-white" />
+                                      </div>
+                                      <motion.div
+                                        animate={{
+                                          scale: [1, 1.2, 1],
+                                          opacity: [0.5, 1, 0.5],
+                                        }}
+                                        transition={{ duration: 1, repeat: Infinity }}
+                                      >
+                                        <ArrowRight className="h-6 w-6 text-cyan-400" />
+                                      </motion.div>
+                                      <div className="bg-gradient-to-br from-teal-500 to-cyan-600 rounded-lg p-4 shadow-xl">
+                                        <Radio className="h-8 w-8 text-white" />
+                                      </div>
+                                    </div>
+
+                                    {/* Connection Waves */}
+                                    <div className="relative w-full h-16 flex items-center justify-center">
+                                      {[1, 2, 3].map((ring) => (
+                                        <motion.div
+                                          key={ring}
+                                          className="absolute rounded-full border-2 border-cyan-400/50"
+                                          style={{
+                                            width: `${20 + ring * 15}px`,
+                                            height: `${20 + ring * 15}px`,
+                                          }}
+                                          animate={{
+                                            scale: [1, 3, 1],
+                                            opacity: [0.8, 0, 0.8],
+                                          }}
+                                          transition={{
+                                            duration: 1.5,
+                                            repeat: Infinity,
+                                            delay: ring * 0.2,
+                                          }}
+                                        />
+                                      ))}
+                                    </div>
+
+                                    <div className="mt-4 flex items-center gap-2 bg-cyan-500/20 rounded-lg px-3 py-2 border border-cyan-500/30">
+                                      <motion.div
+                                        className="w-2 h-2 rounded-full bg-cyan-400"
+                                        animate={{
+                                          scale: [1, 1.5, 1],
+                                          opacity: [0.5, 1, 0.5],
+                                        }}
+                                        transition={{ duration: 1, repeat: Infinity }}
+                                      />
+                                      <span className="text-xs text-cyan-300 font-semibold">Connected</span>
+                                    </div>
+                                  </div>
+                                </motion.div>
+                              )}
+
+                              {/* Step 3: Data Transfer */}
+                              {nfcStep === 2 && (
+                                <motion.div
+                                  key="transfer"
+                                  initial={{ opacity: 0 }}
+                                  animate={{ opacity: 1 }}
+                                  exit={{ opacity: 0 }}
+                                  transition={{ duration: 0.5 }}
+                                  className="absolute inset-4"
+                                >
+                                  <div className="bg-slate-800 rounded-lg p-4 h-full">
+                                    <div className="flex items-center gap-2 mb-4">
+                                      <Waves className="h-5 w-5 text-cyan-400" />
+                                      <span className="text-sm font-semibold text-white">Transferring Data...</span>
+                                    </div>
+
+                                    <div className="space-y-3">
+                                      {[
+                                        { label: "Contact Information", progress: 100 },
+                                        { label: "Social Profiles", progress: 85 },
+                                        { label: "Portfolio Link", progress: 60 },
+                                      ].map((item, i) => (
+                                        <div key={i} className="space-y-1">
+                                          <div className="flex items-center justify-between text-xs">
+                                            <span className="text-slate-300">{item.label}</span>
+                                            <span className="text-cyan-400 font-semibold">{item.progress}%</span>
+                                          </div>
+                                          <div className="w-full bg-slate-700 rounded-full h-1.5 overflow-hidden">
+                                            <motion.div
+                                              className="bg-gradient-to-r from-cyan-500 to-teal-500 h-1.5 rounded-full"
+                                              initial={{ width: "0%" }}
+                                              animate={{ width: `${item.progress}%` }}
+                                              transition={{ duration: 1, delay: i * 0.3 }}
+                                            />
+                                          </div>
+                                        </div>
+                                      ))}
+                                    </div>
+
+                                    <div className="mt-4 flex items-center gap-2 text-xs text-cyan-400">
+                                      <Loader2 className="h-3 w-3 animate-spin" />
+                                      <span>Transferring 2.3 KB...</span>
+                                    </div>
+                                  </div>
+                                </motion.div>
+                              )}
+
+                              {/* Step 4: Success */}
+                              {nfcStep === 3 && (
+                                <motion.div
+                                  key="success"
+                                  initial={{ opacity: 0, scale: 0.95 }}
+                                  animate={{ opacity: 1, scale: 1 }}
+                                  exit={{ opacity: 0, scale: 0.95 }}
+                                  transition={{ duration: 0.5 }}
+                                  className="absolute inset-4"
+                                >
+                                  <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-lg p-4 h-full border-2 border-green-500/30 flex flex-col items-center justify-center">
+                                    <motion.div
+                                      animate={{ scale: [1, 1.1, 1] }}
+                                      transition={{ duration: 1, repeat: Infinity }}
+                                    >
+                                      <CheckCircle2 className="h-12 w-12 text-green-400 mb-3" />
+                                    </motion.div>
+                                    <p className="text-lg font-bold text-green-400 mb-2">Contact Shared!</p>
+                                    <div className="bg-slate-800/50 rounded-lg p-3 w-full mt-4">
+                                      <div className="flex items-center gap-3 mb-2">
+                                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-500 to-teal-600 flex items-center justify-center">
+                                          <span className="text-white text-xs font-bold">JS</span>
+                                        </div>
+                                        <div>
+                                          <p className="text-sm font-semibold text-white">John Smith</p>
+                                          <p className="text-xs text-slate-400">Saved to contacts</p>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </motion.div>
+                              )}
+                            </>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
               </motion.div>
-            </motion.div>
             )}
 
             {/* Feature 4: Portfolio Builder - Building Blocks Animation */}
@@ -1472,7 +1480,7 @@ export function LandingPage() {
                     }}
                     transition={{ duration: 3, repeat: Infinity, repeatType: "reverse" }}
                   />
-                  
+
                   <CardContent className="p-6 relative z-10">
                     <div className="flex items-center gap-3 mb-4">
                       <motion.div
@@ -1496,280 +1504,280 @@ export function LandingPage() {
                       <AnimatePresence mode="wait">
                         {/* Preview Animation */}
                         {!showPortfolioDetails && (
-                        <motion.div
-                          key="preview"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          className="absolute inset-4"
-                        >
-                          <div className="relative h-full flex flex-col gap-2">
-                            {/* Building Blocks Animation */}
-                            <motion.div
-                              className="bg-gradient-to-r from-orange-500/30 to-amber-500/30 rounded-lg p-2 border border-orange-500/40"
-                              initial={{ width: "0%", opacity: 0 }}
-                              animate={{ width: "100%", opacity: 1 }}
-                              transition={{ duration: 1, delay: 0.5 }}
-                            >
-                              <div className="h-2 bg-orange-400/50 rounded w-3/4" />
-                            </motion.div>
+                          <motion.div
+                            key="preview"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="absolute inset-4"
+                          >
+                            <div className="relative h-full flex flex-col gap-2">
+                              {/* Building Blocks Animation */}
+                              <motion.div
+                                className="bg-gradient-to-r from-orange-500/30 to-amber-500/30 rounded-lg p-2 border border-orange-500/40"
+                                initial={{ width: "0%", opacity: 0 }}
+                                animate={{ width: "100%", opacity: 1 }}
+                                transition={{ duration: 1, delay: 0.5 }}
+                              >
+                                <div className="h-2 bg-orange-400/50 rounded w-3/4" />
+                              </motion.div>
 
-                            <div className="flex gap-2 flex-1">
+                              <div className="flex gap-2 flex-1">
+                                <motion.div
+                                  className="flex-1 bg-gradient-to-br from-orange-500/20 to-amber-500/20 rounded-lg p-2 border border-orange-500/30 flex flex-col gap-1"
+                                  initial={{ height: "0%", opacity: 0 }}
+                                  animate={{ height: "100%", opacity: 1 }}
+                                  transition={{ duration: 1, delay: 1 }}
+                                >
+                                  <div className="h-1.5 bg-orange-400/40 rounded w-full" />
+                                  <div className="h-1.5 bg-orange-400/40 rounded w-5/6" />
+                                  <div className="h-1.5 bg-orange-400/40 rounded w-4/6" />
+                                </motion.div>
+                                <motion.div
+                                  className="flex-1 bg-gradient-to-br from-amber-500/20 to-orange-500/20 rounded-lg p-2 border border-amber-500/30"
+                                  initial={{ height: "0%", opacity: 0 }}
+                                  animate={{ height: "100%", opacity: 1 }}
+                                  transition={{ duration: 1, delay: 1.3 }}
+                                >
+                                  <div className="h-full bg-gradient-to-br from-orange-400/20 to-amber-400/20 rounded" />
+                                </motion.div>
+                              </div>
+
                               <motion.div
-                                className="flex-1 bg-gradient-to-br from-orange-500/20 to-amber-500/20 rounded-lg p-2 border border-orange-500/30 flex flex-col gap-1"
-                                initial={{ height: "0%", opacity: 0 }}
-                                animate={{ height: "100%", opacity: 1 }}
-                                transition={{ duration: 1, delay: 1 }}
+                                className="bg-gradient-to-r from-amber-500/30 to-orange-500/30 rounded-lg p-2 border border-amber-500/40 flex items-center gap-2"
+                                initial={{ width: "0%", opacity: 0 }}
+                                animate={{ width: "100%", opacity: 1 }}
+                                transition={{ duration: 1, delay: 1.5 }}
                               >
-                                <div className="h-1.5 bg-orange-400/40 rounded w-full" />
-                                <div className="h-1.5 bg-orange-400/40 rounded w-5/6" />
-                                <div className="h-1.5 bg-orange-400/40 rounded w-4/6" />
+                                <div className="w-4 h-4 rounded bg-orange-400/50" />
+                                <div className="h-1.5 bg-amber-400/50 rounded flex-1" />
                               </motion.div>
-                              <motion.div
-                                className="flex-1 bg-gradient-to-br from-amber-500/20 to-orange-500/20 rounded-lg p-2 border border-amber-500/30"
-                                initial={{ height: "0%", opacity: 0 }}
-                                animate={{ height: "100%", opacity: 1 }}
-                                transition={{ duration: 1, delay: 1.3 }}
-                              >
-                                <div className="h-full bg-gradient-to-br from-orange-400/20 to-amber-400/20 rounded" />
-                              </motion.div>
+
+                              {/* Floating Icons */}
+                              {[Sparkles, Waves, Zap].map((Icon, i) => (
+                                <motion.div
+                                  key={i}
+                                  className="absolute"
+                                  initial={{
+                                    x: "50%",
+                                    y: "50%",
+                                    opacity: 0,
+                                    scale: 0,
+                                  }}
+                                  animate={{
+                                    x: `${30 + i * 20}%`,
+                                    y: `${20 + i * 15}%`,
+                                    opacity: [0, 1, 1, 0],
+                                    scale: [0, 1, 1, 0],
+                                    rotate: [0, 360],
+                                  }}
+                                  transition={{
+                                    duration: 3,
+                                    repeat: Infinity,
+                                    delay: 2 + i * 0.5,
+                                  }}
+                                >
+                                  <Icon className="h-4 w-4 text-orange-400/60" />
+                                </motion.div>
+                              ))}
                             </div>
-
-                            <motion.div
-                              className="bg-gradient-to-r from-amber-500/30 to-orange-500/30 rounded-lg p-2 border border-amber-500/40 flex items-center gap-2"
-                              initial={{ width: "0%", opacity: 0 }}
-                              animate={{ width: "100%", opacity: 1 }}
-                              transition={{ duration: 1, delay: 1.5 }}
-                            >
-                              <div className="w-4 h-4 rounded bg-orange-400/50" />
-                              <div className="h-1.5 bg-amber-400/50 rounded flex-1" />
-                            </motion.div>
-
-                            {/* Floating Icons */}
-                            {[Sparkles, Waves, Zap].map((Icon, i) => (
-                              <motion.div
-                                key={i}
-                                className="absolute"
-                                initial={{
-                                  x: "50%",
-                                  y: "50%",
-                                  opacity: 0,
-                                  scale: 0,
-                                }}
-                                animate={{
-                                  x: `${30 + i * 20}%`,
-                                  y: `${20 + i * 15}%`,
-                                  opacity: [0, 1, 1, 0],
-                                  scale: [0, 1, 1, 0],
-                                  rotate: [0, 360],
-                                }}
-                                transition={{
-                                  duration: 3,
-                                  repeat: Infinity,
-                                  delay: 2 + i * 0.5,
-                                }}
-                              >
-                                <Icon className="h-4 w-4 text-orange-400/60" />
-                              </motion.div>
-                            ))}
-                          </div>
-                        </motion.div>
+                          </motion.div>
                         )}
 
                         {/* Detailed Process Steps */}
                         {showPortfolioDetails && (
-                        <>
-                        {/* Step 1: Template Selection */}
-                        {portfolioStep === 0 && (
-                        <motion.div
-                          key="template"
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -20 }}
-                          transition={{ duration: 0.5 }}
-                          className="absolute inset-4"
-                        >
-                          <div className="bg-slate-800 rounded-lg p-4 h-full">
-                            <div className="flex items-center gap-2 mb-4">
-                              <Briefcase className="h-5 w-5 text-orange-400" />
-                              <span className="text-sm font-semibold text-white">Choose Template</span>
-                            </div>
-                            <div className="grid grid-cols-2 gap-2">
-                              {[1, 2, 3, 4].map((i) => (
-                                <motion.div
-                                  key={i}
-                                  className="bg-slate-700/50 rounded-lg p-2 border border-slate-600"
-                                  whileHover={{ scale: 1.05, borderColor: "rgba(249, 115, 22, 0.5)" }}
-                                >
-                                  <div className="h-16 bg-gradient-to-br from-orange-500/20 to-amber-500/20 rounded mb-1" />
-                                  <div className="h-1.5 bg-slate-600 rounded w-3/4" />
-                                </motion.div>
-                              ))}
-                            </div>
-                            <div className="mt-3 flex items-center gap-2 text-xs text-orange-400">
-                              <Sparkles className="h-3 w-3" />
-                              <span>Template {portfolioStep + 1} selected</span>
-                            </div>
-                          </div>
-                        </motion.div>
-                        )}
+                          <>
+                            {/* Step 1: Template Selection */}
+                            {portfolioStep === 0 && (
+                              <motion.div
+                                key="template"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -20 }}
+                                transition={{ duration: 0.5 }}
+                                className="absolute inset-4"
+                              >
+                                <div className="bg-slate-800 rounded-lg p-4 h-full">
+                                  <div className="flex items-center gap-2 mb-4">
+                                    <Briefcase className="h-5 w-5 text-orange-400" />
+                                    <span className="text-sm font-semibold text-white">Choose Template</span>
+                                  </div>
+                                  <div className="grid grid-cols-2 gap-2">
+                                    {[1, 2, 3, 4].map((i) => (
+                                      <motion.div
+                                        key={i}
+                                        className="bg-slate-700/50 rounded-lg p-2 border border-slate-600"
+                                        whileHover={{ scale: 1.05, borderColor: "rgba(249, 115, 22, 0.5)" }}
+                                      >
+                                        <div className="h-16 bg-gradient-to-br from-orange-500/20 to-amber-500/20 rounded mb-1" />
+                                        <div className="h-1.5 bg-slate-600 rounded w-3/4" />
+                                      </motion.div>
+                                    ))}
+                                  </div>
+                                  <div className="mt-3 flex items-center gap-2 text-xs text-orange-400">
+                                    <Sparkles className="h-3 w-3" />
+                                    <span>Template {portfolioStep + 1} selected</span>
+                                  </div>
+                                </div>
+                              </motion.div>
+                            )}
 
-                        {/* Step 2: Adding Sections */}
-                        {portfolioStep === 1 && (
-                        <motion.div
-                          key="sections"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          transition={{ duration: 0.5 }}
-                          className="absolute inset-4"
-                        >
-                          <div className="bg-slate-800 rounded-lg p-4 h-full">
-                            <div className="flex items-center gap-2 mb-4">
-                              <Zap className="h-5 w-5 text-orange-400" />
-                              <span className="text-sm font-semibold text-white">Adding Sections</span>
-                            </div>
-                            <div className="space-y-2">
-                              {[
-                                { label: "Header", added: true },
-                                { label: "About", added: true },
-                                { label: "Projects", added: true },
-                                { label: "Contact", added: false },
-                              ].map((section, i) => (
-                                <motion.div
-                                  key={i}
-                                  className="flex items-center justify-between bg-slate-700/50 rounded-lg p-2"
-                                  initial={{ opacity: 0, x: -20 }}
-                                  animate={{ opacity: 1, x: 0 }}
-                                  transition={{ delay: i * 0.2 }}
-                                >
-                                  <span className="text-xs text-slate-300">{section.label}</span>
-                                  {section.added ? (
-                                    <CheckCircle2 className="h-4 w-4 text-green-400" />
-                                  ) : (
-                                    <Loader2 className="h-4 w-4 text-orange-400 animate-spin" />
-                                  )}
-                                </motion.div>
-                              ))}
-                            </div>
-                          </div>
-                        </motion.div>
-                        )}
+                            {/* Step 2: Adding Sections */}
+                            {portfolioStep === 1 && (
+                              <motion.div
+                                key="sections"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                transition={{ duration: 0.5 }}
+                                className="absolute inset-4"
+                              >
+                                <div className="bg-slate-800 rounded-lg p-4 h-full">
+                                  <div className="flex items-center gap-2 mb-4">
+                                    <Zap className="h-5 w-5 text-orange-400" />
+                                    <span className="text-sm font-semibold text-white">Adding Sections</span>
+                                  </div>
+                                  <div className="space-y-2">
+                                    {[
+                                      { label: "Header", added: true },
+                                      { label: "About", added: true },
+                                      { label: "Projects", added: true },
+                                      { label: "Contact", added: false },
+                                    ].map((section, i) => (
+                                      <motion.div
+                                        key={i}
+                                        className="flex items-center justify-between bg-slate-700/50 rounded-lg p-2"
+                                        initial={{ opacity: 0, x: -20 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        transition={{ delay: i * 0.2 }}
+                                      >
+                                        <span className="text-xs text-slate-300">{section.label}</span>
+                                        {section.added ? (
+                                          <CheckCircle2 className="h-4 w-4 text-green-400" />
+                                        ) : (
+                                          <Loader2 className="h-4 w-4 text-orange-400 animate-spin" />
+                                        )}
+                                      </motion.div>
+                                    ))}
+                                  </div>
+                                </div>
+                              </motion.div>
+                            )}
 
-                        {/* Step 3: Content Editing */}
-                        {portfolioStep === 2 && (
-                        <motion.div
-                          key="editing"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          transition={{ duration: 0.5 }}
-                          className="absolute inset-4"
-                        >
-                          <div className="bg-slate-800 rounded-lg p-4 h-full overflow-y-auto">
-                            <div className="flex items-center gap-2 mb-4">
-                              <Sparkles className="h-5 w-5 text-orange-400" />
-                              <span className="text-sm font-semibold text-white">Editing Content</span>
-                            </div>
-                            <div className="space-y-3">
-                              <div>
-                                <label className="text-xs text-slate-400 mb-1 block">Name</label>
-                                <div className="bg-slate-700 rounded px-2 py-1.5 text-sm text-white">John Smith</div>
-                              </div>
-                              <div>
-                                <label className="text-xs text-slate-400 mb-1 block">Title</label>
-                                <div className="bg-slate-700 rounded px-2 py-1.5 text-sm text-white">Senior Developer</div>
-                              </div>
-                              <div>
-                                <label className="text-xs text-slate-400 mb-1 block">Bio</label>
-                                <div className="bg-slate-700 rounded px-2 py-1.5 text-sm text-white h-16">
+                            {/* Step 3: Content Editing */}
+                            {portfolioStep === 2 && (
+                              <motion.div
+                                key="editing"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                transition={{ duration: 0.5 }}
+                                className="absolute inset-4"
+                              >
+                                <div className="bg-slate-800 rounded-lg p-4 h-full overflow-y-auto">
+                                  <div className="flex items-center gap-2 mb-4">
+                                    <Sparkles className="h-5 w-5 text-orange-400" />
+                                    <span className="text-sm font-semibold text-white">Editing Content</span>
+                                  </div>
+                                  <div className="space-y-3">
+                                    <div>
+                                      <label className="text-xs text-slate-400 mb-1 block">Name</label>
+                                      <div className="bg-slate-700 rounded px-2 py-1.5 text-sm text-white">John Smith</div>
+                                    </div>
+                                    <div>
+                                      <label className="text-xs text-slate-400 mb-1 block">Title</label>
+                                      <div className="bg-slate-700 rounded px-2 py-1.5 text-sm text-white">Senior Developer</div>
+                                    </div>
+                                    <div>
+                                      <label className="text-xs text-slate-400 mb-1 block">Bio</label>
+                                      <div className="bg-slate-700 rounded px-2 py-1.5 text-sm text-white h-16">
+                                        <motion.div
+                                          className="h-1.5 bg-orange-400/30 rounded mb-1"
+                                          animate={{ width: ["0%", "100%"] }}
+                                          transition={{ duration: 1, repeat: Infinity }}
+                                        />
+                                        <motion.div
+                                          className="h-1.5 bg-orange-400/30 rounded mb-1"
+                                          animate={{ width: ["0%", "85%"] }}
+                                          transition={{ duration: 1, delay: 0.2, repeat: Infinity }}
+                                        />
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </motion.div>
+                            )}
+
+                            {/* Step 4: Preview */}
+                            {portfolioStep === 3 && (
+                              <motion.div
+                                key="preview"
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.95 }}
+                                transition={{ duration: 0.5 }}
+                                className="absolute inset-4"
+                              >
+                                <div className="bg-slate-800 rounded-lg p-4 h-full overflow-y-auto">
+                                  <div className="flex items-center justify-between mb-3">
+                                    <span className="text-sm font-semibold text-white">Portfolio Preview</span>
+                                    <Badge className="bg-orange-600 text-xs">Live</Badge>
+                                  </div>
+                                  <div className="bg-gradient-to-br from-orange-500/10 to-amber-500/10 rounded-lg p-3 border border-orange-500/30">
+                                    <div className="flex items-center gap-3 mb-3">
+                                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center">
+                                        <span className="text-white text-sm font-bold">JS</span>
+                                      </div>
+                                      <div>
+                                        <div className="h-2.5 bg-orange-400/50 rounded w-24 mb-1" />
+                                        <div className="h-2 bg-orange-400/30 rounded w-20" />
+                                      </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                      <div className="h-1.5 bg-slate-700 rounded" />
+                                      <div className="h-1.5 bg-slate-700 rounded w-5/6" />
+                                      <div className="h-16 bg-slate-700/50 rounded mt-2" />
+                                    </div>
+                                  </div>
+                                  <div className="mt-3 flex items-center gap-2 text-xs text-orange-400">
+                                    <Network className="h-3 w-3" />
+                                    <span>portfolio.netlink.com/john-smith</span>
+                                  </div>
+                                </div>
+                              </motion.div>
+                            )}
+
+                            {/* Step 5: Published */}
+                            {portfolioStep === 4 && (
+                              <motion.div
+                                key="published"
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.95 }}
+                                transition={{ duration: 0.5 }}
+                                className="absolute inset-4"
+                              >
+                                <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-lg p-4 h-full border-2 border-green-500/30 flex flex-col items-center justify-center">
                                   <motion.div
-                                    className="h-1.5 bg-orange-400/30 rounded mb-1"
-                                    animate={{ width: ["0%", "100%"] }}
+                                    animate={{ scale: [1, 1.1, 1] }}
                                     transition={{ duration: 1, repeat: Infinity }}
-                                  />
-                                  <motion.div
-                                    className="h-1.5 bg-orange-400/30 rounded mb-1"
-                                    animate={{ width: ["0%", "85%"] }}
-                                    transition={{ duration: 1, delay: 0.2, repeat: Infinity }}
-                                  />
+                                  >
+                                    <CheckCircle2 className="h-12 w-12 text-green-400 mb-3" />
+                                  </motion.div>
+                                  <p className="text-lg font-bold text-green-400 mb-2">Portfolio Published!</p>
+                                  <div className="bg-slate-800/50 rounded-lg p-3 w-full mt-4">
+                                    <div className="flex items-center gap-2 text-xs text-green-400 mb-2">
+                                      <Network className="h-3 w-3" />
+                                      <span>Shareable link ready</span>
+                                    </div>
+                                    <div className="text-xs text-slate-400 text-center">
+                                      portfolio.netlink.com/john-smith
+                                    </div>
+                                  </div>
                                 </div>
-                              </div>
-                            </div>
-                          </div>
-                        </motion.div>
-                        )}
-
-                        {/* Step 4: Preview */}
-                        {portfolioStep === 3 && (
-                        <motion.div
-                          key="preview"
-                          initial={{ opacity: 0, scale: 0.95 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.95 }}
-                          transition={{ duration: 0.5 }}
-                          className="absolute inset-4"
-                        >
-                          <div className="bg-slate-800 rounded-lg p-4 h-full overflow-y-auto">
-                            <div className="flex items-center justify-between mb-3">
-                              <span className="text-sm font-semibold text-white">Portfolio Preview</span>
-                              <Badge className="bg-orange-600 text-xs">Live</Badge>
-                            </div>
-                            <div className="bg-gradient-to-br from-orange-500/10 to-amber-500/10 rounded-lg p-3 border border-orange-500/30">
-                              <div className="flex items-center gap-3 mb-3">
-                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center">
-                                  <span className="text-white text-sm font-bold">JS</span>
-                                </div>
-                                <div>
-                                  <div className="h-2.5 bg-orange-400/50 rounded w-24 mb-1" />
-                                  <div className="h-2 bg-orange-400/30 rounded w-20" />
-                                </div>
-                              </div>
-                              <div className="space-y-2">
-                                <div className="h-1.5 bg-slate-700 rounded" />
-                                <div className="h-1.5 bg-slate-700 rounded w-5/6" />
-                                <div className="h-16 bg-slate-700/50 rounded mt-2" />
-                              </div>
-                            </div>
-                            <div className="mt-3 flex items-center gap-2 text-xs text-orange-400">
-                              <Network className="h-3 w-3" />
-                              <span>portfolio.netlink.com/john-smith</span>
-                            </div>
-                          </div>
-                        </motion.div>
-                        )}
-
-                        {/* Step 5: Published */}
-                        {portfolioStep === 4 && (
-                        <motion.div
-                          key="published"
-                          initial={{ opacity: 0, scale: 0.95 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.95 }}
-                          transition={{ duration: 0.5 }}
-                          className="absolute inset-4"
-                        >
-                          <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-lg p-4 h-full border-2 border-green-500/30 flex flex-col items-center justify-center">
-                            <motion.div
-                              animate={{ scale: [1, 1.1, 1] }}
-                              transition={{ duration: 1, repeat: Infinity }}
-                            >
-                              <CheckCircle2 className="h-12 w-12 text-green-400 mb-3" />
-                            </motion.div>
-                            <p className="text-lg font-bold text-green-400 mb-2">Portfolio Published!</p>
-                            <div className="bg-slate-800/50 rounded-lg p-3 w-full mt-4">
-                              <div className="flex items-center gap-2 text-xs text-green-400 mb-2">
-                                <Network className="h-3 w-3" />
-                                <span>Shareable link ready</span>
-                              </div>
-                              <div className="text-xs text-slate-400 text-center">
-                                portfolio.netlink.com/john-smith
-                              </div>
-                            </div>
-                          </div>
-                        </motion.div>
-                        )}
-                        </>
+                              </motion.div>
+                            )}
+                          </>
                         )}
                       </AnimatePresence>
                     </div>
@@ -1799,7 +1807,7 @@ export function LandingPage() {
                     }}
                     transition={{ duration: 3, repeat: Infinity, repeatType: "reverse" }}
                   />
-                  
+
                   <CardContent className="p-6 relative z-10">
                     <div className="flex items-center gap-3 mb-4">
                       <motion.div
@@ -1823,237 +1831,237 @@ export function LandingPage() {
                       <AnimatePresence mode="wait">
                         {/* Preview Animation */}
                         {!showNetworkingDetails && (
-                        <motion.div
-                          key="preview"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          className="absolute inset-4 flex items-center justify-center"
-                        >
-                          <div className="relative w-full h-full flex flex-col items-center justify-center gap-4">
-                            {/* Scanning Animation */}
-                            <motion.div
-                              className="relative"
-                              animate={{
-                                scale: [1, 1.05, 1],
-                              }}
-                              transition={{ duration: 2, repeat: Infinity }}
-                            >
-                              <div className="w-20 h-28 bg-gradient-to-br from-purple-50 to-pink-100 dark:from-slate-700 dark:to-slate-600 rounded-lg p-2 shadow-xl border-2 border-purple-400/50">
-                                <div className="h-full bg-gradient-to-br from-purple-200 to-pink-200 dark:from-slate-600 dark:to-slate-500 rounded flex items-center justify-center">
-                                  <Scan className="h-6 w-6 text-purple-600 dark:text-purple-400" />
-                                </div>
-                              </div>
-                              {/* Scanning Beam */}
+                          <motion.div
+                            key="preview"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="absolute inset-4 flex items-center justify-center"
+                          >
+                            <div className="relative w-full h-full flex flex-col items-center justify-center gap-4">
+                              {/* Scanning Animation */}
                               <motion.div
-                                className="absolute -top-2 left-1/2 w-16 h-1 bg-gradient-to-r from-transparent via-purple-400 to-transparent rounded-full"
-                                animate={{
-                                  y: [0, 32, 0],
-                                  opacity: [0.5, 1, 0.5],
-                                }}
-                                transition={{ duration: 1.5, repeat: Infinity }}
-                                style={{ transform: "translateX(-50%)" }}
-                              />
-                            </motion.div>
-
-                            {/* Email Icon Flying */}
-                            <motion.div
-                              className="absolute"
-                              animate={{
-                                x: [0, 100, 0],
-                                y: [0, -50, 0],
-                                opacity: [0, 1, 0],
-                              }}
-                              transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
-                            >
-                              <MailCheck className="h-8 w-8 text-green-400" />
-                            </motion.div>
-
-                            {/* Connection Lines */}
-                            {[0, 1, 2].map((i) => (
-                              <motion.div
-                                key={i}
-                                className="absolute w-0.5 h-8 bg-gradient-to-b from-purple-400 to-transparent"
-                                style={{
-                                  left: `${50 + i * 10}%`,
-                                  top: "60%",
-                                }}
-                                animate={{
-                                  height: [0, 32, 0],
-                                  opacity: [0, 1, 0],
-                                }}
-                                transition={{
-                                  duration: 1.5,
-                                  repeat: Infinity,
-                                  delay: i * 0.2,
-                                }}
-                              />
-                            ))}
-                          </div>
-                        </motion.div>
-                        )}
-
-                        {/* Detailed Process Steps */}
-                        {showNetworkingDetails && (
-                        <>
-                        {/* Step 1: Enable Networking Mode */}
-                        {networkingStep === 0 && (
-                        <motion.div
-                          key="enable"
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -20 }}
-                          transition={{ duration: 0.5 }}
-                          className="absolute inset-4"
-                        >
-                          <div className="bg-slate-800 rounded-lg p-4 h-full flex flex-col items-center justify-center">
-                            <motion.div
-                              animate={{ scale: [1, 1.1, 1], rotate: [0, 5, -5, 0] }}
-                              transition={{ duration: 2, repeat: Infinity }}
-                            >
-                              <Sparkles className="h-12 w-12 text-purple-400 mb-4" />
-                            </motion.div>
-                            <p className="text-sm font-semibold text-white mb-2">Networking Mode</p>
-                            <div className="flex items-center gap-2 bg-purple-500/20 rounded-lg px-3 py-2 border border-purple-500/30 mt-2">
-                              <motion.div
-                                className="w-2 h-2 rounded-full bg-purple-400"
-                                animate={{
-                                  scale: [1, 1.5, 1],
-                                  opacity: [0.5, 1, 0.5],
-                                }}
-                                transition={{ duration: 1, repeat: Infinity }}
-                              />
-                              <span className="text-xs text-purple-300 font-semibold">Enabled</span>
-                            </div>
-                            <p className="text-xs text-slate-400 text-center mt-3">Ready to scan and connect</p>
-                          </div>
-                        </motion.div>
-                        )}
-
-                        {/* Step 2: Scanning Card */}
-                        {networkingStep === 1 && (
-                        <motion.div
-                          key="scan"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          transition={{ duration: 0.5 }}
-                          className="absolute inset-4"
-                        >
-                          <div className="bg-slate-800 rounded-lg p-4 h-full flex flex-col items-center justify-center">
-                            <div className="relative mb-4">
-                              <motion.div
-                                className="w-24 h-32 bg-gradient-to-br from-purple-50 to-pink-100 dark:from-slate-700 dark:to-slate-600 rounded-lg p-3 shadow-xl"
+                                className="relative"
                                 animate={{
                                   scale: [1, 1.05, 1],
                                 }}
-                                transition={{ duration: 1.5, repeat: Infinity }}
+                                transition={{ duration: 2, repeat: Infinity }}
                               >
-                                <div className="h-full bg-gradient-to-br from-purple-200 to-pink-200 dark:from-slate-600 dark:to-slate-500 rounded flex items-center justify-center">
-                                  <Scan className="h-8 w-8 text-purple-600 dark:text-purple-400" />
+                                <div className="w-20 h-28 bg-gradient-to-br from-purple-50 to-pink-100 dark:from-slate-700 dark:to-slate-600 rounded-lg p-2 shadow-xl border-2 border-purple-400/50">
+                                  <div className="h-full bg-gradient-to-br from-purple-200 to-pink-200 dark:from-slate-600 dark:to-slate-500 rounded flex items-center justify-center">
+                                    <Scan className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+                                  </div>
                                 </div>
+                                {/* Scanning Beam */}
+                                <motion.div
+                                  className="absolute -top-2 left-1/2 w-16 h-1 bg-gradient-to-r from-transparent via-purple-400 to-transparent rounded-full"
+                                  animate={{
+                                    y: [0, 32, 0],
+                                    opacity: [0.5, 1, 0.5],
+                                  }}
+                                  transition={{ duration: 1.5, repeat: Infinity }}
+                                  style={{ transform: "translateX(-50%)" }}
+                                />
                               </motion.div>
-                              {/* Scanning Beam */}
+
+                              {/* Email Icon Flying */}
                               <motion.div
-                                className="absolute -top-1 left-1/2 w-20 h-1 bg-gradient-to-r from-transparent via-purple-400 to-transparent rounded-full"
+                                className="absolute"
                                 animate={{
-                                  y: [0, 40, 0],
-                                  opacity: [0.5, 1, 0.5],
+                                  x: [0, 100, 0],
+                                  y: [0, -50, 0],
+                                  opacity: [0, 1, 0],
                                 }}
-                                transition={{ duration: 1.5, repeat: Infinity }}
-                                style={{ transform: "translateX(-50%)" }}
-                              />
-                            </div>
-                            <p className="text-sm font-semibold text-white mb-1">Scanning Card...</p>
-                            <p className="text-xs text-slate-400">Extracting contact info</p>
-                            <div className="mt-3 flex gap-1">
+                                transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
+                              >
+                                <MailCheck className="h-8 w-8 text-green-400" />
+                              </motion.div>
+
+                              {/* Connection Lines */}
                               {[0, 1, 2].map((i) => (
                                 <motion.div
                                   key={i}
-                                  className="w-2 h-2 rounded-full bg-purple-400"
+                                  className="absolute w-0.5 h-8 bg-gradient-to-b from-purple-400 to-transparent"
+                                  style={{
+                                    left: `${50 + i * 10}%`,
+                                    top: "60%",
+                                  }}
                                   animate={{
-                                    opacity: [0.3, 1, 0.3],
-                                    scale: [1, 1.2, 1],
+                                    height: [0, 32, 0],
+                                    opacity: [0, 1, 0],
                                   }}
                                   transition={{
-                                    duration: 1,
+                                    duration: 1.5,
                                     repeat: Infinity,
                                     delay: i * 0.2,
                                   }}
                                 />
                               ))}
                             </div>
-                          </div>
-                        </motion.div>
+                          </motion.div>
                         )}
 
-                        {/* Step 3: Auto-Generating Email */}
-                        {networkingStep === 2 && (
-                        <motion.div
-                          key="generate"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          transition={{ duration: 0.5 }}
-                          className="absolute inset-4"
-                        >
-                          <div className="bg-slate-800 rounded-lg p-4 h-full">
-                            <div className="flex items-center gap-2 mb-4">
-                              <Sparkles className="h-5 w-5 text-purple-400" />
-                              <span className="text-sm font-semibold text-white">Generating Email...</span>
-                            </div>
-                            
-                            <div className="space-y-2 mb-3">
-                              <div className="flex items-center gap-2 text-xs">
-                                <Loader2 className="h-3 w-3 text-purple-400 animate-spin" />
-                                <span className="text-slate-300">Personalizing message...</span>
-                              </div>
-                              <div className="bg-slate-700/50 rounded p-2">
-                                <div className="h-2 bg-purple-400/30 rounded w-full mb-1" />
-                                <div className="h-2 bg-purple-400/30 rounded w-4/5 mb-1" />
-                                <div className="h-2 bg-purple-400/30 rounded w-3/4" />
-                              </div>
-                            </div>
-                            
-                            <div className="flex items-center gap-2 text-xs text-purple-400 mt-3">
-                              <Mail className="h-3 w-3" />
-                              <span>Email ready to send</span>
-                            </div>
-                          </div>
-                        </motion.div>
-                        )}
+                        {/* Detailed Process Steps */}
+                        {showNetworkingDetails && (
+                          <>
+                            {/* Step 1: Enable Networking Mode */}
+                            {networkingStep === 0 && (
+                              <motion.div
+                                key="enable"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -20 }}
+                                transition={{ duration: 0.5 }}
+                                className="absolute inset-4"
+                              >
+                                <div className="bg-slate-800 rounded-lg p-4 h-full flex flex-col items-center justify-center">
+                                  <motion.div
+                                    animate={{ scale: [1, 1.1, 1], rotate: [0, 5, -5, 0] }}
+                                    transition={{ duration: 2, repeat: Infinity }}
+                                  >
+                                    <Sparkles className="h-12 w-12 text-purple-400 mb-4" />
+                                  </motion.div>
+                                  <p className="text-sm font-semibold text-white mb-2">Networking Mode</p>
+                                  <div className="flex items-center gap-2 bg-purple-500/20 rounded-lg px-3 py-2 border border-purple-500/30 mt-2">
+                                    <motion.div
+                                      className="w-2 h-2 rounded-full bg-purple-400"
+                                      animate={{
+                                        scale: [1, 1.5, 1],
+                                        opacity: [0.5, 1, 0.5],
+                                      }}
+                                      transition={{ duration: 1, repeat: Infinity }}
+                                    />
+                                    <span className="text-xs text-purple-300 font-semibold">Enabled</span>
+                                  </div>
+                                  <p className="text-xs text-slate-400 text-center mt-3">Ready to scan and connect</p>
+                                </div>
+                              </motion.div>
+                            )}
 
-                        {/* Step 4: Email Sent Successfully */}
-                        {networkingStep === 3 && (
-                        <motion.div
-                          key="success"
-                          initial={{ opacity: 0, scale: 0.95 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.95 }}
-                          transition={{ duration: 0.5 }}
-                          className="absolute inset-4"
-                        >
-                          <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-lg p-4 h-full border-2 border-green-500/30 flex flex-col items-center justify-center">
-                            <motion.div
-                              animate={{ scale: [1, 1.1, 1] }}
-                              transition={{ duration: 1, repeat: Infinity }}
-                            >
-                              <MailCheck className="h-12 w-12 text-green-400 mb-3" />
-                            </motion.div>
-                            <p className="text-lg font-bold text-green-400 mb-2">Email Sent!</p>
-                            <div className="bg-slate-800/50 rounded-lg p-3 w-full mt-4">
-                              <div className="flex items-center gap-2 text-xs text-green-400 mb-1">
-                                <CheckCircle2 className="h-3 w-3" />
-                                <span>Contact saved & email delivered</span>
-                              </div>
-                              <div className="text-xs text-slate-400 text-center mt-2">
-                                Networking mode active
-                              </div>
-                            </div>
-                          </div>
-                        </motion.div>
-                        )}
-                        </>
+                            {/* Step 2: Scanning Card */}
+                            {networkingStep === 1 && (
+                              <motion.div
+                                key="scan"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                transition={{ duration: 0.5 }}
+                                className="absolute inset-4"
+                              >
+                                <div className="bg-slate-800 rounded-lg p-4 h-full flex flex-col items-center justify-center">
+                                  <div className="relative mb-4">
+                                    <motion.div
+                                      className="w-24 h-32 bg-gradient-to-br from-purple-50 to-pink-100 dark:from-slate-700 dark:to-slate-600 rounded-lg p-3 shadow-xl"
+                                      animate={{
+                                        scale: [1, 1.05, 1],
+                                      }}
+                                      transition={{ duration: 1.5, repeat: Infinity }}
+                                    >
+                                      <div className="h-full bg-gradient-to-br from-purple-200 to-pink-200 dark:from-slate-600 dark:to-slate-500 rounded flex items-center justify-center">
+                                        <Scan className="h-8 w-8 text-purple-600 dark:text-purple-400" />
+                                      </div>
+                                    </motion.div>
+                                    {/* Scanning Beam */}
+                                    <motion.div
+                                      className="absolute -top-1 left-1/2 w-20 h-1 bg-gradient-to-r from-transparent via-purple-400 to-transparent rounded-full"
+                                      animate={{
+                                        y: [0, 40, 0],
+                                        opacity: [0.5, 1, 0.5],
+                                      }}
+                                      transition={{ duration: 1.5, repeat: Infinity }}
+                                      style={{ transform: "translateX(-50%)" }}
+                                    />
+                                  </div>
+                                  <p className="text-sm font-semibold text-white mb-1">Scanning Card...</p>
+                                  <p className="text-xs text-slate-400">Extracting contact info</p>
+                                  <div className="mt-3 flex gap-1">
+                                    {[0, 1, 2].map((i) => (
+                                      <motion.div
+                                        key={i}
+                                        className="w-2 h-2 rounded-full bg-purple-400"
+                                        animate={{
+                                          opacity: [0.3, 1, 0.3],
+                                          scale: [1, 1.2, 1],
+                                        }}
+                                        transition={{
+                                          duration: 1,
+                                          repeat: Infinity,
+                                          delay: i * 0.2,
+                                        }}
+                                      />
+                                    ))}
+                                  </div>
+                                </div>
+                              </motion.div>
+                            )}
+
+                            {/* Step 3: Auto-Generating Email */}
+                            {networkingStep === 2 && (
+                              <motion.div
+                                key="generate"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                transition={{ duration: 0.5 }}
+                                className="absolute inset-4"
+                              >
+                                <div className="bg-slate-800 rounded-lg p-4 h-full">
+                                  <div className="flex items-center gap-2 mb-4">
+                                    <Sparkles className="h-5 w-5 text-purple-400" />
+                                    <span className="text-sm font-semibold text-white">Generating Email...</span>
+                                  </div>
+
+                                  <div className="space-y-2 mb-3">
+                                    <div className="flex items-center gap-2 text-xs">
+                                      <Loader2 className="h-3 w-3 text-purple-400 animate-spin" />
+                                      <span className="text-slate-300">Personalizing message...</span>
+                                    </div>
+                                    <div className="bg-slate-700/50 rounded p-2">
+                                      <div className="h-2 bg-purple-400/30 rounded w-full mb-1" />
+                                      <div className="h-2 bg-purple-400/30 rounded w-4/5 mb-1" />
+                                      <div className="h-2 bg-purple-400/30 rounded w-3/4" />
+                                    </div>
+                                  </div>
+
+                                  <div className="flex items-center gap-2 text-xs text-purple-400 mt-3">
+                                    <Mail className="h-3 w-3" />
+                                    <span>Email ready to send</span>
+                                  </div>
+                                </div>
+                              </motion.div>
+                            )}
+
+                            {/* Step 4: Email Sent Successfully */}
+                            {networkingStep === 3 && (
+                              <motion.div
+                                key="success"
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.95 }}
+                                transition={{ duration: 0.5 }}
+                                className="absolute inset-4"
+                              >
+                                <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-lg p-4 h-full border-2 border-green-500/30 flex flex-col items-center justify-center">
+                                  <motion.div
+                                    animate={{ scale: [1, 1.1, 1] }}
+                                    transition={{ duration: 1, repeat: Infinity }}
+                                  >
+                                    <MailCheck className="h-12 w-12 text-green-400 mb-3" />
+                                  </motion.div>
+                                  <p className="text-lg font-bold text-green-400 mb-2">Email Sent!</p>
+                                  <div className="bg-slate-800/50 rounded-lg p-3 w-full mt-4">
+                                    <div className="flex items-center gap-2 text-xs text-green-400 mb-1">
+                                      <CheckCircle2 className="h-3 w-3" />
+                                      <span>Contact saved & email delivered</span>
+                                    </div>
+                                    <div className="text-xs text-slate-400 text-center mt-2">
+                                      Networking mode active
+                                    </div>
+                                  </div>
+                                </div>
+                              </motion.div>
+                            )}
+                          </>
                         )}
                       </AnimatePresence>
                     </div>
@@ -2076,46 +2084,43 @@ export function LandingPage() {
             variants={containerVariants}
           >
             <motion.div variants={itemVariants}>
-            <Button
-              variant={activeDemo === "scan" ? "default" : "outline"}
-              onClick={() => setActiveDemo("scan")}
-                className={`gap-2 h-11 px-6 font-medium transition-all ${
-                activeDemo === "scan"
-                    ? "bg-white text-slate-900 hover:bg-slate-100 shadow-lg"
+              <Button
+                variant={activeDemo === "scan" ? "default" : "outline"}
+                onClick={() => setActiveDemo("scan")}
+                className={`gap-2 h-11 px-6 font-medium transition-all ${activeDemo === "scan"
+                  ? "bg-white text-slate-900 hover:bg-slate-100 shadow-lg"
                   : "border-slate-700 text-slate-400 hover:text-white hover:bg-slate-800/50 hover:border-slate-600"
-              }`}
-            >
-              <Scan className="h-4 w-4" />
-              Card Scanning
-            </Button>
+                  }`}
+              >
+                <Scan className="h-4 w-4" />
+                Card Scanning
+              </Button>
             </motion.div>
             <motion.div variants={itemVariants}>
-            <Button
-              variant={activeDemo === "ai" ? "default" : "outline"}
-              onClick={() => setActiveDemo("ai")}
-                className={`gap-2 h-11 px-6 font-medium transition-all ${
-                activeDemo === "ai"
-                    ? "bg-white text-slate-900 hover:bg-slate-100 shadow-lg"
+              <Button
+                variant={activeDemo === "ai" ? "default" : "outline"}
+                onClick={() => setActiveDemo("ai")}
+                className={`gap-2 h-11 px-6 font-medium transition-all ${activeDemo === "ai"
+                  ? "bg-white text-slate-900 hover:bg-slate-100 shadow-lg"
                   : "border-slate-700 text-slate-400 hover:text-white hover:bg-slate-800/50 hover:border-slate-600"
-              }`}
-            >
-              <Bot className="h-4 w-4" />
-              AI Agent
-            </Button>
+                  }`}
+              >
+                <Bot className="h-4 w-4" />
+                AI Agent
+              </Button>
             </motion.div>
             <motion.div variants={itemVariants}>
-            <Button
-              variant={activeDemo === "analytics" ? "default" : "outline"}
-              onClick={() => setActiveDemo("analytics")}
-                className={`gap-2 h-11 px-6 font-medium transition-all ${
-                activeDemo === "analytics"
-                    ? "bg-white text-slate-900 hover:bg-slate-100 shadow-lg"
+              <Button
+                variant={activeDemo === "analytics" ? "default" : "outline"}
+                onClick={() => setActiveDemo("analytics")}
+                className={`gap-2 h-11 px-6 font-medium transition-all ${activeDemo === "analytics"
+                  ? "bg-white text-slate-900 hover:bg-slate-100 shadow-lg"
                   : "border-slate-700 text-slate-400 hover:text-white hover:bg-slate-800/50 hover:border-slate-600"
-              }`}
-            >
-              <BarChart3 className="h-4 w-4" />
-              Analytics
-            </Button>
+                  }`}
+              >
+                <BarChart3 className="h-4 w-4" />
+                Analytics
+              </Button>
             </motion.div>
           </motion.div>
 
@@ -2125,10 +2130,10 @@ export function LandingPage() {
             animate="visible"
             variants={fadeInUp}
           >
-          <Card className="overflow-hidden border border-slate-800/50 shadow-2xl bg-slate-900/40 backdrop-blur-sm">
-            <CardContent className="p-0">
+            <Card className="overflow-hidden border border-slate-800/50 shadow-2xl bg-slate-900/40 backdrop-blur-sm">
+              <CardContent className="p-0">
                 <AnimatePresence mode="wait">
-              {activeDemo === "scan" && (
+                  {activeDemo === "scan" && (
                     <motion.div
                       key="scan"
                       initial={{ opacity: 0, x: 20 }}
@@ -2136,100 +2141,100 @@ export function LandingPage() {
                       exit={{ opacity: 0, x: -20 }}
                       transition={{ duration: 0.3 }}
                     >
-                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-blue-900 p-12">
-                  <div className="grid md:grid-cols-2 gap-8 items-center">
-                    <motion.div
-                      initial="hidden"
-                      animate="visible"
-                      variants={containerVariants}
-                    >
-                      <motion.div variants={itemVariants}>
-                      <Badge className="mb-4 bg-blue-600">Step 1: Upload</Badge>
-                      </motion.div>
-                      <motion.h3
-                        variants={itemVariants}
-                        className="text-3xl font-bold mb-4 text-gray-900 dark:text-white"
-                      >
-                        Instant Business Card Scanning
-                      </motion.h3>
-                      <div className="space-y-4">
-                        {[
-                          {
-                            num: 1,
-                            title: "Take a photo",
-                            desc: "Snap a picture of any business card",
-                          },
-                          {
-                            num: 2,
-                            title: "AI extracts info",
-                            desc: "Name, email, phone, company—all captured instantly",
-                          },
-                          {
-                            num: 3,
-                            title: "Auto-saved to contacts",
-                            desc: "Contact added to your database in 3 seconds",
-                          },
-                        ].map((step, idx) => (
+                      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-blue-900 p-12">
+                        <div className="grid md:grid-cols-2 gap-8 items-center">
                           <motion.div
-                            key={step.num}
-                            variants={itemVariants}
-                            className="flex items-start gap-3"
-                            whileHover={{ x: 5 }}
-                            transition={{ type: "spring", stiffness: 300 }}
+                            initial="hidden"
+                            animate="visible"
+                            variants={containerVariants}
                           >
-                            <motion.div
-                              className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center flex-shrink-0"
-                              whileHover={{ scale: 1.1, rotate: 360 }}
-                              transition={{ duration: 0.5 }}
-                            >
-                              {step.num}
+                            <motion.div variants={itemVariants}>
+                              <Badge className="mb-4 bg-blue-600">Step 1: Upload</Badge>
                             </motion.div>
-                          <div>
-                              <p className="font-semibold text-gray-900 dark:text-white">{step.title}</p>
-                              <p className="text-sm text-gray-600 dark:text-gray-400">{step.desc}</p>
-                          </div>
+                            <motion.h3
+                              variants={itemVariants}
+                              className="text-3xl font-bold mb-4 text-gray-900 dark:text-white"
+                            >
+                              Instant Business Card Scanning
+                            </motion.h3>
+                            <div className="space-y-4">
+                              {[
+                                {
+                                  num: 1,
+                                  title: "Take a photo",
+                                  desc: "Snap a picture of any business card",
+                                },
+                                {
+                                  num: 2,
+                                  title: "AI extracts info",
+                                  desc: "Name, email, phone, company—all captured instantly",
+                                },
+                                {
+                                  num: 3,
+                                  title: "Auto-saved to contacts",
+                                  desc: "Contact added to your database in 3 seconds",
+                                },
+                              ].map((step, idx) => (
+                                <motion.div
+                                  key={step.num}
+                                  variants={itemVariants}
+                                  className="flex items-start gap-3"
+                                  whileHover={{ x: 5 }}
+                                  transition={{ type: "spring", stiffness: 300 }}
+                                >
+                                  <motion.div
+                                    className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center flex-shrink-0"
+                                    whileHover={{ scale: 1.1, rotate: 360 }}
+                                    transition={{ duration: 0.5 }}
+                                  >
+                                    {step.num}
+                                  </motion.div>
+                                  <div>
+                                    <p className="font-semibold text-gray-900 dark:text-white">{step.title}</p>
+                                    <p className="text-sm text-gray-600 dark:text-gray-400">{step.desc}</p>
+                                  </div>
+                                </motion.div>
+                              ))}
+                            </div>
+                            <motion.div
+                              variants={itemVariants}
+                              className="mt-6 p-4 bg-green-100 dark:bg-green-900/20 rounded-lg"
+                              whileHover={{ scale: 1.02 }}
+                            >
+                              <p className="text-green-800 dark:text-green-300 font-semibold">
+                                ⏱️ Time saved: 2 minutes per card → 3 seconds
+                              </p>
+                            </motion.div>
                           </motion.div>
-                        ))}
-                      </div>
-                      <motion.div
-                        variants={itemVariants}
-                        className="mt-6 p-4 bg-green-100 dark:bg-green-900/20 rounded-lg"
-                        whileHover={{ scale: 1.02 }}
-                      >
-                        <p className="text-green-800 dark:text-green-300 font-semibold">
-                          ⏱️ Time saved: 2 minutes per card → 3 seconds
-                        </p>
-                      </motion.div>
-                    </motion.div>
-                    <div className="relative">
-                      <div className="bg-white dark:bg-gray-900 rounded-lg shadow-xl p-6">
-                        <div className="flex items-center gap-2 mb-4">
-                          <Upload className="h-5 w-5 text-blue-600" />
-                          <span className="font-semibold">Business Card Scanner</span>
-                        </div>
-                        <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center mb-4">
-                          <Scan className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-                          <p className="text-sm text-gray-600 dark:text-gray-400">Upload business card</p>
-                        </div>
-                        <div className="space-y-2 text-sm">
-                          <div className="flex items-center gap-2">
-                            <CheckCircle2 className="h-4 w-4 text-green-500" />
-                            <span>✓ AI Extraction Complete</span>
-                          </div>
-                          <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded">
-                            <p className="font-semibold">John Smith</p>
-                            <p className="text-gray-600 dark:text-gray-400">CEO at TechCorp</p>
-                            <p className="text-gray-600 dark:text-gray-400">john@techcorp.com</p>
+                          <div className="relative">
+                            <div className="bg-white dark:bg-gray-900 rounded-lg shadow-xl p-6">
+                              <div className="flex items-center gap-2 mb-4">
+                                <Upload className="h-5 w-5 text-blue-600" />
+                                <span className="font-semibold">Business Card Scanner</span>
+                              </div>
+                              <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center mb-4">
+                                <Scan className="h-12 w-12 text-gray-400 mx-auto mb-2" />
+                                <p className="text-sm text-gray-600 dark:text-gray-400">Upload business card</p>
+                              </div>
+                              <div className="space-y-2 text-sm">
+                                <div className="flex items-center gap-2">
+                                  <CheckCircle2 className="h-4 w-4 text-green-500" />
+                                  <span>✓ AI Extraction Complete</span>
+                                </div>
+                                <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded">
+                                  <p className="font-semibold">John Smith</p>
+                                  <p className="text-gray-600 dark:text-gray-400">CEO at TechCorp</p>
+                                  <p className="text-gray-600 dark:text-gray-400">john@techcorp.com</p>
+                                </div>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  </div>
-                </div>
                     </motion.div>
-              )}
+                  )}
 
-              {activeDemo === "ai" && (
+                  {activeDemo === "ai" && (
                     <motion.div
                       key="ai"
                       initial={{ opacity: 0, x: 20 }}
@@ -2237,108 +2242,108 @@ export function LandingPage() {
                       exit={{ opacity: 0, x: -20 }}
                       transition={{ duration: 0.3 }}
                     >
-                <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-gray-800 dark:to-purple-900 p-12">
-                  <div className="grid md:grid-cols-2 gap-8 items-center">
-                    <motion.div
-                      initial="hidden"
-                      animate="visible"
-                      variants={containerVariants}
-                    >
-                      <motion.div variants={itemVariants}>
-                      <Badge className="mb-4 bg-purple-600">Step 2: Automate</Badge>
-                      </motion.div>
-                      <motion.h3
-                        variants={itemVariants}
-                        className="text-3xl font-bold mb-4 text-gray-900 dark:text-white"
-                      >
-                        AI-Powered Cold Emails
-                      </motion.h3>
-                      <div className="space-y-4">
-                        {[
-                          {
-                            num: 1,
-                            title: "Create campaign",
-                            desc: "Set your purpose and select contacts",
-                          },
-                          {
-                            num: 2,
-                            title: "AI personalizes each email",
-                            desc: "Unique, contextual emails for every contact",
-                          },
-                          {
-                            num: 3,
-                            title: "Send automatically",
-                            desc: "Reach 100+ contacts with one click",
-                          },
-                        ].map((step, idx) => (
+                      <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-gray-800 dark:to-purple-900 p-12">
+                        <div className="grid md:grid-cols-2 gap-8 items-center">
                           <motion.div
-                            key={step.num}
-                            variants={itemVariants}
-                            className="flex items-start gap-3"
-                            whileHover={{ x: 5 }}
-                            transition={{ type: "spring", stiffness: 300 }}
+                            initial="hidden"
+                            animate="visible"
+                            variants={containerVariants}
                           >
-                            <motion.div
-                              className="w-8 h-8 rounded-full bg-purple-600 text-white flex items-center justify-center flex-shrink-0"
-                              whileHover={{ scale: 1.1, rotate: 360 }}
-                              transition={{ duration: 0.5 }}
-                            >
-                              {step.num}
+                            <motion.div variants={itemVariants}>
+                              <Badge className="mb-4 bg-purple-600">Step 2: Automate</Badge>
                             </motion.div>
-                          <div>
-                              <p className="font-semibold text-gray-900 dark:text-white">{step.title}</p>
-                              <p className="text-sm text-gray-600 dark:text-gray-400">{step.desc}</p>
-                          </div>
+                            <motion.h3
+                              variants={itemVariants}
+                              className="text-3xl font-bold mb-4 text-gray-900 dark:text-white"
+                            >
+                              AI-Powered Cold Emails
+                            </motion.h3>
+                            <div className="space-y-4">
+                              {[
+                                {
+                                  num: 1,
+                                  title: "Create campaign",
+                                  desc: "Set your purpose and select contacts",
+                                },
+                                {
+                                  num: 2,
+                                  title: "AI personalizes each email",
+                                  desc: "Unique, contextual emails for every contact",
+                                },
+                                {
+                                  num: 3,
+                                  title: "Send automatically",
+                                  desc: "Reach 100+ contacts with one click",
+                                },
+                              ].map((step, idx) => (
+                                <motion.div
+                                  key={step.num}
+                                  variants={itemVariants}
+                                  className="flex items-start gap-3"
+                                  whileHover={{ x: 5 }}
+                                  transition={{ type: "spring", stiffness: 300 }}
+                                >
+                                  <motion.div
+                                    className="w-8 h-8 rounded-full bg-purple-600 text-white flex items-center justify-center flex-shrink-0"
+                                    whileHover={{ scale: 1.1, rotate: 360 }}
+                                    transition={{ duration: 0.5 }}
+                                  >
+                                    {step.num}
+                                  </motion.div>
+                                  <div>
+                                    <p className="font-semibold text-gray-900 dark:text-white">{step.title}</p>
+                                    <p className="text-sm text-gray-600 dark:text-gray-400">{step.desc}</p>
+                                  </div>
+                                </motion.div>
+                              ))}
+                            </div>
+                            <motion.div
+                              variants={itemVariants}
+                              className="mt-6 p-4 bg-green-100 dark:bg-green-900/20 rounded-lg"
+                              whileHover={{ scale: 1.02 }}
+                            >
+                              <p className="text-green-800 dark:text-green-300 font-semibold">
+                                ⏱️ Time saved: 5 hours per campaign → 5 minutes
+                              </p>
+                            </motion.div>
                           </motion.div>
-                        ))}
-                      </div>
-                      <motion.div
-                        variants={itemVariants}
-                        className="mt-6 p-4 bg-green-100 dark:bg-green-900/20 rounded-lg"
-                        whileHover={{ scale: 1.02 }}
-                      >
-                        <p className="text-green-800 dark:text-green-300 font-semibold">
-                          ⏱️ Time saved: 5 hours per campaign → 5 minutes
-                        </p>
-                      </motion.div>
-                    </motion.div>
-                    <div className="relative">
-                      <div className="bg-white dark:bg-gray-900 rounded-lg shadow-xl p-6">
-                        <div className="flex items-center gap-2 mb-4">
-                          <Bot className="h-5 w-5 text-purple-600" />
-                          <span className="font-semibold">AI Email Agent</span>
-                        </div>
-                        <div className="space-y-3">
-                          <div>
-                            <label className="text-sm font-medium">Campaign Name</label>
-                            <div className="bg-gray-100 dark:bg-gray-800 p-2 rounded text-sm">Q1 Product Launch</div>
-                          </div>
-                          <div>
-                            <label className="text-sm font-medium">Selected Contacts</label>
-                            <div className="bg-gray-100 dark:bg-gray-800 p-2 rounded text-sm">25 contacts selected</div>
-                          </div>
-                          <div className="bg-purple-50 dark:bg-purple-900/20 p-3 rounded">
-                            <div className="flex items-center justify-between mb-2">
-                              <span className="text-sm font-medium">Sending emails...</span>
-                              <span className="text-sm">60%</span>
+                          <div className="relative">
+                            <div className="bg-white dark:bg-gray-900 rounded-lg shadow-xl p-6">
+                              <div className="flex items-center gap-2 mb-4">
+                                <Bot className="h-5 w-5 text-purple-600" />
+                                <span className="font-semibold">AI Email Agent</span>
+                              </div>
+                              <div className="space-y-3">
+                                <div>
+                                  <label className="text-sm font-medium">Campaign Name</label>
+                                  <div className="bg-gray-100 dark:bg-gray-800 p-2 rounded text-sm">Q1 Product Launch</div>
+                                </div>
+                                <div>
+                                  <label className="text-sm font-medium">Selected Contacts</label>
+                                  <div className="bg-gray-100 dark:bg-gray-800 p-2 rounded text-sm">25 contacts selected</div>
+                                </div>
+                                <div className="bg-purple-50 dark:bg-purple-900/20 p-3 rounded">
+                                  <div className="flex items-center justify-between mb-2">
+                                    <span className="text-sm font-medium">Sending emails...</span>
+                                    <span className="text-sm">60%</span>
+                                  </div>
+                                  <div className="w-full bg-gray-200 rounded-full h-2">
+                                    <div className="bg-purple-600 h-2 rounded-full" style={{ width: "60%" }} />
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-2 text-sm text-green-600">
+                                  <CheckCircle2 className="h-4 w-4" />
+                                  <span>15 emails sent successfully</span>
+                                </div>
+                              </div>
                             </div>
-                            <div className="w-full bg-gray-200 rounded-full h-2">
-                              <div className="bg-purple-600 h-2 rounded-full" style={{ width: "60%" }} />
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2 text-sm text-green-600">
-                            <CheckCircle2 className="h-4 w-4" />
-                            <span>15 emails sent successfully</span>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  </div>
-                </div>
                     </motion.div>
-              )}
+                  )}
 
-              {activeDemo === "analytics" && (
+                  {activeDemo === "analytics" && (
                     <motion.div
                       key="analytics"
                       initial={{ opacity: 0, x: 20 }}
@@ -2346,111 +2351,111 @@ export function LandingPage() {
                       exit={{ opacity: 0, x: -20 }}
                       transition={{ duration: 0.3 }}
                     >
-                <div className="bg-gradient-to-br from-green-50 to-teal-50 dark:from-gray-800 dark:to-green-900 p-12">
-                  <div className="grid md:grid-cols-2 gap-8 items-center">
-                    <motion.div
-                      initial="hidden"
-                      animate="visible"
-                      variants={containerVariants}
-                    >
-                      <motion.div variants={itemVariants}>
-                      <Badge className="mb-4 bg-green-600">Step 3: Track</Badge>
-                      </motion.div>
-                      <motion.h3
-                        variants={itemVariants}
-                        className="text-3xl font-bold mb-4 text-gray-900 dark:text-white"
-                      >
-                        Powerful Analytics
-                      </motion.h3>
-                      <div className="space-y-4">
-                        {[
-                          {
-                            num: 1,
-                            title: "Track network growth",
-                            desc: "See your contacts and connections expand",
-                          },
-                          {
-                            num: 2,
-                            title: "Monitor engagement",
-                            desc: "Email opens, responses, and follow-ups",
-                          },
-                          {
-                            num: 3,
-                            title: "Optimize your strategy",
-                            desc: "Data-driven insights for better results",
-                          },
-                        ].map((step, idx) => (
+                      <div className="bg-gradient-to-br from-green-50 to-teal-50 dark:from-gray-800 dark:to-green-900 p-12">
+                        <div className="grid md:grid-cols-2 gap-8 items-center">
                           <motion.div
-                            key={step.num}
-                            variants={itemVariants}
-                            className="flex items-start gap-3"
-                            whileHover={{ x: 5 }}
-                            transition={{ type: "spring", stiffness: 300 }}
+                            initial="hidden"
+                            animate="visible"
+                            variants={containerVariants}
                           >
-                            <motion.div
-                              className="w-8 h-8 rounded-full bg-green-600 text-white flex items-center justify-center flex-shrink-0"
-                              whileHover={{ scale: 1.1, rotate: 360 }}
-                              transition={{ duration: 0.5 }}
-                            >
-                              {step.num}
+                            <motion.div variants={itemVariants}>
+                              <Badge className="mb-4 bg-green-600">Step 3: Track</Badge>
                             </motion.div>
-                          <div>
-                              <p className="font-semibold text-gray-900 dark:text-white">{step.title}</p>
-                              <p className="text-sm text-gray-600 dark:text-gray-400">{step.desc}</p>
-                          </div>
+                            <motion.h3
+                              variants={itemVariants}
+                              className="text-3xl font-bold mb-4 text-gray-900 dark:text-white"
+                            >
+                              Powerful Analytics
+                            </motion.h3>
+                            <div className="space-y-4">
+                              {[
+                                {
+                                  num: 1,
+                                  title: "Track network growth",
+                                  desc: "See your contacts and connections expand",
+                                },
+                                {
+                                  num: 2,
+                                  title: "Monitor engagement",
+                                  desc: "Email opens, responses, and follow-ups",
+                                },
+                                {
+                                  num: 3,
+                                  title: "Optimize your strategy",
+                                  desc: "Data-driven insights for better results",
+                                },
+                              ].map((step, idx) => (
+                                <motion.div
+                                  key={step.num}
+                                  variants={itemVariants}
+                                  className="flex items-start gap-3"
+                                  whileHover={{ x: 5 }}
+                                  transition={{ type: "spring", stiffness: 300 }}
+                                >
+                                  <motion.div
+                                    className="w-8 h-8 rounded-full bg-green-600 text-white flex items-center justify-center flex-shrink-0"
+                                    whileHover={{ scale: 1.1, rotate: 360 }}
+                                    transition={{ duration: 0.5 }}
+                                  >
+                                    {step.num}
+                                  </motion.div>
+                                  <div>
+                                    <p className="font-semibold text-gray-900 dark:text-white">{step.title}</p>
+                                    <p className="text-sm text-gray-600 dark:text-gray-400">{step.desc}</p>
+                                  </div>
+                                </motion.div>
+                              ))}
+                            </div>
+                            <motion.div
+                              variants={itemVariants}
+                              className="mt-6 p-4 bg-green-100 dark:bg-green-900/20 rounded-lg"
+                              whileHover={{ scale: 1.02 }}
+                            >
+                              <p className="text-green-800 dark:text-green-300 font-semibold">
+                                ⏱️ Time saved: 3 hours weekly reporting → Real-time insights
+                              </p>
+                            </motion.div>
                           </motion.div>
-                        ))}
-                      </div>
-                      <motion.div
-                        variants={itemVariants}
-                        className="mt-6 p-4 bg-green-100 dark:bg-green-900/20 rounded-lg"
-                        whileHover={{ scale: 1.02 }}
-                      >
-                        <p className="text-green-800 dark:text-green-300 font-semibold">
-                          ⏱️ Time saved: 3 hours weekly reporting → Real-time insights
-                        </p>
-                      </motion.div>
-                    </motion.div>
-                    <div className="relative">
-                      <div className="bg-white dark:bg-gray-900 rounded-lg shadow-xl p-6">
-                        <div className="flex items-center gap-2 mb-4">
-                          <BarChart3 className="h-5 w-5 text-green-600" />
-                          <span className="font-semibold">Analytics Dashboard</span>
-                        </div>
-                        <div className="grid grid-cols-2 gap-3 mb-4">
-                          <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded">
-                            <p className="text-2xl font-bold text-blue-600">248</p>
-                            <p className="text-xs text-gray-600 dark:text-gray-400">Total Contacts</p>
-                          </div>
-                          <div className="bg-purple-50 dark:bg-purple-900/20 p-3 rounded">
-                            <p className="text-2xl font-bold text-purple-600">89</p>
-                            <p className="text-xs text-gray-600 dark:text-gray-400">Emails Sent</p>
-                          </div>
-                          <div className="bg-green-50 dark:bg-green-900/20 p-3 rounded">
-                            <p className="text-2xl font-bold text-green-600">67%</p>
-                            <p className="text-xs text-gray-600 dark:text-gray-400">Open Rate</p>
-                          </div>
-                          <div className="bg-orange-50 dark:bg-orange-900/20 p-3 rounded">
-                            <p className="text-2xl font-bold text-orange-600">42</p>
-                            <p className="text-xs text-gray-600 dark:text-gray-400">Responses</p>
-                          </div>
-                        </div>
-                        <div className="bg-gradient-to-r from-blue-500 to-purple-500 h-32 rounded-lg flex items-end p-2">
-                          <div className="flex items-end gap-1 w-full h-full">
-                            {[40, 65, 45, 80, 60, 85, 70].map((height, i) => (
-                              <div key={i} className="bg-white/80 rounded-t flex-1" style={{ height: `${height}%` }} />
-                            ))}
+                          <div className="relative">
+                            <div className="bg-white dark:bg-gray-900 rounded-lg shadow-xl p-6">
+                              <div className="flex items-center gap-2 mb-4">
+                                <BarChart3 className="h-5 w-5 text-green-600" />
+                                <span className="font-semibold">Analytics Dashboard</span>
+                              </div>
+                              <div className="grid grid-cols-2 gap-3 mb-4">
+                                <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded">
+                                  <p className="text-2xl font-bold text-blue-600">248</p>
+                                  <p className="text-xs text-gray-600 dark:text-gray-400">Total Contacts</p>
+                                </div>
+                                <div className="bg-purple-50 dark:bg-purple-900/20 p-3 rounded">
+                                  <p className="text-2xl font-bold text-purple-600">89</p>
+                                  <p className="text-xs text-gray-600 dark:text-gray-400">Emails Sent</p>
+                                </div>
+                                <div className="bg-green-50 dark:bg-green-900/20 p-3 rounded">
+                                  <p className="text-2xl font-bold text-green-600">67%</p>
+                                  <p className="text-xs text-gray-600 dark:text-gray-400">Open Rate</p>
+                                </div>
+                                <div className="bg-orange-50 dark:bg-orange-900/20 p-3 rounded">
+                                  <p className="text-2xl font-bold text-orange-600">42</p>
+                                  <p className="text-xs text-gray-600 dark:text-gray-400">Responses</p>
+                                </div>
+                              </div>
+                              <div className="bg-gradient-to-r from-blue-500 to-purple-500 h-32 rounded-lg flex items-end p-2">
+                                <div className="flex items-end gap-1 w-full h-full">
+                                  {[40, 65, 45, 80, 60, 85, 70].map((height, i) => (
+                                    <div key={i} className="bg-white/80 rounded-t flex-1" style={{ height: `${height}%` }} />
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  </div>
-                </div>
                     </motion.div>
-              )}
+                  )}
                 </AnimatePresence>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
           </motion.div>
         </div>
       </section>
@@ -2530,7 +2535,7 @@ export function LandingPage() {
                   transition={{ type: "spring", stiffness: 300 }}
                 >
                   <Card className="border-2 border-slate-700/50 hover:border-cyan-500/50 bg-slate-800/40 backdrop-blur-sm hover:shadow-2xl hover:shadow-cyan-500/10 transition-all duration-300 h-full">
-              <CardContent className="p-6">
+                    <CardContent className="p-6">
                       <motion.div
                         className={`w-12 h-12 rounded-lg bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-4`}
                         whileHover={{ rotate: 360 }}
@@ -2540,8 +2545,8 @@ export function LandingPage() {
                       </motion.div>
                       <h3 className="text-xl font-bold mb-2 text-white">{feature.title}</h3>
                       <p className="text-slate-400 leading-relaxed">{feature.description}</p>
-              </CardContent>
-            </Card>
+                    </CardContent>
+                  </Card>
                 </motion.div>
               </motion.div>
             ))}
@@ -2550,8 +2555,8 @@ export function LandingPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 relative">
-        <div className="max-w-4xl mx-auto">
+      <section className="py-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+        <div className="max-w-5xl mx-auto relative z-10">
           <motion.div
             initial="hidden"
             whileInView="visible"
@@ -2560,93 +2565,123 @@ export function LandingPage() {
           >
             <motion.div
               variants={scaleIn}
-              whileHover={{ scale: 1.02 }}
-              transition={{ type: "spring", stiffness: 300 }}
+              whileHover={{ scale: 1.01 }}
+              transition={{ type: "spring", stiffness: 200, damping: 20 }}
+              className="relative rounded-3xl overflow-hidden"
             >
-              <Card className="border-2 border-cyan-500/30 shadow-2xl bg-gradient-to-br from-cyan-600 via-blue-600 to-purple-600 text-white overflow-hidden relative">
+              {/* Creative Background */}
+              <div className="absolute inset-0 bg-slate-950">
+                {/* Animated Gradient Mesh */}
                 <motion.div
-                  className="absolute inset-0 opacity-20"
+                  className="absolute inset-0 opacity-40"
                   animate={{
-                    backgroundPosition: ["0% 0%", "100% 100%"],
+                    backgroundImage: [
+                      "radial-gradient(circle at 0% 0%, #06b6d4 0%, transparent 50%), radial-gradient(circle at 100% 100%, #8b5cf6 0%, transparent 50%)",
+                      "radial-gradient(circle at 100% 0%, #3b82f6 0%, transparent 50%), radial-gradient(circle at 0% 100%, #ec4899 0%, transparent 50%)",
+                      "radial-gradient(circle at 0% 0%, #06b6d4 0%, transparent 50%), radial-gradient(circle at 100% 100%, #8b5cf6 0%, transparent 50%)",
+                    ],
                   }}
-                  transition={{
-                    duration: 20,
-                    repeat: Infinity,
-                    repeatType: "reverse",
-                  }}
-                  style={{
-                    backgroundImage:
-                      "radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(255,255,255,0.1) 0%, transparent 50%)",
-                  }}
+                  transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
                 />
-                <CardContent className="p-12 text-center relative z-10">
-                  <motion.div
-                    variants={itemVariants}
-                    className="mb-6"
-                  >
-                    <TrendingUp className="h-12 w-12 text-white/80 mx-auto mb-4" />
-                  </motion.div>
-                  <motion.h2
-                    variants={itemVariants}
-                    className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-4"
-                  >
-                    Ready to Transform Your Networking?
-                  </motion.h2>
-                  <motion.p
-                    variants={itemVariants}
-                    className="text-xl mb-8 text-cyan-100"
-                  >
-                    Join thousands of professionals saving 10+ hours per week
-                  </motion.p>
-                  <motion.div
-                    variants={itemVariants}
-                    className="flex flex-col sm:flex-row gap-4 justify-center"
-                  >
-                  <Link href="/waitlist">
-                      <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                        <Button
-                          size="lg"
-                          variant="secondary"
-                          className="text-lg px-8 py-6 bg-white text-cyan-600 hover:bg-cyan-50 font-semibold shadow-lg"
-                        >
-                      Join Waitlist
-                      <Sparkles className="ml-2 h-5 w-5" />
-                    </Button>
-                      </motion.div>
+
+                {/* Grid Pattern Overlay */}
+                <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]" style={{ backgroundImage: "linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px)", backgroundSize: "30px 30px" }} />
+
+                {/* Floating Glow Orbs */}
+                <motion.div
+                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-cyan-500/20 rounded-full blur-[100px]"
+                  animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
+                  transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                />
+              </div>
+
+              {/* Glassmorphism Content Container */}
+              <div className="relative z-10 p-12 sm:p-16 lg:p-20 text-center backdrop-blur-sm border border-white/10 rounded-3xl">
+                <motion.div variants={itemVariants} className="inline-block mb-6">
+                  <div className="p-3 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-md shadow-xl">
+                    <TrendingUp className="h-10 w-10 text-cyan-400" />
+                  </div>
+                </motion.div>
+
+                <motion.h2
+                  variants={itemVariants}
+                  className="text-4xl sm:text-5xl lg:text-7xl font-bold mb-6 text-white tracking-tight"
+                >
+                  Ready to Transform <br className="hidden sm:block" />
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400">
+                    Your Networking?
+                  </span>
+                </motion.h2>
+
+                <motion.p
+                  variants={itemVariants}
+                  className="text-xl sm:text-2xl text-slate-300 max-w-2xl mx-auto mb-10 leading-relaxed"
+                >
+                  Join thousands of professionals saving <span className="text-cyan-400 font-semibold">10+ hours per week</span> with our AI-powered platform.
+                </motion.p>
+
+                <motion.div
+                  variants={itemVariants}
+                  className="flex flex-col sm:flex-row gap-5 justify-center items-center"
+                >
+                  <Link href="/waitlist" className="w-full sm:w-auto">
+                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="w-full">
+                      <Button
+                        size="lg"
+                        className="w-full sm:w-auto bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold text-lg px-10 py-7 shadow-lg shadow-cyan-500/25 rounded-xl border border-white/10"
+                      >
+                        Join Waitlist
+                        <Sparkles className="ml-2 h-5 w-5 animate-pulse" />
+                      </Button>
+                    </motion.div>
                   </Link>
-                  <Link href="/pricing">
-                      <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                        <Button
-                          size="lg"
-                          variant="outline"
-                          className="text-lg px-8 py-6 border-2 border-white/30 text-white hover:bg-white/10 font-semibold"
-                        >
-                      View Pricing
-                      <ArrowRight className="ml-2 h-5 w-5" />
-                    </Button>
-                      </motion.div>
+
+                  <Link href="/pricing" className="w-full sm:w-auto">
+                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="w-full">
+                      <Button
+                        size="lg"
+                        variant="outline"
+                        className="w-full sm:w-auto text-lg px-10 py-7 border-2 border-slate-700 hover:border-slate-500 bg-slate-900/50 hover:bg-slate-800 text-white font-semibold rounded-xl backdrop-blur-md"
+                      >
+                        View Pricing
+                        <ArrowRight className="ml-2 h-5 w-5" />
+                      </Button>
+                    </motion.div>
                   </Link>
-                  <Link href="/auth/login">
-                      <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                    <Button
-                      size="lg"
-                      variant="outline"
-                          className="text-lg px-8 py-6 border-2 border-white/30 text-white hover:bg-white/10 bg-transparent font-semibold"
-                    >
-                      Sign In
-                      <ArrowRight className="ml-2 h-5 w-5" />
-                    </Button>
-                      </motion.div>
+
+                  {/* TEMPORARILY HIDDEN: Sign In Button
+                  <Link href="/auth/login" className="w-full sm:w-auto">
+                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="w-full">
+                      <Button
+                        size="lg"
+                        variant="ghost"
+                        className="w-full sm:w-auto text-lg px-10 py-7 text-slate-400 hover:text-white hover:bg-white/5 font-semibold rounded-xl"
+                      >
+                        Sign In
+                      </Button>
+                    </motion.div>
                   </Link>
-                  </motion.div>
-                  <motion.p
-                    variants={itemVariants}
-                    className="mt-6 text-sm text-cyan-100"
-                  >
-                  No credit card required • 14-day free trial • Cancel anytime
-                  </motion.p>
-            </CardContent>
-          </Card>
+                  */}
+                </motion.div>
+
+                <motion.div
+                  variants={itemVariants}
+                  className="mt-10 flex flex-wrap justify-center gap-x-8 gap-y-4 text-sm text-slate-400 font-medium"
+                >
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-cyan-500" />
+                    <span>No credit card required</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-cyan-500" />
+                    <span>14-day free trial</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-cyan-500" />
+                    <span>Cancel anytime</span>
+                  </div>
+                </motion.div>
+              </div>
             </motion.div>
           </motion.div>
         </div>
@@ -2689,16 +2724,16 @@ export function LandingPage() {
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 className="text-slate-400 hover:text-cyan-400 transition-colors cursor-pointer underline-offset-4 hover:underline"
-            >
-              Home
+              >
+                Home
               </motion.div>
             </Link>
             <Link href="/public/about">
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 className="text-slate-400 hover:text-cyan-400 transition-colors cursor-pointer underline-offset-4 hover:underline"
-            >
-              About
+              >
+                About
               </motion.div>
             </Link>
             {/* <Link href="/public/networkers">
@@ -2713,16 +2748,16 @@ export function LandingPage() {
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 className="text-slate-400 hover:text-cyan-400 transition-colors cursor-pointer underline-offset-4 hover:underline"
-            >
-              Privacy Policy
+              >
+                Privacy Policy
               </motion.div>
             </Link>
             <Link href="/terms">
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 className="text-slate-400 hover:text-cyan-400 transition-colors cursor-pointer underline-offset-4 hover:underline"
-            >
-              Terms & Conditions
+              >
+                Terms & Conditions
               </motion.div>
             </Link>
           </motion.div>

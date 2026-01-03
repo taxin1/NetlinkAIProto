@@ -57,7 +57,7 @@ export async function POST(request: Request) {
         waitlistEntry.position || 0,
         waitlistEntry.early_bird || false
       )
-      
+
       // Update email_sent flag
       await supabase
         .from('waitlist')
@@ -128,7 +128,7 @@ async function sendWaitlistConfirmationEmail(
     </head>
     <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
       <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 10px 10px 0 0; text-align: center;">
-        <h1 style="color: white; margin: 0;">Welcome to Netlink Cogni!</h1>
+        <h1 style="color: white; margin: 0;">Welcome to Netlink!</h1>
       </div>
       
       <div style="background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px; border: 1px solid #e5e7eb;">
@@ -172,7 +172,7 @@ async function sendWaitlistConfirmationEmail(
         
         <p style="font-size: 14px; color: #6b7280; margin-top: 20px;">
           Best regards,<br>
-          The Netlink Cogni Team
+          The Netlink Team
         </p>
       </div>
     </body>
@@ -180,12 +180,12 @@ async function sendWaitlistConfirmationEmail(
   `
 
   await transporter.sendMail({
-    from: `"Netlink Cogni" <${emailUser}>`,
+    from: `"Netlink" <${emailUser}>`,
     to: email,
-    subject: 'Welcome to the Netlink Cogni Waitlist! 🎉',
+    subject: 'Welcome to the Netlink Waitlist! 🎉',
     html: emailHtml,
     text: `
-Welcome to Netlink Cogni!
+Welcome to Netlink!
 
 Thank you for joining our waitlist! We're excited to have you on board.
 
@@ -203,7 +203,7 @@ What to Expect:
 We'll notify you as soon as the product is live!
 
 Best regards,
-The Netlink Cogni Team
+The Netlink Team
     `.trim(),
   })
 }

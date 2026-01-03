@@ -1,6 +1,6 @@
 # PayPal Integration Setup Guide
 
-This guide will help you set up PayPal payments for your Netlink Cogni application.
+This guide will help you set up PayPal payments for your Netlink application.
 
 ## ✅ Fixed Issues
 
@@ -30,7 +30,7 @@ The following issues have been resolved:
 3. Navigate to **Dashboard** → **My Apps & Credentials**
 4. Click **Create App**
 5. Fill in the app details:
-   - **App Name**: Netlink Cogni (or your preferred name)
+   - **App Name**: Netlink (or your preferred name)
    - **Merchant**: Your business account
    - **Features**: Select "Accept Payments"
 6. Click **Create App**
