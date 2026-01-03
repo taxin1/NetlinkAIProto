@@ -1,4 +1,7 @@
--- Create waitlist table
+-- Fix Waitlist Table - Safe to run multiple times
+-- This script fixes the waitlist table and policies even if they already exist
+
+-- Step 1: Create table if it doesn't exist
 create table if not exists public.waitlist (
   id uuid primary key default gen_random_uuid(),
   user_id uuid references auth.users(id) on delete cascade,
@@ -13,45 +16,26 @@ create table if not exists public.waitlist (
   unique(email)
 );
 
--- Create index for faster queries
+-- Step 2: Create indexes if they don't exist
 create index if not exists waitlist_email_idx on public.waitlist(email);
 create index if not exists waitlist_user_id_idx on public.waitlist(user_id);
 create index if not exists waitlist_position_idx on public.waitlist(position);
 
--- Enable RLS
+-- Step 3: Enable RLS
 alter table public.waitlist enable row level security;
 
--- Policy: Anyone can insert (for joining waitlist)
-do $$
-begin
-  if not exists (
-    select 1 from pg_policies
-    where schemaname = 'public'
-      and tablename = 'waitlist'
-      and policyname = 'Anyone can join waitlist'
-  ) then
-    create policy "Anyone can join waitlist"
-      on public.waitlist for insert
-      with check (true);
-  end if;
-end$$;
+-- Step 4: Drop existing policies if they exist, then recreate
+drop policy if exists "Anyone can join waitlist" on public.waitlist;
+create policy "Anyone can join waitlist"
+  on public.waitlist for insert
+  with check (true);
 
--- Policy: Users can view their own waitlist entry
-do $$
-begin
-  if not exists (
-    select 1 from pg_policies
-    where schemaname = 'public'
-      and tablename = 'waitlist'
-      and policyname = 'Users can view their own waitlist entry'
-  ) then
-    create policy "Users can view their own waitlist entry"
-      on public.waitlist for select
-      using (auth.uid() = user_id OR auth.uid() IS NULL);
-  end if;
-end$$;
+drop policy if exists "Users can view their own waitlist entry" on public.waitlist;
+create policy "Users can view their own waitlist entry"
+  on public.waitlist for select
+  using (auth.uid() = user_id OR auth.uid() IS NULL);
 
--- Function to automatically assign position
+-- Step 5: Create or replace the function
 create or replace function assign_waitlist_position()
 returns trigger as $$
 declare
@@ -77,16 +61,30 @@ begin
 end;
 $$ language plpgsql;
 
--- Create trigger to auto-assign position
+-- Step 6: Drop and recreate triggers
 drop trigger if exists assign_waitlist_position_trigger on public.waitlist;
 create trigger assign_waitlist_position_trigger
   before insert on public.waitlist
   for each row
   execute function assign_waitlist_position();
 
--- Function to update updated_at timestamp
+-- Step 7: Ensure update_updated_at_column function exists (from other migrations)
+create or replace function update_updated_at_column()
+returns trigger as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$ language plpgsql;
+
 drop trigger if exists update_waitlist_updated_at on public.waitlist;
 create trigger update_waitlist_updated_at
   before update on public.waitlist
   for each row
   execute function update_updated_at_column();
+
+-- Success message
+do $$
+begin
+  raise notice 'Waitlist table setup completed successfully!';
+end $$;

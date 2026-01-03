@@ -43,9 +43,20 @@ export async function POST(request: Request) {
       .single()
 
     if (insertError) {
-      console.error('Error inserting into waitlist:', insertError)
+      console.error('Error inserting into waitlist:', JSON.stringify(insertError, null, 2))
+      // Provide more detailed error message for debugging
+      const errorMessage = insertError.message || insertError.code || insertError.hint || 'Failed to join waitlist'
+      const errorDetails = insertError.details || insertError.code
+      
       return NextResponse.json(
-        { error: 'Failed to join waitlist. Please try again.' },
+        { 
+          error: 'Failed to join waitlist. Please try again.',
+          details: process.env.NODE_ENV === 'development' ? {
+            message: errorMessage,
+            code: errorDetails,
+            fullError: insertError
+          } : undefined
+        },
         { status: 500 }
       )
     }

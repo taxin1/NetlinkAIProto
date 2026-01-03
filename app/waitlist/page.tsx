@@ -115,14 +115,32 @@ export default function WaitlistPage() {
     e.preventDefault()
     setIsLoading(true)
     setError(null)
+    setIsSuccess(false)
 
-    // Simulate API call
-    setTimeout(() => {
-      setPosition(Math.floor(Math.random() * 500) + 100) // Mock position
-      setEarlyBird(true) // Mock early bird
+    try {
+      const response = await fetch("/api/waitlist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok || data?.error) {
+        // Show more detailed error in development
+        const errorMsg = data?.error || "Failed to join the waitlist. Please try again."
+        const details = data?.details ? `\n\nDetails: ${JSON.stringify(data.details, null, 2)}` : ''
+        throw new Error(errorMsg + (process.env.NODE_ENV === 'development' ? details : ''))
+      }
+
+      setPosition(data?.position ?? null)
+      setEarlyBird(Boolean(data?.earlyBird))
       setIsSuccess(true)
+    } catch (err: any) {
+      setError(err?.message || "Something went wrong. Please try again.")
+    } finally {
       setIsLoading(false)
-    }, 1500)
+    }
   }
 
   return (
