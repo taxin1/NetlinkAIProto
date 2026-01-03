@@ -6,14 +6,14 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { PublicNavigation } from "@/components/public-navigation"
-import { 
-  Check, 
-  X, 
-  Sparkles, 
-  Mail, 
-  Users, 
-  Zap, 
-  Database, 
+import {
+  Check,
+  X,
+  Sparkles,
+  Mail,
+  Users,
+  Zap,
+  Database,
   Bot,
   Calendar,
   Briefcase,
@@ -79,13 +79,14 @@ const plans = [
   },
   {
     name: "Professional",
-    price: "$15",
+    price: "$6",
+    originalPrice: "$15",
     period: "per month",
     description: "For professionals who need unlimited power and advanced features",
     icon: Crown,
     color: "from-purple-500 to-pink-500",
     borderColor: "border-purple-500/30",
-    badge: "Most Popular",
+    badge: "Limited Time Offer",
     features: {
       "AI Features": [
         "Unlimited AI Email Generation",
@@ -139,8 +140,8 @@ const plans = [
       "AI Messages": "Unlimited",
       "Card Scans": "Unlimited",
     },
-    cta: "Subscribe Now",
-    ctaLink: "/checkout?plan=professional",
+    cta: "Contact Us to Buy",
+    ctaLink: "mailto:networklinkai@gmail.com",
     popular: true,
   },
   {
@@ -196,8 +197,8 @@ const plans = [
       "AI Tools": "All + Custom",
       "Performance": "Dedicated",
     },
-    cta: "Contact Sales",
-    ctaLink: "/public/about",
+    cta: "Contact Us",
+    ctaLink: "mailto:networklinkai@gmail.com",
     popular: false,
   },
 ]
@@ -325,17 +326,16 @@ export function PricingPage() {
                   </div>
                 )}
                 <Card
-                  className={`h-full relative overflow-hidden transition-all duration-500 border-2 ${
-                    plan.popular
-                      ? `${plan.borderColor} shadow-2xl shadow-purple-500/20 bg-gradient-to-br from-slate-900/90 to-slate-800/90 backdrop-blur-xl`
-                      : "border-slate-800/50 bg-slate-900/50 backdrop-blur-xl hover:border-slate-700/50 hover:shadow-xl"
-                  }`}
+                  className={`h-full relative overflow-hidden transition-all duration-500 border-2 ${plan.popular
+                    ? `${plan.borderColor} shadow-2xl shadow-purple-500/20 bg-gradient-to-br from-slate-900/90 to-slate-800/90 backdrop-blur-xl`
+                    : "border-slate-800/50 bg-slate-900/50 backdrop-blur-xl hover:border-slate-700/50 hover:shadow-xl"
+                    }`}
                 >
                   {/* Gradient Overlay for Popular Plan */}
                   {plan.popular && (
                     <div className={`absolute inset-0 bg-gradient-to-br ${plan.color} opacity-5 pointer-events-none`} />
                   )}
-                  
+
                   {/* Animated Border Glow for Popular Plan */}
                   {plan.popular && (
                     <div className={`absolute inset-0 bg-gradient-to-r ${plan.color} opacity-20 blur-xl -z-10 animate-pulse`} />
@@ -348,7 +348,7 @@ export function PricingPage() {
                       </Badge>
                     </div>
                   )}
-                  
+
                   <CardHeader className="pb-6 pt-8">
                     <motion.div
                       whileHover={{ scale: 1.1, rotate: 5 }}
@@ -359,11 +359,16 @@ export function PricingPage() {
                     </motion.div>
                     <CardTitle className="text-3xl font-bold mb-3 text-white">{plan.name}</CardTitle>
                     <CardDescription className="text-slate-400 text-base mb-6 leading-relaxed">{plan.description}</CardDescription>
-                    <div className="flex items-baseline gap-2 mb-2">
-                      <span className="text-5xl font-bold bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">{plan.price}</span>
-                      {plan.period !== "forever" && (
-                        <span className="text-slate-400 text-lg">/{plan.period}</span>
+                    <div className="flex flex-col mb-2">
+                      {plan.originalPrice && (
+                        <span className="text-slate-500 line-through text-xl mb-1">{plan.originalPrice}</span>
                       )}
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-5xl font-bold bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">{plan.price}</span>
+                        {plan.period !== "forever" && (
+                          <span className="text-slate-400 text-lg">/{plan.period}</span>
+                        )}
+                      </div>
                     </div>
                     {plan.period === "forever" && (
                       <p className="text-sm text-slate-500">No credit card required</p>
@@ -421,14 +426,18 @@ export function PricingPage() {
 
                     <Link href={plan.ctaLink} className="block pt-4">
                       <Button
-                        className={`w-full h-12 text-base font-semibold transition-all duration-300 ${
-                          plan.popular
-                            ? "bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 hover:from-purple-500 hover:via-pink-500 hover:to-purple-500 text-white shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 hover:scale-105"
-                            : "bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/40 hover:scale-105"
-                        }`}
+                        className={`w-full h-12 text-base font-semibold transition-all duration-300 ${plan.popular
+                          ? "bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 hover:from-purple-500 hover:via-pink-500 hover:to-purple-500 text-white shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 hover:scale-105"
+                          : "bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/40 hover:scale-105"
+                          }`}
                         size="lg"
                       >
-                        {plan.name === "Professional" ? "Subscribe with PayPal" : plan.cta}
+                        {plan.name === "Professional" ? (
+                          <div className="flex flex-col items-center leading-none">
+                            <span className="mb-1">{plan.cta}</span>
+                            <span className="text-[10px] opacity-80 font-normal">Payment Link Coming Soon</span>
+                          </div>
+                        ) : plan.cta}
                         <ArrowRight className="ml-2 h-5 w-5" />
                       </Button>
                     </Link>

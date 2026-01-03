@@ -29,6 +29,7 @@ import {
   BookOpen,
   MailCheck,
   Wifi,
+  MapPin,
 } from "lucide-react"
 
 const containerVariants = {
@@ -291,7 +292,7 @@ export function LandingPage() {
         className="fixed top-0 left-0 right-0 z-50 bg-slate-950/80 backdrop-blur-xl border-b border-slate-800/50"
         initial={{ y: -100 }}
         animate={{ y: 0 }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
+        transition={{ duration: 0.6, ease: "easeOut" as const }}
       >
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
@@ -1211,7 +1212,7 @@ export function LandingPage() {
                                       duration: 2,
                                       repeat: Infinity,
                                       delay: i * 0.3,
-                                      ease: "easeOut",
+                                      ease: "easeOut" as const,
                                     }}
                                   />
                                 ))}
@@ -1250,7 +1251,7 @@ export function LandingPage() {
                                         duration: 2,
                                         repeat: Infinity,
                                         delay: i * 0.2,
-                                        ease: "easeOut",
+                                        ease: "easeOut" as const,
                                       }}
                                     />
                                   )
@@ -2682,6 +2683,70 @@ export function LandingPage() {
                   </div>
                 </motion.div>
               </div>
+            </motion.div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Contact Section */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 relative z-10 border-t border-slate-800/50 bg-slate-900/30">
+        <div className="max-w-7xl mx-auto">
+          <motion.div
+            className="text-center mb-12"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={containerVariants}
+          >
+            <motion.h2
+              variants={itemVariants}
+              className="text-3xl sm:text-4xl font-bold mb-4 text-white"
+            >
+              Get In Touch
+            </motion.h2>
+            <motion.p
+              variants={itemVariants}
+              className="text-slate-400 max-w-2xl mx-auto"
+            >
+              Have questions or want to learn more? We'd love to hear from you.
+            </motion.p>
+          </motion.div>
+
+          <motion.div
+            className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={containerVariants}
+          >
+            <motion.div variants={itemVariants}>
+              <Card className="bg-slate-900/50 border-slate-800 backdrop-blur-sm hover:border-cyan-500/50 transition-colors h-full">
+                <CardContent className="p-6 flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-cyan-500/10 flex items-center justify-center text-cyan-400 shrink-0">
+                    <Mail className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-slate-400 uppercase tracking-wider font-semibold mb-1">Email Us</p>
+                    <a href="mailto:networklinkai@gmail.com" className="text-lg text-white hover:text-cyan-400 transition-colors break-all">
+                      networklinkai@gmail.com
+                    </a>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            <motion.div variants={itemVariants}>
+              <Card className="bg-slate-900/50 border-slate-800 backdrop-blur-sm hover:border-cyan-500/50 transition-colors h-full">
+                <CardContent className="p-6 flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-400 shrink-0">
+                    <MapPin className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-slate-400 uppercase tracking-wider font-semibold mb-1">Location</p>
+                    <p className="text-lg text-white">Tokyo, Japan</p>
+                  </div>
+                </CardContent>
+              </Card>
             </motion.div>
           </motion.div>
         </div>

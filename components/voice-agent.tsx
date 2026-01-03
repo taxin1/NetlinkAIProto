@@ -161,8 +161,8 @@ function AriaMascot({
               animate={{ rotate: 360, opacity: isProcessing ? 0.8 : 0.3 }}
               transition={{ duration: isProcessing ? 2 : 10, repeat: Infinity, ease: "linear" }}
               className={`absolute -top-1/2 -left-1/2 w-[200%] h-[200%] bg-gradient-to-tr ${isListening ? "from-red-400 via-rose-300 to-transparent" :
-                  isSpeaking ? "from-emerald-400 via-teal-300 to-transparent" :
-                    "from-indigo-400 via-blue-300 to-transparent"
+                isSpeaking ? "from-emerald-400 via-teal-300 to-transparent" :
+                  "from-indigo-400 via-blue-300 to-transparent"
                 } blur-2xl`}
             />
 
@@ -216,8 +216,8 @@ function AriaMascot({
                 animate={{ scale: [1, 1.1, 1], opacity: [0.8, 1, 0.8] }}
                 transition={{ duration: 1.5, repeat: Infinity }}
                 className={`w-5 h-5 rounded-full blur-[2px] ${isListening ? "bg-red-500 shadow-[0_0_15px_#ef4444]" :
-                    isSpeaking ? "bg-emerald-500 shadow-[0_0_15px_#10b981]" :
-                      "bg-cyan-400 shadow-[0_0_15px_#22d3ee]"
+                  isSpeaking ? "bg-emerald-500 shadow-[0_0_15px_#10b981]" :
+                    "bg-cyan-400 shadow-[0_0_15px_#22d3ee]"
                   }`}
               />
             </div>
@@ -329,7 +329,7 @@ function AriaMascot({
                   duration: 1.5,
                   repeat: Infinity,
                   delay: i * 0.4,
-                  ease: "easeOut"
+                  ease: "easeOut" as const
                 }}
                 className="absolute inset-0 rounded-full border-2 border-emerald-400/50"
               />
@@ -354,7 +354,7 @@ function AriaMascot({
                 duration: 2,
                 repeat: Infinity,
                 delay: i * 0.3,
-                ease: "easeOut"
+                ease: "easeOut" as const
               }}
               className="absolute top-1/2 left-1/2 w-2 h-2 bg-amber-400 rounded-full shadow-[0_0_10px_rgba(251,191,36,0.8)]"
             />
@@ -594,7 +594,7 @@ export function VoiceAgent({ userId }: VoiceAgentProps) {
         case "schedule_meeting": {
           const eventTitle = pendingAction.parameters.title
           const eventDate = pendingAction.parameters.date || new Date().toISOString()
-          
+
           // Check for duplicate events: same title and start_time within 1 minute
           const startTime = new Date(eventDate)
           const oneMinuteBefore = new Date(startTime.getTime() - 60000)

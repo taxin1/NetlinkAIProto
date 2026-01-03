@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { PublicNavigation } from "@/components/public-navigation"
-import { 
-  DollarSign, 
+import {
+  DollarSign,
   ArrowLeft,
   ArrowRight,
   CheckCircle2,
@@ -42,7 +42,7 @@ const itemVariants = {
     y: 0,
     transition: {
       duration: 0.5,
-      ease: "easeOut",
+      ease: "easeOut" as const,
     },
   },
 }
@@ -72,12 +72,13 @@ const plans = [
   },
   {
     name: "Professional",
-    price: "$15",
+    price: "$6",
+    originalPrice: "$15",
     period: "per month",
     description: "For professionals who need unlimited power and advanced features",
     icon: Crown,
     color: "from-purple-500 to-pink-500",
-    badge: "Most Popular",
+    badge: "Limited Time Offer",
     features: [
       "Unlimited AI Email Generation",
       "AI Assistant (Text & Voice, unlimited)",
@@ -92,8 +93,8 @@ const plans = [
       "Advanced Analytics (unlimited history)",
       "Priority Support"
     ],
-    cta: "Upgrade to Professional",
-    ctaLink: "/checkout"
+    cta: "Contact Us to Buy",
+    ctaLink: "mailto:networklinkai@gmail.com"
   },
   {
     name: "Enterprise",
@@ -114,8 +115,8 @@ const plans = [
       "Custom Billing & Invoicing",
       "Training & Onboarding Support"
     ],
-    cta: "Contact Sales",
-    ctaLink: "/contact"
+    cta: "Contact Us",
+    ctaLink: "mailto:networklinkai@gmail.com"
   },
 ]
 
@@ -125,7 +126,7 @@ export function ResourcesPricingPage() {
       <PublicNavigation />
       <div className="relative overflow-hidden">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000_70%,transparent_110%)]" />
-        
+
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16">
           {/* Header */}
           <motion.div
@@ -138,7 +139,7 @@ export function ResourcesPricingPage() {
               <ArrowLeft className="h-4 w-4" />
               <span>Back to Resources</span>
             </Link>
-            
+
             <motion.div variants={itemVariants} className="text-center mb-8">
               <div className="inline-flex items-center gap-2 px-4 py-2 mb-6 rounded-full bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border border-primary/20 backdrop-blur-xl">
                 <DollarSign className="h-4 w-4 text-primary" />
@@ -162,9 +163,8 @@ export function ResourcesPricingPage() {
           >
             {plans.map((plan, index) => (
               <motion.div key={plan.name} variants={itemVariants}>
-                <Card className={`h-full hover:shadow-lg transition-all duration-300 border-2 ${
-                  plan.badge ? 'border-primary/50 relative' : ''
-                }`}>
+                <Card className={`h-full hover:shadow-lg transition-all duration-300 border-2 ${plan.badge ? 'border-primary/50 relative' : ''
+                  }`}>
                   {plan.badge && (
                     <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground">
                       {plan.badge}
@@ -175,11 +175,16 @@ export function ResourcesPricingPage() {
                       <plan.icon className="h-6 w-6 text-white" />
                     </div>
                     <CardTitle className="text-2xl mb-2">{plan.name}</CardTitle>
-                    <div className="flex items-baseline gap-2 mb-2">
-                      <span className="text-4xl font-bold">{plan.price}</span>
-                      {plan.period !== "forever" && (
-                        <span className="text-muted-foreground">/{plan.period}</span>
+                    <div className="flex flex-col mb-2">
+                      {plan.originalPrice && (
+                        <span className="text-muted-foreground line-through text-lg mb-0.5">{plan.originalPrice}</span>
                       )}
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-4xl font-bold">{plan.price}</span>
+                        {plan.period !== "forever" && (
+                          <span className="text-muted-foreground">/{plan.period}</span>
+                        )}
+                      </div>
                     </div>
                     <CardDescription className="text-base">
                       {plan.description}
@@ -195,8 +200,13 @@ export function ResourcesPricingPage() {
                       ))}
                     </ul>
                     <Link href={plan.ctaLink}>
-                      <Button className="w-full" variant={plan.badge ? "default" : "outline"}>
-                        {plan.cta}
+                      <Button className="w-full h-auto py-2.5" variant={plan.badge ? "default" : "outline"}>
+                        <div className="flex flex-col items-center leading-tight">
+                          <span>{plan.cta}</span>
+                          {plan.name === "Professional" && (
+                            <span className="text-[10px] opacity-80 font-normal">Payment Link Coming Soon</span>
+                          )}
+                        </div>
                         <ArrowRight className="ml-2 h-4 w-4" />
                       </Button>
                     </Link>

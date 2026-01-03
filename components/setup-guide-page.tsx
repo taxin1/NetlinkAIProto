@@ -7,8 +7,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { PublicNavigation } from "@/components/public-navigation"
-import { 
-  Settings, 
+import {
+  Settings,
   ArrowLeft,
   CheckCircle2,
   User,
@@ -48,7 +48,7 @@ const itemVariants = {
     y: 0,
     transition: {
       duration: 0.5,
-      ease: "easeOut",
+      ease: "easeOut" as const,
     },
   },
 }
@@ -59,7 +59,7 @@ export function SetupGuidePage() {
       <PublicNavigation />
       <div className="relative overflow-hidden">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000_70%,transparent_110%)]" />
-        
+
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 sm:pt-20 pb-12 sm:pb-16">
           {/* Header */}
           <motion.div
@@ -72,7 +72,7 @@ export function SetupGuidePage() {
               <ArrowLeft className="h-4 w-4" />
               <span>Back to Resources</span>
             </Link>
-            
+
             <motion.div variants={itemVariants} className="mb-6 sm:mb-8">
               <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 mb-4 sm:mb-6 rounded-full bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border border-primary/20 backdrop-blur-xl">
                 <Settings className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" />

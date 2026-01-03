@@ -24,6 +24,7 @@ import {
   Bot,
   Radio,
   TrendingUp,
+  MapPin,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
@@ -481,6 +482,54 @@ export default function WaitlistPage() {
             </CardContent>
           </Card>
         </motion.div>
+        {/* Contact Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="mt-24 mb-12"
+        >
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4">Get In Touch</h2>
+            <p className="text-muted-foreground">Any questions? We're here to help you.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+            <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover:border-primary/50 transition-all">
+              <CardContent className="p-6 flex items-center gap-4">
+                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                  <Mail className="h-6 w-6" />
+                </div>
+                <div className="text-left">
+                  <p className="text-sm text-muted-foreground uppercase tracking-wider font-semibold mb-1">Email Us</p>
+                  <a href="mailto:networklinkai@gmail.com" className="text-lg font-medium hover:text-primary transition-colors break-all">
+                    networklinkai@gmail.com
+                  </a>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover:border-primary/50 transition-all">
+              <CardContent className="p-6 flex items-center gap-4">
+                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                  <MapPin className="h-6 w-6" />
+                </div>
+                <div className="text-left">
+                  <p className="text-sm text-muted-foreground uppercase tracking-wider font-semibold mb-1">Our Location</p>
+                  <p className="text-lg font-medium">Tokyo, Japan</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </motion.div>
+
+        {/* Simple Footer */}
+        <footer className="mt-20 py-8 border-t border-border/50 text-center">
+          <p className="text-sm text-muted-foreground">
+            © {new Date().getFullYear()} Netlink. All rights reserved.
+          </p>
+        </footer>
       </div>
     </div>
   )

@@ -7,9 +7,9 @@ import { Button } from "@/components/ui/button"
 import { PublicNavigation } from "@/components/public-navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { 
-  Brain, 
-  Network, 
+import {
+  Brain,
+  Network,
   Sparkles,
   Globe,
   Users,
@@ -43,7 +43,8 @@ import {
   Filter,
   Bell,
   Settings,
-  UserCircle
+  UserCircle,
+  MapPin,
 } from "lucide-react"
 
 const containerVariants = {
@@ -63,7 +64,7 @@ const itemVariants = {
     y: 0,
     transition: {
       duration: 0.6,
-      ease: "easeOut",
+      ease: "easeOut" as const,
     },
   },
 }
@@ -73,7 +74,7 @@ const floatAnimation = {
   transition: {
     duration: 3,
     repeat: Infinity,
-    ease: "easeInOut",
+    ease: "easeInOut" as const,
   },
 }
 
@@ -82,7 +83,7 @@ const pulseAnimation = {
   transition: {
     duration: 2,
     repeat: Infinity,
-    ease: "easeInOut",
+    ease: "easeInOut" as const,
   },
 }
 
@@ -92,7 +93,7 @@ export function PublicAboutPage() {
     target: heroRef,
     offset: ["start start", "end start"]
   })
-  
+
   const y = useTransform(scrollYProgress, [0, 1], ["0%", "50%"])
   const opacity = useTransform(scrollYProgress, [0, 1], [1, 0])
 
@@ -228,19 +229,19 @@ export function PublicAboutPage() {
       <PublicNavigation />
 
       {/* Hero Section - Enhanced */}
-      <motion.section 
+      <motion.section
         ref={heroRef}
         style={{ y, opacity }}
         className="relative container mx-auto px-4 py-32 md:py-40 z-10"
       >
         <div className="max-w-5xl mx-auto">
-        <motion.div
+          <motion.div
             initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             className="mb-10"
           >
-            <motion.span 
+            <motion.span
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2, duration: 0.6 }}
@@ -250,7 +251,7 @@ export function PublicAboutPage() {
               <span className="text-sm font-semibold text-cyan-400">About Us</span>
             </motion.span>
           </motion.div>
-          
+
           <motion.h1
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
@@ -260,7 +261,7 @@ export function PublicAboutPage() {
             <span className="block bg-gradient-to-r from-white via-cyan-100 to-blue-200 bg-clip-text text-transparent">
               We're reimagining how
             </span>
-            <motion.span 
+            <motion.span
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.6, duration: 0.8 }}
@@ -268,7 +269,7 @@ export function PublicAboutPage() {
             >
               professionals build
             </motion.span>
-            <motion.span 
+            <motion.span
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.8, duration: 0.8 }}
@@ -277,7 +278,7 @@ export function PublicAboutPage() {
               meaningful networks
             </motion.span>
           </motion.h1>
-          
+
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -285,7 +286,7 @@ export function PublicAboutPage() {
             className="max-w-2xl mb-12"
           >
             <p className="text-xl md:text-2xl text-slate-300 leading-relaxed font-light">
-              Netlink combines artificial intelligence with thoughtful design to eliminate the friction 
+              Netlink combines artificial intelligence with thoughtful design to eliminate the friction
               in professional networking. We help you connect, communicate, and grow your network—without the busywork.
             </p>
           </motion.div>
@@ -303,8 +304,8 @@ export function PublicAboutPage() {
               >
                 <Button size="lg" className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-semibold text-lg px-8 py-6 shadow-lg shadow-cyan-500/25">
                   Get Started
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
               </motion.div>
             </Link>
             {/* <Link href="/public/networkers">
@@ -324,26 +325,26 @@ export function PublicAboutPage() {
       {/* Stats Section - Enhanced */}
       <section className="relative container mx-auto px-4 py-24 z-10 border-y border-slate-800/50 bg-slate-900/30 backdrop-blur-sm">
         <div className="max-w-6xl mx-auto">
-        <motion.div
-          initial="hidden"
-          whileInView="visible"
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
             viewport={{ once: true, margin: "-100px" }}
-          variants={containerVariants}
+            variants={containerVariants}
             className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-16"
-        >
-          {stats.map((stat, index) => (
-            <motion.div
-              key={stat.label}
-              variants={itemVariants}
+          >
+            {stats.map((stat, index) => (
+              <motion.div
+                key={stat.label}
+                variants={itemVariants}
                 className="text-center group"
                 whileHover={{ y: -5 }}
                 transition={{ duration: 0.3 }}
-            >
-                  <motion.div
+              >
+                <motion.div
                   initial={{ opacity: 0, scale: 0.5 }}
                   whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true }}
-                  transition={{ 
+                  transition={{
                     delay: index * 0.15,
                     type: "spring",
                     stiffness: 200,
@@ -355,7 +356,7 @@ export function PublicAboutPage() {
                   >
                     {stat.number}
                   </motion.h3>
-                  <motion.p 
+                  <motion.p
                     initial={{ opacity: 0 }}
                     whileInView={{ opacity: 1 }}
                     viewport={{ once: true }}
@@ -365,9 +366,9 @@ export function PublicAboutPage() {
                     {stat.label}
                   </motion.p>
                 </motion.div>
-            </motion.div>
-          ))}
-        </motion.div>
+              </motion.div>
+            ))}
+          </motion.div>
         </div>
       </section>
 
@@ -396,7 +397,7 @@ export function PublicAboutPage() {
               <span className="block bg-gradient-to-r from-white via-cyan-100 to-blue-200 bg-clip-text text-transparent">
                 We believe networking
               </span>
-              <motion.span 
+              <motion.span
                 initial={{ opacity: 0 }}
                 whileInView={{ opacity: 1 }}
                 viewport={{ once: true }}
@@ -407,7 +408,7 @@ export function PublicAboutPage() {
               </motion.span>
               <span className="block mt-2 bg-gradient-to-r from-white via-cyan-100 to-blue-200 bg-clip-text text-transparent">not mechanical</span>
             </h2>
-            <motion.div 
+            <motion.div
               initial={{ width: 0 }}
               whileInView={{ width: 96 }}
               viewport={{ once: true }}
@@ -417,7 +418,7 @@ export function PublicAboutPage() {
           </motion.div>
 
           {/* Mission - Enhanced layout */}
-            <motion.div
+          <motion.div
             initial={{ opacity: 0, y: 50 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
@@ -425,7 +426,7 @@ export function PublicAboutPage() {
             className="mb-32"
           >
             <div className="grid md:grid-cols-[auto_1fr] gap-8 md:gap-12 items-start">
-                    <motion.div
+              <motion.div
                 initial={{ scaleY: 0 }}
                 whileInView={{ scaleY: 1 }}
                 viewport={{ once: true }}
@@ -433,9 +434,9 @@ export function PublicAboutPage() {
                 className="flex-shrink-0 mt-2"
               >
                 <div className="w-1 h-24 bg-gradient-to-b from-cyan-600 to-cyan-400 dark:from-cyan-400 dark:to-cyan-300"></div>
-                    </motion.div>
+              </motion.div>
               <div className="flex-1">
-                <motion.h3 
+                <motion.h3
                   initial={{ opacity: 0, x: -20 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
@@ -445,7 +446,7 @@ export function PublicAboutPage() {
                   Mission
                 </motion.h3>
                 <div className="space-y-6 text-lg md:text-xl leading-relaxed">
-                  <motion.p 
+                  <motion.p
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
@@ -454,34 +455,34 @@ export function PublicAboutPage() {
                   >
                     We're eliminating the busywork that stands between professionals and real relationships.
                   </motion.p>
-                  <motion.p 
+                  <motion.p
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: 0.7, duration: 0.6 }}
                     className="text-slate-300"
                   >
-                    Traditional networking tools force you to manage spreadsheets, remember follow-ups, and manually track every interaction. 
+                    Traditional networking tools force you to manage spreadsheets, remember follow-ups, and manually track every interaction.
                     We've built something different: an intelligent platform that handles the logistics so you can focus on what matters—building genuine connections.
                   </motion.p>
-                  <motion.p 
+                  <motion.p
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: 0.8, duration: 0.6 }}
                     className="text-slate-300"
                   >
-                    Our AI doesn't replace human connection; it amplifies it. By automating routine tasks like contact extraction, 
-                    email drafting, and meeting reminders, we give you time to invest in meaningful conversations and relationships 
+                    Our AI doesn't replace human connection; it amplifies it. By automating routine tasks like contact extraction,
+                    email drafting, and meeting reminders, we give you time to invest in meaningful conversations and relationships
                     that drive your career forward.
                   </motion.p>
-                  </div>
+                </div>
               </div>
             </div>
-            </motion.div>
+          </motion.div>
 
           {/* Vision - Enhanced layout */}
-            <motion.div
+          <motion.div
             initial={{ opacity: 0, y: 50 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
@@ -489,7 +490,7 @@ export function PublicAboutPage() {
             className="mb-24"
           >
             <div className="grid md:grid-cols-[auto_1fr] gap-8 md:gap-12 items-start">
-              <motion.div 
+              <motion.div
                 initial={{ scaleY: 0 }}
                 whileInView={{ scaleY: 1 }}
                 viewport={{ once: true }}
@@ -499,17 +500,17 @@ export function PublicAboutPage() {
                 <div className="w-1 h-24 bg-gradient-to-b from-blue-600 to-blue-400 dark:from-blue-400 dark:to-blue-300"></div>
               </motion.div>
               <div className="flex-1">
-                <motion.h3 
+                <motion.h3
                   initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
                   transition={{ delay: 0.6, duration: 0.6 }}
                   className="text-4xl md:text-5xl font-bold mb-8 bg-gradient-to-r from-white via-cyan-100 to-blue-200 bg-clip-text text-transparent"
                 >
                   Vision
                 </motion.h3>
                 <div className="space-y-6 text-lg md:text-xl leading-relaxed">
-                  <motion.p 
+                  <motion.p
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
@@ -518,32 +519,32 @@ export function PublicAboutPage() {
                   >
                     A world where every professional has the tools to build a global network effortlessly.
                   </motion.p>
-                  <motion.p 
+                  <motion.p
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: 0.8, duration: 0.6 }}
                     className="text-slate-300"
                   >
-                    We envision a future where geographic boundaries don't limit professional relationships. Where language barriers 
-                    are overcome by intelligent translation. Where time zones are managed automatically. Where your network grows 
+                    We envision a future where geographic boundaries don't limit professional relationships. Where language barriers
+                    are overcome by intelligent translation. Where time zones are managed automatically. Where your network grows
                     organically because the platform handles the friction.
                   </motion.p>
-                  <motion.p 
+                  <motion.p
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: 0.9, duration: 0.6 }}
                     className="text-slate-300"
                   >
-                    This isn't about replacing human interaction—it's about creating more of it. By removing the administrative 
-                    burden of networking, we enable professionals to connect more frequently, more meaningfully, and more globally 
+                    This isn't about replacing human interaction—it's about creating more of it. By removing the administrative
+                    burden of networking, we enable professionals to connect more frequently, more meaningfully, and more globally
                     than ever before.
                   </motion.p>
                 </div>
               </div>
             </div>
-                    </motion.div>
+          </motion.div>
 
           {/* Key Differentiator - Enhanced */}
           <motion.div
@@ -564,29 +565,29 @@ export function PublicAboutPage() {
                 <Sparkles className="h-4 w-4 text-cyan-400" />
                 <span className="text-sm font-semibold text-cyan-400">What Makes Us Different</span>
               </motion.span>
-              <motion.p 
+              <motion.p
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.6, duration: 0.6 }}
                 className="text-2xl md:text-3xl leading-relaxed font-medium text-white"
               >
-                We're not building another CRM or contact manager. We're building an 
-                <span className="bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent"> AI co-pilot for networking</span>—one that learns 
-                your communication style, understands context, and helps you maintain relationships at scale without losing 
+                We're not building another CRM or contact manager. We're building an
+                <span className="bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent"> AI co-pilot for networking</span>—one that learns
+                your communication style, understands context, and helps you maintain relationships at scale without losing
                 the personal touch.
               </motion.p>
-                  </div>
-            </motion.div>
+            </div>
+          </motion.div>
         </div>
       </section>
 
       {/* Features Section - Enhanced */}
       <section className="relative container mx-auto px-4 py-32 z-10 bg-slate-900/30 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto">
-        <motion.div
+          <motion.div
             initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             className="mb-20"
@@ -607,14 +608,14 @@ export function PublicAboutPage() {
               </span>
               <span className="block mt-2 bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">modern networking</span>
             </h2>
-            <motion.div 
+            <motion.div
               initial={{ width: 0 }}
               whileInView={{ width: 96 }}
               viewport={{ once: true }}
               transition={{ delay: 0.3, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
               className="h-1 bg-gradient-to-r from-cyan-500 to-blue-500 mb-8"
             ></motion.div>
-            <motion.p 
+            <motion.p
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -623,25 +624,25 @@ export function PublicAboutPage() {
             >
               A comprehensive suite of AI-powered features that work together to streamline your networking workflow
             </motion.p>
-        </motion.div>
+          </motion.div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-          {features.map((feature, index) => (
-            <motion.div
-              key={feature.title}
+            {features.map((feature, index) => (
+              <motion.div
+                key={feature.title}
                 initial={{ opacity: 0, y: 50, scale: 0.95 }}
                 whileInView={{ opacity: 1, y: 0, scale: 1 }}
                 viewport={{ once: true, margin: "-50px" }}
-                transition={{ 
-                  duration: 0.6, 
+                transition={{
+                  duration: 0.6,
                   delay: index * 0.1,
                   ease: [0.16, 1, 0.3, 1]
                 }}
                 whileHover={{ y: -8, transition: { duration: 0.3 } }}
                 className="group"
               >
-                <div                 className="h-full p-8 border border-slate-700/50 rounded-xl hover:border-cyan-500/50 transition-all duration-300 bg-slate-900/70 backdrop-blur-sm hover:shadow-xl hover:shadow-cyan-500/10">
-                  <motion.div 
+                <div className="h-full p-8 border border-slate-700/50 rounded-xl hover:border-cyan-500/50 transition-all duration-300 bg-slate-900/70 backdrop-blur-sm hover:shadow-xl hover:shadow-cyan-500/10">
+                  <motion.div
                     className="w-14 h-14 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center mb-6 shadow-lg shadow-cyan-500/25"
                     whileHover={{ scale: 1.1, rotate: 5 }}
                     transition={{ type: "spring", stiffness: 400, damping: 17 }}
@@ -653,8 +654,8 @@ export function PublicAboutPage() {
                     {feature.description}
                   </p>
                 </div>
-            </motion.div>
-          ))}
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
@@ -662,9 +663,9 @@ export function PublicAboutPage() {
       {/* How It Works Section - Enhanced */}
       <section className="relative container mx-auto px-4 py-32 z-10 bg-slate-900/30 backdrop-blur-sm border-t border-slate-800/50">
         <div className="max-w-5xl mx-auto">
-        <motion.div
+          <motion.div
             initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             className="mb-20"
@@ -682,14 +683,14 @@ export function PublicAboutPage() {
             <h2 className="text-5xl md:text-6xl font-bold mb-8 leading-[1.1] tracking-tight bg-gradient-to-r from-white via-cyan-100 to-blue-200 bg-clip-text text-transparent">
               How it works
             </h2>
-            <motion.div 
+            <motion.div
               initial={{ width: 0 }}
               whileInView={{ width: 96 }}
               viewport={{ once: true }}
               transition={{ delay: 0.3, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
               className="h-1 bg-gradient-to-r from-cyan-500 to-blue-500"
             ></motion.div>
-        </motion.div>
+          </motion.div>
 
           <div className="space-y-8 md:space-y-12 relative">
             {/* Connecting line */}
@@ -700,40 +701,40 @@ export function PublicAboutPage() {
               transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
               className="hidden md:block absolute left-6 top-0 bottom-0 w-0.5 bg-gradient-to-b from-cyan-500 via-blue-500 to-purple-500"
             />
-            
-              {howItWorks.map((step, index) => (
-                <motion.div
-                  key={step.step}
+
+            {howItWorks.map((step, index) => (
+              <motion.div
+                key={step.step}
                 initial={{ opacity: 0, x: -50 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true, margin: "-50px" }}
-                  transition={{ 
-                  duration: 0.7, 
-                    delay: index * 0.2,
+                transition={{
+                  duration: 0.7,
+                  delay: index * 0.2,
                   ease: [0.16, 1, 0.3, 1]
-                  }}
+                }}
                 whileHover={{ x: 10, transition: { duration: 0.3 } }}
                 className="flex gap-6 md:gap-8 items-start relative group"
-                >
-                    <motion.div 
+              >
+                <motion.div
                   className="flex-shrink-0 relative z-10"
-                              initial={{ scale: 0, rotate: -180 }}
-                              whileInView={{ scale: 1, rotate: 0 }}
-                              viewport={{ once: true }}
-                              transition={{ 
-                                delay: index * 0.2 + 0.3,
-                                type: "spring",
+                  initial={{ scale: 0, rotate: -180 }}
+                  whileInView={{ scale: 1, rotate: 0 }}
+                  viewport={{ once: true }}
+                  transition={{
+                    delay: index * 0.2 + 0.3,
+                    type: "spring",
                     stiffness: 200,
                     damping: 20
-                              }}
-                              whileHover={{ scale: 1.1, rotate: 5 }}
-                            >
+                  }}
+                  whileHover={{ scale: 1.1, rotate: 5 }}
+                >
                   <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-cyan-500/25 border-4 border-slate-900">
                     {step.step}
                   </div>
                 </motion.div>
                 <div className="flex-1 pt-2">
-                  <motion.div 
+                  <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
@@ -748,7 +749,7 @@ export function PublicAboutPage() {
                     </motion.div>
                     <h3 className="text-2xl md:text-3xl font-bold text-white">{step.title}</h3>
                   </motion.div>
-                  <motion.p 
+                  <motion.p
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
@@ -757,9 +758,9 @@ export function PublicAboutPage() {
                   >
                     {step.description}
                   </motion.p>
-                  </div>
-                </motion.div>
-              ))}
+                </div>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
@@ -767,9 +768,9 @@ export function PublicAboutPage() {
       {/* Values Section - Enhanced */}
       <section className="relative container mx-auto px-4 py-32 z-10 bg-slate-900/20">
         <div className="max-w-6xl mx-auto">
-        <motion.div
+          <motion.div
             initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             className="mb-20"
@@ -787,31 +788,31 @@ export function PublicAboutPage() {
             <h2 className="text-5xl md:text-6xl font-bold mb-8 leading-[1.1] tracking-tight bg-gradient-to-r from-white via-cyan-100 to-blue-200 bg-clip-text text-transparent">
               What drives us
             </h2>
-            <motion.div 
+            <motion.div
               initial={{ width: 0 }}
               whileInView={{ width: 96 }}
               viewport={{ once: true }}
               transition={{ delay: 0.3, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
               className="h-1 bg-gradient-to-r from-cyan-500 to-blue-500"
             ></motion.div>
-        </motion.div>
+          </motion.div>
 
           <div className="grid md:grid-cols-2 gap-10 md:gap-16">
-          {values.map((value, index) => (
-            <motion.div
-              key={value.title}
+            {values.map((value, index) => (
+              <motion.div
+                key={value.title}
                 initial={{ opacity: 0, y: 50, x: index % 2 === 0 ? -30 : 30 }}
                 whileInView={{ opacity: 1, y: 0, x: 0 }}
                 viewport={{ once: true, margin: "-50px" }}
-                transition={{ 
-                  duration: 0.7, 
+                transition={{
+                  duration: 0.7,
                   delay: index * 0.15,
                   ease: [0.16, 1, 0.3, 1]
                 }}
                 whileHover={{ x: index % 2 === 0 ? 5 : -5, transition: { duration: 0.3 } }}
                 className="flex gap-6 items-start group"
               >
-                  <motion.div
+                <motion.div
                   className="flex-shrink-0"
                   whileHover={{ scale: 1.1, rotate: 5 }}
                   transition={{ type: "spring", stiffness: 400, damping: 17 }}
@@ -821,7 +822,7 @@ export function PublicAboutPage() {
                   </div>
                 </motion.div>
                 <div className="flex-1 pt-1">
-                  <motion.h3 
+                  <motion.h3
                     initial={{ opacity: 0 }}
                     whileInView={{ opacity: 1 }}
                     viewport={{ once: true }}
@@ -830,7 +831,7 @@ export function PublicAboutPage() {
                   >
                     {value.title}
                   </motion.h3>
-                  <motion.p 
+                  <motion.p
                     initial={{ opacity: 0 }}
                     whileInView={{ opacity: 1 }}
                     viewport={{ once: true }}
@@ -840,8 +841,8 @@ export function PublicAboutPage() {
                     {value.description}
                   </motion.p>
                 </div>
-            </motion.div>
-          ))}
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
@@ -849,9 +850,9 @@ export function PublicAboutPage() {
       {/* Technology Stack Section - Enhanced */}
       <section className="relative container mx-auto px-4 py-32 z-10 border-t border-slate-800/50 bg-slate-900/30 backdrop-blur-sm">
         <div className="max-w-6xl mx-auto">
-        <motion.div
+          <motion.div
             initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             className="mb-20"
@@ -869,14 +870,14 @@ export function PublicAboutPage() {
             <h2 className="text-5xl md:text-6xl font-bold mb-8 leading-[1.1] tracking-tight bg-gradient-to-r from-white via-cyan-100 to-blue-200 bg-clip-text text-transparent">
               Built for scale and security
             </h2>
-            <motion.div 
+            <motion.div
               initial={{ width: 0 }}
               whileInView={{ width: 96 }}
               viewport={{ once: true }}
               transition={{ delay: 0.3, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
               className="h-1 bg-gradient-to-r from-cyan-500 to-blue-500 mb-8"
             ></motion.div>
-            <motion.p 
+            <motion.p
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -888,25 +889,25 @@ export function PublicAboutPage() {
           </motion.div>
 
           <div className="grid md:grid-cols-3 gap-6 md:gap-8">
-          {[
-            { icon: Brain, title: "AI & Machine Learning", description: "Advanced AI models for natural language processing and intelligent automation" },
-            { icon: Cloud, title: "Cloud Infrastructure", description: "Scalable, secure cloud architecture for global accessibility" },
-            { icon: Lock, title: "Enterprise Security", description: "End-to-end encryption and compliance with industry standards" },
-          ].map((tech, index) => (
-            <motion.div
-              key={tech.title}
+            {[
+              { icon: Brain, title: "AI & Machine Learning", description: "Advanced AI models for natural language processing and intelligent automation" },
+              { icon: Cloud, title: "Cloud Infrastructure", description: "Scalable, secure cloud architecture for global accessibility" },
+              { icon: Lock, title: "Enterprise Security", description: "End-to-end encryption and compliance with industry standards" },
+            ].map((tech, index) => (
+              <motion.div
+                key={tech.title}
                 initial={{ opacity: 0, y: 50, scale: 0.95 }}
                 whileInView={{ opacity: 1, y: 0, scale: 1 }}
                 viewport={{ once: true, margin: "-50px" }}
-                transition={{ 
-                  duration: 0.6, 
+                transition={{
+                  duration: 0.6,
                   delay: index * 0.15,
                   ease: [0.16, 1, 0.3, 1]
                 }}
                 whileHover={{ y: -8, transition: { duration: 0.3 } }}
                 className="p-8 border border-slate-700/50 rounded-xl hover:border-cyan-500/50 transition-all duration-300 bg-slate-900/70 backdrop-blur-sm hover:shadow-xl hover:shadow-cyan-500/10"
               >
-                <motion.div 
+                <motion.div
                   className="w-14 h-14 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center mb-6 shadow-lg shadow-cyan-500/25"
                   whileHover={{ scale: 1.1, rotate: 5 }}
                   transition={{ type: "spring", stiffness: 400, damping: 17 }}
@@ -915,7 +916,7 @@ export function PublicAboutPage() {
                 </motion.div>
                 <h3 className="text-xl md:text-2xl font-bold mb-4 text-white">{tech.title}</h3>
                 <p className="text-slate-300 leading-relaxed text-base">{tech.description}</p>
-        </motion.div>
+              </motion.div>
             ))}
           </div>
         </div>
@@ -930,7 +931,7 @@ export function PublicAboutPage() {
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           className="max-w-4xl mx-auto text-center"
         >
-          <motion.h2 
+          <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -939,17 +940,17 @@ export function PublicAboutPage() {
           >
             Ready to get started?
           </motion.h2>
-          <motion.p 
+          <motion.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.3, duration: 0.6 }}
             className="text-xl md:text-2xl text-slate-300 mb-12 leading-relaxed font-light"
           >
-            Join professionals who are building stronger networks with AI-powered tools. 
+            Join professionals who are building stronger networks with AI-powered tools.
             No credit card required.
           </motion.p>
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -979,6 +980,70 @@ export function PublicAboutPage() {
             </Link> */}
           </motion.div>
         </motion.div>
+      </section>
+
+      {/* Contact Section */}
+      <section className="relative container mx-auto px-4 py-20 z-10 border-t border-slate-800/50">
+        <div className="max-w-7xl mx-auto">
+          <motion.div
+            className="text-center mb-12"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={containerVariants}
+          >
+            <motion.h2
+              variants={itemVariants}
+              className="text-3xl sm:text-4xl font-bold mb-4 text-white"
+            >
+              Get In Touch
+            </motion.h2>
+            <motion.p
+              variants={itemVariants}
+              className="text-slate-400 max-w-2xl mx-auto"
+            >
+              Have questions or want to learn more? We'd love to hear from you.
+            </motion.p>
+          </motion.div>
+
+          <motion.div
+            className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={containerVariants}
+          >
+            <motion.div variants={itemVariants}>
+              <Card className="bg-slate-900/50 border-slate-800 backdrop-blur-sm hover:border-cyan-500/50 transition-colors h-full">
+                <CardContent className="p-6 flex items-center gap-4 text-left">
+                  <div className="w-12 h-12 rounded-full bg-cyan-500/10 flex items-center justify-center text-cyan-400 shrink-0">
+                    <Mail className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-slate-400 uppercase tracking-wider font-semibold mb-1">Email Us</p>
+                    <a href="mailto:networklinkai@gmail.com" className="text-lg text-white hover:text-cyan-400 transition-colors break-all">
+                      networklinkai@gmail.com
+                    </a>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            <motion.div variants={itemVariants}>
+              <Card className="bg-slate-900/50 border-slate-800 backdrop-blur-sm hover:border-cyan-500/50 transition-colors h-full">
+                <CardContent className="p-6 flex items-center gap-4 text-left">
+                  <div className="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-400 shrink-0">
+                    <MapPin className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-slate-400 uppercase tracking-wider font-semibold mb-1">Location</p>
+                    <p className="text-lg text-white">Tokyo, Japan</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </motion.div>
+        </div>
       </section>
 
       {/* Footer */}
