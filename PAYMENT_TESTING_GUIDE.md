@@ -8,7 +8,7 @@ This guide will help you test both PayPal payments and coupon-based free subscri
 
 Make sure your `.env.local` file has:
 
-```env
+\`\`\`env
 # PayPal Configuration (Sandbox for testing)
 PAYPAL_CLIENT_ID=your_sandbox_client_id
 PAYPAL_CLIENT_SECRET=your_sandbox_client_secret
@@ -21,7 +21,7 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 # Supabase (already configured)
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-```
+\`\`\`
 
 ### 2. Database Setup
 
@@ -45,9 +45,9 @@ Run these SQL scripts in your Supabase SQL Editor (in order):
 
 ### Step 1: Start Your Development Server
 
-```bash
+\`\`\`bash
 pnpm dev
-```
+\`\`\`
 
 ### Step 2: Create Test User Account
 
@@ -85,13 +85,13 @@ pnpm dev
 
 ### Verify in Database:
 
-```sql
+\`\`\`sql
 -- Check subscription was created
 SELECT * FROM subscriptions 
 WHERE user_id = 'your-user-id'
 ORDER BY created_at DESC
 LIMIT 1;
-```
+\`\`\`
 
 ---
 
@@ -132,7 +132,7 @@ LIMIT 1;
 
 ### Verify in Database:
 
-```sql
+\`\`\`sql
 -- Check subscription
 SELECT s.*, c.code as coupon_code 
 FROM subscriptions s
@@ -149,7 +149,7 @@ WHERE user_id = 'your-user-id';
 SELECT code, current_uses, max_uses 
 FROM coupons 
 WHERE code = 'NETLINKFREE';
-```
+\`\`\`
 
 ---
 
@@ -207,10 +207,10 @@ WHERE code = 'NETLINKFREE';
 - Browser console for errors
 
 **Solution:**
-```bash
+\`\`\`bash
 # Restart dev server after changing env variables
 pnpm dev
-```
+\`\`\`
 
 ### Issue: "PayPal credentials not configured" error
 
@@ -220,11 +220,11 @@ pnpm dev
 - No typos in variable names
 
 **Solution:**
-```env
+\`\`\`env
 PAYPAL_CLIENT_ID=your_actual_client_id
 PAYPAL_CLIENT_SECRET=your_actual_secret
 PAYPAL_ENVIRONMENT=sandbox
-```
+\`\`\`
 
 ### Issue: Subscription not created
 
@@ -235,7 +235,7 @@ PAYPAL_ENVIRONMENT=sandbox
 - Check server logs for errors
 
 **Debug Query:**
-```sql
+\`\`\`sql
 -- Check if table exists
 SELECT table_name 
 FROM information_schema.tables 
@@ -245,7 +245,7 @@ AND table_name = 'subscriptions';
 -- Check RLS policies
 SELECT * FROM pg_policies 
 WHERE tablename = 'subscriptions';
-```
+\`\`\`
 
 ### Issue: Coupon validation fails
 
@@ -256,13 +256,13 @@ WHERE tablename = 'subscriptions';
 - Check server logs
 
 **Debug Query:**
-```sql
+\`\`\`sql
 -- Check coupon exists
 SELECT * FROM coupons WHERE code = 'NETLINKFREE';
 
 -- Check RLS policies
 SELECT * FROM pg_policies WHERE tablename = 'coupons';
-```
+\`\`\`
 
 ### Issue: Free subscription not activating
 
@@ -313,7 +313,7 @@ SELECT * FROM pg_policies WHERE tablename = 'coupons';
 
 ### Check Environment Variables
 
-```bash
+\`\`\`bash
 # Windows PowerShell
 $env:PAYPAL_CLIENT_ID
 $env:PAYPAL_CLIENT_SECRET
@@ -321,11 +321,11 @@ $env:PAYPAL_CLIENT_SECRET
 # Linux/Mac
 echo $PAYPAL_CLIENT_ID
 echo $PAYPAL_CLIENT_SECRET
-```
+\`\`\`
 
 ### Check Database Tables
 
-```sql
+\`\`\`sql
 -- List all tables
 SELECT table_name 
 FROM information_schema.tables 
@@ -337,7 +337,7 @@ SELECT COUNT(*) FROM subscriptions;
 
 -- Check coupons
 SELECT code, active, current_uses, max_uses FROM coupons;
-```
+\`\`\`
 
 ---
 
@@ -346,12 +346,12 @@ SELECT code, active, current_uses, max_uses FROM coupons;
 When ready for production:
 
 1. **Change Environment Variables:**
-   ```env
+   \`\`\`env
    PAYPAL_ENVIRONMENT=live
    PAYPAL_CLIENT_ID=your_live_client_id
    PAYPAL_CLIENT_SECRET=your_live_client_secret
    NEXT_PUBLIC_SITE_URL=https://yourdomain.com
-   ```
+   \`\`\`
 
 2. **Test with Real PayPal Account:**
    - Use a small test amount first
