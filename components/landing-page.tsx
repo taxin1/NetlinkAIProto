@@ -26,6 +26,9 @@ import {
   Mail,
   Sparkle,
   Waves,
+  BookOpen,
+  MailCheck,
+  Wifi,
 } from "lucide-react"
 
 const containerVariants = {
@@ -118,12 +121,14 @@ export function LandingPage() {
   const [emailStep, setEmailStep] = useState(0)
   const [nfcStep, setNfcStep] = useState(0)
   const [portfolioStep, setPortfolioStep] = useState(0)
+  const [networkingStep, setNetworkingStep] = useState(0)
   
   // Show preview first, then details
   const [showCardDetails, setShowCardDetails] = useState(false)
   const [showEmailDetails, setShowEmailDetails] = useState(false)
   const [showNfcDetails, setShowNfcDetails] = useState(false)
   const [showPortfolioDetails, setShowPortfolioDetails] = useState(false)
+  const [showNetworkingDetails, setShowNetworkingDetails] = useState(false)
 
   // Store random particle positions to avoid hydration mismatch
   const [particleConfigs, setParticleConfigs] = useState<Array<{ x: string; y: string; duration: number }> | null>(null)
@@ -157,6 +162,11 @@ export function LandingPage() {
 
   useEffect(() => {
     const timer = setTimeout(() => setShowPortfolioDetails(true), 5500)
+    return () => clearTimeout(timer)
+  }, [])
+
+  useEffect(() => {
+    const timer = setTimeout(() => setShowNetworkingDetails(true), 5000)
     return () => clearTimeout(timer)
   }, [])
 
@@ -199,6 +209,16 @@ export function LandingPage() {
       return () => clearInterval(interval)
     }
   }, [showPortfolioDetails])
+
+  // Auto-cycle through networking mode steps (only when details are shown)
+  useEffect(() => {
+    if (showNetworkingDetails) {
+      const interval = setInterval(() => {
+        setNetworkingStep((prev) => (prev + 1) % 4)
+      }, 3000)
+      return () => clearInterval(interval)
+    }
+  }, [showNetworkingDetails])
 
   return (
     <div className="min-h-screen bg-slate-950 relative overflow-hidden">
@@ -302,17 +322,25 @@ export function LandingPage() {
                 </Button>
                 </motion.div>
               </Link>
-              <Link href="/public/networkers">
+              {/* <Link href="/public/networkers">
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 <Button variant="ghost" className="text-slate-400 hover:text-white hover:bg-slate-800/50 font-medium">
                   Networkers
                 </Button>
                 </motion.div>
-              </Link>
+              </Link> */}
               <Link href="/pricing">
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 <Button variant="ghost" className="text-slate-400 hover:text-white hover:bg-slate-800/50 font-medium">
                   Pricing
+                </Button>
+                </motion.div>
+              </Link>
+              <Link href="/resources">
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button variant="ghost" className="text-slate-400 hover:text-white hover:bg-slate-800/50 font-medium">
+                  <BookOpen className="h-4 w-4 mr-2" />
+                  Resources
                 </Button>
                 </motion.div>
               </Link>
@@ -323,10 +351,10 @@ export function LandingPage() {
                 </Button>
                 </motion.div>
               </Link>
-              <Link href="/auth/signup">
+              <Link href="/waitlist">
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 <Button className="bg-white text-slate-900 hover:bg-slate-100 font-medium shadow-md">
-                  Get Started
+                  Join Waitlist
                 </Button>
                 </motion.div>
               </Link>
@@ -383,14 +411,14 @@ export function LandingPage() {
               variants={itemVariants}
               className="flex flex-col sm:flex-row gap-4 justify-center items-center"
             >
-              <Link href="/auth/signup">
+              <Link href="/waitlist">
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                   <Button
                     size="lg"
                     className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-semibold text-lg px-8 py-6 shadow-lg shadow-cyan-500/25"
                   >
-                    Start Free Trial
-                    <Zap className="ml-2 h-5 w-5" />
+                    Join Waitlist
+                    <Sparkles className="ml-2 h-5 w-5" />
                   </Button>
                 </motion.div>
               </Link>
@@ -423,7 +451,7 @@ export function LandingPage() {
               variants={itemVariants}
               className="mt-6 text-sm text-slate-400"
             >
-              No credit card required • 14-day free trial • Cancel anytime
+              First 100 users get 6 months FREE Pro access • Launch coming soon
             </motion.p>
           </motion.div>
         </div>
@@ -1104,7 +1132,8 @@ export function LandingPage() {
               </motion.div>
             </motion.div>
 
-            {/* Feature 3: NFC - Radio Waves with Connection Animation */}
+            {/* Feature 3: NFC - Radio Waves with Connection Animation - HIDDEN */}
+            {false && (
             <motion.div
               initial="hidden"
               whileInView="visible"
@@ -1420,6 +1449,7 @@ export function LandingPage() {
                 </Card>
               </motion.div>
             </motion.div>
+            )}
 
             {/* Feature 4: Portfolio Builder - Building Blocks Animation */}
             <motion.div
@@ -1734,6 +1764,290 @@ export function LandingPage() {
                               </div>
                               <div className="text-xs text-slate-400 text-center">
                                 portfolio.netlink.com/john-smith
+                              </div>
+                            </div>
+                          </div>
+                        </motion.div>
+                        )}
+                        </>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            </motion.div>
+
+            {/* Feature 5: Networking Mode - Auto Email on Scan */}
+            <motion.div
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.2 }}
+              variants={itemVariants}
+              className="relative group"
+            >
+              <motion.div
+                whileHover={{ y: -8, scale: 1.02 }}
+                transition={{ type: "spring", stiffness: 300 }}
+              >
+                <Card className="border-2 border-slate-700/50 bg-gradient-to-br from-slate-800/60 to-slate-900/60 backdrop-blur-xl hover:border-purple-500/50 transition-all duration-500 h-full overflow-hidden relative">
+                  {/* Animated background glow */}
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                    animate={{
+                      backgroundPosition: ["0% 0%", "100% 100%"],
+                    }}
+                    transition={{ duration: 3, repeat: Infinity, repeatType: "reverse" }}
+                  />
+                  
+                  <CardContent className="p-6 relative z-10">
+                    <div className="flex items-center gap-3 mb-4">
+                      <motion.div
+                        className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 via-purple-600 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/30"
+                        animate={{
+                          scale: [1, 1.1, 1],
+                          rotate: [0, 10, -10, 0],
+                        }}
+                        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                      >
+                        <Sparkles className="h-6 w-6 text-white" />
+                      </motion.div>
+                      <div>
+                        <h3 className="text-xl font-bold text-white">Networking Mode</h3>
+                        <p className="text-sm text-slate-400">Auto-Connect at Events</p>
+                      </div>
+                    </div>
+
+                    {/* Preview Animation or Detailed Process */}
+                    <div className="relative bg-slate-900/70 rounded-xl p-4 mt-4 border border-slate-700/50 overflow-hidden min-h-[280px]">
+                      <AnimatePresence mode="wait">
+                        {/* Preview Animation */}
+                        {!showNetworkingDetails && (
+                        <motion.div
+                          key="preview"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          className="absolute inset-4 flex items-center justify-center"
+                        >
+                          <div className="relative w-full h-full flex flex-col items-center justify-center gap-4">
+                            {/* Scanning Animation */}
+                            <motion.div
+                              className="relative"
+                              animate={{
+                                scale: [1, 1.05, 1],
+                              }}
+                              transition={{ duration: 2, repeat: Infinity }}
+                            >
+                              <div className="w-20 h-28 bg-gradient-to-br from-purple-50 to-pink-100 dark:from-slate-700 dark:to-slate-600 rounded-lg p-2 shadow-xl border-2 border-purple-400/50">
+                                <div className="h-full bg-gradient-to-br from-purple-200 to-pink-200 dark:from-slate-600 dark:to-slate-500 rounded flex items-center justify-center">
+                                  <Scan className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+                                </div>
+                              </div>
+                              {/* Scanning Beam */}
+                              <motion.div
+                                className="absolute -top-2 left-1/2 w-16 h-1 bg-gradient-to-r from-transparent via-purple-400 to-transparent rounded-full"
+                                animate={{
+                                  y: [0, 32, 0],
+                                  opacity: [0.5, 1, 0.5],
+                                }}
+                                transition={{ duration: 1.5, repeat: Infinity }}
+                                style={{ transform: "translateX(-50%)" }}
+                              />
+                            </motion.div>
+
+                            {/* Email Icon Flying */}
+                            <motion.div
+                              className="absolute"
+                              animate={{
+                                x: [0, 100, 0],
+                                y: [0, -50, 0],
+                                opacity: [0, 1, 0],
+                              }}
+                              transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
+                            >
+                              <MailCheck className="h-8 w-8 text-green-400" />
+                            </motion.div>
+
+                            {/* Connection Lines */}
+                            {[0, 1, 2].map((i) => (
+                              <motion.div
+                                key={i}
+                                className="absolute w-0.5 h-8 bg-gradient-to-b from-purple-400 to-transparent"
+                                style={{
+                                  left: `${50 + i * 10}%`,
+                                  top: "60%",
+                                }}
+                                animate={{
+                                  height: [0, 32, 0],
+                                  opacity: [0, 1, 0],
+                                }}
+                                transition={{
+                                  duration: 1.5,
+                                  repeat: Infinity,
+                                  delay: i * 0.2,
+                                }}
+                              />
+                            ))}
+                          </div>
+                        </motion.div>
+                        )}
+
+                        {/* Detailed Process Steps */}
+                        {showNetworkingDetails && (
+                        <>
+                        {/* Step 1: Enable Networking Mode */}
+                        {networkingStep === 0 && (
+                        <motion.div
+                          key="enable"
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -20 }}
+                          transition={{ duration: 0.5 }}
+                          className="absolute inset-4"
+                        >
+                          <div className="bg-slate-800 rounded-lg p-4 h-full flex flex-col items-center justify-center">
+                            <motion.div
+                              animate={{ scale: [1, 1.1, 1], rotate: [0, 5, -5, 0] }}
+                              transition={{ duration: 2, repeat: Infinity }}
+                            >
+                              <Sparkles className="h-12 w-12 text-purple-400 mb-4" />
+                            </motion.div>
+                            <p className="text-sm font-semibold text-white mb-2">Networking Mode</p>
+                            <div className="flex items-center gap-2 bg-purple-500/20 rounded-lg px-3 py-2 border border-purple-500/30 mt-2">
+                              <motion.div
+                                className="w-2 h-2 rounded-full bg-purple-400"
+                                animate={{
+                                  scale: [1, 1.5, 1],
+                                  opacity: [0.5, 1, 0.5],
+                                }}
+                                transition={{ duration: 1, repeat: Infinity }}
+                              />
+                              <span className="text-xs text-purple-300 font-semibold">Enabled</span>
+                            </div>
+                            <p className="text-xs text-slate-400 text-center mt-3">Ready to scan and connect</p>
+                          </div>
+                        </motion.div>
+                        )}
+
+                        {/* Step 2: Scanning Card */}
+                        {networkingStep === 1 && (
+                        <motion.div
+                          key="scan"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.5 }}
+                          className="absolute inset-4"
+                        >
+                          <div className="bg-slate-800 rounded-lg p-4 h-full flex flex-col items-center justify-center">
+                            <div className="relative mb-4">
+                              <motion.div
+                                className="w-24 h-32 bg-gradient-to-br from-purple-50 to-pink-100 dark:from-slate-700 dark:to-slate-600 rounded-lg p-3 shadow-xl"
+                                animate={{
+                                  scale: [1, 1.05, 1],
+                                }}
+                                transition={{ duration: 1.5, repeat: Infinity }}
+                              >
+                                <div className="h-full bg-gradient-to-br from-purple-200 to-pink-200 dark:from-slate-600 dark:to-slate-500 rounded flex items-center justify-center">
+                                  <Scan className="h-8 w-8 text-purple-600 dark:text-purple-400" />
+                                </div>
+                              </motion.div>
+                              {/* Scanning Beam */}
+                              <motion.div
+                                className="absolute -top-1 left-1/2 w-20 h-1 bg-gradient-to-r from-transparent via-purple-400 to-transparent rounded-full"
+                                animate={{
+                                  y: [0, 40, 0],
+                                  opacity: [0.5, 1, 0.5],
+                                }}
+                                transition={{ duration: 1.5, repeat: Infinity }}
+                                style={{ transform: "translateX(-50%)" }}
+                              />
+                            </div>
+                            <p className="text-sm font-semibold text-white mb-1">Scanning Card...</p>
+                            <p className="text-xs text-slate-400">Extracting contact info</p>
+                            <div className="mt-3 flex gap-1">
+                              {[0, 1, 2].map((i) => (
+                                <motion.div
+                                  key={i}
+                                  className="w-2 h-2 rounded-full bg-purple-400"
+                                  animate={{
+                                    opacity: [0.3, 1, 0.3],
+                                    scale: [1, 1.2, 1],
+                                  }}
+                                  transition={{
+                                    duration: 1,
+                                    repeat: Infinity,
+                                    delay: i * 0.2,
+                                  }}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                        </motion.div>
+                        )}
+
+                        {/* Step 3: Auto-Generating Email */}
+                        {networkingStep === 2 && (
+                        <motion.div
+                          key="generate"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.5 }}
+                          className="absolute inset-4"
+                        >
+                          <div className="bg-slate-800 rounded-lg p-4 h-full">
+                            <div className="flex items-center gap-2 mb-4">
+                              <Sparkles className="h-5 w-5 text-purple-400" />
+                              <span className="text-sm font-semibold text-white">Generating Email...</span>
+                            </div>
+                            
+                            <div className="space-y-2 mb-3">
+                              <div className="flex items-center gap-2 text-xs">
+                                <Loader2 className="h-3 w-3 text-purple-400 animate-spin" />
+                                <span className="text-slate-300">Personalizing message...</span>
+                              </div>
+                              <div className="bg-slate-700/50 rounded p-2">
+                                <div className="h-2 bg-purple-400/30 rounded w-full mb-1" />
+                                <div className="h-2 bg-purple-400/30 rounded w-4/5 mb-1" />
+                                <div className="h-2 bg-purple-400/30 rounded w-3/4" />
+                              </div>
+                            </div>
+                            
+                            <div className="flex items-center gap-2 text-xs text-purple-400 mt-3">
+                              <Mail className="h-3 w-3" />
+                              <span>Email ready to send</span>
+                            </div>
+                          </div>
+                        </motion.div>
+                        )}
+
+                        {/* Step 4: Email Sent Successfully */}
+                        {networkingStep === 3 && (
+                        <motion.div
+                          key="success"
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.95 }}
+                          transition={{ duration: 0.5 }}
+                          className="absolute inset-4"
+                        >
+                          <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-lg p-4 h-full border-2 border-green-500/30 flex flex-col items-center justify-center">
+                            <motion.div
+                              animate={{ scale: [1, 1.1, 1] }}
+                              transition={{ duration: 1, repeat: Infinity }}
+                            >
+                              <MailCheck className="h-12 w-12 text-green-400 mb-3" />
+                            </motion.div>
+                            <p className="text-lg font-bold text-green-400 mb-2">Email Sent!</p>
+                            <div className="bg-slate-800/50 rounded-lg p-3 w-full mt-4">
+                              <div className="flex items-center gap-2 text-xs text-green-400 mb-1">
+                                <CheckCircle2 className="h-3 w-3" />
+                                <span>Contact saved & email delivered</span>
+                              </div>
+                              <div className="text-xs text-slate-400 text-center mt-2">
+                                Networking mode active
                               </div>
                             </div>
                           </div>
@@ -2288,15 +2602,15 @@ export function LandingPage() {
                     variants={itemVariants}
                     className="flex flex-col sm:flex-row gap-4 justify-center"
                   >
-                  <Link href="/auth/signup">
+                  <Link href="/waitlist">
                       <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                         <Button
                           size="lg"
                           variant="secondary"
                           className="text-lg px-8 py-6 bg-white text-cyan-600 hover:bg-cyan-50 font-semibold shadow-lg"
                         >
-                      Start Free Trial
-                      <Zap className="ml-2 h-5 w-5" />
+                      Join Waitlist
+                      <Sparkles className="ml-2 h-5 w-5" />
                     </Button>
                       </motion.div>
                   </Link>
@@ -2387,14 +2701,14 @@ export function LandingPage() {
               About
               </motion.div>
             </Link>
-            <Link href="/public/networkers">
+            {/* <Link href="/public/networkers">
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 className="text-slate-400 hover:text-cyan-400 transition-colors cursor-pointer underline-offset-4 hover:underline"
             >
               Networkers
               </motion.div>
-            </Link>
+            </Link> */}
             <Link href="/privacy">
               <motion.div
                 whileHover={{ scale: 1.05 }}

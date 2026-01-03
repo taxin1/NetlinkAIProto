@@ -32,8 +32,8 @@ export default function LoginPage() {
         const { data: { user } } = await supabase.auth.getUser()
         
         if (user) {
-          // User is already signed in, redirect to intended page
-          router.push(redirectPath)
+          // User is already signed in, redirect to waitlist (product launch)
+          router.push("/waitlist")
           router.refresh()
         }
       } catch (error) {
@@ -56,7 +56,8 @@ export default function LoginPage() {
     if (error) {
       setError(error)
     } else if (data?.session) {
-      router.push(redirectPath)
+      // Redirect to waitlist for now (product launch)
+      router.push("/waitlist")
       router.refresh()
     }
     
@@ -67,7 +68,7 @@ export default function LoginPage() {
     setIsLoading(true)
     setError(null)
 
-    const { data, error } = await authService.signInWithOAuth('google', redirectPath)
+    const { data, error } = await authService.signInWithOAuth('google', '/waitlist')
     
     if (error) {
       setError(error)

@@ -6,7 +6,7 @@ import { useState, useEffect } from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { LayoutDashboard, Users, Mail, BarChart3, LogOut, Network, Bot, Settings, Calendar, Menu, X, Share2, Phone, CheckCircle2, CalendarDays, Briefcase, Home, Info, UserCircle, Sparkles, Wand2, Crown, CreditCard } from "lucide-react"
+import { LayoutDashboard, Users, Mail, BarChart3, LogOut, Network, Bot, Settings, Calendar, Menu, X, Share2, Phone, CheckCircle2, CalendarDays, Briefcase, Home, Info, UserCircle, Sparkles, Wand2, Crown, CreditCard, BookOpen } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { useMobile } from "@/lib/hooks/use-mobile"
@@ -42,7 +42,15 @@ const navigation = [
 const publicNavigation = [
   { name: "Home", href: "/", icon: Home },
   { name: "About", href: "/public/about", icon: Info },
-  { name: "Networkers", href: "/public/networkers", icon: UserCircle },
+  // { name: "Networkers", href: "/public/networkers", icon: UserCircle }, // Hidden for now
+]
+
+const resourcesNavigation = [
+  { name: "Resources Home", href: "/resources", icon: BookOpen },
+  { name: "Getting Started", href: "/resources/getting-started", icon: Sparkles },
+  { name: "Setup Guide", href: "/resources/setup-guide", icon: Settings },
+  { name: "Pricing", href: "/resources/pricing", icon: Crown },
+  { name: "FAQ", href: "/resources/faq", icon: Info },
 ]
 
 export function Sidebar({ user }: SidebarProps) {
@@ -145,11 +153,28 @@ export function Sidebar({ user }: SidebarProps) {
           const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname?.startsWith(item.href))
           const showGoogleCalendarBadge = (item.name === "Calendar" || item.name === "Events") && googleCalendarConnected
           
+          // Map navigation items to tour data attributes
+          const tourDataAttr: Record<string, string> = {
+            "Dashboard": "dashboard-nav",
+            "Network Profile": "profile-nav",
+            "Portfolio": "portfolio-nav",
+            "Contacts": "contacts-nav",
+            "Networking Mode": "networking-nav",
+            "Calendar": "calendar-nav",
+            "Events": "events-nav",
+            "Emails": "emails-nav",
+            "AI Campaigns": "campaigns-nav",
+            "Analytics": "analytics-nav",
+            "AI Assistant": "ai-assistant-nav",
+            "Settings": "settings-nav",
+          }
+          
           return (
             <Link
               key={item.name}
               href={item.href}
               onClick={onItemClick}
+              data-tour={tourDataAttr[item.name]}
               className={cn(
                 "flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all duration-200 relative",
                 isActive
@@ -183,6 +208,34 @@ export function Sidebar({ user }: SidebarProps) {
           )
         })}
         
+        {/* Divider */}
+        <div className="my-4 border-t border-slate-800/50"></div>
+        
+        {/* Resources Section */}
+        <div className="mb-2 px-4">
+          <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Resources</p>
+        </div>
+        {resourcesNavigation.map((item) => {
+          const isActive = pathname === item.href || pathname?.startsWith(item.href)
+          
+          return (
+            <Link
+              key={item.name}
+              href={item.href}
+              onClick={onItemClick}
+              className={cn(
+                "flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all duration-200",
+                isActive
+                  ? "bg-white text-slate-900 shadow-md"
+                  : "text-slate-400 hover:text-white hover:bg-slate-800/50",
+              )}
+            >
+              <item.icon className="h-5 w-5" />
+              <span className="flex-1">{item.name}</span>
+            </Link>
+          )
+        })}
+
         {/* Divider */}
         <div className="my-4 border-t border-slate-800/50"></div>
         

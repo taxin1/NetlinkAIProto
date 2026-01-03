@@ -307,7 +307,7 @@ export function PublicAboutPage() {
               </Button>
               </motion.div>
             </Link>
-            <Link href="/public/networkers">
+            {/* <Link href="/public/networkers">
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -316,7 +316,7 @@ export function PublicAboutPage() {
                 Explore Networkers
               </Button>
               </motion.div>
-            </Link>
+            </Link> */}
           </motion.div>
         </div>
       </motion.section>
@@ -967,7 +967,7 @@ export function PublicAboutPage() {
                 </Button>
               </motion.div>
             </Link>
-            <Link href="/public/networkers">
+            {/* <Link href="/public/networkers">
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -976,7 +976,7 @@ export function PublicAboutPage() {
                   Explore Networkers
                 </Button>
               </motion.div>
-            </Link>
+            </Link> */}
           </motion.div>
         </motion.div>
       </section>
@@ -995,9 +995,9 @@ export function PublicAboutPage() {
               <Link href="/public/about" className="text-sm text-muted-foreground hover:text-foreground">
                 About
               </Link>
-              <Link href="/public/networkers" className="text-sm text-muted-foreground hover:text-foreground">
+              {/* <Link href="/public/networkers" className="text-sm text-muted-foreground hover:text-foreground">
                 Networkers
-              </Link>
+              </Link> */}
               <Link href="/privacy" className="text-sm text-muted-foreground hover:text-foreground">
                 Privacy
               </Link>

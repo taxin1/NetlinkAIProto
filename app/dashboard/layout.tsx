@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server"
 import { Sidebar } from "@/components/sidebar"
 import { BackgroundPaths } from "@/components/kokonutui/background-paths"
 import { GlobalNetworkerOptInPrompt } from "@/components/global-networker-optin"
+import { GuidedTour } from "@/components/guided-tour"
 
 export default async function DashboardLayout({
   children,
@@ -17,6 +18,23 @@ export default async function DashboardLayout({
 
   if (!user) {
     redirect("/auth/login")
+  }
+
+  // Check if user should be on waitlist
+  // For now, redirect all users to waitlist until product launch
+  const { data: waitlistEntry } = await supabase
+    .from('waitlist')
+    .select('pro_access_granted, pro_access_until')
+    .eq('user_id', user.id)
+    .maybeSingle()
+
+  // Allow access only if they have pro access granted and it hasn't expired
+  const hasAccess = waitlistEntry?.pro_access_granted && 
+    waitlistEntry?.pro_access_until && 
+    new Date(waitlistEntry.pro_access_until) > new Date()
+
+  if (!hasAccess) {
+    redirect("/waitlist")
   }
 
   return (
@@ -43,6 +61,7 @@ export default async function DashboardLayout({
 
       <main className="flex-1 overflow-y-auto overflow-x-hidden relative z-10 w-full lg:w-auto overscroll-contain">
         <GlobalNetworkerOptInPrompt userId={user.id} />
+        <GuidedTour userId={user.id} />
         {children}
       </main>
     </div>

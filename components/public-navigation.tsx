@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { createClient } from "@/lib/supabase/client"
-import { LayoutDashboard, LogOut } from "lucide-react"
+import { LayoutDashboard, LogOut, BookOpen } from "lucide-react"
 import { useRouter } from "next/navigation"
 
 export function PublicNavigation() {
@@ -50,11 +50,17 @@ export function PublicNavigation() {
             <Link href="/public/about">
               <Button variant="ghost">About</Button>
             </Link>
-            <Link href="/public/networkers">
+            {/* <Link href="/public/networkers">
               <Button variant="ghost">Networkers</Button>
-            </Link>
+            </Link> */}
             <Link href="/pricing">
               <Button variant="ghost">Pricing</Button>
+            </Link>
+            <Link href="/resources">
+              <Button variant="ghost">
+                <BookOpen className="h-4 w-4 mr-2" />
+                Resources
+              </Button>
             </Link>
             {!isLoading && (
               <>

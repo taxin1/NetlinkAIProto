@@ -12,19 +12,23 @@ export default async function OnboardingPage() {
     redirect("/auth/login")
   }
 
-  const { data: existingProfile } = await supabase
-    .from("network_profiles")
-    .select("id, name, title, company, email, linkedin, website, is_public_profile")
-    .eq("user_id", user.id)
-    .maybeSingle()
+  // Redirect to waitlist during product launch
+  redirect("/waitlist")
 
-  const hasProfileDetails =
-    existingProfile &&
-    (existingProfile.name || existingProfile.title || existingProfile.company || existingProfile.linkedin || existingProfile.website)
+  // Original onboarding code (commented out for waitlist phase)
+  // const { data: existingProfile } = await supabase
+  //   .from("network_profiles")
+  //   .select("id, name, title, company, email, linkedin, website, is_public_profile")
+  //   .eq("user_id", user.id)
+  //   .maybeSingle()
 
-  if (hasProfileDetails) {
-    redirect("/dashboard")
-  }
+  // const hasProfileDetails =
+  //   existingProfile &&
+  //   (existingProfile.name || existingProfile.title || existingProfile.company || existingProfile.linkedin || existingProfile.website)
 
-  return <OnboardingWizard userId={user.id} initialEmail={user.email ?? ""} existingProfile={existingProfile} />
+  // if (hasProfileDetails) {
+  //   redirect("/dashboard")
+  // }
+
+  // return <OnboardingWizard userId={user.id} initialEmail={user.email ?? ""} existingProfile={existingProfile} />
 }

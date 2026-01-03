@@ -450,7 +450,10 @@ export function BusinessCardScanner({
   }, [autoDetect, isCameraActive, isScanning, captureAndScan])
 
   return (
-    <Card className="border-2 border-dashed border-primary/20 bg-card/50 backdrop-blur-sm hover:border-primary/40 transition-colors">
+    <Card 
+      data-tour="dashboard-scanner"
+      className="border-2 border-dashed border-primary/20 bg-card/50 backdrop-blur-sm hover:border-primary/40 transition-colors"
+    >
       <CardContent className="p-4 sm:p-6 lg:p-12">
         <div className="flex flex-col items-center justify-center text-center">
           {/* Mode toggle buttons */}
