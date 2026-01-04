@@ -52,7 +52,7 @@ Check your server logs (terminal where you run `pnpm dev`) for the actual error 
 
 If the script doesn't work, you can manually run these commands one by one in Supabase SQL Editor:
 
-```sql
+\`\`\`sql
 -- 1. Drop policies if they exist
 DROP POLICY IF EXISTS "Anyone can join waitlist" ON public.waitlist;
 DROP POLICY IF EXISTS "Users can view their own waitlist entry" ON public.waitlist;
@@ -65,6 +65,6 @@ CREATE POLICY "Anyone can join waitlist"
 CREATE POLICY "Users can view their own waitlist entry"
   ON public.waitlist FOR SELECT
   USING (auth.uid() = user_id OR auth.uid() IS NULL);
-```
+\`\`\`
 
 Then test the waitlist again!
