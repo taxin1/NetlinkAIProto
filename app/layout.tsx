@@ -88,6 +88,7 @@ export const metadata: Metadata = {
     yandex: 'your-yandex-verification-code',
   },
   category: 'Technology',
+    generator: 'v0.app'
 }
 
 export default function RootLayout({
