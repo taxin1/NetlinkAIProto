@@ -439,7 +439,7 @@ async function callOpenRouterChatModel(
         "Content-Type": "application/json",
         "Authorization": `Bearer ${apiKey}`,
         "HTTP-Referer": process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
-        "X-Title": "Network Link AI"
+        "X-Title": "Netlink AI"
       },
       body: JSON.stringify({
         model,

@@ -29,7 +29,7 @@ export function AdminLayoutWrapper({ children }: { children: React.ReactNode }) 
       <header className="border-b border-slate-800 p-4 bg-slate-900/50 backdrop-blur">
         <div className="container mx-auto flex justify-between items-center">
           <h1 className="text-xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
-            Cognisor Admin
+            Netlink AI Admin
           </h1>
           <nav className="flex items-center gap-4">
             <a href="/admin" className="text-sm font-medium hover:text-purple-400 transition-colors">Dashboard</a>

@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import Link from "next/link"
+import Image from "next/image"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useState, useEffect, Suspense } from "react"
 import { Chrome, LayoutDashboard, Eye, EyeOff } from "lucide-react"
@@ -93,6 +94,19 @@ function LoginContent() {
     <div className="flex min-h-screen w-full items-center justify-center p-6 bg-slate-950 relative overflow-hidden">
       <div className="fixed inset-0 tech-grid opacity-20" />
       <div className="w-full max-w-sm relative z-10">
+        <div className="flex justify-center mb-16">
+          <Link href="/" className="flex flex-col items-center group transition-all">
+            <div className="relative h-72 w-[600px] overflow-hidden transform group-hover:scale-110 transition-transform duration-700 drop-shadow-[0_0_40px_rgba(59,130,246,0.7)]">
+              <Image 
+                src="/Logo1.png" 
+                alt="Netlink AI Logo" 
+                fill 
+                className="object-contain"
+                priority
+              />
+            </div>
+          </Link>
+        </div>
         <Card className="border-slate-800/50 bg-slate-900/80 backdrop-blur-xl">
           <CardHeader>
             <CardTitle className="text-2xl text-white font-bold tracking-tight">Welcome back</CardTitle>

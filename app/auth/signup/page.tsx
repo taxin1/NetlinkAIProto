@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import Link from "next/link"
+import Image from "next/image"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useState, useEffect, Suspense } from "react"
 import { Chrome, Eye, EyeOff } from "lucide-react"
@@ -116,22 +117,36 @@ function SignUpContent() {
   // Show loading state while checking authentication
   if (isCheckingAuth) {
     return (
-      <div className="flex min-h-screen w-full items-center justify-center p-6">
+      <div className="flex min-h-screen w-full items-center justify-center p-6 bg-slate-950">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Checking authentication...</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-4"></div>
+          <p className="text-slate-400">Checking authentication...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="flex min-h-screen w-full items-center justify-center p-6">
-      <div className="w-full max-w-sm">
-        <Card className="border-border">
+    <div className="flex min-h-screen w-full items-center justify-center p-6 bg-slate-950 relative overflow-hidden">
+      <div className="fixed inset-0 tech-grid opacity-20" />
+      <div className="w-full max-w-sm relative z-10">
+        <div className="flex justify-center mb-16">
+          <Link href="/" className="flex flex-col items-center group transition-all">
+            <div className="relative h-72 w-[600px] overflow-hidden transform group-hover:scale-110 transition-transform duration-700 drop-shadow-[0_0_40px_rgba(59,130,246,0.7)]">
+              <Image 
+                src="/Logo1.png" 
+                alt="Netlink AI Logo" 
+                fill 
+                className="object-contain"
+                priority
+              />
+            </div>
+          </Link>
+        </div>
+        <Card className="border-slate-800/50 bg-slate-900/80 backdrop-blur-xl">
           <CardHeader>
-            <CardTitle className="text-2xl">Create an account</CardTitle>
-            <CardDescription className="text-muted-foreground">
+            <CardTitle className="text-2xl text-white font-bold tracking-tight">Create an account</CardTitle>
+            <CardDescription className="text-slate-400 font-light">
               {redirectPath.includes('checkout')
                 ? "Sign up to start your subscription"
                 : "Start building your network today"}
@@ -141,7 +156,7 @@ function SignUpContent() {
             <form onSubmit={handleSignUp}>
               <div className="flex flex-col gap-6">
                 <div className="grid gap-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email" className="text-slate-300">Email</Label>
                   <Input
                     id="email"
                     type="email"
@@ -149,11 +164,11 @@ function SignUpContent() {
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="bg-secondary border-border"
+                    className="bg-slate-800/50 border-slate-700/50 text-white placeholder:text-slate-500"
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password" className="text-slate-300">Password</Label>
                   <div className="relative">
                     <Input
                       id="password"
@@ -161,12 +176,12 @@ function SignUpContent() {
                       required
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="bg-secondary border-border pr-10"
+                      className="bg-slate-800/50 border-slate-700/50 text-white placeholder:text-slate-500 pr-10"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword((prev) => !prev)}
-                      className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground hover:text-foreground"
+                      className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-200"
                     >
                       {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
@@ -179,51 +194,51 @@ function SignUpContent() {
                     id="consent"
                     checked={consentAccepted}
                     onChange={(e) => setConsentAccepted(e.target.checked)}
-                    className="mt-1 h-4 w-4 rounded border-border bg-secondary text-primary focus:ring-2 focus:ring-primary focus:ring-offset-0 cursor-pointer"
+                    className="mt-1 h-4 w-4 rounded border-slate-700 bg-slate-800 text-cyan-500 focus:ring-2 focus:ring-cyan-500 focus:ring-offset-0 cursor-pointer"
                     required
                   />
-                  <Label htmlFor="consent" className="text-sm text-muted-foreground cursor-pointer leading-relaxed">
+                  <Label htmlFor="consent" className="text-sm text-slate-400 cursor-pointer leading-relaxed">
                     I agree to the{" "}
-                    <Link href="/terms" target="_blank" className="text-primary underline underline-offset-4 hover:text-primary/80">
+                    <Link href="/terms" target="_blank" className="text-cyan-400 underline underline-offset-4 hover:text-cyan-300">
                       Terms & Conditions
                     </Link>
                     {" "}and{" "}
-                    <Link href="/privacy" target="_blank" className="text-primary underline underline-offset-4 hover:text-primary/80">
+                    <Link href="/privacy" target="_blank" className="text-cyan-400 underline underline-offset-4 hover:text-cyan-300">
                       Privacy Policy
                     </Link>
                   </Label>
                 </div>
                 
-                {error && <p className="text-sm text-destructive">{error}</p>}
-                <Button type="submit" className="w-full" disabled={isLoading || !consentAccepted}>
+                {error && <p className="text-sm text-red-400">{error}</p>}
+                <Button type="submit" className="w-full bg-white text-slate-900 hover:bg-slate-100 font-medium" disabled={isLoading || !consentAccepted}>
                   {isLoading ? "Creating account..." : "Sign up"}
                 </Button>
               </div>
               
               <div className="relative my-4">
                 <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t border-border" />
+                  <span className="w-full border-t border-slate-800" />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+                  <span className="bg-slate-900 px-2 text-slate-500">Or continue with</span>
                 </div>
               </div>
               
               <Button
                 type="button"
                 variant="outline"
-                className="w-full"
+                className="w-full border-slate-700 text-slate-300 hover:bg-slate-800/50 hover:text-white"
                 onClick={handleGoogleSignup}
                 disabled={isLoading || !consentAccepted}
               >
                 <Chrome className="mr-2 h-4 w-4" />
                 {isLoading ? "Creating account..." : "Continue with Google"}
               </Button>
-              <div className="mt-4 text-center text-sm text-muted-foreground">
+              <div className="mt-4 text-center text-sm text-slate-400">
                 Already have an account?{" "}
                 <Link 
                   href={`/auth/login${redirectPath && redirectPath !== '/onboarding' ? `?redirect=${encodeURIComponent(redirectPath)}` : ''}`} 
-                  className="text-primary underline underline-offset-4"
+                  className="text-cyan-400 underline underline-offset-4 hover:text-cyan-300 font-medium"
                 >
                   Sign in
                 </Link>
@@ -239,10 +254,10 @@ function SignUpContent() {
 export default function SignUpPage() {
   return (
     <Suspense fallback={
-      <div className="flex min-h-screen w-full items-center justify-center p-6">
+      <div className="flex min-h-screen w-full items-center justify-center p-6 bg-slate-950">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading...</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-4"></div>
+          <p className="text-slate-400">Loading...</p>
         </div>
       </div>
     }>

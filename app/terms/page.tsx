@@ -4,8 +4,8 @@ import { Network, ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 export const metadata: Metadata = {
-  title: 'Terms and Conditions | Netlink',
-  description: 'Terms and Conditions for Netlink - AI-Powered Business Networking Platform',
+  title: 'Terms and Conditions | Netlink AI - Network Link AI',
+  description: 'Terms and Conditions for Netlink AI (Network Link AI) - AI-Powered Business Networking Platform',
 }
 
 const lastUpdated = 'January 1, 2025'
@@ -22,7 +22,7 @@ export default function TermsPage() {
                 <Network className="h-7 w-7 text-white group-hover:text-cyan-400 transition-colors" />
               </div>
               <span className="text-xl font-semibold text-white tracking-tight">
-                Netlink
+                Netlink AI
               </span>
             </Link>
             <Link href="/">
@@ -45,14 +45,14 @@ export default function TermsPage() {
             <section>
               <h2 className="text-2xl font-semibold text-white mb-4">1. Acceptance of Terms</h2>
               <p>
-                By accessing and using Netlink ("the Service"), you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to abide by the above, please do not use this service.
+                By accessing and using Netlink AI ("the Service"), you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to abide by the above, please do not use this service.
               </p>
             </section>
 
             <section>
               <h2 className="text-2xl font-semibold text-white mb-4">2. Description of Service</h2>
               <p>
-                Netlink is an AI-powered business networking platform that provides contact management, automated email campaigns, calendar integration, and analytics services. We reserve the right to modify, suspend, or discontinue any aspect of the Service at any time.
+                Netlink AI is an AI-powered business networking platform that provides contact management, automated email campaigns, calendar integration, and analytics services. We reserve the right to modify, suspend, or discontinue any aspect of the Service at any time.
               </p>
             </section>
 
@@ -140,7 +140,7 @@ export default function TermsPage() {
             <section>
               <h2 className="text-2xl font-semibold text-white mb-4">8. Intellectual Property</h2>
               <p>
-                The Service, including its original content, features, and functionality, is owned by Netlink and is protected by international copyright, trademark, patent, trade secret, and other intellectual property laws. You may not reproduce, distribute, modify, or create derivative works of the Service without our express written permission.
+                The Service, including its original content, features, and functionality, is owned by Netlink AI and is protected by international copyright, trademark, patent, trade secret, and other intellectual property laws. You may not reproduce, distribute, modify, or create derivative works of the Service without our express written permission.
               </p>
             </section>
 
@@ -153,7 +153,7 @@ export default function TermsPage() {
 
               <h3 className="text-xl font-semibold text-white mb-3 mt-6">9.2 Limitation of Liability</h3>
               <p>
-                To the maximum extent permitted by law, Netlink shall not be liable for any indirect, incidental, special, consequential, or punitive damages, or any loss of profits or revenues, whether incurred directly or indirectly, or any loss of data, use, goodwill, or other intangible losses.
+                To the maximum extent permitted by law, Netlink AI shall not be liable for any indirect, incidental, special, consequential, or punitive damages, or any loss of profits or revenues, whether incurred directly or indirectly, or any loss of data, use, goodwill, or other intangible losses.
               </p>
 
               <h3 className="text-xl font-semibold text-white mb-3 mt-6">9.3 AI-Generated Content</h3>
@@ -165,7 +165,7 @@ export default function TermsPage() {
             <section>
               <h2 className="text-2xl font-semibold text-white mb-4">10. Indemnification</h2>
               <p>
-                You agree to indemnify, defend, and hold harmless Netlink and its officers, directors, employees, and agents from any claims, damages, losses, liabilities, and expenses (including legal fees) arising from your use of the Service, your User Content, or your violation of these Terms.
+                You agree to indemnify, defend, and hold harmless Netlink AI and its officers, directors, employees, and agents from any claims, damages, losses, liabilities, and expenses (including legal fees) arising from your use of the Service, your User Content, or your violation of these Terms.
               </p>
             </section>
 
@@ -216,10 +216,10 @@ export default function TermsPage() {
         <div className="max-w-7xl mx-auto text-center">
           <div className="flex items-center justify-center gap-2 mb-4">
             <Network className="h-6 w-6 text-cyan-400" />
-            <span className="text-xl font-bold text-white">Netlink</span>
+            <span className="text-xl font-bold text-white">Netlink AI</span>
           </div>
           <p className="text-slate-400 mb-4">
-            © 2025 Netlink. All rights reserved.
+            © 2025 Netlink AI. All rights reserved.
           </p>
           <div className="flex justify-center gap-6 text-sm">
             <Link href="/privacy" className="text-slate-400 hover:text-cyan-400 transition-colors">

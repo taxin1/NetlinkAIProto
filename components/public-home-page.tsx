@@ -13,7 +13,8 @@ import {
   Sparkles,
   Briefcase,
   Mail,
-  Calendar
+  Calendar,
+  Search
 } from "lucide-react"
 
 export function PublicHomePage() {
@@ -33,9 +34,29 @@ export function PublicHomePage() {
           <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-cyan-600 via-blue-600 to-purple-600 bg-clip-text text-transparent">
             Connect with Global Networkers
           </h1>
-          <p className="text-xl text-muted-foreground mb-8">
+          <p className="text-xl text-muted-foreground mb-10">
             Discover professionals from around the world. Share your portfolio, connect through social networks, and build meaningful relationships.
           </p>
+
+          {/* Search Bar */}
+          <div className="max-w-2xl mx-auto mb-10 relative group">
+            <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none transition-transform group-focus-within:scale-110">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center shadow-sm">
+                <Search className="h-4 w-4 text-white" />
+              </div>
+            </div>
+            <input
+              type="text"
+              placeholder="Search for Netlink AI professionals, portfolios..."
+              className="w-full bg-background/50 backdrop-blur-sm border border-muted py-5 pl-16 pr-6 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all shadow-xl text-lg"
+            />
+            <div className="absolute right-3 inset-y-0 flex items-center">
+              <Button size="sm" className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 rounded-xl px-6">
+                Search
+              </Button>
+            </div>
+          </div>
+
           <div className="flex gap-4 justify-center">
             {/* <Link href="/public/networkers">
               <Button size="lg" className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700">
@@ -140,7 +161,7 @@ export function PublicHomePage() {
               <Sparkles className="h-12 w-12 mx-auto mb-4" />
               <h2 className="text-3xl font-bold mb-4">Ready to Expand Your Network?</h2>
               <p className="text-xl mb-8 opacity-90">
-                Join thousands of professionals already connecting on Network Link AI
+                Join thousands of professionals already connecting on Netlink AI
               </p>
               <div className="flex gap-4 justify-center">
                 <Link href="/auth/signup">
@@ -164,7 +185,7 @@ export function PublicHomePage() {
         <div className="container mx-auto px-4 py-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p className="text-muted-foreground text-sm">
-              © {new Date().getFullYear()} Network Link AI. All rights reserved.
+              © {new Date().getFullYear()} Netlink AI - Network Link AI. All rights reserved.
             </p>
             <div className="flex gap-4 mt-4 md:mt-0">
               <Link href="/public/about" className="text-sm text-muted-foreground hover:text-foreground">

@@ -28,6 +28,7 @@ import {
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import Image from "next/image"
 
 const features = [
   {
@@ -158,8 +159,16 @@ export default function WaitlistPage() {
       {/* Navigation */}
       <nav className="relative z-10 p-6">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <Link href="/" className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-            Network Link AI
+          <Link href="/" className="flex items-center group transition-all">
+            <div className="relative h-32 w-[400px] overflow-hidden transform group-hover:scale-110 transition-transform duration-700 drop-shadow-[0_0_25px_rgba(59,130,246,0.6)]">
+              <Image 
+                src="/Logo1.png" 
+                alt="Netlink AI Logo" 
+                fill 
+                className="object-contain"
+                priority
+              />
+            </div>
           </Link>
           <div className="flex gap-4">
 

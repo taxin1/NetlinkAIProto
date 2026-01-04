@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname, useRouter } from "next/navigation"
 import { useState, useEffect } from "react"
 import { cn } from "@/lib/utils"
@@ -129,12 +130,16 @@ export function Sidebar({ user }: SidebarProps) {
 
   const SidebarContent = ({ onItemClick }: { onItemClick?: () => void }) => (
     <>
-      <div className="flex h-20 items-center justify-between border-b border-slate-800/50 px-6">
-        <Link href="/dashboard" className="flex items-center gap-3 group" onClick={onItemClick}>
-          <Network className="h-6 w-6 text-white group-hover:text-cyan-400 transition-colors" />
-          <span className="text-lg font-semibold text-white tracking-tight">
-            Network Link AI
-          </span>
+      <div className="flex h-48 items-center justify-center border-b border-slate-800/50 px-4">
+        <Link href="/dashboard" className="flex items-center group w-full" onClick={onItemClick}>
+          <div className="relative h-40 w-full overflow-hidden transition-all duration-700 transform group-hover:scale-110 drop-shadow-[0_0_20px_rgba(59,130,246,0.5)]">
+            <Image 
+              src="/Logo1.png" 
+              alt="Netlink AI Logo" 
+              fill 
+              className="object-contain"
+            />
+          </div>
         </Link>
         {isMobile && (
           <Button

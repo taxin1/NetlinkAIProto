@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
@@ -299,17 +300,15 @@ export function LandingPage() {
       >
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
-            <Link href="/" className="flex items-center gap-3 group">
-              <motion.div
-                className="relative"
-                whileHover={{ scale: 1.1, rotate: 5 }}
-                transition={{ type: "spring", stiffness: 400 }}
-              >
-                <Network className="h-7 w-7 text-white group-hover:text-cyan-400 transition-colors" />
-              </motion.div>
-              <span className="text-xl font-semibold text-white tracking-tight">
-                Network Link AI
-              </span>
+            <Link href="/" className="flex items-center group">
+              <div className="relative h-32 w-[400px] overflow-hidden transition-all duration-700 transform group-hover:scale-110 drop-shadow-[0_0_25px_rgba(59,130,246,0.6)]">
+                <Image 
+                  src="/Logo1.png" 
+                  alt="Netlink AI Logo" 
+                  fill 
+                  className="object-contain"
+                />
+              </div>
             </Link>
             <div className="hidden lg:flex items-center gap-3">
               <Link href="/">
@@ -2822,23 +2821,22 @@ export function LandingPage() {
         <div className="max-w-7xl mx-auto text-center">
           <motion.div
             variants={itemVariants}
-            className="flex items-center justify-center gap-2 mb-4"
+            className="flex items-center justify-center mb-16 group"
           >
-            <motion.div
-              whileHover={{ rotate: 360 }}
-              transition={{ duration: 0.6 }}
-            >
-              <Network className="h-6 w-6 text-cyan-400" />
-            </motion.div>
-            <span className="text-xl font-bold text-white">
-              Network Link AI
-            </span>
+            <div className="relative h-72 w-[900px] overflow-hidden transition-all duration-700 transform group-hover:scale-110 drop-shadow-[0_0_40px_rgba(59,130,246,0.7)]">
+              <Image 
+                src="/Logo1.png" 
+                alt="Netlink AI Logo" 
+                fill 
+                className="object-contain"
+              />
+            </div>
           </motion.div>
           <motion.p
             variants={itemVariants}
             className="text-slate-400 mb-4"
           >
-            © 2025 Network Link AI. All rights reserved. Making networking effortless with AI.
+            © 2025 Netlink AI - Network Link AI. All rights reserved. Making networking effortless with AI.
           </motion.p>
           <motion.div
             variants={itemVariants}

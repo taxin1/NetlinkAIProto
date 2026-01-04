@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { BookOpen, Menu, X } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
@@ -13,8 +14,16 @@ export function PublicNavigation() {
     <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
-          <Link href="/" className="text-2xl font-bold bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
-            Network Link AI
+          <Link href="/" className="flex items-center group transition-all">
+            <div className="relative h-32 w-[400px] overflow-hidden transform group-hover:scale-110 transition-transform duration-700 drop-shadow-[0_0_25px_rgba(59,130,246,0.6)]">
+              <Image 
+                src="/Logo1.png" 
+                alt="Netlink AI Logo" 
+                fill 
+                className="object-contain"
+                priority
+              />
+            </div>
           </Link>
 
           {/* Desktop Navigation */}
