@@ -25,10 +25,18 @@ import {
   Radio,
   TrendingUp,
   MapPin,
+  Languages,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
+import { useTranslations } from "@/lib/hooks/use-translations"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 const features = [
   {
@@ -104,6 +112,7 @@ const itemVariants = {
 }
 
 export default function WaitlistPage() {
+  const { t, lang, changeLanguage } = useTranslations()
   const [email, setEmail] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
@@ -171,9 +180,26 @@ export default function WaitlistPage() {
             </div>
           </Link>
           <div className="flex gap-4">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="icon" className="relative group border-primary/20 bg-background/50 backdrop-blur-sm">
+                  <Languages className="h-5 w-5 transition-transform group-hover:scale-110" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => changeLanguage("en")} className={lang === "en" ? "bg-accent" : ""}>
+                  🇺🇸 English
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => changeLanguage("ja")} className={lang === "ja" ? "bg-accent" : ""}>
+                  🇯🇵 日本語
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
             <Link href="/">
-              <Button variant="outline">Back to Home</Button>
+              <Button variant="outline" className="border-primary/20 bg-background/50 backdrop-blur-sm">
+                {lang === "ja" ? "ホームに戻る" : "Back to Home"}
+              </Button>
             </Link>
           </div>
         </div>
@@ -199,11 +225,11 @@ export default function WaitlistPage() {
             className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 tracking-tight"
           >
             <span className="bg-gradient-to-br from-foreground via-foreground to-foreground/70 bg-clip-text text-transparent">
-              Join the Waitlist
+              {t("joinWaitlist")}
             </span>
             <br />
             <span className="bg-gradient-to-r from-primary via-primary/80 to-primary bg-clip-text text-transparent">
-              Get Early Access
+              {lang === "ja" ? "先行アクセスをゲット" : "Get Early Access"}
             </span>
           </motion.h1>
 
@@ -266,11 +292,11 @@ export default function WaitlistPage() {
                       {isLoading ? (
                         <>
                           <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          Joining...
+                          {lang === "ja" ? "参加中..." : "Joining..."}
                         </>
                       ) : (
                         <>
-                          Join Waitlist
+                          {t("joinWaitlist")}
                           <ArrowRight className="w-4 h-4 ml-2" />
                         </>
                       )}

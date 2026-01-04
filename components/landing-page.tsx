@@ -33,7 +33,16 @@ import {
   MapPin,
   Menu,
   X,
+  Languages,
 } from "lucide-react"
+import { useTranslations } from "@/lib/hooks/use-translations"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { StructuredData } from "@/components/structured-data"
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -73,6 +82,13 @@ function TypewriterText({
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isComplete, setIsComplete] = useState(false)
 
+  // Reset when text changes (e.g. language switch)
+  useEffect(() => {
+    setDisplayedText("")
+    setCurrentIndex(0)
+    setIsComplete(false)
+  }, [text])
+
   useEffect(() => {
     if (currentIndex < text.length) {
       const timeout = setTimeout(() => {
@@ -86,7 +102,7 @@ function TypewriterText({
   }, [currentIndex, text, speed, delay])
 
   return (
-    <span className={className}>
+    <span className={`${className} notranslate`} translate="no">
       {displayedText}
       {!isComplete && (
         <span className="animate-pulse">|</span>
@@ -120,6 +136,7 @@ const scaleIn = {
 }
 
 export function LandingPage() {
+  const { t, lang, changeLanguage } = useTranslations()
   const [activeDemo, setActiveDemo] = useState<"scan" | "ai" | "analytics">("scan")
   const [cardScanStep, setCardScanStep] = useState(0)
   const [emailStep, setEmailStep] = useState(0)
@@ -227,6 +244,7 @@ export function LandingPage() {
 
   return (
     <div className="min-h-screen bg-slate-950 relative overflow-hidden">
+      <StructuredData />
       {/* Animated tech background */}
       <div className="fixed inset-0 z-0">
         {/* Grid pattern */}
@@ -304,7 +322,7 @@ export function LandingPage() {
               <div className="relative h-32 w-[400px] overflow-hidden transition-all duration-700 transform group-hover:scale-110 drop-shadow-[0_0_25px_rgba(59,130,246,0.6)]">
                 <Image 
                   src="/Logo1.png" 
-                  alt="Netlink AI Logo" 
+                  alt="Netlink AI - Intelligent Professional Networking Logo" 
                   fill 
                   className="object-contain"
                 />
@@ -314,28 +332,28 @@ export function LandingPage() {
               <Link href="/">
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                   <Button variant="ghost" className="text-slate-400 hover:text-white hover:bg-slate-800/50 font-medium">
-                    Home
+                    {t("home")}
                   </Button>
                 </motion.div>
               </Link>
               <Link href="/public/about">
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                   <Button variant="ghost" className="text-slate-400 hover:text-white hover:bg-slate-800/50 font-medium">
-                    About
+                    {t("about")}
                   </Button>
                 </motion.div>
               </Link>
-              {/* <Link href="/public/networkers">
+              <Link href="/public/about#how-it-works">
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button variant="ghost" className="text-slate-400 hover:text-white hover:bg-slate-800/50 font-medium">
-                  Networkers
-                </Button>
+                  <Button variant="ghost" className="text-slate-400 hover:text-white hover:bg-slate-800/50 font-medium">
+                    How It Works
+                  </Button>
                 </motion.div>
-              </Link> */}
+              </Link>
               <Link href="/pricing">
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                   <Button variant="ghost" className="text-slate-400 hover:text-white hover:bg-slate-800/50 font-medium">
-                    Pricing
+                    {t("pricing")}
                   </Button>
                 </motion.div>
               </Link>
@@ -343,25 +361,31 @@ export function LandingPage() {
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                   <Button variant="ghost" className="text-slate-400 hover:text-white hover:bg-slate-800/50 font-medium">
                     <BookOpen className="h-4 w-4 mr-2" />
-                    Resources
+                    {t("resources")}
                   </Button>
                 </motion.div>
               </Link>
 
-              {/* TEMPORARILY HIDDEN: Sign In Button
-              <Link href="/auth/login">
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button variant="ghost" className="text-slate-400 hover:text-white hover:bg-slate-800/50 font-medium">
-                  Sign In
-                </Button>
-                </motion.div>
-              </Link>
-              */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="text-slate-400 hover:text-white hover:bg-slate-800/50 font-medium relative group">
+                    <Languages className="h-5 w-5 transition-transform group-hover:scale-110" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="bg-slate-900 border-slate-800 text-slate-300">
+                  <DropdownMenuItem onClick={() => changeLanguage("en")} className={lang === "en" ? "bg-slate-800 text-white" : "hover:bg-slate-800 hover:text-white"}>
+                    🇺🇸 English
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => changeLanguage("ja")} className={lang === "ja" ? "bg-slate-800 text-white" : "hover:bg-slate-800 hover:text-white"}>
+                    🇯🇵 日本語
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
 
               <Link href="/waitlist">
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                   <Button className="bg-white text-slate-900 hover:bg-slate-100 font-medium shadow-md">
-                    Join Waitlist
+                    {t("joinWaitlist")}
                   </Button>
                 </motion.div>
               </Link>
@@ -394,29 +418,58 @@ export function LandingPage() {
               <div className="px-6 py-6 space-y-4 flex flex-col">
                 <Link href="/" onClick={() => setMobileMenuOpen(false)}>
                   <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-white hover:bg-slate-800/50 text-lg">
-                    Home
+                    {t("home")}
                   </Button>
                 </Link>
                 <Link href="/public/about" onClick={() => setMobileMenuOpen(false)}>
                   <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-white hover:bg-slate-800/50 text-lg">
-                    About
+                    {t("about")}
+                  </Button>
+                </Link>
+                <Link href="/public/about#how-it-works" onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-white hover:bg-slate-800/50 text-lg">
+                    How It Works
                   </Button>
                 </Link>
                 <Link href="/pricing" onClick={() => setMobileMenuOpen(false)}>
                   <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-white hover:bg-slate-800/50 text-lg">
-                    Pricing
+                    {t("pricing")}
                   </Button>
                 </Link>
                 <Link href="/resources" onClick={() => setMobileMenuOpen(false)}>
                   <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-white hover:bg-slate-800/50 text-lg">
                     <BookOpen className="h-5 w-5 mr-3" />
-                    Resources
+                    {t("resources")}
                   </Button>
                 </Link>
+                
+                <div className="flex gap-2 p-2 border-t border-slate-800/50 pt-4">
+                  <Button 
+                    variant={lang === "en" ? "default" : "outline"} 
+                    className="flex-1 bg-slate-800 border-slate-700 text-white"
+                    onClick={() => {
+                      changeLanguage("en")
+                      setMobileMenuOpen(false)
+                    }}
+                  >
+                    🇺🇸 En
+                  </Button>
+                  <Button 
+                    variant={lang === "ja" ? "default" : "outline"} 
+                    className="flex-1 bg-slate-800 border-slate-700 text-white"
+                    onClick={() => {
+                      changeLanguage("ja")
+                      setMobileMenuOpen(false)
+                    }}
+                  >
+                    🇯🇵 Ja
+                  </Button>
+                </div>
+
                 <div className="pt-4 border-t border-slate-800/50">
                   <Link href="/waitlist" onClick={() => setMobileMenuOpen(false)}>
                     <Button className="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white font-medium shadow-md shadow-blue-900/20 py-6 text-lg">
-                      Join Waitlist
+                      {t("joinWaitlist")}
                     </Button>
                   </Link>
                 </div>
@@ -448,7 +501,7 @@ export function LandingPage() {
             >
               <span className="bg-gradient-to-r from-white via-cyan-100 to-blue-200 bg-clip-text text-transparent">
                 <TypewriterText
-                  text="Transform Your Networking"
+                  text={t("heroTitlePart1")}
                   speed={80}
                   delay={500}
                 />
@@ -456,7 +509,7 @@ export function LandingPage() {
               <br />
               <span className="bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
                 <TypewriterText
-                  text="with AI Intelligence"
+                  text={t("heroTitlePart2")}
                   speed={80}
                   delay={2500}
                 />
@@ -466,9 +519,18 @@ export function LandingPage() {
               variants={itemVariants}
               className="text-xl sm:text-2xl text-slate-300 font-light max-w-3xl mx-auto mb-8 leading-relaxed"
             >
-              The all-in-one platform that automates business card scanning, personalizes cold emails, and tracks your
-              network growth—saving you{" "}
-              <span className="text-cyan-400 font-semibold">10+ hours per week</span>
+              {lang === "ja" ? (
+                <>
+                  名刺スキャン、コールドメールのパーソナライズ、ネットワークの成長を自動化し、週に{" "}
+                  <span className="text-cyan-400 font-semibold">10時間以上</span> の時間を節約するオールインワン・プラットフォームです。
+                </>
+              ) : (
+                <>
+                  The all-in-one platform that automates business card scanning, personalizes cold emails, and tracks your
+                  network growth—saving you{" "}
+                  <span className="text-cyan-400 font-semibold">10+ hours per week</span>
+                </>
+              )}
             </motion.p>
             <motion.div
               variants={itemVariants}
@@ -480,8 +542,21 @@ export function LandingPage() {
                     size="lg"
                     className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-semibold text-lg px-8 py-6 shadow-lg shadow-cyan-500/25"
                   >
-                    Join Waitlist
+                    {t("joinWaitlist")}
                     <Sparkles className="ml-2 h-5 w-5" />
+                  </Button>
+                </motion.div>
+              </Link>
+
+              <Link href="/public/about#how-it-works">
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="border-2 border-slate-600 text-slate-300 hover:text-white hover:bg-slate-800/50 font-semibold text-lg px-8 py-6"
+                  >
+                    {t("howItWorks")}
+                    <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </motion.div>
               </Link>
@@ -2689,7 +2764,7 @@ export function LandingPage() {
                         size="lg"
                         className="w-full sm:w-auto bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold text-lg px-10 py-7 shadow-lg shadow-cyan-500/25 rounded-xl border border-white/10"
                       >
-                        Join Waitlist
+                        {t("joinWaitlist")}
                         <Sparkles className="ml-2 h-5 w-5 animate-pulse" />
                       </Button>
                     </motion.div>
@@ -2826,7 +2901,7 @@ export function LandingPage() {
             <div className="relative h-72 w-[900px] overflow-hidden transition-all duration-700 transform group-hover:scale-110 drop-shadow-[0_0_40px_rgba(59,130,246,0.7)]">
               <Image 
                 src="/Logo1.png" 
-                alt="Netlink AI Logo" 
+                alt="Netlink AI - AI-Powered Business Networking Platform" 
                 fill 
                 className="object-contain"
               />
@@ -2856,6 +2931,14 @@ export function LandingPage() {
                 className="text-slate-400 hover:text-cyan-400 transition-colors cursor-pointer underline-offset-4 hover:underline"
               >
                 About
+              </motion.div>
+            </Link>
+            <Link href="/public/about#how-it-works">
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                className="text-slate-400 hover:text-cyan-400 transition-colors cursor-pointer underline-offset-4 hover:underline"
+              >
+                How It Works
               </motion.div>
             </Link>
             {/* <Link href="/public/networkers">

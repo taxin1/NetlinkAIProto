@@ -11,6 +11,7 @@ import { LayoutDashboard, Users, Mail, BarChart3, LogOut, Network, Bot, Settings
 import { createClient } from "@/lib/supabase/client"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { useMobile } from "@/lib/hooks/use-mobile"
+import { useTranslations } from "@/lib/hooks/use-translations"
 import {
   Dialog,
   DialogContent,
@@ -25,42 +26,42 @@ interface SidebarProps {
   }
 }
 
-const navigation = [
-  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { name: "Network Profile", href: "/dashboard/profile", icon: Share2 },
-  { name: "Portfolio", href: "/dashboard/portfolio", icon: Briefcase },
-  { name: "Contacts", href: "/dashboard/contacts", icon: Users },
-  { name: "Networking Mode", href: "/dashboard/networking", icon: Sparkles },
-  { name: "Calendar", href: "/dashboard/calendar", icon: CalendarDays },
-  { name: "Events", href: "/dashboard/events", icon: Calendar },
-  { name: "Emails", href: "/dashboard/emails", icon: Mail },
-  { name: "AI Campaigns", href: "/dashboard/campaigns", icon: Wand2 },
-  { name: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
-  { name: "AI Assistant", href: "/dashboard/ai-assistant", icon: Bot },
-  { name: "Settings", href: "/dashboard/settings", icon: Settings },
-]
-
-const publicNavigation = [
-  { name: "Home", href: "/", icon: Home },
-  { name: "About", href: "/public/about", icon: Info },
-  // { name: "Networkers", href: "/public/networkers", icon: UserCircle }, // Hidden for now
-]
-
-const resourcesNavigation = [
-  { name: "Resources Home", href: "/resources", icon: BookOpen },
-  { name: "Getting Started", href: "/resources/getting-started", icon: Sparkles },
-  { name: "Setup Guide", href: "/resources/setup-guide", icon: Settings },
-  { name: "Pricing", href: "/resources/pricing", icon: Crown },
-  { name: "FAQ", href: "/resources/faq", icon: Info },
-]
-
 export function Sidebar({ user }: SidebarProps) {
+  const { t } = useTranslations()
   const pathname = usePathname()
   const router = useRouter()
   const { isMobile } = useMobile()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [googleCalendarConnected, setGoogleCalendarConnected] = useState(false)
   const [subscription, setSubscription] = useState<Subscription | null>(null)
+
+  const navigation = [
+    { name: t("dashboard"), href: "/dashboard", icon: LayoutDashboard },
+    { name: t("networkProfile"), href: "/dashboard/profile", icon: Share2 },
+    { name: t("portfolio"), href: "/dashboard/portfolio", icon: Briefcase },
+    { name: t("contacts"), href: "/dashboard/contacts", icon: Users },
+    { name: t("networkingMode"), href: "/dashboard/networking", icon: Sparkles },
+    { name: t("calendar"), href: "/dashboard/calendar", icon: CalendarDays },
+    { name: t("events"), href: "/dashboard/events", icon: Calendar },
+    { name: t("emails"), href: "/dashboard/emails", icon: Mail },
+    { name: t("aiCampaigns"), href: "/dashboard/campaigns", icon: Wand2 },
+    { name: t("analytics"), href: "/dashboard/analytics", icon: BarChart3 },
+    { name: t("aiAssistant"), href: "/dashboard/ai-assistant", icon: Bot },
+    { name: t("settings"), href: "/dashboard/settings", icon: Settings },
+  ]
+
+  const publicNavigation = [
+    { name: t("home"), href: "/", icon: Home },
+    { name: t("about"), href: "/public/about", icon: Info },
+  ]
+
+  const resourcesNavigation = [
+    { name: t("resources"), href: "/resources", icon: BookOpen },
+    { name: t("gettingStarted"), href: "/resources/getting-started", icon: Sparkles },
+    { name: t("setupGuide"), href: "/resources/setup-guide", icon: Settings },
+    { name: t("pricing"), href: "/resources/pricing", icon: Crown },
+    { name: t("faq"), href: "/resources/faq", icon: Info },
+  ]
 
   const handleSignOut = async () => {
     const supabase = createClient()
@@ -218,7 +219,7 @@ export function Sidebar({ user }: SidebarProps) {
 
         {/* Resources Section */}
         <div className="mb-2 px-4">
-          <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Resources</p>
+          <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">{t("resources")}</p>
         </div>
         {resourcesNavigation.map((item) => {
           const isActive = pathname === item.href || pathname?.startsWith(item.href)
@@ -246,7 +247,7 @@ export function Sidebar({ user }: SidebarProps) {
 
         {/* Public Pages Section */}
         <div className="mb-2 px-4">
-          <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Public Pages</p>
+          <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">{t("publicPages")}</p>
         </div>
         {publicNavigation.map((item) => {
           const isActive = pathname === item.href || pathname?.startsWith(item.href)
@@ -272,7 +273,7 @@ export function Sidebar({ user }: SidebarProps) {
 
       <div className="border-t border-slate-800/50 p-4">
         <div className="mb-3 px-4">
-          <p className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">Account</p>
+          <p className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">{t("account")}</p>
           <p className="text-sm font-medium text-slate-300 truncate mb-2">{user.email}</p>
           {subscription ? (
             <Badge
@@ -313,7 +314,7 @@ export function Sidebar({ user }: SidebarProps) {
           )}
         >
           <CreditCard className="h-4 w-4" />
-          <span className="flex-1">Manage Subscription</span>
+          <span className="flex-1">{t("manageSubscription")}</span>
         </Link>
         <Button
           variant="ghost"
@@ -321,7 +322,7 @@ export function Sidebar({ user }: SidebarProps) {
           onClick={handleSignOut}
         >
           <LogOut className="mr-3 h-5 w-5" />
-          Sign out
+          {t("signOut")}
         </Button>
       </div>
     </>

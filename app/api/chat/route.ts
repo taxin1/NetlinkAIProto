@@ -3,7 +3,7 @@ import { generateChatResponse } from "@/lib/ai/assistant"
 
 export async function POST(request: NextRequest) {
   try {
-    const { message } = await request.json()
+    const { message, language = "en" } = await request.json()
 
     if (!message) {
       return NextResponse.json(
@@ -13,8 +13,8 @@ export async function POST(request: NextRequest) {
     }
 
     try {
-      console.log("Chat API: Calling generateChatResponse with message:", message.substring(0, 50))
-      const response = await generateChatResponse(message)
+      console.log(`Chat API: Calling generateChatResponse (lang: ${language}) with message:`, message.substring(0, 50))
+      const response = await generateChatResponse(message, language)
       console.log("Chat API: Got response successfully")
       
       return NextResponse.json({

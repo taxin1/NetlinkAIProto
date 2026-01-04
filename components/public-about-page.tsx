@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { PublicNavigation } from "@/components/public-navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { useTranslations } from "@/lib/hooks/use-translations"
 import {
   Brain,
   Network,
@@ -88,6 +89,7 @@ const pulseAnimation = {
 }
 
 export function PublicAboutPage() {
+  const { t } = useTranslations()
   const heroRef = useRef<HTMLDivElement>(null)
   const { scrollYProgress } = useScroll({
     target: heroRef,
@@ -248,7 +250,7 @@ export function PublicAboutPage() {
               className="inline-flex items-center gap-2 px-4 py-2 mb-6 rounded-full bg-gradient-to-r from-cyan-500/10 via-blue-500/10 to-purple-500/10 border border-cyan-500/20 backdrop-blur-sm"
             >
               <Sparkles className="h-4 w-4 text-cyan-400" />
-              <span className="text-sm font-semibold text-cyan-400">About Us</span>
+              <span className="text-sm font-semibold text-cyan-400">{t("aboutUs")}</span>
             </motion.span>
           </motion.div>
 
@@ -259,7 +261,7 @@ export function PublicAboutPage() {
             className="text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold mb-10 leading-[1.1] tracking-tight text-white"
           >
             <span className="block bg-gradient-to-r from-white via-cyan-100 to-blue-200 bg-clip-text text-transparent">
-              We're reimagining how
+              {t("reimaginingHow")}
             </span>
             <motion.span
               initial={{ opacity: 0 }}
@@ -267,7 +269,7 @@ export function PublicAboutPage() {
               transition={{ delay: 0.6, duration: 0.8 }}
               className="block mt-2 bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent"
             >
-              professionals build
+              {t("professionalsBuild")}
             </motion.span>
             <motion.span
               initial={{ opacity: 0 }}
@@ -275,7 +277,7 @@ export function PublicAboutPage() {
               transition={{ delay: 0.8, duration: 0.8 }}
               className="block mt-2 bg-gradient-to-r from-white via-cyan-100 to-blue-200 bg-clip-text text-transparent"
             >
-              meaningful networks
+              {t("meaningfulNetworks")}
             </motion.span>
           </motion.h1>
 
@@ -661,7 +663,7 @@ export function PublicAboutPage() {
       </section>
 
       {/* How It Works Section - Enhanced */}
-      <section className="relative container mx-auto px-4 py-32 z-10 bg-slate-900/30 backdrop-blur-sm border-t border-slate-800/50">
+      <section id="how-it-works" className="relative container mx-auto px-4 py-32 z-10 bg-slate-900/30 backdrop-blur-sm border-t border-slate-800/50">
         <div className="max-w-5xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 40 }}

@@ -19,12 +19,14 @@ import {
   Server,
   Shield,
   Zap,
-  Sparkles
+  Sparkles,
+  Languages
 } from "lucide-react"
 import { GoogleCalendarSettings } from "@/components/google-calendar-settings"
 import { GmailSettings } from "@/components/gmail-settings"
 import { AITrainer } from "@/components/ai-trainer"
 import { SubscriptionManagement } from "@/components/subscription-management"
+import { useTranslations } from "@/lib/hooks/use-translations"
 
 interface EmailSettings {
   id?: string
@@ -38,6 +40,7 @@ interface EmailSettings {
 }
 
 export default function SettingsPage() {
+  const { t, lang, changeLanguage } = useTranslations()
   const [userId, setUserId] = useState<string>("")
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
@@ -257,6 +260,41 @@ export default function SettingsPage() {
             </div>
           </div>
         </div>
+
+        {/* Language Selection Card */}
+        <Card className="backdrop-blur-md bg-white/70 dark:bg-gray-900/70 border-white/60 dark:border-gray-800/60 shadow-2xl hover:shadow-3xl transition-all duration-500 animate-fade-in-up">
+          <CardHeader className="border-b border-gray-200/50 dark:border-gray-800/50 bg-gradient-to-r from-blue-50/50 to-purple-50/50 dark:from-blue-950/50 dark:to-purple-950/50">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-lg shadow-lg">
+                <Languages className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <CardTitle className="text-2xl bg-gradient-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent">
+                  {t("language")}
+                </CardTitle>
+                <CardDescription className="mt-1">
+                  Choose your preferred language for the application
+                </CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="p-8">
+            <div className="grid gap-3 max-w-xs">
+              <Label htmlFor="app-language" className="text-base font-semibold">
+                Select Language
+              </Label>
+              <select
+                id="app-language"
+                value={lang}
+                onChange={(e) => changeLanguage(e.target.value as any)}
+                className="flex h-12 w-full rounded-xl border-2 border-input bg-background/50 backdrop-blur-sm px-4 py-2 text-sm font-medium ring-offset-background transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:border-blue-500 hover:border-blue-400 cursor-pointer"
+              >
+                <option value="en">🇺🇸 {t("english")}</option>
+                <option value="ja">🇯🇵 {t("japanese")}</option>
+              </select>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Subscription Management Card - Moved to top */}
         <div id="subscription-management">

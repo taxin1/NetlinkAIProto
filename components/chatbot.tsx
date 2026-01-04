@@ -6,9 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { Send, Bot, User, Loader2, Mic, MicOff, Volume2, VolumeX, Sparkles, HelpCircle } from "lucide-react"
+import { Send, Bot, User, Loader2, Mic, MicOff, Volume2, VolumeX, Sparkles, HelpCircle, Languages } from "lucide-react"
 import { useVoiceAssistant } from "@/lib/hooks/use-voice-assistant"
 import { createClient } from "@/lib/supabase/client"
+import { useTranslations } from "@/lib/hooks/use-translations"
 
 interface Message {
   id: string
@@ -21,7 +22,7 @@ interface ChatbotProps {
   userId: string
 }
 
-async function sendMessageToAI(message: string): Promise<string> {
+async function sendMessageToAI(message: string, language: string = "en"): Promise<string> {
   try {
     const response = await fetch("/api/chat", {
       method: "POST",
@@ -30,6 +31,7 @@ async function sendMessageToAI(message: string): Promise<string> {
       },
       body: JSON.stringify({
         message,
+        language,
       }),
     })
 
@@ -76,14 +78,36 @@ async function sendMessageToAI(message: string): Promise<string> {
 }
 
 export function Chatbot({ userId }: ChatbotProps) {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "1",
-      content: "Hello! I'm your AI assistant. You can type or use voice commands. Try saying 'send email' or 'show my contacts'!",
-      role: "assistant",
-      timestamp: new Date(),
-    },
-  ])
+  const { t, lang } = useTranslations()
+  const [messages, setMessages] = useState<Message[]>([])
+  
+  useEffect(() => {
+    // Initialize welcome message when language changes
+    setMessages([
+      {
+        id: "1",
+        content: lang === "ja" 
+          ? "こんにちは！AIアシスタントです。タイピングまたは音声コマンドを使用できます。「メールを送信」や「連絡先を表示」と言ってみてください！"
+          : "Hello! I'm your AI assistant. You can type or use voice commands. Try saying 'send email' or 'show my contacts'!",
+        role: "assistant",
+        timestamp: new Date(),
+      }
+    ])
+  }, [lang])
+
+  // Listen for language changes from other components
+  useEffect(() => {
+    const handleLangChange = () => {
+      // The useTranslations hook will update its state because it's using the same logic,
+      // but we need to trigger a re-render here if needed.
+      // Actually, since useTranslations is a hook, it might already handle it if it were global,
+      // but here it's local to each component.
+      window.location.reload() // Simplest way to ensure everything updates
+    }
+    window.addEventListener("languageChanged", handleLangChange)
+    return () => window.removeEventListener("languageChanged", handleLangChange)
+  }, [])
+
   const [inputMessage, setInputMessage] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [voiceEnabled, setVoiceEnabled] = useState(true)
@@ -124,7 +148,7 @@ export function Chatbot({ userId }: ChatbotProps) {
       const response = await fetch("/api/voice-command", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ command: transcript, userId }),
+        body: JSON.stringify({ command: transcript, userId, language: lang }),
       })
 
       if (!response.ok) throw new Error("Failed to process voice command")
@@ -190,6 +214,7 @@ export function Chatbot({ userId }: ChatbotProps) {
       onResult: handleVoiceResult,
       onError: handleVoiceError,
       autoSpeak: voiceEnabled,
+      language: lang,
     })
 
   const handleSendMessage = async () => {
@@ -207,7 +232,7 @@ export function Chatbot({ userId }: ChatbotProps) {
     setIsLoading(true)
 
     try {
-      const response = await sendMessageToAI(userMessage.content)
+      const response = await sendMessageToAI(userMessage.content, lang)
       
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -407,7 +432,7 @@ export function Chatbot({ userId }: ChatbotProps) {
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
             <Bot className="h-5 w-5 text-primary" />
-            AI Assistant
+            {t("aiAssistant")}
           </CardTitle>
           <div className="flex items-center gap-2">
             {isSupported && (
@@ -415,17 +440,17 @@ export function Chatbot({ userId }: ChatbotProps) {
                 {isListening ? (
                   <>
                     <Mic className="h-3 w-3 mr-1 animate-pulse" />
-                    Listening...
+                    {t("listening")}
                   </>
                 ) : isSpeaking ? (
                   <>
                     <Volume2 className="h-3 w-3 mr-1 animate-pulse" />
-                    Speaking...
+                    {t("speaking")}
                   </>
                 ) : (
                   <>
                     <Sparkles className="h-3 w-3 mr-1" />
-                    Voice Ready
+                    {t("voiceReady")}
                   </>
                 )}
               </Badge>
@@ -508,7 +533,7 @@ export function Chatbot({ userId }: ChatbotProps) {
                 <div className="bg-muted rounded-lg px-3 py-2">
                   <div className="flex items-center gap-2">
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    <span className="text-sm text-muted-foreground">Thinking...</span>
+                    <span className="text-sm text-muted-foreground">{t("thinking")}</span>
                   </div>
                 </div>
               </div>
@@ -520,10 +545,10 @@ export function Chatbot({ userId }: ChatbotProps) {
         {/* Pending Action Confirmation */}
         {pendingAction && (
           <div className="mb-4 p-3 bg-primary/10 border border-primary/20 rounded-lg animate-fade-in">
-            <p className="text-sm font-medium mb-2">Confirm Action</p>
+            <p className="text-sm font-medium mb-2">{t("confirmAction")}</p>
             <p className="text-xs text-muted-foreground mb-3">
               {pendingAction.action === "send_email" && 
-                `Send email to ${pendingAction.parameters.contactName || pendingAction.parameters.recipient}?`
+                `${t("confirmSend")} ${pendingAction.parameters.contactName || pendingAction.parameters.recipient}?`
               }
               {pendingAction.action === "create_campaign" && 
                 `Start sending emails for campaign "${pendingAction.parameters.campaign_name}"?`
@@ -544,10 +569,10 @@ export function Chatbot({ userId }: ChatbotProps) {
                 size="sm" 
                 className="flex-1"
               >
-                {pendingAction.action === "create_campaign" ? "Start Campaign" : "Confirm & Send"}
+                {pendingAction.action === "create_campaign" ? "Start Campaign" : t("confirmSend")}
               </Button>
               <Button onClick={cancelAction} size="sm" variant="outline" className="flex-1">
-                Cancel
+                {t("cancel")}
               </Button>
             </div>
           </div>
@@ -565,7 +590,7 @@ export function Chatbot({ userId }: ChatbotProps) {
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder={isListening ? "Listening..." : "Type or speak your message..."}
+            placeholder={isListening ? t("listening") : t("chatPlaceholder")}
             disabled={isLoading || isListening}
             className="flex-1"
           />

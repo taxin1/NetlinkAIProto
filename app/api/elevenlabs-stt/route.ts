@@ -4,6 +4,7 @@ export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData()
     const audioFile = formData.get("audio") as File
+    const language = formData.get("language") as string || "en"
 
     if (!audioFile || audioFile.size === 0) {
       return NextResponse.json({ error: "Audio file is required and must not be empty" }, { status: 400 })
@@ -21,6 +22,10 @@ export async function POST(request: NextRequest) {
     const elevenLabsFormData = new FormData()
     elevenLabsFormData.append("file", audioFile)
     elevenLabsFormData.append("model_id", "scribe_v1") // ElevenLabs STT model
+    
+    if (language) {
+      elevenLabsFormData.append("language_code", language)
+    }
 
     const response = await fetch(
       "https://api.elevenlabs.io/v1/speech-to-text",

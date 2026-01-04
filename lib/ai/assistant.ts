@@ -291,8 +291,14 @@ Provide insights about network diversity, potential opportunities, and suggestio
   return await generateText(prompt)
 }
 
-export async function generateChatResponse(message: string): Promise<string> {
+export async function generateChatResponse(message: string, language: string = "en"): Promise<string> {
+  const languagePrompt = language === "ja" || language === "japanese"
+    ? "IMPORTANT: RESPOND IN JAPANESE. すべての回答は日本語で行ってください。"
+    : "IMPORTANT: RESPOND IN ENGLISH."
+
   const systemPrompt = `You are a helpful AI assistant for Network Link AI, a comprehensive AI-powered business networking platform. You help users with business networking, contact management, and professional communication.
+
+${languagePrompt}
 
 ABOUT NETWORK LINK AI PLATFORM:
 Network Link AI is an AI-powered business networking and contact management platform that helps professionals build, manage, and grow their professional networks. The platform includes:

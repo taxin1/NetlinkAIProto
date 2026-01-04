@@ -35,6 +35,7 @@ export function useVoiceAssistant({
     transcript,
     isLoading
   } = useElevenLabsVoice({
+    language,
     onSpeechStart: () => {
       // Speech started
     },

@@ -6,6 +6,7 @@ import { Analytics } from '@vercel/analytics/next'
 import { ThemeProvider } from '@/components/theme-provider'
 import { PayPalErrorHandler } from '@/components/paypal-error-handler'
 import { ClientLoadingWrapper } from '@/components/client-loading-wrapper'
+import { GoogleTranslate } from '@/components/google-translate'
 import './globals.css'
 
 const inter = Inter({
@@ -15,9 +16,23 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: 'Netlink AI - Network Link AI | AI-Powered Business Networking',
-  description: 'Netlink AI (Network Link AI) is an enterprise-grade AI platform for intelligent contact management, automated networking, and business intelligence. Transform your professional network with cutting-edge technology.',
-  keywords: ['Netlink AI', 'Network Link AI', 'AI Networking', 'Business Networking', 'Contact Management', 'AI Email Automation', 'Professional Networking', 'Networking AI'],
+  title: {
+    default: 'Netlink AI - Intelligent Professional Networking & Relationship Management',
+    template: '%s | Netlink AI'
+  },
+  description: 'Netlink AI is the ultimate AI-powered platform for professional networking. Automate business card scanning, personalize outreach with AI, manage contacts, and grow your network 10x faster.',
+  keywords: [
+    'AI Networking', 
+    'Business Card Scanner', 
+    'Professional Relationship Management', 
+    'AI Email Automation', 
+    'Contact Management AI', 
+    'Networking Intelligence',
+    'CRM for Professionals',
+    'Personalized Outreach AI',
+    'Network Link AI',
+    'Netlink Cogni'
+  ],
   authors: [{ name: 'Netlink AI Team' }],
   creator: 'Netlink AI',
   publisher: 'Netlink AI',
@@ -26,13 +41,17 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL('https://netlink-ai.vercel.app'), // Replace with actual domain if known
+  metadataBase: new URL('https://netlink-ai.vercel.app'),
   alternates: {
     canonical: '/',
+    languages: {
+      'en-US': '/',
+      'ja-JP': '/?lang=ja',
+    },
   },
   openGraph: {
-    title: 'Netlink AI - Network Link AI',
-    description: 'AI-Powered Business Networking Platform',
+    title: 'Netlink AI - Intelligent Professional Networking',
+    description: 'The all-in-one AI platform to automate your professional growth. Scan cards, generate emails, and manage relationships smarter.',
     url: 'https://netlink-ai.vercel.app',
     siteName: 'Netlink AI',
     locale: 'en_US',
@@ -42,21 +61,16 @@ export const metadata: Metadata = {
         url: '/Logo1.png',
         width: 1200,
         height: 630,
-        alt: 'Netlink AI Logo',
-      },
-      {
-        url: '/favicon.png',
-        width: 512,
-        height: 512,
-        alt: 'Netlink AI Icon',
-      },
+        alt: 'Netlink AI - Networking Reinvented',
+      }
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Netlink AI - Network Link AI',
-    description: 'AI-Powered Business Networking Platform',
+    title: 'Netlink AI - Networking Reinvented with AI',
+    description: 'Automate your professional growth with AI intelligence. Scan cards, personalize emails, and manage your network.',
     images: ['/Logo1.png'],
+    creator: '@NetlinkAI',
   },
   robots: {
     index: true,
@@ -69,54 +83,11 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
-  icons: {
-    icon: [
-      {
-        url: '/favicon.png',
-        sizes: '32x32',
-        type: 'image/png',
-      },
-      {
-        url: '/favicon.png',
-        sizes: '128x128',
-        type: 'image/png',
-      },
-      {
-        url: '/favicon.png',
-        sizes: '512x512',
-        type: 'image/png',
-      },
-      {
-        url: '/favicon.png',
-        sizes: '1024x1024',
-        type: 'image/png',
-      },
-    ],
-    shortcut: '/favicon.png',
-    apple: [
-      {
-        url: '/favicon.png',
-        sizes: '180x180',
-        type: 'image/png',
-      },
-      {
-        url: '/favicon.png',
-        sizes: '512x512',
-        type: 'image/png',
-      },
-      {
-        url: '/favicon.png',
-        sizes: '1024x1024',
-        type: 'image/png',
-      },
-    ],
-    other: [
-      {
-        rel: 'apple-touch-icon-precomposed',
-        url: '/favicon.png',
-      },
-    ],
+  verification: {
+    google: 'your-google-verification-code', // User should replace this
+    yandex: 'your-yandex-verification-code',
   },
+  category: 'Technology',
 }
 
 export default function RootLayout({
@@ -136,6 +107,7 @@ export default function RootLayout({
             disableTransitionOnChange
           >
             {children}
+            <GoogleTranslate />
           </ThemeProvider>
           <Analytics />
         </ClientLoadingWrapper>

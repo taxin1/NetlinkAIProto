@@ -8,6 +8,7 @@ interface VoiceOptions {
   onTranscript?: (text: string) => void
   onError?: (error: string) => void
   voiceId?: string
+  language?: string
 }
 
 export function useElevenLabsVoice({
@@ -16,6 +17,7 @@ export function useElevenLabsVoice({
   onTranscript,
   onError,
   voiceId = "21m00Tcm4TlvDq8ikWAM",
+  language = "en",
 }: VoiceOptions = {}) {
   const [isSpeaking, setIsSpeaking] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -68,7 +70,7 @@ export function useElevenLabsVoice({
       const response = await fetch("/api/elevenlabs-tts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text, voiceId }),
+        body: JSON.stringify({ text, voiceId, language }),
       })
 
       // Check if response is JSON (browser fallback signal)
@@ -133,6 +135,9 @@ export function useElevenLabsVoice({
 
       const formData = new FormData()
       formData.append("audio", audioBlob, "recording.webm")
+      if (language) {
+        formData.append("language", language)
+      }
 
       const response = await fetch("/api/elevenlabs-stt", {
         method: "POST",

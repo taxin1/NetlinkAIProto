@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { PublicNavigation } from "@/components/public-navigation"
+import { useTranslations } from "@/lib/hooks/use-translations"
 import {
   Check,
   X,

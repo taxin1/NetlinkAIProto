@@ -12,7 +12,7 @@ interface CommandIntent {
 
 export async function POST(request: NextRequest) {
   try {
-    const { command, userId } = await request.json()
+    const { command, userId, language = "en" } = await request.json()
 
     if (!command || !userId) {
       return NextResponse.json(
@@ -20,6 +20,10 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
+
+    const languagePrompt = language === "ja" || language === "japanese"
+      ? "IMPORTANT: RESPOND IN JAPANESE. すべての回答は日本語で行ってください。"
+      : "IMPORTANT: RESPOND IN ENGLISH."
 
     const supabase = await createClient()
 
@@ -121,6 +125,8 @@ export async function POST(request: NextRequest) {
 
     const prompt = `You are a voice command parser for Netlink, an AI-powered business networking platform.
 
+${languagePrompt}
+
 AVAILABLE VOICE ACTIONS:
 - write_email: Generate/write an email for a contact (requires: recipient name/email, purpose/topic)
 - send_email: Send an email to a contact (requires: recipient name/email, subject, body/message)
@@ -165,7 +171,7 @@ Respond with ONLY a JSON object:
   "action": "action_name",
   "parameters": {},
   "needsConfirmation": true/false,
-  "response": "Natural language response (no asterisks, plain text)"
+  "response": "Natural language response (no asterisks, plain text, in ${language === "ja" ? "JAPANESE" : "ENGLISH"})"
 }`
 
     const response = await fetch(
