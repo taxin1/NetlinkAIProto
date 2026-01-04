@@ -65,7 +65,8 @@ export async function updateSession(request: NextRequest) {
                         request.nextUrl.pathname.startsWith("/api") ||
                         request.nextUrl.pathname.startsWith("/public") ||
                         request.nextUrl.pathname.startsWith("/portfolio") ||
-                        request.nextUrl.pathname.startsWith("/admin")
+                        request.nextUrl.pathname.startsWith("/admin") ||
+                        request.nextUrl.pathname.startsWith("/resources")
     
     if (!user && !isPublicPath) {
       const url = request.nextUrl.clone()
