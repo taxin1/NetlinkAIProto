@@ -2,9 +2,11 @@ import { createServerClient } from "@supabase/ssr"
 import { NextResponse, type NextRequest } from "next/server"
 
 export async function updateSession(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({
-    request,
-  })
+  // Set custom header with pathname so layouts can check it
+  const requestHeaders = new Headers(request.headers)
+  requestHeaders.set('x-pathname', request.nextUrl.pathname)
+  
+  const pathname = request.nextUrl.pathname
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -14,8 +16,23 @@ export async function updateSession(request: NextRequest) {
     console.error(
       "Missing Supabase environment variables in middleware. Please check that NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY are set."
     )
-    return supabaseResponse
+    const response = NextResponse.next({
+      request: {
+        headers: requestHeaders,
+      },
+    })
+    response.headers.set('x-pathname', pathname)
+    return response
   }
+
+  let supabaseResponse = NextResponse.next({
+    request: {
+      headers: requestHeaders,
+    },
+  })
+  
+  // Set pathname header on response
+  supabaseResponse.headers.set('x-pathname', pathname)
 
   const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
     cookies: {
@@ -25,8 +42,12 @@ export async function updateSession(request: NextRequest) {
       setAll(cookiesToSet) {
         cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
         supabaseResponse = NextResponse.next({
-          request,
+          request: {
+            headers: requestHeaders,
+          },
         })
+        // Preserve the pathname header
+        supabaseResponse.headers.set('x-pathname', pathname)
         cookiesToSet.forEach(({ name, value, options }) => supabaseResponse.cookies.set(name, value, options))
       },
     },
@@ -43,7 +64,8 @@ export async function updateSession(request: NextRequest) {
                         request.nextUrl.pathname.startsWith("/auth") || 
                         request.nextUrl.pathname.startsWith("/api") ||
                         request.nextUrl.pathname.startsWith("/public") ||
-                        request.nextUrl.pathname.startsWith("/portfolio")
+                        request.nextUrl.pathname.startsWith("/portfolio") ||
+                        request.nextUrl.pathname.startsWith("/admin")
     
     if (!user && !isPublicPath) {
       const url = request.nextUrl.clone()
