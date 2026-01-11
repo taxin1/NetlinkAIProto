@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { createClient } from "@/lib/supabase/client"
+import { isGuest } from "@/lib/guest-trial"
 import type { Contact } from "@/types/contact"
 
 interface EditContactDialogProps {
@@ -54,6 +55,29 @@ export function EditContactDialog({ contact, userId, open, onOpenChange }: EditC
     const supabase = createClient()
 
     try {
+      if (isGuest(userId)) {
+        const guestContacts = JSON.parse(localStorage.getItem(`contacts_${userId}`) || "[]")
+        const index = guestContacts.findIndex((c: any) => c.id === contact.id)
+        if (index !== -1) {
+          guestContacts[index] = {
+            ...guestContacts[index],
+            name: name.trim(),
+            email: email.trim() || null,
+            phone: phone.trim() || null,
+            company: company.trim() || null,
+            position: position.trim() || null,
+            linkedin_url: linkedinUrl.trim() || null,
+            updated_at: new Date().toISOString()
+          }
+          localStorage.setItem(`contacts_${userId}`, JSON.stringify(guestContacts))
+          window.dispatchEvent(new CustomEvent('guest-contacts-updated'))
+        }
+        alert("Contact updated successfully!")
+        onOpenChange(false)
+        setIsSaving(false)
+        return
+      }
+
       const { error } = await supabase
         .from("contacts")
         .update({

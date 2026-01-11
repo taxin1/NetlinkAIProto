@@ -13,6 +13,8 @@ export async function GET(request: Request) {
   }
 
   // URL to redirect to after sign in process completes
-  // Redirect to waitlist for now (product launch)
-  return NextResponse.redirect(`${origin}/waitlist`)
+  if (next) {
+    return NextResponse.redirect(`${origin}${next}`)
+  }
+  return NextResponse.redirect(`${origin}/dashboard`)
 }

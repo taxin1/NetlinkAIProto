@@ -1,6 +1,10 @@
+import { cookies } from "next/headers"
 import { createClient } from "@/lib/supabase/server"
 import { AIEmailAgent } from "@/components/ai-email-agent"
-import { Sparkles } from "lucide-react"
+import { Sparkles, Lock } from "lucide-react"
+import { GUEST_COOKIE_NAME } from "@/lib/guest-trial"
+import { Button } from "@/components/ui/button"
+import Link from "next/link"
 
 export default async function CampaignsPage() {
   const supabase = await createClient()
@@ -8,7 +12,30 @@ export default async function CampaignsPage() {
     data: { user },
   } = await supabase.auth.getUser()
 
-  if (!user) return null
+  const cookieStore = await cookies()
+  const guestId = cookieStore.get(GUEST_COOKIE_NAME)?.value
+
+  if (!user && !guestId) return null
+
+  // If guest, show a placeholder
+  if (!user && guestId) {
+    return (
+      <div className="relative z-10 p-4 sm:p-6 lg:p-8 flex flex-col items-center justify-center min-h-[60vh] text-center">
+        <div className="bg-primary/10 p-6 rounded-full mb-6">
+          <Lock className="h-12 w-12 text-primary" />
+        </div>
+        <h1 className="text-3xl font-bold mb-4">AI Campaigns are Locked</h1>
+        <p className="text-muted-foreground max-w-md mb-8">
+          To create automated AI-powered email campaigns and manage recipients, you need to create a full account.
+        </p>
+        <Link href="/auth/signup">
+          <Button size="lg" className="bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-bold px-8 py-6 text-lg">
+            Sign Up to Unlock Campaigns
+          </Button>
+        </Link>
+      </div>
+    )
+  }
 
   return (
     <div className="relative z-10 p-4 sm:p-6 lg:p-8">

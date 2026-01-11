@@ -58,6 +58,9 @@ export async function updateSession(request: NextRequest) {
       data: { user },
     } = await supabase.auth.getUser()
 
+    // Check for guest cookie
+    const isGuestUser = request.cookies.get('netlink_guest_id')
+
     // Allow public routes: home, auth pages, privacy, terms, pricing, public pages, portfolio pages, waitlist, and API routes
     const publicPaths = ["/", "/privacy", "/terms", "/pricing", "/waitlist"]
     const isPublicPath = publicPaths.includes(request.nextUrl.pathname) || 
@@ -68,7 +71,7 @@ export async function updateSession(request: NextRequest) {
                         request.nextUrl.pathname.startsWith("/admin") ||
                         request.nextUrl.pathname.startsWith("/resources")
     
-    if (!user && !isPublicPath) {
+    if (!user && !isGuestUser && !isPublicPath) {
       const url = request.nextUrl.clone()
       url.pathname = "/auth/login"
       return NextResponse.redirect(url)

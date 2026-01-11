@@ -6,6 +6,41 @@ interface AnalyticsChartsProps {
 }
 
 export async function AnalyticsCharts({ userId }: AnalyticsChartsProps) {
+  const isGuest = userId.startsWith('guest_')
+  
+  if (isGuest) {
+    return (
+      <div className="grid gap-6 lg:grid-cols-2">
+        <Card className="border-border bg-card/50 backdrop-blur-sm">
+          <CardHeader>
+            <CardTitle>Activity Breakdown</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">No activity data in Trial Mode</p>
+          </CardContent>
+        </Card>
+
+        <Card className="border-border bg-card/50 backdrop-blur-sm">
+          <CardHeader>
+            <CardTitle>Engagement Summary</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-4 bg-secondary rounded-lg">
+                <span className="text-sm font-medium">Total Interactions</span>
+                <span className="text-2xl font-bold">0</span>
+              </div>
+              <div className="flex items-center justify-between p-4 bg-secondary rounded-lg">
+                <span className="text-sm font-medium">Most Active Type</span>
+                <span className="text-lg font-semibold">N/A</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
   const supabase = await createClient()
 
   // Get event type distribution

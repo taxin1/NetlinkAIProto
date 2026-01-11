@@ -19,6 +19,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { Plus } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { checkUsageLimitClient } from "@/lib/plan-features-client"
+import { hasReachedLimit, incrementGuestUsage, isGuest } from "@/lib/guest-trial"
+import Link from "next/link"
 
 interface AddContactDialogProps {
   userId: string
@@ -37,7 +39,47 @@ export function AddContactDialog({ userId }: AddContactDialogProps) {
     const supabase = createClient()
 
     try {
-      // Check contact limit before creating
+      // Check guest limits
+      if (isGuest(userId) && hasReachedLimit('contacts')) {
+        alert("You've reached the trial limit for contacts. Please sign up to add more!")
+        setIsLoading(false)
+        return
+      }
+
+      const name = formData.get("name") as string
+      const email = formData.get("email") as string
+      const phone = formData.get("phone") as string
+      const company = formData.get("company") as string
+      const position = formData.get("position") as string
+      const notes = formData.get("notes") as string
+
+      if (isGuest(userId)) {
+        // Handle guest contact save to LocalStorage
+        const guestContacts = JSON.parse(localStorage.getItem(`contacts_${userId}`) || "[]")
+        const newContact = {
+          id: crypto.randomUUID(),
+          user_id: userId,
+          name,
+          email,
+          phone,
+          company,
+          position,
+          notes,
+          created_at: new Date().toISOString()
+        }
+        guestContacts.unshift(newContact)
+        localStorage.setItem(`contacts_${userId}`, JSON.stringify(guestContacts))
+        
+        // Trigger custom event for real-time update in same window
+        window.dispatchEvent(new CustomEvent('guest-contacts-updated'))
+        
+        incrementGuestUsage('contacts')
+        setOpen(false)
+        setIsLoading(false)
+        return
+      }
+
+      // Check contact limit for authenticated users
       const contactLimitCheck = await checkUsageLimitClient(userId, 'contacts')
       if (!contactLimitCheck.allowed) {
         alert(contactLimitCheck.message || "Contact limit reached. Please upgrade your plan.")
@@ -47,12 +89,12 @@ export function AddContactDialog({ userId }: AddContactDialogProps) {
 
       const { error } = await supabase.from("contacts").insert({
         user_id: userId,
-        name: formData.get("name") as string,
-        email: formData.get("email") as string,
-        phone: formData.get("phone") as string,
-        company: formData.get("company") as string,
-        position: formData.get("position") as string,
-        notes: formData.get("notes") as string,
+        name,
+        email,
+        phone,
+        company,
+        position,
+        notes,
       })
 
       if (error) throw error
@@ -63,6 +105,11 @@ export function AddContactDialog({ userId }: AddContactDialogProps) {
         event_type: "connection",
         description: `Added ${formData.get("name")} to contacts`,
       })
+
+      // Increment guest usage
+      if (isGuest(userId)) {
+        incrementGuestUsage('contacts')
+      }
 
       setOpen(false)
       router.refresh()

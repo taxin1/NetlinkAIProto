@@ -1,5 +1,7 @@
+import { cookies } from "next/headers"
 import { createClient } from "@/lib/supabase/server"
 import { Chatbot } from "@/components/chatbot"
+import { GUEST_COOKIE_NAME } from "@/lib/guest-trial"
 
 export default async function AIAssistantPage() {
   const supabase = await createClient()
@@ -7,7 +9,10 @@ export default async function AIAssistantPage() {
     data: { user },
   } = await supabase.auth.getUser()
 
-  if (!user) return null
+  const cookieStore = await cookies()
+  const guestId = cookieStore.get(GUEST_COOKIE_NAME)?.value
+
+  if (!user && !guestId) return null
 
   return (
     <div className="p-8 max-w-4xl mx-auto">
@@ -20,7 +25,7 @@ export default async function AIAssistantPage() {
       </div>
 
       <div className="max-w-4xl">
-        <Chatbot userId={user.id} />
+        <Chatbot userId={user?.id || guestId || "guest"} />
       </div>
     </div>
   )

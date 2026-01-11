@@ -43,6 +43,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { StructuredData } from "@/components/structured-data"
+import { startGuestSession } from "@/lib/guest-trial"
+import { useRouter } from "next/navigation"
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -144,6 +146,13 @@ export function LandingPage() {
   const [portfolioStep, setPortfolioStep] = useState(0)
   const [networkingStep, setNetworkingStep] = useState(0)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [isMounted, setIsMounted] = useState(false)
+  const router = useRouter()
+
+  const handleTryDemo = () => {
+    startGuestSession()
+    router.push("/dashboard")
+  }
 
   // Show preview first, then details
   const [showCardDetails, setShowCardDetails] = useState(false)
@@ -157,6 +166,7 @@ export function LandingPage() {
 
   // Initialize particle configs only on client
   useEffect(() => {
+    setIsMounted(true)
     setParticleConfigs(
       Array.from({ length: 5 }, () => ({
         x: Math.random() * 100 + "%",
@@ -366,26 +376,40 @@ export function LandingPage() {
                 </motion.div>
               </Link>
 
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="text-slate-400 hover:text-white hover:bg-slate-800/50 font-medium relative group">
-                    <Languages className="h-5 w-5 transition-transform group-hover:scale-110" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="bg-slate-900 border-slate-800 text-slate-300">
-                  <DropdownMenuItem onClick={() => changeLanguage("en")} className={lang === "en" ? "bg-slate-800 text-white" : "hover:bg-slate-800 hover:text-white"}>
-                    🇺🇸 English
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => changeLanguage("ja")} className={lang === "ja" ? "bg-slate-800 text-white" : "hover:bg-slate-800 hover:text-white"}>
-                    🇯🇵 日本語
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              {isMounted ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="text-slate-400 hover:text-white hover:bg-slate-800/50 font-medium relative group">
+                      <Languages className="h-5 w-5 transition-transform group-hover:scale-110" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="bg-slate-900 border-slate-800 text-slate-300">
+                    <DropdownMenuItem onClick={() => changeLanguage("en")} className={lang === "en" ? "bg-slate-800 text-white" : "hover:bg-slate-800 hover:text-white"}>
+                      🇺🇸 English
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => changeLanguage("ja")} className={lang === "ja" ? "bg-slate-800 text-white" : "hover:bg-slate-800 hover:text-white"}>
+                      🇯🇵 日本語
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <Button variant="ghost" size="icon" className="text-slate-400 hover:text-white hover:bg-slate-800/50 font-medium relative group">
+                  <Languages className="h-5 w-5" />
+                </Button>
+              )}
 
-              <Link href="/waitlist">
+              <Link href="/auth/login">
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Button variant="ghost" className="text-slate-400 hover:text-white hover:bg-slate-800/50 font-medium">
+                    {t("signIn")}
+                  </Button>
+                </motion.div>
+              </Link>
+
+              <Link href="/auth/signup">
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                   <Button className="bg-white text-slate-900 hover:bg-slate-100 font-medium shadow-md">
-                    {t("joinWaitlist")}
+                    {t("getStarted")}
                   </Button>
                 </motion.div>
               </Link>
@@ -466,10 +490,15 @@ export function LandingPage() {
                   </Button>
                 </div>
 
-                <div className="pt-4 border-t border-slate-800/50">
-                  <Link href="/waitlist" onClick={() => setMobileMenuOpen(false)}>
+                <div className="pt-4 border-t border-slate-800/50 space-y-2">
+                  <Link href="/auth/login" onClick={() => setMobileMenuOpen(false)}>
+                    <Button variant="outline" className="w-full bg-slate-800 border-slate-700 text-white font-medium py-6 text-lg">
+                      {t("signIn")}
+                    </Button>
+                  </Link>
+                  <Link href="/auth/signup" onClick={() => setMobileMenuOpen(false)}>
                     <Button className="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white font-medium shadow-md shadow-blue-900/20 py-6 text-lg">
-                      {t("joinWaitlist")}
+                      {t("getStarted")}
                     </Button>
                   </Link>
                 </div>
@@ -536,17 +565,28 @@ export function LandingPage() {
               variants={itemVariants}
               className="flex flex-col sm:flex-row gap-4 justify-center items-center"
             >
-              <Link href="/waitlist">
+              <Link href="/auth/signup">
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                   <Button
                     size="lg"
                     className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-semibold text-lg px-8 py-6 shadow-lg shadow-cyan-500/25"
                   >
-                    {t("joinWaitlist")}
+                    {t("getStarted")}
                     <Sparkles className="ml-2 h-5 w-5" />
                   </Button>
                 </motion.div>
               </Link>
+
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button
+                  size="lg"
+                  onClick={handleTryDemo}
+                  className="bg-white/10 hover:bg-white/20 text-white border border-white/20 font-semibold text-lg px-8 py-6 backdrop-blur-md"
+                >
+                  Try Demo
+                  <Bot className="ml-2 h-5 w-5" />
+                </Button>
+              </motion.div>
 
               <Link href="/public/about#how-it-works">
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
@@ -2758,26 +2798,26 @@ export function LandingPage() {
                   variants={itemVariants}
                   className="flex flex-col sm:flex-row gap-5 justify-center items-center"
                 >
-                  <Link href="/waitlist" className="w-full sm:w-auto">
+                  <Link href="/auth/signup" className="w-full sm:w-auto">
                     <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="w-full">
                       <Button
                         size="lg"
                         className="w-full sm:w-auto bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold text-lg px-10 py-7 shadow-lg shadow-cyan-500/25 rounded-xl border border-white/10"
                       >
-                        {t("joinWaitlist")}
+                        {t("getStarted")}
                         <Sparkles className="ml-2 h-5 w-5 animate-pulse" />
                       </Button>
                     </motion.div>
                   </Link>
 
-                  <Link href="/pricing" className="w-full sm:w-auto">
+                  <Link href="/auth/login" className="w-full sm:w-auto">
                     <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="w-full">
                       <Button
                         size="lg"
                         variant="outline"
                         className="w-full sm:w-auto text-lg px-10 py-7 border-2 border-slate-700 hover:border-slate-500 bg-slate-900/50 hover:bg-slate-800 text-white font-semibold rounded-xl backdrop-blur-md"
                       >
-                        View Pricing
+                        {t("signIn")}
                         <ArrowRight className="ml-2 h-5 w-5" />
                       </Button>
                     </motion.div>

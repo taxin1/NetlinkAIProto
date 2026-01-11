@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Upload, Scan, Loader2, CheckCircle2, Camera, X } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { checkUsageLimitClient } from "@/lib/plan-features-client"
+import { isGuest, incrementGuestUsage, hasReachedLimit } from "@/lib/guest-trial"
 
 interface BusinessCardScannerProps {
   userId: string
@@ -163,7 +164,38 @@ export function BusinessCardScanner({
       console.log("[v0] Extracted info:", info)
       setExtractedInfo(info)
 
-      // Check contact limit before saving
+      if (isGuest(userId)) {
+        if (hasReachedLimit('actions') || hasReachedLimit('contacts')) {
+          alert("You've reached your trial limit. Please sign up to continue!")
+          setIsScanning(false)
+          return
+        }
+
+        // Save to guest LocalStorage
+        const guestContacts = JSON.parse(localStorage.getItem(`contacts_${userId}`) || "[]")
+        const newContact = {
+          id: crypto.randomUUID(),
+          user_id: userId,
+          name: info.name || "Unknown",
+          email: info.email,
+          phone: info.phone,
+          company: info.company,
+          position: info.position,
+          linkedin_url: info.linkedin_url,
+          created_at: new Date().toISOString()
+        }
+        guestContacts.unshift(newContact)
+        localStorage.setItem(`contacts_${userId}`, JSON.stringify(guestContacts))
+        window.dispatchEvent(new CustomEvent('guest-contacts-updated'))
+        
+        incrementGuestUsage('actions')
+        incrementGuestUsage('contacts')
+        setSuccess(true)
+        setIsScanning(false)
+        return
+      }
+
+      // Check contact limit before saving for authenticated users
       const contactLimitCheck = await checkUsageLimitClient(userId, 'contacts')
       if (!contactLimitCheck.allowed) {
         alert(contactLimitCheck.message || "Contact limit reached. Please upgrade your plan.")

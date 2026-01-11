@@ -34,9 +34,8 @@ function SignUpContent() {
         const { data: { user } } = await supabase.auth.getUser()
         
         if (user) {
-          // User is already signed in, check if they should be on waitlist
-          // For now, redirect all to waitlist
-          router.push("/waitlist")
+          // User is already signed in, check if they should be on onboarding
+          router.push(redirectPath)
           router.refresh()
         }
       } catch (error) {
@@ -67,23 +66,7 @@ function SignUpContent() {
       setError(error)
     } else if (data?.session) {
       // User is immediately signed in (email confirmation disabled)
-      // Join waitlist automatically
-      try {
-        const supabase = createClient()
-        const { data: { user: currentUser } } = await supabase.auth.getUser()
-        await fetch("/api/waitlist", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: email.trim(),
-            userId: currentUser?.id || null,
-          }),
-        })
-      } catch (err) {
-        console.error("Error joining waitlist:", err)
-      }
-      // Redirect to waitlist page
-      router.push("/waitlist")
+      router.push(redirectPath)
     } else if (data?.user && !data.session) {
       // Email confirmation is required
       router.push("/auth/check-email")
@@ -105,13 +88,13 @@ function SignUpContent() {
       return
     }
 
-    const { data, error } = await authService.signInWithOAuth('google', '/waitlist')
+    const { data, error } = await authService.signInWithOAuth('google', redirectPath)
     
     if (error) {
       setError(error)
       setIsLoading(false)
     }
-    // OAuth redirect will handle the rest - will redirect to waitlist via callback
+    // OAuth redirect will handle the rest - will redirect to onboarding via callback
   }
 
   // Show loading state while checking authentication

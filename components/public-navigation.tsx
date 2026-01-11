@@ -1,12 +1,14 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { BookOpen, Menu, X, Languages } from "lucide-react"
+import { BookOpen, Menu, X, Languages, Bot } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useTranslations } from "@/lib/hooks/use-translations"
+import { startGuestSession } from "@/lib/guest-trial"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,6 +19,17 @@ import {
 export function PublicNavigation() {
   const { t, lang, changeLanguage } = useTranslations()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [isMounted, setIsMounted] = useState(false)
+  const router = useRouter()
+
+  const handleTryDemo = () => {
+    startGuestSession()
+    router.push("/dashboard")
+  }
+
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
 
   return (
     <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
@@ -55,25 +68,44 @@ export function PublicNavigation() {
               </Button>
             </Link>
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="relative group">
-                  <Languages className="h-5 w-5 transition-transform group-hover:scale-110" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => changeLanguage("en")} className={lang === "en" ? "bg-accent" : ""}>
-                  🇺🇸 English
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => changeLanguage("ja")} className={lang === "ja" ? "bg-accent" : ""}>
-                  🇯🇵 日本語
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            {isMounted ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="relative group">
+                    <Languages className="h-5 w-5 transition-transform group-hover:scale-110" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => changeLanguage("en")} className={lang === "en" ? "bg-accent" : ""}>
+                    🇺🇸 English
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => changeLanguage("ja")} className={lang === "ja" ? "bg-accent" : ""}>
+                    🇯🇵 日本語
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button variant="ghost" size="icon" className="relative group">
+                <Languages className="h-5 w-5" />
+              </Button>
+            )}
 
-            <Link href="/waitlist">
+            <Link href="/auth/login">
+              <Button variant="ghost">{t("signIn")}</Button>
+            </Link>
+
+            <Button 
+              variant="outline" 
+              onClick={handleTryDemo}
+              className="border-primary/20 hover:bg-primary/10"
+            >
+              <Bot className="h-4 w-4 mr-2" />
+              Try Demo
+            </Button>
+
+            <Link href="/auth/signup">
               <Button className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700">
-                {t("joinWaitlist")}
+                {t("getStarted")}
               </Button>
             </Link>
           </div>
@@ -147,10 +179,26 @@ export function PublicNavigation() {
                 </Button>
               </div>
 
-              <div className="pt-4 border-t">
-                <Link href="/waitlist" onClick={() => setMobileMenuOpen(false)}>
+              <div className="pt-4 border-t space-y-2">
+                <Link href="/auth/login" onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="outline" className="w-full text-lg py-6">
+                    {t("signIn")}
+                  </Button>
+                </Link>
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    handleTryDemo()
+                    setMobileMenuOpen(false)
+                  }}
+                  className="w-full text-lg py-6 border-primary/20 bg-primary/5"
+                >
+                  <Bot className="h-5 w-5 mr-3" />
+                  Try Demo
+                </Button>
+                <Link href="/auth/signup" onClick={() => setMobileMenuOpen(false)}>
                   <Button className="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white font-medium shadow-md py-6 text-lg">
-                    {t("joinWaitlist")}
+                    {t("getStarted")}
                   </Button>
                 </Link>
               </div>

@@ -10,6 +10,8 @@ import { Send, Bot, User, Loader2, Mic, MicOff, Volume2, VolumeX, Sparkles, Help
 import { useVoiceAssistant } from "@/lib/hooks/use-voice-assistant"
 import { createClient } from "@/lib/supabase/client"
 import { useTranslations } from "@/lib/hooks/use-translations"
+import { hasReachedLimit, incrementGuestUsage, isGuest } from "@/lib/guest-trial"
+import Link from "next/link"
 
 interface Message {
   id: string
@@ -133,6 +135,21 @@ export function Chatbot({ userId }: ChatbotProps) {
 
   // Voice Assistant
   const handleVoiceResult = async (transcript: string) => {
+    // Check guest limits
+    if (isGuest(userId) && hasReachedLimit('actions')) {
+      const limitMessage: Message = {
+        id: Date.now().toString(),
+        content: "You've reached your trial limit for AI actions. Please sign up to continue using all features!",
+        role: "assistant",
+        timestamp: new Date(),
+      }
+      setMessages(prev => [...prev, limitMessage])
+      if (voiceEnabled) {
+        await speak(limitMessage.content)
+      }
+      return
+    }
+
     // Add user's voice message
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -154,6 +171,11 @@ export function Chatbot({ userId }: ChatbotProps) {
       if (!response.ok) throw new Error("Failed to process voice command")
 
       const intent = await response.json()
+      
+      // Increment guest usage
+      if (isGuest(userId)) {
+        incrementGuestUsage('actions')
+      }
 
       // Handle different actions
       if (intent.action === "write_email" && intent.parameters.generatedEmail) {
@@ -220,6 +242,18 @@ export function Chatbot({ userId }: ChatbotProps) {
   const handleSendMessage = async () => {
     if (!inputMessage.trim() || isLoading) return
 
+    // Check guest limits
+    if (isGuest(userId) && hasReachedLimit('actions')) {
+      const limitMessage: Message = {
+        id: Date.now().toString(),
+        content: "You've reached your trial limit for AI actions. Please sign up to continue using all features!",
+        role: "assistant",
+        timestamp: new Date(),
+      }
+      setMessages(prev => [...prev, limitMessage])
+      return
+    }
+
     const userMessage: Message = {
       id: Date.now().toString(),
       content: inputMessage.trim(),
@@ -242,6 +276,11 @@ export function Chatbot({ userId }: ChatbotProps) {
       }
 
       setMessages(prev => [...prev, assistantMessage])
+      
+      // Increment guest usage
+      if (isGuest(userId)) {
+        incrementGuestUsage('actions')
+      }
     } catch (error) {
       console.error("Chat error:", error)
       

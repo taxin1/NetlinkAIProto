@@ -1,3 +1,4 @@
+import { cookies } from "next/headers"
 import { createClient } from "@/lib/supabase/server"
 import { BusinessCardScanner } from "@/components/business-card-scanner"
 import { QuickStats } from "@/components/quick-stats"
@@ -6,6 +7,7 @@ import { EmailHighlights } from "@/components/email-highlights"
 import { NetworkingEventsSummary } from "@/components/networking-events-summary"
 import { RealtimeNotifications } from "@/components/realtime-notifications"
 import { MeetingReminders } from "@/components/meeting-reminders"
+import { GUEST_COOKIE_NAME } from "@/lib/guest-trial"
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -13,12 +15,17 @@ export default async function DashboardPage() {
     data: { user },
   } = await supabase.auth.getUser()
 
-  if (!user) return null
+  const cookieStore = await cookies()
+  const guestId = cookieStore.get(GUEST_COOKIE_NAME)?.value
+
+  if (!user && !guestId) return null
+
+  const userId = user?.id || guestId || "guest"
 
   return (
     <>
-      <RealtimeNotifications userId={user.id} />
-      <MeetingReminders userId={user.id} />
+      {user && <RealtimeNotifications userId={user.id} />}
+      {user && <MeetingReminders userId={user.id} />}
       <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto relative">
         {/* Header with Glassmorphism */}
         <div className="mb-8 sm:mb-12 animate-fade-in-up">
@@ -40,17 +47,17 @@ export default async function DashboardPage() {
 
         {/* Scanner Section with Glass Effect */}
         <div className="mb-8 sm:mb-12 lg:mb-16 animate-fade-in-up delay-200">
-          <BusinessCardScanner userId={user.id} />
+          <BusinessCardScanner userId={userId} />
         </div>
 
         {/* Stats with Glass Effect */}
         <div className="animate-fade-in-up delay-300">
-          <QuickStats userId={user.id} />
+          <QuickStats userId={userId} />
         </div>
 
         {/* Upcoming Events */}
         <div className="mt-8 sm:mt-12 lg:mt-16 animate-fade-in-up delay-500">
-          <UpcomingEvents userId={user.id} />
+          <UpcomingEvents userId={userId} />
         </div>
 
         {/* Highlights Section */}
@@ -65,7 +72,7 @@ export default async function DashboardPage() {
           </div>
           <div className="grid gap-6 lg:grid-cols-2">
             <EmailHighlights />
-            <NetworkingEventsSummary userId={user.id} />
+            <NetworkingEventsSummary userId={userId} />
           </div>
         </div>
       </div>

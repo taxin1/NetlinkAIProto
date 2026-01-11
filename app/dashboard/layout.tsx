@@ -1,10 +1,12 @@
 import type React from "react"
 import { redirect } from "next/navigation"
+import { cookies } from "next/headers"
 import { createClient } from "@/lib/supabase/server"
 import { Sidebar } from "@/components/sidebar"
 import { BackgroundPaths } from "@/components/kokonutui/background-paths"
 import { GlobalNetworkerOptInPrompt } from "@/components/global-networker-optin"
 import { GuidedTour } from "@/components/guided-tour"
+import { GUEST_COOKIE_NAME } from "@/lib/guest-trial"
 
 export default async function DashboardLayout({
   children,
@@ -16,25 +18,18 @@ export default async function DashboardLayout({
     data: { user },
   } = await supabase.auth.getUser()
 
-  if (!user) {
+  const cookieStore = await cookies()
+  const guestId = cookieStore.get(GUEST_COOKIE_NAME)?.value
+
+  if (!user && !guestId) {
     redirect("/auth/login")
   }
 
-  // Check if user should be on waitlist
-  // For now, redirect all users to waitlist until product launch
-  const { data: waitlistEntry } = await supabase
-    .from('waitlist')
-    .select('pro_access_granted, pro_access_until')
-    .eq('user_id', user.id)
-    .maybeSingle()
-
-  // Allow access only if they have pro access granted and it hasn't expired
-  const hasAccess = waitlistEntry?.pro_access_granted && 
-    waitlistEntry?.pro_access_until && 
-    new Date(waitlistEntry.pro_access_until) > new Date()
-
-  if (!hasAccess) {
-    redirect("/waitlist")
+  // Use guest user info if no authenticated user
+  const displayUser = user || {
+    id: guestId,
+    email: "Guest Mode (Limited Trial)",
+    isGuest: true
   }
 
   return (
@@ -57,11 +52,17 @@ export default async function DashboardLayout({
       </div>
 
       {/* Sidebar - handles mobile/desktop rendering internally */}
-      <Sidebar user={{ id: user.id, email: user.email }} />
+      <Sidebar user={{ id: displayUser.id, email: displayUser.email || "Guest", isGuest: !!displayUser.isGuest }} />
 
       <main className="flex-1 overflow-y-auto overflow-x-hidden relative z-10 w-full lg:w-auto overscroll-contain">
-        <GlobalNetworkerOptInPrompt userId={user.id} />
-        <GuidedTour userId={user.id} />
+        {user && <GlobalNetworkerOptInPrompt userId={user.id} />}
+        {user && <GuidedTour userId={user.id} />}
+        {!user && (
+          <div className="bg-primary/10 border-b border-primary/20 px-4 py-2 text-center text-sm font-medium flex items-center justify-center gap-2">
+            <span>You are in Trial Mode. Progress will not be saved.</span>
+            <a href="/auth/signup" className="text-primary hover:underline font-bold">Sign up now</a>
+          </div>
+        )}
         {children}
       </main>
     </div>

@@ -7,6 +7,7 @@ import { useState } from "react"
 import { useRealtimeContacts } from "@/lib/hooks/use-realtime-contacts"
 import { ComposeEmailDialog } from "@/components/compose-email-dialog"
 import { EditContactDialog } from "@/components/edit-contact-dialog"
+import { isGuest } from "@/lib/guest-trial"
 import type { Contact } from "@/types/contact"
 
 interface ContactsListProps {
@@ -20,6 +21,14 @@ export function ContactsList({ userId }: ContactsListProps) {
 
   const handleDelete = async (contactId: string) => {
     if (!confirm("Are you sure you want to delete this contact?")) return
+
+    if (isGuest(userId)) {
+      const guestContacts = JSON.parse(localStorage.getItem(`contacts_${userId}`) || "[]")
+      const filtered = guestContacts.filter((c: any) => c.id !== contactId)
+      localStorage.setItem(`contacts_${userId}`, JSON.stringify(filtered))
+      window.dispatchEvent(new CustomEvent('guest-contacts-updated'))
+      return
+    }
 
     const { createClient } = await import("@/lib/supabase/client")
     const supabase = createClient()

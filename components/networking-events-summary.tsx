@@ -47,6 +47,17 @@ export function NetworkingEventsSummary({ userId }: { userId: string }) {
     setError(null)
     setIsLoading(true)
     try {
+      const isGuest = userId.startsWith('guest_')
+      if (isGuest) {
+        setSummary({
+          totalEvents: 0,
+          recentEvents: [],
+          eventBreakdown: { emails: 0, meetings: 0, calls: 0, connections: 0 },
+          topContacts: [],
+        })
+        return
+      }
+
       const supabase = createClient()
       
       // Get networking events from last 30 days
