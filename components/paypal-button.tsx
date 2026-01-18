@@ -515,28 +515,6 @@ export function PayPalButton({
 
               const orderData = await response.json();
 
-      // Check if the response is an error (check HTTP status or error field)
-      if (!response.ok || orderData.error) {
-        const errorDetail = orderData?.details?.[0];
-        let errorMessage = errorDetail?.description || orderData.error_description || orderData.error || "Failed to create order";
-        
-        // Check for authentication errors and provide helpful guidance
-        if (errorMessage.includes("Client Authentication failed") || errorMessage.includes("invalid or missing PayPal credentials")) {
-          errorMessage = "PayPal credentials are not configured. Please contact support or check your PayPal settings.";
-          console.error("PayPal authentication error:", {
-            message: errorDetail?.description || orderData.error_description,
-            details: orderData,
-            hint: "Make sure PAYPAL_CLIENT_ID and PAYPAL_CLIENT_SECRET are set in .env.local"
-          });
-        }
-        
-        const fullErrorMessage = errorDetail
-          ? `${errorDetail.issue} ${errorMessage}${orderData.debug_id ? ` (${orderData.debug_id})` : ""}`
-          : errorMessage;
-
-        throw new Error(fullErrorMessage);
-      }
-
       if (orderData.id) {
         // Check if payer action is required (e.g., 3D Secure authentication)
         if (orderData.status === "PAYER_ACTION_REQUIRED" && orderData.payerActionUrl) {
