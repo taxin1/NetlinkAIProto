@@ -26,10 +26,17 @@ export function getGuestId(): string | null {
   return match ? match[2] : null
 }
 
-export function startGuestSession(): string {
+export async function startGuestSession(): Promise<string> {
+  try {
+    const supabase = createClient()
+    await supabase.auth.signOut()
+  } catch (error) {
+    console.warn("Unable to sign out before starting demo session:", error)
+  }
+
   const guestId = `guest_${Math.random().toString(36).substring(2, 15)}`
   document.cookie = `${GUEST_COOKIE_NAME}=${guestId}; path=/; max-age=${60 * 60 * 24 * 7}` // 7 days
-  
+
   // Initialize usage in local storage
   const initialUsage: GuestUsage = {
     actions: 0,
@@ -37,7 +44,7 @@ export function startGuestSession(): string {
     lastUpdated: new Date().toISOString()
   }
   localStorage.setItem(`usage_${guestId}`, JSON.stringify(initialUsage))
-  
+
   return guestId
 }
 

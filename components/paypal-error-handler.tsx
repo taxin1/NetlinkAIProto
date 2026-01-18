@@ -41,6 +41,30 @@ export function PayPalErrorHandler() {
       }).join(' ');
       const errorStr = errorMessage.toLowerCase();
 
+      // Suppress source map errors (harmless development warnings from Next.js/Turbopack)
+      const isSourceMapError = 
+        errorStr.includes("invalid source map") ||
+        errorStr.includes("sourcemapurl") ||
+        errorStr.includes("source map") ||
+        errorStr.includes("sourcemap") ||
+        errorStr.includes("could not be parsed") ||
+        (args.length > 0 &&
+          typeof args[0] === "string" &&
+          (args[0].includes("Invalid source map") ||
+           args[0].includes("sourceMapURL") ||
+           args[0].includes("sourceMap") ||
+           args[0].includes("source map"))) ||
+        (args.length > 0 &&
+          typeof args[0] === "object" &&
+          args[0] !== null &&
+          (String(args[0]).includes("source map") || 
+           String(args[0]).includes("sourceMap")))
+      
+      if (isSourceMapError) {
+        // Silently suppress source map parsing errors - these are harmless development warnings
+        return; // Don't call original console.error
+      }
+
       // Check if this is the PayPal SDK v5 unhandled exception
       if (
         errorStr.includes("paypal_js_sdk_v5_unhandled_exception") ||
@@ -71,6 +95,30 @@ export function PayPalErrorHandler() {
       ).join(' ');
       const warningStr = warningMessage.toLowerCase();
 
+      // Suppress source map warnings (harmless development warnings from Next.js/Turbopack)
+      const isSourceMapWarning = 
+        warningStr.includes("invalid source map") ||
+        warningStr.includes("sourcemapurl") ||
+        warningStr.includes("source map") ||
+        warningStr.includes("sourcemap") ||
+        warningStr.includes("could not be parsed") ||
+        (args.length > 0 &&
+          typeof args[0] === "string" &&
+          (args[0].includes("Invalid source map") ||
+           args[0].includes("sourceMapURL") ||
+           args[0].includes("sourceMap") ||
+           args[0].includes("source map"))) ||
+        (args.length > 0 &&
+          typeof args[0] === "object" &&
+          args[0] !== null &&
+          (String(args[0]).includes("source map") || 
+           String(args[0]).includes("sourceMap")))
+
+      if (isSourceMapWarning) {
+        // Silently suppress source map parsing warnings - these are harmless development warnings
+        return;
+      }
+
       // Suppress PayPal SDK v5 unhandled exception warnings
       if (
         warningStr.includes("paypal_js_sdk_v5_unhandled_exception") ||
@@ -97,6 +145,19 @@ export function PayPalErrorHandler() {
       const messageStr = String(message || "");
       const sourceStr = String(source || "");
       const errorStr = error ? String(error) : "";
+      const combinedStr = `${messageStr} ${sourceStr} ${errorStr}`.toLowerCase();
+
+      // Suppress source map errors (harmless development warnings from Next.js/Turbopack)
+      if (
+        combinedStr.includes("invalid source map") ||
+        combinedStr.includes("sourcemapurl") ||
+        combinedStr.includes("source map") ||
+        combinedStr.includes("sourcemap") ||
+        combinedStr.includes("could not be parsed")
+      ) {
+        // Silently suppress source map parsing errors
+        return true; // Prevent default error handling
+      }
 
       // Check if this is a PayPal SDK v5 unhandled exception
       const isPayPalUnhandledException =

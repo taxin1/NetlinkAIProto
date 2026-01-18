@@ -5,10 +5,11 @@ import Link from "next/link"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { BookOpen, Menu, X, Languages, Bot } from "lucide-react"
+import { BookOpen, Menu, X, Languages, Bot, Share2 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useTranslations } from "@/lib/hooks/use-translations"
 import { startGuestSession } from "@/lib/guest-trial"
+import { createClient } from "@/lib/supabase/client"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,15 +21,34 @@ export function PublicNavigation() {
   const { t, lang, changeLanguage } = useTranslations()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [isMounted, setIsMounted] = useState(false)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
   const router = useRouter()
 
-  const handleTryDemo = () => {
-    startGuestSession()
+  const handleTryDemo = async () => {
+    if (isAuthenticated) {
+      router.push("/dashboard")
+      return
+    }
+    await startGuestSession()
     router.push("/dashboard")
   }
 
   useEffect(() => {
     setIsMounted(true)
+  }, [])
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const supabase = createClient()
+        const { data } = await supabase.auth.getUser()
+        setIsAuthenticated(!!data.user)
+      } catch {
+        setIsAuthenticated(false)
+      }
+    }
+
+    checkAuth()
   }, [])
 
   return (
@@ -55,9 +75,17 @@ export function PublicNavigation() {
             <Link href="/public/about">
               <Button variant="ghost">{t("about")}</Button>
             </Link>
-            {/* <Link href="/public/networkers">
+            <Link href="/public/networkers">
               <Button variant="ghost">Networkers</Button>
-            </Link> */}
+            </Link>
+            {isAuthenticated && (
+              <Link href="/dashboard/profile">
+                <Button variant="ghost">
+                  <Share2 className="h-4 w-4 mr-2" />
+                  {t("networkProfile")}
+                </Button>
+              </Link>
+            )}
             <Link href="/pricing">
               <Button variant="ghost">{t("pricing")}</Button>
             </Link>
@@ -90,9 +118,11 @@ export function PublicNavigation() {
               </Button>
             )}
 
-            <Link href="/auth/login">
-              <Button variant="ghost">{t("signIn")}</Button>
-            </Link>
+            {!isAuthenticated && (
+              <Link href="/auth/login">
+                <Button variant="ghost">{t("signIn")}</Button>
+              </Link>
+            )}
 
             <Button 
               variant="outline" 
@@ -100,14 +130,16 @@ export function PublicNavigation() {
               className="border-primary/20 hover:bg-primary/10"
             >
               <Bot className="h-4 w-4 mr-2" />
-              Try Demo
+              {isAuthenticated ? "Go to Dashboard" : "Try Demo"}
             </Button>
 
-            <Link href="/auth/signup">
-              <Button className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700">
-                {t("getStarted")}
-              </Button>
-            </Link>
+            {!isAuthenticated && (
+              <Link href="/auth/signup">
+                <Button className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700">
+                  {t("getStarted")}
+                </Button>
+              </Link>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -144,6 +176,19 @@ export function PublicNavigation() {
                   {t("about")}
                 </Button>
               </Link>
+              <Link href="/public/networkers" onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start text-lg">
+                  Networkers
+                </Button>
+              </Link>
+              {isAuthenticated && (
+                <Link href="/dashboard/profile" onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="ghost" className="w-full justify-start text-lg">
+                    <Share2 className="h-5 w-5 mr-3" />
+                    {t("networkProfile")}
+                  </Button>
+                </Link>
+              )}
               <Link href="/pricing" onClick={() => setMobileMenuOpen(false)}>
                 <Button variant="ghost" className="w-full justify-start text-lg">
                   {t("pricing")}
@@ -180,11 +225,13 @@ export function PublicNavigation() {
               </div>
 
               <div className="pt-4 border-t space-y-2">
-                <Link href="/auth/login" onClick={() => setMobileMenuOpen(false)}>
-                  <Button variant="outline" className="w-full text-lg py-6">
-                    {t("signIn")}
-                  </Button>
-                </Link>
+                {!isAuthenticated && (
+                  <Link href="/auth/login" onClick={() => setMobileMenuOpen(false)}>
+                    <Button variant="outline" className="w-full text-lg py-6">
+                      {t("signIn")}
+                    </Button>
+                  </Link>
+                )}
                 <Button 
                   variant="outline" 
                   onClick={() => {
@@ -194,13 +241,15 @@ export function PublicNavigation() {
                   className="w-full text-lg py-6 border-primary/20 bg-primary/5"
                 >
                   <Bot className="h-5 w-5 mr-3" />
-                  Try Demo
+                  {isAuthenticated ? "Go to Dashboard" : "Try Demo"}
                 </Button>
-                <Link href="/auth/signup" onClick={() => setMobileMenuOpen(false)}>
-                  <Button className="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white font-medium shadow-md py-6 text-lg">
-                    {t("getStarted")}
-                  </Button>
-                </Link>
+                {!isAuthenticated && (
+                  <Link href="/auth/signup" onClick={() => setMobileMenuOpen(false)}>
+                    <Button className="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white font-medium shadow-md py-6 text-lg">
+                      {t("getStarted")}
+                    </Button>
+                  </Link>
+                )}
               </div>
             </div>
           </motion.div>

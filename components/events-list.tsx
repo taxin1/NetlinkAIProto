@@ -96,10 +96,50 @@ export function EventsList({ userId }: EventsListProps) {
       const result = await response.json()
 
       if (!response.ok) {
-        throw new Error(result.error || 'Failed to sync Google Calendar events')
+        // Show error message - if details exist and are different from error, show both
+        // Otherwise just show the error message
+        let errorMessage = result.error || 'Failed to sync Google Calendar events'
+        
+        if (result.details && result.details !== errorMessage) {
+          // Only append details if they add meaningful information
+          const details = result.details.trim()
+          if (details && !errorMessage.includes(details)) {
+            // Check if details is just a repetition of the error
+            const errorLower = errorMessage.toLowerCase()
+            const detailsLower = details.toLowerCase()
+            if (!detailsLower.includes(errorLower) && !errorLower.includes(detailsLower)) {
+              errorMessage = `${errorMessage}: ${details}`
+            }
+          }
+        }
+        
+        throw new Error(errorMessage)
       }
 
-      setSyncMessage(`Successfully synced ${result.imported} new events and updated ${result.updated} existing events.`)
+      // Show success message with details
+      const successParts = []
+      if (result.imported > 0) {
+        successParts.push(`${result.imported} new event${result.imported === 1 ? '' : 's'}`)
+      }
+      if (result.updated > 0) {
+        successParts.push(`${result.updated} updated`)
+      }
+      if (result.skipped > 0) {
+        successParts.push(`${result.skipped} skipped`)
+      }
+      
+      if (successParts.length > 0) {
+        setSyncMessage(`Successfully synced ${successParts.join(', ')}.`)
+      } else if (result.total === 0) {
+        setSyncMessage('No new events found in Google Calendar for the selected time range.')
+      } else {
+        setSyncMessage('Sync completed.')
+      }
+      
+      // Show warnings if there were errors but some events were still synced
+      if (result.errors && result.errors.length > 0 && (result.imported > 0 || result.updated > 0)) {
+        console.warn('Google Calendar sync completed with some errors:', result.errors)
+      }
       
       // Reload events to show the synced ones
       await loadEvents()

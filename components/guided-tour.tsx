@@ -37,6 +37,7 @@ export function GuidedTour({ userId }: { userId: string }) {
   const [isOpen, setIsOpen] = useState(false)
   const [currentStep, setCurrentStep] = useState(0)
   const [targetElement, setTargetElement] = useState<HTMLElement | null>(null)
+  const [targetRect, setTargetRect] = useState<DOMRect | null>(null)
   const [tooltipStyle, setTooltipStyle] = useState<React.CSSProperties>({})
   const overlayRef = useRef<HTMLDivElement>(null)
   const tooltipRef = useRef<HTMLDivElement>(null)
@@ -158,18 +159,31 @@ export function GuidedTour({ userId }: { userId: string }) {
 
     const step = tourSteps[currentStep]
     if (step.targetSelector) {
-      // Small delay to ensure DOM is ready
-      const timer = setTimeout(() => {
+      // Multiple attempts to find element with increasing delays
+      const findElement = (attempts = 0) => {
         const element = document.querySelector(step.targetSelector!) as HTMLElement
         if (element) {
           setTargetElement(element)
-          // Scroll element into view
-          element.scrollIntoView({ behavior: "smooth", block: "center" })
+          // Scroll element into view with smooth behavior
+          element.scrollIntoView({ behavior: "smooth", block: "center", inline: "center" })
+          // Ensure element is visible (bring to front)
+          element.style.zIndex = "9997"
+          element.style.position = "relative"
+          // Update rect after scrolling
+          setTimeout(() => {
+            setTargetRect(element.getBoundingClientRect())
+          }, 400)
+        } else if (attempts < 3) {
+          // Retry up to 3 times with increasing delays
+          setTimeout(() => findElement(attempts + 1), 200 * (attempts + 1))
         } else {
+          // Element not found after retries - continue tour without highlighting
           setTargetElement(null)
+          setTargetRect(null)
         }
-      }, 300)
+      }
 
+      const timer = setTimeout(() => findElement(), 100)
       return () => clearTimeout(timer)
     } else {
       setTargetElement(null)
@@ -179,7 +193,36 @@ export function GuidedTour({ userId }: { userId: string }) {
     if (step.action) {
       step.action()
     }
-  }, [currentStep, isOpen])
+
+    // Update rect on scroll/resize when target element exists
+    const updateRect = () => {
+      if (targetElement) {
+        setTargetRect(targetElement.getBoundingClientRect())
+      }
+    }
+
+    if (targetElement) {
+      window.addEventListener("scroll", updateRect, true)
+      window.addEventListener("resize", updateRect)
+      
+      // Update rect periodically to catch any changes
+      const rectInterval = setInterval(updateRect, 100)
+      
+      return () => {
+        window.removeEventListener("scroll", updateRect, true)
+        window.removeEventListener("resize", updateRect)
+        clearInterval(rectInterval)
+        if (targetElement) {
+          targetElement.style.zIndex = ""
+          targetElement.style.position = ""
+        }
+      }
+    }
+
+    return () => {
+      setTargetRect(null)
+    }
+  }, [currentStep, isOpen, targetElement])
 
   const handleNext = () => {
     if (currentStep < tourSteps.length - 1) {
@@ -219,64 +262,93 @@ export function GuidedTour({ userId }: { userId: string }) {
           top: "50%",
           left: "50%",
           transform: "translate(-50%, -50%)",
+          position: "fixed",
         })
         return
       }
 
       const rect = targetElement.getBoundingClientRect()
-      const scrollY = window.scrollY
-      const scrollX = window.scrollX
+      const tooltipHeight = 200 // Approximate tooltip height
+      const tooltipWidth = Math.min(400, window.innerWidth * 0.9)
+      const spacing = 16
 
-      let newStyle: React.CSSProperties = {}
+      let newStyle: React.CSSProperties = {
+        position: "fixed",
+      }
 
       switch (currentStepData.position) {
         case "top":
           newStyle = {
-            top: `${rect.top + scrollY - 20}px`,
-            left: `${rect.left + scrollX + rect.width / 2}px`,
+            ...newStyle,
+            top: `${rect.top - spacing}px`,
+            left: `${rect.left + rect.width / 2}px`,
             transform: "translate(-50%, -100%)",
           }
           break
         case "bottom":
           newStyle = {
-            top: `${rect.bottom + scrollY + 20}px`,
-            left: `${rect.left + scrollX + rect.width / 2}px`,
+            ...newStyle,
+            top: `${rect.bottom + spacing}px`,
+            left: `${rect.left + rect.width / 2}px`,
             transform: "translate(-50%, 0)",
           }
           break
         case "left":
           newStyle = {
-            top: `${rect.top + scrollY + rect.height / 2}px`,
-            left: `${rect.left + scrollX - 20}px`,
+            ...newStyle,
+            top: `${rect.top + rect.height / 2}px`,
+            left: `${rect.left - spacing}px`,
             transform: "translate(-100%, -50%)",
           }
           break
         case "right":
           newStyle = {
-            top: `${rect.top + scrollY + rect.height / 2}px`,
-            left: `${rect.right + scrollX + 20}px`,
+            ...newStyle,
+            top: `${rect.top + rect.height / 2}px`,
+            left: `${rect.right + spacing}px`,
             transform: "translate(0, -50%)",
           }
           break
         default:
           newStyle = {
-            top: `${rect.bottom + scrollY + 20}px`,
-            left: `${rect.left + scrollX + rect.width / 2}px`,
+            ...newStyle,
+            top: `${rect.bottom + spacing}px`,
+            left: `${rect.left + rect.width / 2}px`,
             transform: "translate(-50%, 0)",
           }
+      }
+
+      // Ensure tooltip stays within viewport
+      if (newStyle.top !== undefined && typeof newStyle.top === "string") {
+        const topValue = parseFloat(newStyle.top)
+        if (topValue < 20) newStyle.top = "20px"
+        if (topValue > window.innerHeight - tooltipHeight - 20) {
+          newStyle.top = `${window.innerHeight - tooltipHeight - 20}px`
+        }
+      }
+
+      if (newStyle.left !== undefined && typeof newStyle.left === "string") {
+        const leftValue = parseFloat(newStyle.left)
+        if (leftValue < tooltipWidth / 2) {
+          newStyle.left = `${tooltipWidth / 2 + 20}px`
+          newStyle.transform = "translate(-50%, -50%)"
+        }
+        if (leftValue > window.innerWidth - tooltipWidth / 2) {
+          newStyle.left = `${window.innerWidth - tooltipWidth / 2 - 20}px`
+          newStyle.transform = "translate(-50%, -50%)"
+        }
       }
 
       setTooltipStyle(newStyle)
     }
 
+    // Initial position update with delay to ensure DOM is ready
+    const timeoutId = setTimeout(updatePosition, 100)
     updatePosition()
 
     // Update position on scroll and resize
     window.addEventListener("scroll", updatePosition, true)
     window.addEventListener("resize", updatePosition)
-
-    // Also update after a short delay to ensure element is positioned
-    const timeoutId = setTimeout(updatePosition, 100)
 
     return () => {
       window.removeEventListener("scroll", updatePosition, true)
@@ -292,39 +364,105 @@ export function GuidedTour({ userId }: { userId: string }) {
       {isOpen && (
         <>
           {/* Overlay with spotlight effect */}
-          <motion.div
-            ref={overlayRef}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[9998] bg-black/60 backdrop-blur-sm"
-            onClick={currentStepData.position === "center" ? undefined : handleNext}
-            style={{
-              cursor: currentStepData.position === "center" ? "default" : "pointer",
-            }}
-          >
-            {targetElement && (
+          <div className="fixed inset-0 z-[9998] pointer-events-auto">
+            {targetElement && targetRect ? (
+              (() => {
+                const rect = targetRect
+                const padding = 12
+                const highlightWidth = rect.width + padding * 2
+                const highlightHeight = rect.height + padding * 2
+                const highlightTop = rect.top - padding
+                const highlightLeft = rect.left - padding
+                
+                return (
+                  <>
+                    {/* Top overlay */}
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="absolute bg-black/75 backdrop-blur-sm"
+                      style={{
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        height: Math.max(0, highlightTop),
+                      }}
+                      onClick={currentStepData.position === "center" ? undefined : handleNext}
+                    />
+                    {/* Bottom overlay */}
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="absolute bg-black/75 backdrop-blur-sm"
+                      style={{
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        height: Math.max(0, window.innerHeight - (highlightTop + highlightHeight)),
+                      }}
+                      onClick={currentStepData.position === "center" ? undefined : handleNext}
+                    />
+                    {/* Left overlay */}
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="absolute bg-black/75 backdrop-blur-sm"
+                      style={{
+                        top: Math.max(0, highlightTop),
+                        left: 0,
+                        width: Math.max(0, highlightLeft),
+                        height: highlightHeight,
+                      }}
+                      onClick={currentStepData.position === "center" ? undefined : handleNext}
+                    />
+                    {/* Right overlay */}
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="absolute bg-black/75 backdrop-blur-sm"
+                      style={{
+                        top: Math.max(0, highlightTop),
+                        right: 0,
+                        width: Math.max(0, window.innerWidth - (highlightLeft + highlightWidth)),
+                        height: highlightHeight,
+                      }}
+                      onClick={currentStepData.position === "center" ? undefined : handleNext}
+                    />
+                    {/* Highlight border around target element */}
+                    <motion.div
+                      className="absolute pointer-events-none rounded-lg border-2 border-primary shadow-[0_0_20px_rgba(59,130,246,0.5)] bg-transparent"
+                      initial={{ scale: 0.95, opacity: 0 }}
+                      animate={{
+                        scale: 1,
+                        opacity: 1,
+                        width: highlightWidth,
+                        height: highlightHeight,
+                        top: highlightTop,
+                        left: highlightLeft,
+                      }}
+                      exit={{ scale: 0.95, opacity: 0 }}
+                      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                    />
+                  </>
+                )
+              })()
+            ) : (
               <motion.div
-                className="absolute rounded-lg border-4 border-primary shadow-[0_0_0_9999px_rgba(0,0,0,0.6)]"
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{
-                  scale: 1,
-                  opacity: 1,
-                  ...(() => {
-                    const rect = targetElement.getBoundingClientRect()
-                    return {
-                      width: rect.width + 16,
-                      height: rect.height + 16,
-                      top: rect.top - 8 + window.scrollY,
-                      left: rect.left - 8 + window.scrollX,
-                    }
-                  })(),
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 bg-black/75 backdrop-blur-sm"
+                onClick={currentStepData.position === "center" ? undefined : handleNext}
+                style={{
+                  cursor: currentStepData.position === "center" ? "default" : "pointer",
                 }}
-                exit={{ scale: 0.8, opacity: 0 }}
-                transition={{ type: "spring", stiffness: 300, damping: 30 }}
               />
             )}
-          </motion.div>
+          </div>
 
           {/* Tooltip */}
           <motion.div

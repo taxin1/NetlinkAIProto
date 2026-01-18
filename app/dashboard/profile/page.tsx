@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
+import { Switch } from "@/components/ui/switch"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { 
   Save, 
@@ -44,6 +45,7 @@ interface SocialProfile {
   company?: string
   email?: string
   phone?: string
+  is_public_profile?: boolean
 }
 
 export default function NetworkProfilePage() {
@@ -82,6 +84,7 @@ export default function NetworkProfilePage() {
     company: "",
     email: "",
     phone: "",
+    is_public_profile: false,
   })
 
   useEffect(() => {
@@ -214,6 +217,7 @@ export default function NetworkProfilePage() {
             github: dbProfile.github || "",
             instagram: dbProfile.instagram || "",
             website: dbProfile.website || "",
+            is_public_profile: dbProfile.is_public_profile ?? false,
           })
         } else {
           // Try localStorage as fallback for migration
@@ -234,6 +238,7 @@ export default function NetworkProfilePage() {
               github: localProfile.github || null,
               instagram: localProfile.instagram || null,
               website: localProfile.website || null,
+              is_public_profile: localProfile.is_public_profile ?? false,
             })
           }
         }
@@ -286,6 +291,7 @@ export default function NetworkProfilePage() {
           github: profile.github || null,
           instagram: profile.instagram || null,
           website: profile.website || null,
+          is_public_profile: profile.is_public_profile ?? false,
         }, {
           onConflict: "user_id"
         })
@@ -805,6 +811,32 @@ N:${lastName};${firstName};;;`
                     />
                   </div>
                 </div>
+              </div>
+
+              {/* Visibility */}
+              <div className={`${isMobile ? 'space-y-3' : 'space-y-4'} pt-4 border-t border-gray-200/50 dark:border-gray-800/50`}>
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <Label className={isMobile ? "text-sm" : ""}>Public Profile</Label>
+                    <p className={`text-xs text-muted-foreground ${isMobile ? 'max-w-[220px]' : 'max-w-sm'}`}>
+                      Show your profile in the Global Networkers directory.
+                    </p>
+                  </div>
+                  <Switch
+                    checked={profile.is_public_profile ?? false}
+                    onCheckedChange={(checked) =>
+                      setProfile({ ...profile, is_public_profile: checked })
+                    }
+                  />
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => window.open("/public/networkers", "_blank")}
+                >
+                  View Public Directory
+                </Button>
               </div>
 
               <Button 

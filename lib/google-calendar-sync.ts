@@ -36,7 +36,11 @@ export async function syncGoogleCalendarEvents(
     .single()
 
   if (connError || !connection) {
-    result.errors.push('Google Calendar not connected or sync disabled')
+    result.errors.push(
+      connError 
+        ? `Database error: ${connError.message}` 
+        : 'Google Calendar not connected or sync disabled. Please connect your Google Calendar in settings.'
+    )
     return result
   }
 
@@ -176,8 +180,46 @@ export async function syncGoogleCalendarEvents(
 
     return result
   } catch (googleError: any) {
-    const errorMessage = googleError.message || 'Unknown Google Calendar API error'
-    result.errors.push(`Google Calendar API error: ${errorMessage}`)
+    // Handle specific error types
+    let errorMessage = 'Unknown Google Calendar API error'
+    let errorType: 'authentication' | 'permissions' | 'not_found' | 'rate_limit' | 'api_error' | 'unknown' = 'unknown'
+    
+    if (googleError.name === 'InsufficientScopesError' || 
+        (googleError.code === 403 && googleError.message?.includes('insufficient'))) {
+      errorMessage = 'Insufficient permissions. Please reconnect your Google Calendar with proper permissions.'
+      errorType = 'permissions'
+    } else if (googleError.message?.includes('refresh') || 
+               googleError.message?.includes('token') ||
+               googleError.message?.includes('Failed to refresh access token') ||
+               googleError.code === 401) {
+      errorMessage = 'Authentication failed. Please reconnect your Google Calendar.'
+      errorType = 'authentication'
+      
+      // Disable sync if authentication fails to prevent repeated errors
+      try {
+        await supabase
+          .from('google_calendar_connections')
+          .update({ sync_enabled: false })
+          .eq('user_id', userId)
+      } catch (updateError) {
+        console.error('Failed to disable sync after authentication error:', updateError)
+      }
+    } else if (googleError.code === 403) {
+      errorMessage = 'Access denied. Please check your Google Calendar permissions.'
+      errorType = 'permissions'
+    } else if (googleError.code === 404) {
+      errorMessage = 'Calendar not found. Please check your calendar settings.'
+      errorType = 'not_found'
+    } else if (googleError.code === 429) {
+      errorMessage = 'Rate limit exceeded. Please try again later.'
+      errorType = 'rate_limit'
+    } else if (googleError.message) {
+      errorMessage = googleError.message
+      errorType = 'api_error'
+    }
+    
+    // Store error type in the error message for better parsing
+    result.errors.push(`[${errorType.toUpperCase()}] ${errorMessage}`)
     return result
   }
 }

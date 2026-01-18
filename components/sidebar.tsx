@@ -56,7 +56,9 @@ export function Sidebar({ user }: SidebarProps) {
       { name: t("networkingMode"), href: "/dashboard/networking", icon: Sparkles },
       { name: t("calendar"), href: "/dashboard/calendar", icon: CalendarDays },
       { name: t("events"), href: "/dashboard/events", icon: Calendar },
-      { name: t("emails"), href: "/dashboard/emails", icon: Mail },
+    ] : []),
+    { name: t("emails"), href: "/dashboard/emails", icon: Mail },
+    ...(!isGuestMode ? [
       { name: t("aiCampaigns"), href: "/dashboard/campaigns", icon: Wand2 },
     ] : []),
     { name: t("analytics"), href: "/dashboard/analytics", icon: BarChart3 },
@@ -191,11 +193,27 @@ export function Sidebar({ user }: SidebarProps) {
           const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname?.startsWith(item.href))
           const showGoogleBadge = (item.name === "Calendar" || item.name === "Events") && googleCalendarConnected
 
+          // Map navigation items to tour selectors based on href
+          const getTourSelector = (href: string): string | undefined => {
+            const hrefToTourMap: Record<string, string> = {
+              "/dashboard/contacts": "contacts-nav",
+              "/dashboard/events": "events-nav",
+              "/dashboard/emails": "emails-nav",
+              "/dashboard/ai-assistant": "ai-assistant-nav",
+              "/dashboard/portfolio": "portfolio-nav",
+              "/dashboard/profile": "profile-nav",
+              "/dashboard/campaigns": "campaigns-nav",
+              "/dashboard/analytics": "analytics-nav",
+            }
+            return hrefToTourMap[href]
+          }
+
           return (
             <Link
               key={item.name}
               href={item.href}
               onClick={onItemClick}
+              data-tour={getTourSelector(item.href)}
               className={cn(
                 "flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all duration-200 relative",
                 isActive

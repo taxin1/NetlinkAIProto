@@ -93,8 +93,8 @@ const plans = [
       "Advanced Analytics (unlimited history)",
       "Priority Support"
     ],
-    cta: "Contact Us to Buy",
-    ctaLink: "mailto:networklinkai@gmail.com"
+    cta: "Buy Professional",
+    ctaLink: "/checkout?plan=professional"
   },
   {
     name: "Enterprise",
@@ -203,9 +203,6 @@ export function ResourcesPricingPage() {
                       <Button className="w-full h-auto py-2.5" variant={plan.badge ? "default" : "outline"}>
                         <div className="flex flex-col items-center leading-tight">
                           <span>{plan.cta}</span>
-                          {plan.name === "Professional" && (
-                            <span className="text-[10px] opacity-80 font-normal">Payment Link Coming Soon</span>
-                          )}
                         </div>
                         <ArrowRight className="ml-2 h-4 w-4" />
                       </Button>

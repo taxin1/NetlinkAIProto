@@ -44,6 +44,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { StructuredData } from "@/components/structured-data"
 import { startGuestSession } from "@/lib/guest-trial"
+import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
 
 const containerVariants = {
@@ -147,10 +148,15 @@ export function LandingPage() {
   const [networkingStep, setNetworkingStep] = useState(0)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [isMounted, setIsMounted] = useState(false)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
   const router = useRouter()
 
-  const handleTryDemo = () => {
-    startGuestSession()
+  const handleTryDemo = async () => {
+    if (isAuthenticated) {
+      router.push("/dashboard")
+      return
+    }
+    await startGuestSession()
     router.push("/dashboard")
   }
 
@@ -174,6 +180,20 @@ export function LandingPage() {
         duration: 2 + Math.random(),
       }))
     )
+  }, [])
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const supabase = createClient()
+        const { data } = await supabase.auth.getUser()
+        setIsAuthenticated(!!data.user)
+      } catch {
+        setIsAuthenticated(false)
+      }
+    }
+
+    checkAuth()
   }, [])
 
   // Show preview for 4 seconds, then switch to details
@@ -360,6 +380,13 @@ export function LandingPage() {
                   </Button>
                 </motion.div>
               </Link>
+              <Link href="/public/networkers">
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Button variant="ghost" className="text-slate-400 hover:text-white hover:bg-slate-800/50 font-medium">
+                    Networkers
+                  </Button>
+                </motion.div>
+              </Link>
               <Link href="/pricing">
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                   <Button variant="ghost" className="text-slate-400 hover:text-white hover:bg-slate-800/50 font-medium">
@@ -453,6 +480,11 @@ export function LandingPage() {
                 <Link href="/public/about#how-it-works" onClick={() => setMobileMenuOpen(false)}>
                   <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-white hover:bg-slate-800/50 text-lg">
                     How It Works
+                  </Button>
+                </Link>
+                <Link href="/public/networkers" onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-white hover:bg-slate-800/50 text-lg">
+                    Networkers
                   </Button>
                 </Link>
                 <Link href="/pricing" onClick={() => setMobileMenuOpen(false)}>
@@ -583,7 +615,7 @@ export function LandingPage() {
                   onClick={handleTryDemo}
                   className="bg-white/10 hover:bg-white/20 text-white border border-white/20 font-semibold text-lg px-8 py-6 backdrop-blur-md"
                 >
-                  Try Demo
+                  {isAuthenticated ? "Go to Dashboard" : "Try Demo"}
                   <Bot className="ml-2 h-5 w-5" />
                 </Button>
               </motion.div>
@@ -597,6 +629,19 @@ export function LandingPage() {
                   >
                     {t("howItWorks")}
                     <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </motion.div>
+              </Link>
+
+              <Link href="/public/networkers">
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="border-2 border-cyan-500/30 text-cyan-300 hover:text-white hover:bg-cyan-500/10 font-semibold text-lg px-8 py-6"
+                  >
+                    Explore Networkers
+                    <Users className="ml-2 h-5 w-5" />
                   </Button>
                 </motion.div>
               </Link>
@@ -2981,14 +3026,14 @@ export function LandingPage() {
                 How It Works
               </motion.div>
             </Link>
-            {/* <Link href="/public/networkers">
+            <Link href="/public/networkers">
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 className="text-slate-400 hover:text-cyan-400 transition-colors cursor-pointer underline-offset-4 hover:underline"
-            >
-              Networkers
+              >
+                Networkers
               </motion.div>
-            </Link> */}
+            </Link>
             <Link href="/privacy">
               <motion.div
                 whileHover={{ scale: 1.05 }}

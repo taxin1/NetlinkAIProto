@@ -58,12 +58,12 @@ export function PublicHomePage() {
           </div>
 
           <div className="flex gap-4 justify-center">
-            {/* <Link href="/public/networkers">
+            <Link href="/public/networkers">
               <Button size="lg" className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700">
                 Explore Networkers
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
-            </Link> */}
+            </Link>
             <Link href="/auth/signup">
               <Button size="lg" variant="outline">
                 Join Now
@@ -169,11 +169,11 @@ export function PublicHomePage() {
                     Create Your Profile
                   </Button>
                 </Link>
-                {/* <Link href="/public/networkers">
+                <Link href="/public/networkers">
                   <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
                     Browse Networkers
                   </Button>
-                </Link> */}
+                </Link>
               </div>
             </CardContent>
           </Card>

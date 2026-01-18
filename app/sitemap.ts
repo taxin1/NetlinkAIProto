@@ -6,6 +6,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const routes = [
     '',
     '/pricing',
+    '/public/networkers',
     '/public/about',
     '/resources',
     '/resources/getting-started',

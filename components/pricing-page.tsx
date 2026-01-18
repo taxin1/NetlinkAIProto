@@ -141,8 +141,8 @@ const plans = [
       "AI Messages": "Unlimited",
       "Card Scans": "Unlimited",
     },
-    cta: "Contact Us to Buy",
-    ctaLink: "mailto:networklinkai@gmail.com",
+    cta: "Buy Professional",
+    ctaLink: "/checkout?plan=professional",
     popular: true,
   },
   {
@@ -433,12 +433,7 @@ export function PricingPage() {
                           }`}
                         size="lg"
                       >
-                        {plan.name === "Professional" ? (
-                          <div className="flex flex-col items-center leading-none">
-                            <span className="mb-1">{plan.cta}</span>
-                            <span className="text-[10px] opacity-80 font-normal">Payment Link Coming Soon</span>
-                          </div>
-                        ) : plan.cta}
+                        {plan.cta}
                         <ArrowRight className="ml-2 h-5 w-5" />
                       </Button>
                     </Link>
