@@ -702,7 +702,7 @@ export function LandingPage() {
               variants={itemVariants}
               className="mt-6 text-sm text-slate-400"
             >
-              First 100 users get 6 months FREE Pro access • Launch coming soon
+              First 100 users get 6 months FREE Pro access • Website is live now!
             </motion.p>
           </motion.div>
         </div>

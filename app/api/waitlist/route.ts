@@ -123,7 +123,7 @@ async function sendWaitlistConfirmationEmail(
       <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 10px; margin: 20px 0; text-align: center;">
         <h2 style="color: white; margin: 0;">🎉 Congratulations!</h2>
         <p style="color: white; margin: 10px 0 0 0; font-size: 18px;">
-          You're one of the first 100 users! You'll get <strong>FREE Pro access for 6 months</strong> when we launch!
+          You're one of the first 100 users! You'll get <strong>FREE Pro access for 6 months</strong> now that we're live!
         </p>
       </div>
     `
@@ -202,7 +202,7 @@ Thank you for joining our waitlist! We're excited to have you on board.
 
 Your Position: #${position}
 
-${earlyBird ? '🎉 Congratulations! You\'re one of the first 100 users! You\'ll get FREE Pro access for 6 months when we launch!' : ''}
+${earlyBird ? '🎉 Congratulations! You\'re one of the first 100 users! You\'ll get FREE Pro access for 6 months now that we\'re live!' : ''}
 
 What to Expect:
 - AI-powered business card scanning
