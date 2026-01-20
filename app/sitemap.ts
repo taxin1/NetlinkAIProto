@@ -2,9 +2,9 @@ import { MetadataRoute } from 'next'
 import { getBlogPosts } from '@/lib/blog/posts'
 
 export default function sitemap(): MetadataRoute.Sitemap {
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.networklinkai.com'
+  
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.networklinkai.com'
-
     const blogPosts = getBlogPosts()
 
     const blogUrls = blogPosts.map(post => ({
@@ -14,7 +14,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.8,
     }))
 
-  return [
+    return [
     {
       url: baseUrl,
       lastModified: new Date(),
