@@ -7,9 +7,9 @@ After connecting Gmail or Google Calendar, the redirects were going to `localhos
 ## Root Cause
 
 The OAuth redirect URI is constructed using:
-```typescript
+\`\`\`typescript
 process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-```
+\`\`\`
 
 If `NEXT_PUBLIC_APP_URL` is not set in production, it defaults to `http://localhost:3000`, causing Google to redirect to localhost instead of your production domain.
 
@@ -28,18 +28,18 @@ If `NEXT_PUBLIC_APP_URL` is not set in production, it defaults to `http://localh
 1. Go to your Vercel project dashboard
 2. Navigate to **Settings** → **Environment Variables**
 3. Add or update:
-   ```
+   \`\`\`
    NEXT_PUBLIC_APP_URL=https://www.networklinkai.com
-   ```
+   \`\`\`
    (Use your actual production URL with https://)
 
 **For Netlify:**
 1. Go to your Netlify site dashboard
 2. Navigate to **Site settings** → **Environment variables**
 3. Add or update:
-   ```
+   \`\`\`
    NEXT_PUBLIC_APP_URL=https://your-domain.com
-   ```
+   \`\`\`
 
 **For other platforms:**
 - Set the `NEXT_PUBLIC_APP_URL` environment variable to your production URL
@@ -54,14 +54,14 @@ Make sure your Google Cloud Console OAuth credentials include **both** redirect 
 4. In **Authorized redirect URIs**, add:
 
    **For Gmail:**
-   ```
+   \`\`\`
    https://www.networklinkai.com/api/gmail/callback
-   ```
+   \`\`\`
 
    **For Google Calendar:**
-   ```
+   \`\`\`
    https://www.networklinkai.com/api/google-calendar/callback
-   ```
+   \`\`\`
 
    **Important:**
    - ✅ Use `https://` (not `http://`) for production
@@ -85,9 +85,9 @@ After setting the environment variable:
 ### 4. Check Logs
 
 The code now logs warnings if `NEXT_PUBLIC_APP_URL` is missing in production. Check your deployment logs for:
-```
+\`\`\`
 ⚠️ NEXT_PUBLIC_APP_URL is not set in production! OAuth redirects will use localhost.
-```
+\`\`\`
 
 If you see this warning, the environment variable is not set correctly.
 
@@ -115,9 +115,9 @@ If you see this warning, the environment variable is not set correctly.
 ### Still redirecting to localhost?
 
 1. **Check environment variable:**
-   ```bash
+   \`\`\`bash
    # In your deployment platform, verify NEXT_PUBLIC_APP_URL is set
-   ```
+   \`\`\`
 
 2. **Redeploy after setting environment variable:**
    - Environment variables require a new deployment to take effect

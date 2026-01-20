@@ -3,11 +3,11 @@
 ## The Problem
 
 You're seeing this error:
-```
+\`\`\`
 Access blocked: Authorization Error
 You can't sign in to this app because it doesn't comply with Google's OAuth 2.0 policy for keeping apps secure.
 Error 400: invalid_request
-```
+\`\`\`
 
 This means your **OAuth consent screen** is not properly configured in Google Cloud Console.
 
@@ -68,9 +68,9 @@ This means your **OAuth consent screen** is not properly configured in Google Cl
 2. **Check Authorized Redirect URIs**
    - Click on your OAuth client ID
    - In **Authorized redirect URIs**, make sure you have:
-     ```
+     \`\`\`
      https://[YOUR-SUPABASE-PROJECT-REF].supabase.co/auth/v1/callback
-     ```
+     \`\`\`
    - Replace `[YOUR-SUPABASE-PROJECT-REF]` with your actual Supabase project reference
    - Example: `https://kaqptbreyakggqybftjc.supabase.co/auth/v1/callback`
 
@@ -92,10 +92,10 @@ This means your **OAuth consent screen** is not properly configured in Google Cl
 3. **Check URL Configuration**
    - Go to: **Authentication** → **URL Configuration**
    - Ensure **Redirect URLs** includes:
-     ```
+     \`\`\`
      http://localhost:3000/auth/callback
      https://netlink-ai.vercel.app/auth/callback
-     ```
+     \`\`\`
    - Set **Site URL** to your production URL or `http://localhost:3000` for development
 
 ### Step 4: Publishing Your App (If Needed)
