@@ -10,8 +10,22 @@ export interface GmailToken {
   scope?: string
 }
 
+// Helper function to get the base URL for redirects
+function getBaseUrl(): string {
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL
+  if (!baseUrl) {
+    // Warn in production if NEXT_PUBLIC_APP_URL is not set
+    if (process.env.NODE_ENV === 'production') {
+      console.warn('[Gmail] ⚠️ NEXT_PUBLIC_APP_URL is not set in production! OAuth redirects will use localhost.')
+      console.warn('[Gmail] Please set NEXT_PUBLIC_APP_URL to your production URL (e.g., https://your-domain.com)')
+    }
+    return 'http://localhost:3000'
+  }
+  return baseUrl
+}
+
 export async function getGmailClient(token: GmailToken) {
-  const gmailRedirectUri = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/gmail/callback`
+  const gmailRedirectUri = `${getBaseUrl()}/api/gmail/callback`
   const oauth2Client = new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID,
     process.env.GOOGLE_CLIENT_SECRET,
@@ -43,7 +57,20 @@ export async function getGmailClient(token: GmailToken) {
 }
 
 export function getGmailAuthUrl() {
-  const gmailRedirectUri = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/gmail/callback`
+  const baseUrl = getBaseUrl()
+  const gmailRedirectUri = `${baseUrl}/api/gmail/callback`
+  
+  console.log('[Gmail Auth URL] Generating auth URL...')
+  console.log('[Gmail Auth URL] Base URL:', baseUrl)
+  console.log('[Gmail Auth URL] Redirect URI:', gmailRedirectUri)
+  console.log('[Gmail Auth URL] Client ID:', process.env.GOOGLE_CLIENT_ID ? 'Set' : 'Missing')
+  
+  // Warn if using localhost in production
+  if (baseUrl.includes('localhost') && process.env.NODE_ENV === 'production') {
+    console.error('[Gmail Auth URL] ❌ ERROR: Using localhost redirect URI in production!')
+    console.error('[Gmail Auth URL] This will cause OAuth redirects to fail. Set NEXT_PUBLIC_APP_URL to your production URL.')
+  }
+  
   const oauth2Client = new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID,
     process.env.GOOGLE_CLIENT_SECRET,
@@ -56,11 +83,15 @@ export function getGmailAuthUrl() {
     'https://www.googleapis.com/auth/gmail.modify',
   ]
 
-  return oauth2Client.generateAuthUrl({
+  const authUrl = oauth2Client.generateAuthUrl({
     access_type: 'offline',
     scope: scopes,
     prompt: 'consent', // Force consent screen to get refresh token
   })
+  
+  console.log('[Gmail Auth URL] Generated auth URL (length):', authUrl.length)
+  
+  return authUrl
 }
 
 // Cache OAuth client to avoid recreating it
@@ -72,7 +103,7 @@ function getGmailOAuthClient() {
   }
 
   if (!cachedGmailOAuthClient) {
-    const gmailRedirectUri = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/gmail/callback`
+    const gmailRedirectUri = `${getBaseUrl()}/api/gmail/callback`
     cachedGmailOAuthClient = new google.auth.OAuth2(
       process.env.GOOGLE_CLIENT_ID,
       process.env.GOOGLE_CLIENT_SECRET,
@@ -85,23 +116,48 @@ function getGmailOAuthClient() {
 
 export async function getGmailTokens(code: string) {
   const oauth2Client = getGmailOAuthClient()
+  const redirectUri = `${getBaseUrl()}/api/gmail/callback`
 
   try {
+    console.log('[Gmail Tokens] Exchanging code for tokens...')
+    console.log('[Gmail Tokens] Redirect URI:', redirectUri)
+    console.log('[Gmail Tokens] Client ID:', process.env.GOOGLE_CLIENT_ID ? 'Set' : 'Missing')
+    console.log('[Gmail Tokens] Client Secret:', process.env.GOOGLE_CLIENT_SECRET ? 'Set' : 'Missing')
+    
     const { tokens } = await oauth2Client.getToken(code)
     
     if (!tokens.access_token) {
+      console.error('[Gmail Tokens] No access token in response')
       throw new Error('No access token received from Google')
     }
     
+    console.log('[Gmail Tokens] Token exchange successful')
     return tokens
   } catch (error: any) {
-    if (error.response?.data?.error_description) {
-      throw new Error(`Google OAuth error: ${error.response.data.error_description}`)
+    console.error('[Gmail Tokens] Token exchange error:', error)
+    
+    // Provide more specific error messages
+    if (error.response?.data) {
+      const errorData = error.response.data
+      console.error('[Gmail Tokens] Error details:', JSON.stringify(errorData, null, 2))
+      
+      if (errorData.error === 'invalid_grant') {
+        throw new Error('Authorization code expired or already used. Please try connecting again.')
+      }
+      if (errorData.error === 'redirect_uri_mismatch') {
+        throw new Error(`Redirect URI mismatch. Expected: ${redirectUri}. Please check Google Cloud Console configuration.`)
+      }
+      if (errorData.error_description) {
+        throw new Error(`Google OAuth error: ${errorData.error_description}`)
+      }
+      throw new Error(`Google OAuth error: ${errorData.error || 'Unknown error'}`)
     }
+    
     if (error.message) {
       throw error
     }
-    throw new Error('Failed to exchange authorization code for tokens')
+    
+    throw new Error('Failed to exchange authorization code for tokens. Please check your OAuth configuration.')
   }
 }
 

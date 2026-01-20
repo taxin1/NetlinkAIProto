@@ -38,14 +38,30 @@ export async function GET(request: NextRequest) {
 
     console.log(`[Gmail Process] User authenticated: ${user.id}`)
 
+    // Validate OAuth configuration before proceeding
+    if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+      console.error('[Gmail Process] OAuth credentials not configured')
+      throw new Error('Gmail OAuth is not configured. Please set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET environment variables.')
+    }
+
     // Step 2: Exchange code for tokens
     let tokens
     try {
       console.log('[Gmail Process] Exchanging code for tokens...')
+      console.log('[Gmail Process] Authorization code length:', code.length)
+      console.log('[Gmail Process] NEXT_PUBLIC_APP_URL:', process.env.NEXT_PUBLIC_APP_URL || 'Not set (using default)')
+      console.log('[Gmail Process] GOOGLE_CLIENT_ID:', process.env.GOOGLE_CLIENT_ID ? 'Set' : 'MISSING')
+      console.log('[Gmail Process] GOOGLE_CLIENT_SECRET:', process.env.GOOGLE_CLIENT_SECRET ? 'Set' : 'MISSING')
+      
       tokens = await withTimeout(getGmailTokens(code), 15000)
-      console.log('[Gmail Process] Tokens received')
+      console.log('[Gmail Process] Tokens received successfully')
+      console.log('[Gmail Process] Has access token:', !!tokens.access_token)
+      console.log('[Gmail Process] Has refresh token:', !!tokens.refresh_token)
     } catch (tokenError: any) {
-      console.error('[Gmail Process] Token exchange failed:', tokenError)
+      console.error('[Gmail Process] Token exchange failed')
+      console.error('[Gmail Process] Error type:', tokenError?.constructor?.name)
+      console.error('[Gmail Process] Error message:', tokenError?.message)
+      console.error('[Gmail Process] Full error:', JSON.stringify(tokenError, null, 2))
       throw tokenError
     }
 
@@ -86,15 +102,25 @@ export async function GET(request: NextRequest) {
         : null,
       email_address: emailAddress,
       updated_at: now,
+      created_at: now, // Ensure created_at is set for new connections
     }
 
     console.log('[Gmail Process] Storing tokens in database...')
-    const { error: dbError } = await withTimeout(
+    console.log('[Gmail Process] Connection data:', {
+      user_id: user.id,
+      email_address: emailAddress,
+      has_access_token: !!tokens.access_token,
+      has_refresh_token: !!tokens.refresh_token,
+    })
+
+    const { data: savedData, error: dbError } = await withTimeout(
       supabase
         .from('gmail_connections')
         .upsert(connectionData, {
           onConflict: 'user_id',
-        }),
+        })
+        .select()
+        .single(),
       10000
     )
 
@@ -103,14 +129,22 @@ export async function GET(request: NextRequest) {
       throw new Error(`Database error: ${dbError.message || 'Unknown error'}`)
     }
 
+    if (!savedData) {
+      console.error('[Gmail Process] No data returned after upsert')
+      throw new Error('Failed to save connection to database')
+    }
+
     console.log('[Gmail Process] Tokens stored successfully')
+    console.log('[Gmail Process] Saved connection ID:', savedData.id)
     const elapsedTime = Date.now() - startTime
     console.log(`[Gmail Process] ✅ Success in ${elapsedTime}ms`)
 
-    return NextResponse.redirect(
-      new URL('/dashboard/settings?success=gmail_connected', request.url),
-      { status: 307 }
-    )
+    // Build redirect URL with base URL
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin
+    const redirectUrl = new URL('/dashboard/settings', baseUrl)
+    redirectUrl.searchParams.set('success', 'gmail_connected')
+
+    return NextResponse.redirect(redirectUrl.toString(), { status: 307 })
   } catch (error: any) {
     const elapsedTime = Date.now() - startTime
     console.error(`[Gmail Process] ❌ Error after ${elapsedTime}ms`)

@@ -41,24 +41,46 @@ export function GlobalNetworkerOptInPrompt({ userId }: GlobalNetworkerOptInPromp
           .eq("user_id", userId)
           .maybeSingle()
 
+        // Handle errors - PGRST116 means "no rows returned" which is expected for new users
         if (error) {
-          console.error("Failed to load network profile for opt-in prompt:", error)
+          // Ignore expected "no rows" error (PGRST116) and empty error objects
+          const isExpectedError = error.code === "PGRST116" || 
+                                  (typeof error === "object" && 
+                                   Object.keys(error).length === 0)
+          
+          if (!isExpectedError) {
+            // Only log actual errors in development
+            if (process.env.NODE_ENV === "development") {
+              console.error("Failed to load network profile for opt-in prompt:", error)
+            }
+          }
+          
+          // For any error (expected or not), treat as "no profile exists" and show prompt
+          setOpen(true)
           return
         }
 
         if (!data) {
+          // No profile exists - show the opt-in prompt
           setOpen(true)
           return
         }
 
         if (data.is_public_profile) {
+          // Profile exists and is already public - mark as answered
           localStorage.setItem(storageKey, "public")
           return
         }
 
+        // Profile exists but is private - show the opt-in prompt
         setOpen(true)
       } catch (error) {
-        console.error("Unexpected error while preparing opt-in prompt:", error)
+        // Only log unexpected errors in development
+        if (process.env.NODE_ENV === "development") {
+          console.error("Unexpected error while preparing opt-in prompt:", error)
+        }
+        // On error, show the prompt anyway (graceful degradation)
+        setOpen(true)
       }
     }
 

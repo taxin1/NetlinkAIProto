@@ -159,11 +159,11 @@ export function PublicNavigation() {
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
+            initial={{ opacity: 0, maxHeight: 0 }}
+            animate={{ opacity: 1, maxHeight: "90vh" }}
+            exit={{ opacity: 0, maxHeight: 0 }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="lg:hidden border-t bg-background/95 backdrop-blur overflow-hidden"
+            className="lg:hidden border-t bg-background/95 backdrop-blur overflow-y-auto"
           >
             <div className="container mx-auto px-4 py-6 space-y-4 flex flex-col">
               <Link href="/" onClick={() => setMobileMenuOpen(false)}>

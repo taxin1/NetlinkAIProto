@@ -28,21 +28,35 @@ export function GmailSettings() {
     setIsLoading(true)
     try {
       const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      
+      if (!user) {
+        setIsConnected(false)
+        setIsLoading(false)
+        return
+      }
+
       const { data, error } = await supabase
         .from('gmail_connections')
         .select('*')
-        .single()
+        .eq('user_id', user.id)
+        .maybeSingle()
 
       if (data && !error) {
         setIsConnected(true)
         setEmailAddress(data.email_address)
       } else {
+        // PGRST116 means no rows found, which is expected if not connected
+        if (error && error.code !== 'PGRST116') {
+          console.error('Error checking Gmail connection:', error)
+        }
         setIsConnected(false)
         setEmailAddress(null)
       }
     } catch (error) {
       console.error('Error checking Gmail connection:', error)
       setIsConnected(false)
+      setEmailAddress(null)
     } finally {
       setIsLoading(false)
     }
@@ -97,29 +111,38 @@ export function GmailSettings() {
     const error = params.get('error')
 
     if (success === 'gmail_connected') {
-      checkConnection()
+      // Wait a bit for the database to be updated, then check connection
+      setTimeout(() => {
+        checkConnection()
+      }, 500)
       // Clean URL
       window.history.replaceState({}, '', window.location.pathname)
     }
 
     if (error) {
+      setIsConnecting(false) // Reset connecting state on error
       let errorMessage = 'Failed to connect Gmail'
       switch (error) {
         case 'no_code':
-          errorMessage = 'No authorization code received'
+          errorMessage = 'No authorization code received. Please try connecting again.'
           break
         case 'token_exchange_failed':
-          errorMessage = 'Failed to exchange authorization code'
+          errorMessage = 'Failed to exchange authorization code. Please try connecting again.'
           break
         case 'connection_timeout':
           errorMessage = 'Connection timed out. Please try again.'
           break
         case 'invalid_authorization_code':
-          errorMessage = 'Invalid authorization code. Please try again.'
+          errorMessage = 'Invalid authorization code. Please try connecting again.'
           break
         case 'oauth_not_configured':
-          errorMessage = 'Gmail OAuth is not configured on the server'
+          errorMessage = 'Gmail OAuth is not configured on the server. Please contact support.'
           break
+        case 'database_error':
+          errorMessage = 'Failed to save connection. Please try again.'
+          break
+        default:
+          errorMessage = `Failed to connect Gmail: ${error}`
       }
       alert(errorMessage)
       // Clean URL

@@ -460,11 +460,11 @@ export function LandingPage() {
         <AnimatePresence>
           {mobileMenuOpen && (
             <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
+              initial={{ opacity: 0, maxHeight: 0 }}
+              animate={{ opacity: 1, maxHeight: "90vh" }}
+              exit={{ opacity: 0, maxHeight: 0 }}
               transition={{ duration: 0.3, ease: "easeInOut" }}
-              className="lg:hidden border-t border-slate-800/50 bg-slate-950/95 backdrop-blur-xl overflow-hidden"
+              className="lg:hidden border-t border-slate-800/50 bg-slate-950/95 backdrop-blur-xl overflow-y-auto"
             >
               <div className="px-6 py-6 space-y-4 flex flex-col">
                 <Link href="/" onClick={() => setMobileMenuOpen(false)}>

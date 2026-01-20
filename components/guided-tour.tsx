@@ -20,6 +20,7 @@ import {
   Wand2
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { createClient } from "@/lib/supabase/client"
 
 interface TourStep {
   id: string
@@ -135,22 +136,65 @@ export function GuidedTour({ userId }: { userId: string }) {
   ]
 
   useEffect(() => {
-    // Check if user has already completed the tour
-    const hasCompletedTour = localStorage.getItem(`${TOUR_STORAGE_KEY}-${userId}`)
+    let timer: NodeJS.Timeout | null = null
 
-    // Check if user is new (account created in last 7 days)
-    const accountAge = localStorage.getItem(`netlink-account-created-${userId}`)
-    if (!accountAge) {
-      localStorage.setItem(`netlink-account-created-${userId}`, Date.now().toString())
+    const checkTourEligibility = async () => {
+      // First check localStorage for completion (fast check)
+      const hasCompletedTour = localStorage.getItem(`${TOUR_STORAGE_KEY}-${userId}`)
+      if (hasCompletedTour === "true") {
+        setIsOpen(false)
+        return
+      }
+
+      try {
+        // Get user's actual creation date from Supabase
+        const supabase = createClient()
+        const { data: { user }, error: userError } = await supabase.auth.getUser()
+        
+        if (userError || !user) {
+          // If we can't get user, don't show tour
+          setIsOpen(false)
+          return
+        }
+
+        // Check if user account was created in the last 7 days
+        const accountCreatedAt = new Date(user.created_at)
+        const now = new Date()
+        const daysSinceCreation = (now.getTime() - accountCreatedAt.getTime()) / (1000 * 60 * 60 * 24)
+        const isNewUser = daysSinceCreation <= 7
+
+        // Only show tour to new users (created in last 7 days)
+        if (!isNewUser) {
+          // User is old - mark tour as completed so it never shows again
+          if (typeof window !== "undefined") {
+            localStorage.setItem(`${TOUR_STORAGE_KEY}-${userId}`, "true")
+          }
+          setIsOpen(false)
+          return
+        }
+
+        // User is new and tour not completed - show tour after a small delay
+        timer = setTimeout(() => {
+          // Double-check before opening (in case localStorage was updated)
+          const stillNotCompleted = localStorage.getItem(`${TOUR_STORAGE_KEY}-${userId}`) !== "true"
+          if (stillNotCompleted) {
+            setIsOpen(true)
+          }
+        }, 1000)
+      } catch (error) {
+        // On error, don't show tour
+        console.error("Error checking tour eligibility:", error)
+        setIsOpen(false)
+      }
     }
 
-    // Show tour if not completed and account is new
-    if (!hasCompletedTour) {
-      // Small delay to ensure page is loaded
-      const timer = setTimeout(() => {
-        setIsOpen(true)
-      }, 1000)
-      return () => clearTimeout(timer)
+    checkTourEligibility()
+
+    // Cleanup function
+    return () => {
+      if (timer) {
+        clearTimeout(timer)
+      }
     }
   }, [userId])
 
@@ -239,12 +283,16 @@ export function GuidedTour({ userId }: { userId: string }) {
   }
 
   const handleSkip = () => {
-    localStorage.setItem(`${TOUR_STORAGE_KEY}-${userId}`, "true")
+    if (typeof window !== "undefined") {
+      localStorage.setItem(`${TOUR_STORAGE_KEY}-${userId}`, "true")
+    }
     setIsOpen(false)
   }
 
   const handleComplete = () => {
-    localStorage.setItem(`${TOUR_STORAGE_KEY}-${userId}`, "true")
+    if (typeof window !== "undefined") {
+      localStorage.setItem(`${TOUR_STORAGE_KEY}-${userId}`, "true")
+    }
     setIsOpen(false)
   }
 
@@ -268,19 +316,25 @@ export function GuidedTour({ userId }: { userId: string }) {
       }
 
       const rect = targetElement.getBoundingClientRect()
-      const tooltipHeight = 200 // Approximate tooltip height
-      const tooltipWidth = Math.min(400, window.innerWidth * 0.9)
-      const spacing = 16
+      const isMobile = window.innerWidth < 768
+      const tooltipHeight = isMobile ? 250 : 200 // Approximate tooltip height
+      const tooltipWidth = isMobile ? Math.min(340, window.innerWidth - 32) : Math.min(400, window.innerWidth * 0.9)
+      const spacing = isMobile ? 12 : 16
 
       let newStyle: React.CSSProperties = {
         position: "fixed",
       }
 
-      switch (currentStepData.position) {
+      // On mobile, prefer bottom positioning for better visibility
+      const effectivePosition = isMobile && (currentStepData.position === "left" || currentStepData.position === "right") 
+        ? "bottom" 
+        : currentStepData.position
+
+      switch (effectivePosition) {
         case "top":
           newStyle = {
             ...newStyle,
-            top: `${rect.top - spacing}px`,
+            top: `${Math.max(20, rect.top - spacing)}px`,
             left: `${rect.left + rect.width / 2}px`,
             transform: "translate(-50%, -100%)",
           }
@@ -297,7 +351,7 @@ export function GuidedTour({ userId }: { userId: string }) {
           newStyle = {
             ...newStyle,
             top: `${rect.top + rect.height / 2}px`,
-            left: `${rect.left - spacing}px`,
+            left: `${Math.max(20, rect.left - spacing)}px`,
             transform: "translate(-100%, -50%)",
           }
           break
@@ -321,21 +375,32 @@ export function GuidedTour({ userId }: { userId: string }) {
       // Ensure tooltip stays within viewport
       if (newStyle.top !== undefined && typeof newStyle.top === "string") {
         const topValue = parseFloat(newStyle.top)
-        if (topValue < 20) newStyle.top = "20px"
+        if (topValue < 20) {
+          newStyle.top = "20px"
+          // Adjust transform if we're at the top
+          if (effectivePosition === "top") {
+            newStyle.transform = "translate(-50%, 0)"
+          }
+        }
         if (topValue > window.innerHeight - tooltipHeight - 20) {
-          newStyle.top = `${window.innerHeight - tooltipHeight - 20}px`
+          newStyle.top = `${Math.max(20, window.innerHeight - tooltipHeight - 20)}px`
         }
       }
 
       if (newStyle.left !== undefined && typeof newStyle.left === "string") {
         const leftValue = parseFloat(newStyle.left)
-        if (leftValue < tooltipWidth / 2) {
-          newStyle.left = `${tooltipWidth / 2 + 20}px`
-          newStyle.transform = "translate(-50%, -50%)"
+        const padding = isMobile ? 16 : 20
+        if (leftValue < tooltipWidth / 2 + padding) {
+          newStyle.left = `${tooltipWidth / 2 + padding}px`
+          if (effectivePosition !== "center") {
+            newStyle.transform = isMobile ? "translate(-50%, 0)" : "translate(-50%, -50%)"
+          }
         }
-        if (leftValue > window.innerWidth - tooltipWidth / 2) {
-          newStyle.left = `${window.innerWidth - tooltipWidth / 2 - 20}px`
-          newStyle.transform = "translate(-50%, -50%)"
+        if (leftValue > window.innerWidth - tooltipWidth / 2 - padding) {
+          newStyle.left = `${window.innerWidth - tooltipWidth / 2 - padding}px`
+          if (effectivePosition !== "center") {
+            newStyle.transform = isMobile ? "translate(-50%, 0)" : "translate(-50%, -50%)"
+          }
         }
       }
 
@@ -357,6 +422,7 @@ export function GuidedTour({ userId }: { userId: string }) {
     }
   }, [currentStep, targetElement, isOpen, currentStepData.position])
 
+  // Early return if not open
   if (!isOpen) return null
 
   return (
@@ -368,7 +434,8 @@ export function GuidedTour({ userId }: { userId: string }) {
             {targetElement && targetRect ? (
               (() => {
                 const rect = targetRect
-                const padding = 12
+                const isMobile = window.innerWidth < 768
+                const padding = isMobile ? 8 : 12
                 const highlightWidth = rect.width + padding * 2
                 const highlightHeight = rect.height + padding * 2
                 const highlightTop = rect.top - padding
@@ -476,28 +543,30 @@ export function GuidedTour({ userId }: { userId: string }) {
             exit={{ opacity: 0, scale: 0.8, y: 20 }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
             className={cn(
-              "fixed z-[9999] w-[90vw] max-w-md",
+              "fixed z-[9999] w-[calc(100vw-2rem)] max-w-md sm:w-[90vw]",
             )}
             style={tooltipStyle}
             onClick={(e) => e.stopPropagation()}
           >
             <Card className="border-2 border-primary/50 shadow-2xl bg-background/95 backdrop-blur-xl">
-              <CardHeader className="relative pb-4">
+              <CardHeader className="relative pb-3 sm:pb-4 px-4 sm:px-6">
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="absolute top-4 right-4 h-8 w-8"
+                  className="absolute top-3 right-3 sm:top-4 sm:right-4 h-7 w-7 sm:h-8 sm:w-8"
                   onClick={handleSkip}
                 >
-                  <X className="h-4 w-4" />
+                  <X className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 </Button>
-                <div className="flex items-center gap-3 pr-8">
-                  <div className="p-2 rounded-lg bg-primary/10 text-primary">
-                    {currentStepData.icon}
+                <div className="flex items-start sm:items-center gap-2 sm:gap-3 pr-8 sm:pr-10">
+                  <div className="p-1.5 sm:p-2 rounded-lg bg-primary/10 text-primary flex-shrink-0 mt-0.5 sm:mt-0">
+                    <div className="h-5 w-5 sm:h-6 sm:w-6">
+                      {currentStepData.icon}
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <CardTitle className="text-xl">{currentStepData.title}</CardTitle>
-                    <div className="flex items-center gap-2 mt-1">
+                  <div className="flex-1 min-w-0">
+                    <CardTitle className="text-lg sm:text-xl leading-tight pr-2">{currentStepData.title}</CardTitle>
+                    <div className="flex items-center gap-2 mt-1.5 sm:mt-1">
                       <div className="h-1.5 flex-1 bg-muted rounded-full overflow-hidden">
                         <motion.div
                           className="h-full bg-primary rounded-full"
@@ -508,43 +577,45 @@ export function GuidedTour({ userId }: { userId: string }) {
                           transition={{ duration: 0.3 }}
                         />
                       </div>
-                      <span className="text-xs text-muted-foreground whitespace-nowrap">
+                      <span className="text-xs text-muted-foreground whitespace-nowrap flex-shrink-0">
                         {currentStep + 1}/{tourSteps.length}
                       </span>
                     </div>
                   </div>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <CardDescription className="text-base leading-relaxed">
+              <CardContent className="space-y-3 sm:space-y-4 px-4 sm:px-6 pb-4 sm:pb-6">
+                <CardDescription className="text-sm sm:text-base leading-relaxed">
                   {currentStepData.description}
                 </CardDescription>
-                <div className="flex items-center justify-between gap-3 pt-2">
-                  <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-3 pt-2">
+                  <div className="flex gap-2 order-2 sm:order-1">
                     {!isFirstStep && (
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={handlePrevious}
-                        className="flex items-center gap-2"
+                        className="flex items-center gap-2 flex-1 sm:flex-initial"
                       >
                         <ChevronLeft className="h-4 w-4" />
-                        Previous
+                        <span className="sm:hidden">Prev</span>
+                        <span className="hidden sm:inline">Previous</span>
                       </Button>
                     )}
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 order-1 sm:order-2">
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={handleSkip}
+                      className="flex-1 sm:flex-initial text-xs sm:text-sm"
                     >
-                      Skip Tour
+                      Skip
                     </Button>
                     <Button
                       size="sm"
                       onClick={handleNext}
-                      className="flex items-center gap-2"
+                      className="flex items-center gap-2 flex-1 sm:flex-initial"
                     >
                       {isLastStep ? "Get Started" : "Next"}
                       {!isLastStep && <ChevronRight className="h-4 w-4" />}

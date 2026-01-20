@@ -10,6 +10,20 @@ export interface GoogleCalendarToken {
   scope?: string
 }
 
+// Helper function to get the base URL for redirects
+function getBaseUrl(): string {
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL
+  if (!baseUrl) {
+    // Warn in production if NEXT_PUBLIC_APP_URL is not set
+    if (process.env.NODE_ENV === 'production') {
+      console.warn('[Google Calendar] ⚠️ NEXT_PUBLIC_APP_URL is not set in production! OAuth redirects will use localhost.')
+      console.warn('[Google Calendar] Please set NEXT_PUBLIC_APP_URL to your production URL (e.g., https://your-domain.com)')
+    }
+    return 'http://localhost:3000'
+  }
+  return baseUrl
+}
+
 // Required scopes for Google Calendar API
 const REQUIRED_SCOPES = [
   'https://www.googleapis.com/auth/calendar',
@@ -24,10 +38,18 @@ export class InsufficientScopesError extends Error {
 }
 
 export async function getGoogleCalendarClient(token: GoogleCalendarToken) {
+  let redirectUri = process.env.GOOGLE_REDIRECT_URI || `${getBaseUrl()}/api/google-calendar/callback`
+  
+  // Ensure redirect URI is for Google Calendar, not Gmail
+  if (redirectUri.includes('/api/gmail/callback')) {
+    console.warn('[Google Calendar Client] ⚠️ GOOGLE_REDIRECT_URI was pointing to Gmail callback, auto-correcting to Google Calendar callback')
+    redirectUri = `${getBaseUrl()}/api/google-calendar/callback`
+  }
+  
   const oauth2Client = new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID,
     process.env.GOOGLE_CLIENT_SECRET,
-    process.env.GOOGLE_REDIRECT_URI || `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/google-calendar/callback`
+    redirectUri
   )
 
   oauth2Client.setCredentials({
@@ -216,10 +238,36 @@ export async function listGoogleCalendarEvents(
 }
 
 export function getGoogleCalendarAuthUrl() {
+  const baseUrl = getBaseUrl()
+  let redirectUri = process.env.GOOGLE_REDIRECT_URI || `${baseUrl}/api/google-calendar/callback`
+  
+  // Ensure redirect URI is for Google Calendar, not Gmail
+  if (redirectUri.includes('/api/gmail/callback')) {
+    console.warn('[Google Calendar Auth URL] ⚠️ GOOGLE_REDIRECT_URI was pointing to Gmail callback, auto-correcting to Google Calendar callback')
+    redirectUri = `${baseUrl}/api/google-calendar/callback`
+  }
+  
+  console.log('[Google Calendar Auth URL] Generating auth URL...')
+  console.log('[Google Calendar Auth URL] Base URL:', baseUrl)
+  console.log('[Google Calendar Auth URL] Redirect URI:', redirectUri)
+  console.log('[Google Calendar Auth URL] Client ID:', process.env.GOOGLE_CLIENT_ID ? 'Set' : 'Missing')
+  
+  // Warn if using localhost in production
+  if (redirectUri.includes('localhost') && process.env.NODE_ENV === 'production') {
+    console.error('[Google Calendar Auth URL] ❌ ERROR: Using localhost redirect URI in production!')
+    console.error('[Google Calendar Auth URL] This will cause OAuth redirects to fail. Set NEXT_PUBLIC_APP_URL to your production URL.')
+  }
+  
+  // Ensure redirect URI ends with the correct path
+  if (!redirectUri.endsWith('/api/google-calendar/callback')) {
+    console.warn('[Google Calendar Auth URL] ⚠️ Redirect URI does not end with /api/google-calendar/callback')
+    console.warn('[Google Calendar Auth URL] This may cause OAuth redirect issues.')
+  }
+  
   const oauth2Client = new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID,
     process.env.GOOGLE_CLIENT_SECRET,
-    process.env.GOOGLE_REDIRECT_URI || `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/google-calendar/callback`
+    redirectUri
   )
 
   const scopes = [
@@ -243,10 +291,18 @@ function getOAuthClient() {
   }
 
   if (!cachedOAuthClient) {
+    let redirectUri = process.env.GOOGLE_REDIRECT_URI || `${getBaseUrl()}/api/google-calendar/callback`
+    
+    // Ensure redirect URI is for Google Calendar, not Gmail
+    if (redirectUri.includes('/api/gmail/callback')) {
+      console.warn('[Google Calendar OAuth Client] ⚠️ GOOGLE_REDIRECT_URI was pointing to Gmail callback, auto-correcting to Google Calendar callback')
+      redirectUri = `${getBaseUrl()}/api/google-calendar/callback`
+    }
+    
     cachedOAuthClient = new google.auth.OAuth2(
       process.env.GOOGLE_CLIENT_ID,
       process.env.GOOGLE_CLIENT_SECRET,
-      process.env.GOOGLE_REDIRECT_URI || `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/google-calendar/callback`
+      redirectUri
     )
   }
 
@@ -255,24 +311,54 @@ function getOAuthClient() {
 
 export async function getGoogleCalendarTokens(code: string) {
   const oauth2Client = getOAuthClient()
+  let redirectUri = process.env.GOOGLE_REDIRECT_URI || `${getBaseUrl()}/api/google-calendar/callback`
+  
+  // Ensure redirect URI is for Google Calendar, not Gmail
+  if (redirectUri.includes('/api/gmail/callback')) {
+    console.warn('[Google Calendar Tokens] ⚠️ GOOGLE_REDIRECT_URI was pointing to Gmail callback, auto-correcting to Google Calendar callback')
+    redirectUri = `${getBaseUrl()}/api/google-calendar/callback`
+  }
 
   try {
+    console.log('[Google Calendar Tokens] Exchanging code for tokens...')
+    console.log('[Google Calendar Tokens] Redirect URI:', redirectUri)
+    console.log('[Google Calendar Tokens] Client ID:', process.env.GOOGLE_CLIENT_ID ? 'Set' : 'Missing')
+    console.log('[Google Calendar Tokens] Client Secret:', process.env.GOOGLE_CLIENT_SECRET ? 'Set' : 'Missing')
+    
     // Use optimized token exchange
     const { tokens } = await oauth2Client.getToken(code)
     
     if (!tokens.access_token) {
+      console.error('[Google Calendar Tokens] No access token in response')
       throw new Error('No access token received from Google')
     }
     
+    console.log('[Google Calendar Tokens] Token exchange successful')
     return tokens
   } catch (error: any) {
-    // Provide more descriptive error messages
-    if (error.response?.data?.error_description) {
-      throw new Error(`Google OAuth error: ${error.response.data.error_description}`)
+    console.error('[Google Calendar Tokens] Token exchange error:', error)
+    
+    // Provide more specific error messages
+    if (error.response?.data) {
+      const errorData = error.response.data
+      console.error('[Google Calendar Tokens] Error details:', JSON.stringify(errorData, null, 2))
+      
+      if (errorData.error === 'invalid_grant') {
+        throw new Error('Authorization code expired or already used. Please try connecting again.')
+      }
+      if (errorData.error === 'redirect_uri_mismatch') {
+        throw new Error(`Redirect URI mismatch. Expected: ${redirectUri}. Please check Google Cloud Console configuration.`)
+      }
+      if (errorData.error_description) {
+        throw new Error(`Google OAuth error: ${errorData.error_description}`)
+      }
+      throw new Error(`Google OAuth error: ${errorData.error || 'Unknown error'}`)
     }
+    
     if (error.message) {
       throw error
     }
-    throw new Error('Failed to exchange authorization code for tokens')
+    
+    throw new Error('Failed to exchange authorization code for tokens. Please check your OAuth configuration.')
   }
 }

@@ -13,10 +13,11 @@ function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
 }
 
 // Return optimized HTML loading page with instant redirect
-function getLoadingPage(code: string, error?: string) {
+function getLoadingPage(code: string, error?: string, baseUrl?: string) {
+  const base = baseUrl || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000')
   const redirectUrl = error 
-    ? `/dashboard/settings?error=${encodeURIComponent(error)}`
-    : `/api/google-calendar/process?code=${encodeURIComponent(code)}`
+    ? `${base}/dashboard/settings?error=${encodeURIComponent(error)}`
+    : `${base}/api/google-calendar/process?code=${encodeURIComponent(code)}`
   
   // Use both meta refresh and JS for fastest redirect
   return `<!DOCTYPE html>
@@ -34,7 +35,7 @@ function getLoadingPage(code: string, error?: string) {
       align-items: center;
       justify-content: center;
       min-height: 100vh;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, #4285f4 0%, #34a853 100%);
       color: white;
       overflow: hidden;
     }
@@ -67,7 +68,7 @@ function getLoadingPage(code: string, error?: string) {
   <div class="container">
     <div class="spinner"></div>
     <h1>Connecting Google Calendar...</h1>
-    <p>Setting up your integration</p>
+    <p>Setting up your calendar integration</p>
   </div>
   <script>
     // Instant redirect - no delay
@@ -87,22 +88,25 @@ export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
   const code = searchParams.get('code')
   const error = searchParams.get('error')
+  
+  // Get base URL from environment or request
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin
 
   // Return loading page immediately
   if (error) {
-    return new NextResponse(getLoadingPage('', error), {
+    return new NextResponse(getLoadingPage('', error, baseUrl), {
       headers: { 'Content-Type': 'text/html' },
     })
   }
 
   if (!code) {
-    return new NextResponse(getLoadingPage('', 'no_code'), {
+    return new NextResponse(getLoadingPage('', 'no_code', baseUrl), {
       headers: { 'Content-Type': 'text/html' },
     })
   }
 
   // Return loading page and let the process route handle the actual work
-  return new NextResponse(getLoadingPage(code), {
+  return new NextResponse(getLoadingPage(code, undefined, baseUrl), {
     headers: { 'Content-Type': 'text/html' },
   })
 }

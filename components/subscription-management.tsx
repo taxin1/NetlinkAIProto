@@ -46,17 +46,42 @@ export function SubscriptionManagement({ userId }: SubscriptionManagementProps) 
         .from("subscriptions")
         .select("*")
         .eq("user_id", userId)
-        .single()
+        .maybeSingle() // Use maybeSingle to avoid errors when no subscription exists
 
-      if (fetchError && fetchError.code !== 'PGRST116') { // PGRST116 is "not found" error
-        throw fetchError
+      // Handle expected errors gracefully (no subscription found, table missing, etc.)
+      if (fetchError) {
+        // PGRST116 = no rows returned (expected for users without subscriptions)
+        // PGRST205 = table not found (expected if table hasn't been created yet)
+        // 22P02 = invalid input syntax (expected in some edge cases)
+        const isExpectedError = fetchError.code === 'PGRST116' || 
+                               fetchError.code === 'PGRST205' || 
+                               fetchError.code === '22P02' ||
+                               (typeof fetchError === "object" && Object.keys(fetchError).length === 0)
+        
+        if (!isExpectedError) {
+          // Only log and show actual errors in development
+          if (process.env.NODE_ENV === "development") {
+            console.error("Error fetching subscription:", fetchError)
+          }
+          setError("Failed to fetch subscription")
+        } else {
+          // Expected error - no subscription exists, which is fine
+          setSubscription(null)
+          setError(null)
+        }
+        return
       }
 
       setSubscription(data || null)
       setError(null)
     } catch (err) {
-      console.error("Error fetching subscription:", err)
-      setError(err instanceof Error ? err.message : "Failed to fetch subscription")
+      // Only log unexpected errors in development
+      if (process.env.NODE_ENV === "development") {
+        console.error("Unexpected error fetching subscription:", err)
+      }
+      // Don't show error to user for unexpected errors - just set subscription to null
+      setSubscription(null)
+      setError(null)
     } finally {
       setIsLoading(false)
     }

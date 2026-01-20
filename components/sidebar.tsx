@@ -145,11 +145,15 @@ export function Sidebar({ user }: SidebarProps) {
           .single()
 
         if (error) {
-          if (error.code === 'PGRST116' || error.code === '22P02') {
+          // Handle missing table gracefully (PGRST205 = table not found)
+          if (error.code === 'PGRST116' || error.code === '22P02' || error.code === 'PGRST205') {
             setSubscription(null)
             return
           }
-          console.error("Error fetching subscription:", JSON.stringify(error, null, 2))
+          // Only log non-critical errors
+          if (error.code !== 'PGRST205') {
+            console.error("Error fetching subscription:", JSON.stringify(error, null, 2))
+          }
           return
         }
 

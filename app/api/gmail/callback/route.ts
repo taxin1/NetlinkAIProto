@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 // Return optimized HTML loading page with instant redirect
-function getLoadingPage(code: string, error?: string) {
+function getLoadingPage(code: string, error?: string, baseUrl?: string) {
+  const base = baseUrl || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000')
   const redirectUrl = error 
-    ? `/dashboard/settings?error=${encodeURIComponent(error)}`
-    : `/api/gmail/process?code=${encodeURIComponent(code)}`
+    ? `${base}/dashboard/settings?error=${encodeURIComponent(error)}`
+    : `${base}/api/gmail/process?code=${encodeURIComponent(code)}`
   
   return `<!DOCTYPE html>
 <html lang="en">
@@ -73,20 +74,23 @@ export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
   const code = searchParams.get('code')
   const error = searchParams.get('error')
+  
+  // Get base URL from environment or request
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin
 
   if (error) {
-    return new NextResponse(getLoadingPage('', error), {
+    return new NextResponse(getLoadingPage('', error, baseUrl), {
       headers: { 'Content-Type': 'text/html' },
     })
   }
 
   if (!code) {
-    return new NextResponse(getLoadingPage('', 'no_code'), {
+    return new NextResponse(getLoadingPage('', 'no_code', baseUrl), {
       headers: { 'Content-Type': 'text/html' },
     })
   }
 
-  return new NextResponse(getLoadingPage(code), {
+  return new NextResponse(getLoadingPage(code, undefined, baseUrl), {
     headers: { 'Content-Type': 'text/html' },
   })
 }
