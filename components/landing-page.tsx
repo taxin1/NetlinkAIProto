@@ -34,6 +34,7 @@ import {
   Menu,
   X,
   Languages,
+  Shield,
 } from "lucide-react"
 import { useTranslations } from "@/lib/hooks/use-translations"
 import {
@@ -402,6 +403,14 @@ export function LandingPage() {
                   </Button>
                 </motion.div>
               </Link>
+              <Link href="/privacy">
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Button variant="ghost" className="text-slate-400 hover:text-white hover:bg-slate-800/50 font-medium">
+                    <Shield className="h-4 w-4 mr-2" />
+                    Privacy Policy
+                  </Button>
+                </motion.div>
+              </Link>
 
               {isMounted ? (
                 <DropdownMenu>
@@ -496,6 +505,12 @@ export function LandingPage() {
                   <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-white hover:bg-slate-800/50 text-lg">
                     <BookOpen className="h-5 w-5 mr-3" />
                     {t("resources")}
+                  </Button>
+                </Link>
+                <Link href="/privacy" onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-white hover:bg-slate-800/50 text-lg">
+                    <Shield className="h-5 w-5 mr-3" />
+                    Privacy Policy
                   </Button>
                 </Link>
                 
@@ -593,6 +608,15 @@ export function LandingPage() {
                 </>
               )}
             </motion.p>
+            <motion.div
+              variants={itemVariants}
+              className="mb-6 text-center"
+            >
+              <Link href="/privacy" className="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-cyan-400 transition-colors underline underline-offset-4">
+                <Shield className="h-4 w-4" />
+                Privacy Policy
+              </Link>
+            </motion.div>
             <motion.div
               variants={itemVariants}
               className="flex flex-col sm:flex-row gap-4 justify-center items-center"
@@ -2970,6 +2994,147 @@ export function LandingPage() {
         </div>
       </section>
 
+      {/* Data Usage Transparency Section - Required for Google OAuth */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 relative z-10 border-t border-slate-800/50 bg-slate-900/40">
+        <div className="max-w-7xl mx-auto">
+          <motion.div
+            className="text-center mb-12"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={containerVariants}
+          >
+            <motion.h2
+              variants={itemVariants}
+              className="text-3xl sm:text-4xl font-bold mb-4 text-white"
+            >
+              About Netlink AI
+            </motion.h2>
+            <motion.p
+              variants={itemVariants}
+              className="text-slate-300 max-w-3xl mx-auto text-lg leading-relaxed"
+            >
+              Netlink AI (Network Link AI) is an AI-powered business networking platform designed to transform how professionals connect, manage contacts, and grow their networks.
+            </motion.p>
+          </motion.div>
+
+          <motion.div
+            className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={containerVariants}
+          >
+            {/* App Functionality */}
+            <motion.div variants={itemVariants}>
+              <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm h-full">
+                <CardContent className="p-8">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
+                      <Sparkles className="h-6 w-6 text-white" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-white">App Functionality</h3>
+                  </div>
+                  <div className="space-y-4 text-slate-300">
+                    <p className="leading-relaxed">
+                      Netlink AI provides a comprehensive suite of networking tools:
+                    </p>
+                    <ul className="space-y-3 list-disc list-inside text-slate-300">
+                      <li><strong className="text-white">Business Card Scanning:</strong> AI-powered OCR to extract contact information from business cards</li>
+                      <li><strong className="text-white">Contact Management:</strong> Organize and manage your professional contacts in one place</li>
+                      <li><strong className="text-white">Email Campaigns:</strong> Create and send personalized email campaigns to your network</li>
+                      <li><strong className="text-white">Calendar Integration:</strong> Sync with Google Calendar to manage events and meetings</li>
+                      <li><strong className="text-white">Network Analytics:</strong> Track your networking activities and growth metrics</li>
+                      <li><strong className="text-white">AI Assistant:</strong> Get intelligent suggestions for networking opportunities</li>
+                      <li><strong className="text-white">Portfolio Sharing:</strong> Create and share your professional portfolio</li>
+                      <li><strong className="text-white">Voice Agent:</strong> AI-powered voice assistant for networking calls</li>
+                    </ul>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            {/* Data Usage Transparency */}
+            <motion.div variants={itemVariants}>
+              <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm h-full">
+                <CardContent className="p-8">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                      <Shield className="h-6 w-6 text-white" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-white">Data Usage & Privacy</h3>
+                  </div>
+                  <div className="space-y-4 text-slate-300">
+                    <p className="leading-relaxed">
+                      We are committed to transparency about how we use your data. Here's why we request access to your information:
+                    </p>
+                    <div className="space-y-3">
+                      <div className="p-4 bg-slate-900/50 rounded-lg border border-slate-700/50">
+                        <h4 className="font-semibold text-white mb-2">Account Information (Name, Email)</h4>
+                        <p className="text-sm text-slate-400">Used to create and manage your account, authenticate you, and send service-related communications.</p>
+                      </div>
+                      <div className="p-4 bg-slate-900/50 rounded-lg border border-slate-700/50">
+                        <h4 className="font-semibold text-white mb-2">Contact Information & Business Cards</h4>
+                        <p className="text-sm text-slate-400">Processed to build and maintain your contact database, enable networking features, and provide contact management services.</p>
+                      </div>
+                      <div className="p-4 bg-slate-900/50 rounded-lg border border-slate-700/50">
+                        <h4 className="font-semibold text-white mb-2">Email Content (Gmail Integration)</h4>
+                        <p className="text-sm text-slate-400">Accessed only with your explicit permission to enable email campaign features, send personalized emails, and manage your email communications through our platform.</p>
+                      </div>
+                      <div className="p-4 bg-slate-900/50 rounded-lg border border-slate-700/50">
+                        <h4 className="font-semibold text-white mb-2">Calendar Data (Google Calendar)</h4>
+                        <p className="text-sm text-slate-400">Synchronized to help you manage networking events, schedule meetings, and track your professional activities.</p>
+                      </div>
+                      <div className="p-4 bg-slate-900/50 rounded-lg border border-slate-700/50">
+                        <h4 className="font-semibold text-white mb-2">Usage Analytics</h4>
+                        <p className="text-sm text-slate-400">Collected to improve our services, fix technical issues, and provide you with better user experience and personalized features.</p>
+                      </div>
+                    </div>
+                    <div className="pt-4 border-t border-slate-700">
+                      <p className="text-sm text-slate-400 mb-4">
+                        We do not sell your personal information. All data is used solely to provide and improve our networking services.
+                      </p>
+                      <Link href="/privacy" className="inline-flex items-center gap-2 text-cyan-400 hover:text-cyan-300 font-semibold transition-colors">
+                        <Shield className="h-4 w-4" />
+                        Read our full Privacy Policy
+                        <ArrowRight className="h-4 w-4" />
+                      </Link>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </motion.div>
+
+          {/* Privacy Policy Link - Prominent */}
+          <motion.div
+            className="text-center"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={itemVariants}
+          >
+            <Card className="bg-gradient-to-r from-cyan-500/10 via-blue-500/10 to-purple-500/10 border-cyan-500/30 backdrop-blur-sm max-w-2xl mx-auto">
+              <CardContent className="p-6">
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                  <Shield className="h-6 w-6 text-cyan-400" />
+                  <div className="text-center sm:text-left">
+                    <p className="text-white font-semibold mb-1">Your Privacy Matters</p>
+                    <p className="text-sm text-slate-300">For complete details on how we collect, use, and protect your data, please review our Privacy Policy.</p>
+                  </div>
+                  <Link href="/privacy">
+                    <Button className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-semibold">
+                      View Privacy Policy
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </div>
+      </section>
+
       {/* Footer */}
       <motion.footer
         className="py-12 px-4 sm:px-6 lg:px-8 border-t border-slate-800 bg-slate-900/50 backdrop-blur-sm"
@@ -3000,7 +3165,7 @@ export function LandingPage() {
           </motion.p>
           <motion.div
             variants={itemVariants}
-            className="flex justify-center gap-6 text-sm flex-wrap"
+            className="flex justify-center gap-6 text-sm flex-wrap mb-6"
           >
             <Link href="/">
               <motion.div
@@ -3034,14 +3199,6 @@ export function LandingPage() {
                 Networkers
               </motion.div>
             </Link>
-            <Link href="/privacy">
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                className="text-slate-400 hover:text-cyan-400 transition-colors cursor-pointer underline-offset-4 hover:underline"
-              >
-                Privacy Policy
-              </motion.div>
-            </Link>
             <Link href="/terms">
               <motion.div
                 whileHover={{ scale: 1.05 }}
@@ -3049,6 +3206,15 @@ export function LandingPage() {
               >
                 Terms & Conditions
               </motion.div>
+            </Link>
+          </motion.div>
+          <motion.div
+            variants={itemVariants}
+            className="text-center"
+          >
+            <Link href="/privacy" className="inline-flex items-center gap-2 text-base font-semibold text-cyan-400 hover:text-cyan-300 transition-colors underline underline-offset-4">
+              <Shield className="h-5 w-5" />
+              Privacy Policy
             </Link>
           </motion.div>
         </div>

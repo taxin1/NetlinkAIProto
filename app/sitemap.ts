@@ -2,16 +2,17 @@ import { MetadataRoute } from 'next'
 import { getBlogPosts } from '@/lib/blog/posts'
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.networklinkai.com'
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.networklinkai.com'
 
-  const blogPosts = getBlogPosts()
+    const blogPosts = getBlogPosts()
 
-  const blogUrls = blogPosts.map(post => ({
-    url: `${baseUrl}/blog/${post.slug}`,
-    lastModified: post.updatedAt || post.publishedAt,
-    changeFrequency: 'monthly' as const,
-    priority: 0.8,
-  }))
+    const blogUrls = blogPosts.map(post => ({
+      url: `${baseUrl}/blog/${post.slug}`,
+      lastModified: post.updatedAt ? new Date(post.updatedAt) : new Date(post.publishedAt),
+      changeFrequency: 'monthly' as const,
+      priority: 0.8,
+    }))
 
   return [
     {
@@ -94,4 +95,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     ...blogUrls,
   ]
+  } catch (error) {
+    console.error('Error generating sitemap:', error)
+    // Return minimal sitemap on error to avoid HTML error page
+    return [
+      {
+        url: baseUrl,
+        lastModified: new Date(),
+        changeFrequency: 'daily',
+        priority: 1,
+      },
+    ]
+  }
 }
