@@ -41,51 +41,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid amount" }, { status: 400 });
     }
 
-    // Check PayPal credentials before attempting to create client
-    const clientId = process.env.PAYPAL_CLIENT_ID;
-    const clientSecret = process.env.PAYPAL_CLIENT_SECRET;
-
-    if (!clientId || !clientSecret) {
-      console.error("PayPal credentials missing:", {
-        hasClientId: !!clientId,
-        hasClientSecret: !!clientSecret,
-      });
-      return NextResponse.json(
-        {
-          error: "PayPal credentials not configured",
-          error_description: "Client Authentication failed - invalid or missing PayPal credentials. Please set PAYPAL_CLIENT_ID and PAYPAL_CLIENT_SECRET in your .env.local file.",
-          details: [
-            {
-              issue: "ORDER_CREATION_FAILED",
-              description: "Client Authentication failed - invalid or missing PayPal credentials. Please configure PAYPAL_CLIENT_ID and PAYPAL_CLIENT_SECRET environment variables.",
-            },
-          ],
-          debug_id: Date.now().toString(),
-        },
-        { status: 401 }
-      );
-    }
-
-    let paypalClient;
-    try {
-      paypalClient = getPayPalClient();
-    } catch (clientError: any) {
-      console.error("Failed to create PayPal client:", clientError);
-      return NextResponse.json(
-        {
-          error: "PayPal client initialization failed",
-          error_description: clientError?.message || "Failed to initialize PayPal client. Please check your credentials.",
-          details: [
-            {
-              issue: "ORDER_CREATION_FAILED",
-              description: clientError?.message || "Client Authentication failed - invalid or missing PayPal credentials",
-            },
-          ],
-          debug_id: Date.now().toString(),
-        },
-        { status: 401 }
-      );
-    }
+    const paypalClient = getPayPalClient();
 
     // Create PayPal order request using legacy SDK
     const request_paypal = new checkoutNodeJssdk.orders.OrdersCreateRequest();
