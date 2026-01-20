@@ -5,9 +5,9 @@
 ### 1. Set Environment Variable
 
 In your deployment platform (Vercel/Netlify/etc.), set:
-```
+\`\`\`
 NEXT_PUBLIC_APP_URL=https://www.networklinkai.com
-```
+\`\`\`
 
 **Important:** 
 - ✅ Include `https://` protocol
@@ -21,10 +21,10 @@ NEXT_PUBLIC_APP_URL=https://www.networklinkai.com
 3. Click on your OAuth 2.0 Client ID
 4. In **Authorized redirect URIs**, add these **exact** URLs:
 
-```
+\`\`\`
 https://www.networklinkai.com/api/gmail/callback
 https://www.networklinkai.com/api/google-calendar/callback
-```
+\`\`\`
 
 **Critical Requirements:**
 - ✅ Must use `https://` (not `http://`)

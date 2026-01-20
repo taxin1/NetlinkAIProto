@@ -3,14 +3,14 @@
 ## The Problem
 
 You're seeing this error:
-```
+\`\`\`
 Error fetching subscription: {
   "code": "PGRST205",
   "details": null,
   "hint": "Perhaps you meant the table 'public.ai_interactions'",
   "message": "Could not find the table 'public.subscriptions' in the schema cache"
 }
-```
+\`\`\`
 
 This means the `subscriptions` table doesn't exist in your Supabase database yet.
 
@@ -27,7 +27,7 @@ This means the `subscriptions` table doesn't exist in your Supabase database yet
 
 First, make sure the trigger function exists. Run this SQL:
 
-```sql
+\`\`\`sql
 -- Create function to update updated_at timestamp (if it doesn't exist)
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
@@ -36,7 +36,7 @@ BEGIN
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
-```
+\`\`\`
 
 ### Step 3: Run the Subscriptions Migration
 
@@ -44,7 +44,7 @@ Copy and paste the entire contents of `scripts/006_add_subscriptions.sql` into t
 
 **Or copy this SQL directly:**
 
-```sql
+\`\`\`sql
 -- Create subscriptions table
 create table if not exists public.subscriptions (
   id uuid primary key default gen_random_uuid(),
@@ -97,13 +97,13 @@ create trigger update_subscriptions_updated_at
     before update on public.subscriptions 
     for each row 
     execute function update_updated_at_column();
-```
+\`\`\`
 
 ### Step 4: Run Additional Migration (Optional - for trial usage tracking)
 
 If you want to add trial usage tracking features, also run `scripts/018_add_trial_usage_tracking.sql`:
 
-```sql
+\`\`\`sql
 -- Add networking_mode_usage and ai_campaign_usage columns to subscriptions table
 -- These track free trial usage (100 uses each) before requiring Pro subscription
 
@@ -118,7 +118,7 @@ comment on column public.subscriptions.ai_campaign_usage is 'Number of times AI 
 -- Create indexes for efficient queries
 create index if not exists subscriptions_networking_usage_idx on public.subscriptions(user_id, networking_mode_usage);
 create index if not exists subscriptions_ai_campaign_usage_idx on public.subscriptions(user_id, ai_campaign_usage);
-```
+\`\`\`
 
 ### Step 5: Verify the Table Was Created
 
@@ -155,7 +155,7 @@ create index if not exists subscriptions_ai_campaign_usage_idx on public.subscri
 **Solution:**
 You need to create the `update_updated_at_column()` function first. Run this SQL:
 
-```sql
+\`\`\`sql
 -- Create function to update updated_at timestamp
 create or replace function update_updated_at_column()
 returns trigger as $$
@@ -164,7 +164,7 @@ begin
     return new;
 end;
 $$ language plpgsql;
-```
+\`\`\`
 
 ### Issue: "relation already exists"
 
