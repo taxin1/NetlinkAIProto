@@ -98,8 +98,8 @@
   },
   "pnpm": {
     "overrides": {
-      "@remix-run/react>react": "$react",
-      "@remix-run/react>react-dom": "$react-dom"
+      "@remix-run/react>react": "^19",
+      "@remix-run/react>react-dom": "^19"
     }
   }
 }
