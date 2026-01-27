@@ -25,6 +25,21 @@ function LoginContent() {
   const searchParams = useSearchParams()
   const redirectPath = searchParams.get("redirect") || "/dashboard"
 
+  // Check for error messages from OAuth callback
+  useEffect(() => {
+    const errorParam = searchParams.get("error")
+    const errorDescription = searchParams.get("error_description")
+    
+    if (errorParam) {
+      setError(errorDescription || errorParam)
+      // Clean up URL by removing error parameters
+      const newUrl = new URL(window.location.href)
+      newUrl.searchParams.delete("error")
+      newUrl.searchParams.delete("error_description")
+      window.history.replaceState({}, "", newUrl.toString())
+    }
+  }, [searchParams])
+
   // Check if user is already authenticated
   useEffect(() => {
     const checkAuth = async () => {
@@ -52,17 +67,31 @@ function LoginContent() {
     setIsLoading(true)
     setError(null)
 
-    const { data, error } = await authService.signInWithPassword(email, password)
-    
-    if (error) {
-      setError(error)
-    } else if (data?.session) {
-      // Redirect to dashboard
-      router.push(redirectPath)
-      router.refresh()
+    try {
+      console.log('[Login] Starting login process...', { email, redirectPath })
+      const { data, error } = await authService.signInWithPassword(email, password)
+      
+      if (error) {
+        console.error('[Login] Login error:', error)
+        setError(error)
+        setIsLoading(false)
+        return
+      }
+
+      if (data?.session) {
+        console.log('[Login] Login successful, redirecting to:', redirectPath)
+        setIsLoading(false)
+        window.location.href = redirectPath
+      } else {
+        console.error('[Login] Login completed but no session received')
+        setError("Login completed but no session received. Please try again.")
+        setIsLoading(false)
+      }
+    } catch (err) {
+      console.error('[Login] Unexpected error during login:', err)
+      setError(err instanceof Error ? err.message : "An unexpected error occurred. Please try again.")
+      setIsLoading(false)
     }
-    
-    setIsLoading(false)
   }
 
   const handleGoogleLogin = async () => {

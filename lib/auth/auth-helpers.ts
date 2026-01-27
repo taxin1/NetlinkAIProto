@@ -53,20 +53,74 @@ export class AuthService {
 
   async signInWithOAuth(provider: 'google' | 'github' | 'discord', redirectPath?: string) {
     try {
-      const redirectTo = new URL(`${window.location.origin}/auth/callback`)
+      // Get the current origin - this ensures we use localhost when on localhost,
+      // and production domain when on production, regardless of Supabase Site URL setting
+      const currentOrigin = window.location.origin
+      const redirectTo = new URL(`${currentOrigin}/auth/callback`)
+      
       if (redirectPath) {
         redirectTo.searchParams.set('next', redirectPath)
       }
 
+      // Store the expected origin in sessionStorage so the callback can verify it
+      // This helps us detect if Supabase redirected to the wrong domain
+      if (typeof window !== 'undefined' && window.sessionStorage) {
+        sessionStorage.setItem('oauth_expected_origin', currentOrigin)
+        sessionStorage.setItem('oauth_redirect_path', redirectPath || '/dashboard')
+      }
+
+      // Explicitly set the redirectTo to force Supabase to use our URL
+      // The redirectTo must match one of the allowed redirect URLs in Supabase dashboard
+      const redirectToUrl = redirectTo.toString()
+      
+      console.log('[OAuth] Initiating OAuth with redirectTo:', redirectToUrl)
+      console.log('[OAuth] Current origin:', currentOrigin)
+      console.log('[OAuth] Provider:', provider)
+
       const { data, error } = await this.supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: redirectTo.toString()
+          redirectTo: redirectToUrl,
+          // Add queryParams to ensure the redirect URL is preserved through the OAuth flow
+          queryParams: {
+            redirect_to: redirectToUrl
+          }
         }
       })
 
       if (error) {
+        console.error('[OAuth] Error initiating OAuth:', error)
+        // Clean up sessionStorage on error
+        if (typeof window !== 'undefined' && window.sessionStorage) {
+          sessionStorage.removeItem('oauth_expected_origin')
+          sessionStorage.removeItem('oauth_redirect_path')
+        }
         throw new Error(this.getErrorMessage(error.message))
+      }
+
+      // PERMANENT FIX: If Supabase generated a URL with the wrong redirect, fix it
+      if (data?.url) {
+        const oauthUrl = new URL(data.url)
+        const redirectParam = oauthUrl.searchParams.get('redirect_to')
+        
+        if (redirectParam) {
+          const redirectParamUrl = new URL(redirectParam)
+          // If Supabase changed our redirect URL to use a different origin, fix it
+          if (redirectParamUrl.origin !== currentOrigin) {
+            console.warn('[OAuth] ⚠️ Supabase changed redirect origin, fixing it:', {
+              expected: currentOrigin,
+              actual: redirectParamUrl.origin
+            })
+            
+            // Replace the redirect_to parameter with our correct URL
+            oauthUrl.searchParams.set('redirect_to', redirectToUrl)
+            
+            // Update data.url with the corrected URL
+            data.url = oauthUrl.toString()
+            
+            console.log('[OAuth] ✅ Fixed OAuth URL to use correct redirect:', data.url)
+          }
+        }
       }
 
       return { data, error: null }

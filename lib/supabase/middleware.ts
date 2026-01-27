@@ -54,14 +54,23 @@ export async function updateSession(request: NextRequest) {
   })
 
   try {
+    // Special handling for auth callback - allow it to complete without checking user
+    // This prevents redirect loops during OAuth flow - cookies are set in the callback route
+    const isAuthCallback = request.nextUrl.pathname === "/auth/callback"
+    if (isAuthCallback) {
+      console.log('[Middleware] Allowing auth callback to proceed without auth check')
+      return supabaseResponse
+    }
+
     const {
       data: { user },
+      error: userError
     } = await supabase.auth.getUser()
 
     // Check for guest cookie
     const isGuestUser = request.cookies.get('netlink_guest_id')
 
-    // Allow public routes: home, auth pages, privacy, terms, pricing, public pages, portfolio pages, waitlist, and API routes
+    // Allow public routes: home, auth pages, privacy, terms, pricing, public pages, portfolio pages, waitlist, API routes, and well-known paths
     const publicPaths = ["/", "/privacy", "/terms", "/pricing", "/waitlist"]
     const isPublicPath = publicPaths.includes(request.nextUrl.pathname) || 
                         request.nextUrl.pathname.startsWith("/auth") || 
@@ -69,17 +78,37 @@ export async function updateSession(request: NextRequest) {
                         request.nextUrl.pathname.startsWith("/public") ||
                         request.nextUrl.pathname.startsWith("/portfolio") ||
                         request.nextUrl.pathname.startsWith("/admin") ||
-                        request.nextUrl.pathname.startsWith("/resources")
+                        request.nextUrl.pathname.startsWith("/resources") ||
+                        request.nextUrl.pathname.startsWith("/.well-known") // Exclude well-known paths (Chrome DevTools, etc.)
+    
+    // Log auth status for debugging (only for protected routes)
+    if (!isPublicPath && !isGuestUser) {
+      console.log('[Middleware] Auth check:', {
+        path: request.nextUrl.pathname,
+        hasUser: !!user,
+        hasGuest: !!isGuestUser,
+        error: userError?.message
+      })
+    }
     
     if (!user && !isGuestUser && !isPublicPath) {
       const url = request.nextUrl.clone()
       url.pathname = "/auth/login"
+      // Preserve the original path as a redirect parameter
+      if (request.nextUrl.pathname !== "/auth/login") {
+        url.searchParams.set("redirect", request.nextUrl.pathname)
+      }
+      console.log('[Middleware] Redirecting to login:', url.toString())
       return NextResponse.redirect(url)
     }
   } catch (error) {
     // If auth check fails, continue without redirecting
     // This prevents middleware from breaking the app on network errors
-    console.error("Error checking user in middleware:", error)
+    console.error("[Middleware] Error checking user:", error)
+    // For auth callback, always allow through even on error
+    if (request.nextUrl.pathname === "/auth/callback") {
+      return supabaseResponse
+    }
   }
 
   return supabaseResponse

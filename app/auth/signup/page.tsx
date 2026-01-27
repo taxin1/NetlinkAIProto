@@ -53,48 +53,108 @@ function SignUpContent() {
     setIsLoading(true)
     setError(null)
 
-    // Validate consent
-    if (!consentAccepted) {
-      setError("You must agree to the Terms & Conditions and Privacy Policy to create an account")
-      setIsLoading(false)
-      return
-    }
+    // Force visible console output
+    console.clear()
+    console.log('🚀 SIGNUP BUTTON CLICKED - FUNCTION EXECUTING')
+    console.log('📧 Email:', email)
+    console.log('🔐 Password length:', password.length)
+    console.log('✅ Consent accepted:', consentAccepted)
+    console.log('📍 Redirect path:', redirectPath)
 
-    const { data, error } = await authService.signUp(email, password, redirectPath)
-    
-    if (error) {
-      setError(error)
-    } else if (data?.session) {
-      // User is immediately signed in (email confirmation disabled)
-      router.push(redirectPath)
-    } else if (data?.user && !data.session) {
-      // Email confirmation is required
-      router.push("/auth/check-email")
-    } else {
-      setError("Signup completed but no user data received")
+    try {
+      // Validate consent
+      if (!consentAccepted) {
+        console.error('❌ Consent not accepted')
+        setError("You must agree to the Terms & Conditions and Privacy Policy to create an account")
+        setIsLoading(false)
+        return
+      }
+
+      console.log('[Signup] Starting signup process...', { email, redirectPath })
+      const { data, error } = await authService.signUp(email, password, redirectPath)
+      
+      if (error) {
+        console.error('[Signup] Signup error:', error)
+        setError(error)
+        setIsLoading(false)
+        return
+      }
+
+      console.log('[Signup] Signup response:', { 
+        hasData: !!data, 
+        hasSession: !!data?.session, 
+        hasUser: !!data?.user 
+      })
+
+      if (data?.session) {
+        // User is immediately signed in (email confirmation disabled)
+        console.log('[Signup] Session created, redirecting to:', redirectPath)
+        setIsLoading(false) // Stop loading before redirect
+        window.location.href = redirectPath
+      } else if (data?.user) {
+        // User created - check if session exists or email confirmation needed
+        console.log('[Signup] User created, checking session...')
+        
+        // Check for session immediately
+        const supabase = createClient()
+        const { data: sessionData } = await supabase.auth.getSession()
+        
+        if (sessionData?.session) {
+          console.log('[Signup] Session found, redirecting to:', redirectPath)
+          setIsLoading(false)
+          window.location.href = redirectPath
+        } else {
+          // Email confirmation is required
+          console.log('[Signup] Email confirmation required')
+          setIsLoading(false)
+          window.location.href = "/auth/check-email"
+        }
+      } else {
+        console.error('[Signup] Signup completed but no user data received')
+        setError("Signup completed but no user data received. Please try again.")
+      }
+    } catch (err) {
+      console.error('[Signup] Unexpected error during signup:', err)
+      setError(err instanceof Error ? err.message : "An unexpected error occurred. Please try again.")
+    } finally {
+      setIsLoading(false)
     }
-    
-    setIsLoading(false)
   }
 
   const handleGoogleSignup = async () => {
     setIsLoading(true)
     setError(null)
 
-    // Validate consent
-    if (!consentAccepted) {
-      setError("You must agree to the Terms & Conditions and Privacy Policy to create an account")
-      setIsLoading(false)
-      return
-    }
+    try {
+      // Validate consent
+      if (!consentAccepted) {
+        setError("You must agree to the Terms & Conditions and Privacy Policy to create an account")
+        setIsLoading(false)
+        return
+      }
 
-    const { data, error } = await authService.signInWithOAuth('google', redirectPath)
-    
-    if (error) {
-      setError(error)
+      console.clear()
+      console.log('🚀 GOOGLE SIGNUP BUTTON CLICKED')
+      console.log('📍 Redirect path:', redirectPath)
+      console.log('[Signup] Starting Google OAuth signup...', { redirectPath })
+      const { data, error } = await authService.signInWithOAuth('google', redirectPath)
+      
+      if (error) {
+        console.error('[Signup] Google OAuth error:', error)
+        setError(error)
+        setIsLoading(false)
+        return
+      }
+
+      console.log('[Signup] Google OAuth initiated, redirecting...')
+      // OAuth redirect will handle the rest - will redirect to onboarding via callback
+      // Note: setIsLoading(false) is intentionally not called here because
+      // the page will redirect away, so the loading state doesn't matter
+    } catch (err) {
+      console.error('[Signup] Unexpected error during Google signup:', err)
+      setError(err instanceof Error ? err.message : "An unexpected error occurred. Please try again.")
       setIsLoading(false)
     }
-    // OAuth redirect will handle the rest - will redirect to onboarding via callback
   }
 
   // Show loading state while checking authentication
@@ -192,9 +252,20 @@ function SignUpContent() {
                   </Label>
                 </div>
                 
-                {error && <p className="text-sm text-red-400">{error}</p>}
+                {error && (
+                  <div className="p-3 rounded-md bg-red-500/10 border border-red-500/20">
+                    <p className="text-sm text-red-400 font-medium">{error}</p>
+                  </div>
+                )}
                 <Button type="submit" className="w-full bg-white text-slate-900 hover:bg-slate-100 font-medium" disabled={isLoading || !consentAccepted}>
-                  {isLoading ? "Creating account..." : "Sign up"}
+                  {isLoading ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-slate-900"></span>
+                      Creating account...
+                    </span>
+                  ) : (
+                    "Sign up"
+                  )}
                 </Button>
               </div>
               
@@ -215,7 +286,14 @@ function SignUpContent() {
                 disabled={isLoading || !consentAccepted}
               >
                 <Chrome className="mr-2 h-4 w-4" />
-                {isLoading ? "Creating account..." : "Continue with Google"}
+                {isLoading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-slate-300"></span>
+                    Creating account...
+                  </span>
+                ) : (
+                  "Continue with Google"
+                )}
               </Button>
               <div className="mt-4 text-center text-sm text-slate-400">
                 Already have an account?{" "}
