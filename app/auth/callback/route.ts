@@ -7,6 +7,8 @@ export async function GET(request: Request) {
   const { searchParams, origin } = requestUrl
   const code = searchParams.get('code')
   const next = searchParams.get('next') ?? '/dashboard'
+  // Redirect to intermediate page so browser commits cookies before loading dashboard
+  const completePath = `/auth/complete?next=${encodeURIComponent(next)}`
   
   // Get the expected origin from the referer or state parameter
   // This helps us detect if Supabase redirected to the wrong domain
@@ -48,10 +50,10 @@ export async function GET(request: Request) {
 
   const cookieStore = await cookies()
   
-  // Create redirect response FIRST - this is the response we'll return
-  // Use 307 (Temporary Redirect) to ensure browser follows immediately
-  // and add headers to prevent caching and client-side code execution
-  const redirectUrl = `${origin}${next}`
+  // Create redirect response FIRST - this is the response we'll return.
+  // Redirect to /auth/complete so the browser commits cookies before loading
+  // the dashboard (avoids cookie-not-sent on first load after OAuth).
+  const redirectUrl = `${origin}${completePath}`
   const response = NextResponse.redirect(redirectUrl, { status: 307 })
   
   // Add headers to prevent caching and ensure immediate redirect
@@ -81,27 +83,22 @@ export async function GET(request: Request) {
             // Set on response for browser to receive
             // CRITICAL: Don't set domain unless explicitly provided - let browser handle it
             // Setting domain incorrectly can prevent cookies from being sent
-            const cookieOptions: any = {
-              path: options?.path || '/',
+            // Forward Supabase options and only override when needed for this response
+            const cookieOptions: Record<string, unknown> = {
+              ...options,
+              path: options?.path ?? '/',
               secure: options?.secure ?? isProduction,
-              sameSite: (options?.sameSite as 'lax' | 'strict' | 'none') || 'lax',
+              sameSite: (options?.sameSite as 'lax' | 'strict' | 'none') ?? 'lax',
               httpOnly: options?.httpOnly ?? (name.startsWith('sb-') ? true : undefined),
             }
-            
-            // Only set domain if explicitly provided (usually shouldn't be for same-domain cookies)
             if (options?.domain) {
               cookieOptions.domain = options.domain
             }
-            
-            // Only set maxAge/expires if provided
-            if (options?.maxAge !== undefined) {
-              cookieOptions.maxAge = options.maxAge
+            // Avoid leaking Supabase's internal name into Next.js cookie API
+            if ('name' in cookieOptions) {
+              delete cookieOptions.name
             }
-            if (options?.expires) {
-              cookieOptions.expires = options.expires
-            }
-            
-            response.cookies.set(name, value, cookieOptions)
+            response.cookies.set(name, value, cookieOptions as Parameters<typeof response.cookies.set>[2])
             console.log('[Auth Callback] Cookie set:', { name, path: cookieOptions.path, secure: cookieOptions.secure, sameSite: cookieOptions.sameSite })
           })
         },
@@ -145,6 +142,7 @@ export async function GET(request: Request) {
     userId: user.id,
     email: user.email,
     redirectingTo: redirectUrl,
+    finalDestination: next,
     cookieCount: response.cookies.getAll().length
   })
 

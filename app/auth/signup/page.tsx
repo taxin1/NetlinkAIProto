@@ -146,10 +146,13 @@ function SignUpContent() {
         return
       }
 
-      console.log('[Signup] Google OAuth initiated, redirecting...')
-      // OAuth redirect will handle the rest - will redirect to onboarding via callback
-      // Note: setIsLoading(false) is intentionally not called here because
-      // the page will redirect away, so the loading state doesn't matter
+      // Redirect to Supabase OAuth URL – required for Google sign-in to start
+      if (data?.url) {
+        window.location.href = data.url
+      } else {
+        setError('Could not start Google sign-in. Please try again.')
+        setIsLoading(false)
+      }
     } catch (err) {
       console.error('[Signup] Unexpected error during Google signup:', err)
       setError(err instanceof Error ? err.message : "An unexpected error occurred. Please try again.")

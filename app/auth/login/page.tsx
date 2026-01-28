@@ -98,13 +98,26 @@ function LoginContent() {
     setIsLoading(true)
     setError(null)
 
-    const { data, error } = await authService.signInWithOAuth('google', redirectPath)
-    
-    if (error) {
-      setError(error)
+    try {
+      const { data, error } = await authService.signInWithOAuth('google', redirectPath)
+      
+      if (error) {
+        setError(error)
+        setIsLoading(false)
+        return
+      }
+      // Redirect to Supabase OAuth URL – required for Google sign-in to start
+      if (data?.url) {
+        window.location.href = data.url
+      } else {
+        setError('Could not start Google sign-in. Please try again.')
+        setIsLoading(false)
+      }
+    } catch (err) {
+      console.error('[Login] Google OAuth error:', err)
+      setError(err instanceof Error ? err.message : 'An unexpected error occurred.')
       setIsLoading(false)
     }
-    // OAuth redirect will handle the rest
   }
 
   // Show loading state while checking authentication
