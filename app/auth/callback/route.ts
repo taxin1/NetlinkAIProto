@@ -102,7 +102,7 @@ export async function GET(request: Request) {
       status: error.status,
       name: error.name
     })
-    return NextResponse.redirect(`${origin}/auth/login?error=auth_failed&details=${encodeURIComponent(error.message)}`)
+    return NextResponse.redirect(`${origin}/auth/login?error=auth_failed&details=${encodeURIComponent(error.message || 'Unknown error during code exchange')}`)
   }
 
   console.log('[Auth Callback] Code exchanged successfully, verifying session...')

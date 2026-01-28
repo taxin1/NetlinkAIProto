@@ -29,14 +29,10 @@ function LoginContent() {
   useEffect(() => {
     const errorParam = searchParams.get("error")
     const errorDescription = searchParams.get("error_description")
-    
+    const errorDetails = searchParams.get("details")
+
     if (errorParam) {
-      setError(errorDescription || errorParam)
-      // Clean up URL by removing error parameters
-      const newUrl = new URL(window.location.href)
-      newUrl.searchParams.delete("error")
-      newUrl.searchParams.delete("error_description")
-      window.history.replaceState({}, "", newUrl.toString())
+      setError(errorDetails || errorDescription || errorParam)
     }
   }, [searchParams])
 
@@ -46,7 +42,7 @@ function LoginContent() {
       try {
         const supabase = createClient()
         const { data: { user } } = await supabase.auth.getUser()
-        
+
         if (user) {
           // User is already signed in, redirect to dashboard
           router.push(redirectPath)
@@ -58,7 +54,7 @@ function LoginContent() {
         setIsCheckingAuth(false)
       }
     }
-    
+
     checkAuth()
   }, [router, redirectPath])
 
@@ -70,7 +66,7 @@ function LoginContent() {
     try {
       console.log('[Login] Starting login process...', { email, redirectPath })
       const { data, error } = await authService.signInWithPassword(email, password)
-      
+
       if (error) {
         console.error('[Login] Login error:', error)
         setError(error)
@@ -95,12 +91,14 @@ function LoginContent() {
   }
 
   const handleGoogleLogin = async () => {
+    console.log('[Login] handleGoogleLogin called - button clicked!')
     setIsLoading(true)
     setError(null)
 
     try {
+      console.log('[Login] Calling authService.signInWithOAuth...')
       const { data, error } = await authService.signInWithOAuth('google', redirectPath)
-      
+
       if (error) {
         setError(error)
         setIsLoading(false)
@@ -139,10 +137,10 @@ function LoginContent() {
         <div className="flex justify-center mb-16">
           <Link href="/" className="flex flex-col items-center group transition-all">
             <div className="relative h-72 w-[600px] overflow-hidden transform group-hover:scale-110 transition-transform duration-700 drop-shadow-[0_0_40px_rgba(59,130,246,0.7)]">
-              <Image 
-                src="/Logo1.png" 
-                alt="Netlink AI Logo" 
-                fill 
+              <Image
+                src="/Logo1.png"
+                alt="Netlink AI Logo"
+                fill
                 className="object-contain"
                 priority
               />
@@ -153,8 +151,8 @@ function LoginContent() {
           <CardHeader>
             <CardTitle className="text-2xl text-white font-bold tracking-tight">Welcome back</CardTitle>
             <CardDescription className="text-slate-400 font-light">
-              {redirectPath.includes('checkout') 
-                ? "Sign in to complete your subscription" 
+              {redirectPath.includes('checkout')
+                ? "Sign in to complete your subscription"
                 : "Sign in to your Netlink account"}
             </CardDescription>
           </CardHeader>
@@ -203,7 +201,7 @@ function LoginContent() {
                   {isLoading ? "Signing in..." : "Sign in"}
                 </Button>
               </div>
-              
+
               <div className="relative my-4">
                 <div className="absolute inset-0 flex items-center">
                   <span className="w-full border-t border-slate-800" />
@@ -212,7 +210,7 @@ function LoginContent() {
                   <span className="bg-slate-900 px-2 text-slate-500">Or continue with</span>
                 </div>
               </div>
-              
+
               <Button
                 type="button"
                 variant="outline"
@@ -225,8 +223,8 @@ function LoginContent() {
               </Button>
               <div className="mt-4 text-center text-sm text-slate-400">
                 Don&apos;t have an account?{" "}
-                <Link 
-                  href={`/auth/signup${redirectPath && redirectPath !== '/dashboard' ? `?redirect=${encodeURIComponent(redirectPath)}` : ''}`} 
+                <Link
+                  href={`/auth/signup${redirectPath && redirectPath !== '/dashboard' ? `?redirect=${encodeURIComponent(redirectPath)}` : ''}`}
                   className="text-cyan-400 hover:text-cyan-300 underline underline-offset-4 font-medium"
                 >
                   Sign up

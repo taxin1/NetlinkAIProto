@@ -38,7 +38,7 @@ export async function updateSession(request: NextRequest) {
       headers: requestHeaders,
     },
   })
-  
+
   // Set pathname header on response
   supabaseResponse.headers.set('x-pathname', pathname)
 
@@ -62,9 +62,9 @@ export async function updateSession(request: NextRequest) {
   })
 
   try {
-    // Special handling for auth callback - allow it to complete without checking user
+    // Special handling for auth callback and completion - allow them to proceed without checking user
     // This prevents redirect loops during OAuth flow - cookies are set in the callback route
-    const isAuthCallback = request.nextUrl.pathname === "/auth/callback"
+    const isAuthCallback = request.nextUrl.pathname === "/auth/callback" || request.nextUrl.pathname === "/auth/complete"
     if (isAuthCallback) {
       console.log('[Middleware] Allowing auth callback to proceed without auth check')
       return supabaseResponse
@@ -80,15 +80,15 @@ export async function updateSession(request: NextRequest) {
 
     // Allow public routes: home, auth pages, privacy, terms, pricing, public pages, portfolio pages, waitlist, API routes, and well-known paths
     const publicPaths = ["/", "/privacy", "/terms", "/pricing", "/waitlist"]
-    const isPublicPath = publicPaths.includes(request.nextUrl.pathname) || 
-                        request.nextUrl.pathname.startsWith("/auth") || 
-                        request.nextUrl.pathname.startsWith("/api") ||
-                        request.nextUrl.pathname.startsWith("/public") ||
-                        request.nextUrl.pathname.startsWith("/portfolio") ||
-                        request.nextUrl.pathname.startsWith("/admin") ||
-                        request.nextUrl.pathname.startsWith("/resources") ||
-                        request.nextUrl.pathname.startsWith("/.well-known") // Exclude well-known paths (Chrome DevTools, etc.)
-    
+    const isPublicPath = publicPaths.includes(request.nextUrl.pathname) ||
+      request.nextUrl.pathname.startsWith("/auth") ||
+      request.nextUrl.pathname.startsWith("/api") ||
+      request.nextUrl.pathname.startsWith("/public") ||
+      request.nextUrl.pathname.startsWith("/portfolio") ||
+      request.nextUrl.pathname.startsWith("/admin") ||
+      request.nextUrl.pathname.startsWith("/resources") ||
+      request.nextUrl.pathname.startsWith("/.well-known") // Exclude well-known paths (Chrome DevTools, etc.)
+
     // Log auth status for debugging (only for protected routes)
     if (!isPublicPath && !isGuestUser) {
       console.log('[Middleware] Auth check:', {
@@ -98,7 +98,7 @@ export async function updateSession(request: NextRequest) {
         error: userError?.message
       })
     }
-    
+
     if (!user && !isGuestUser && !isPublicPath) {
       const url = request.nextUrl.clone()
       url.pathname = "/auth/login"

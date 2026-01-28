@@ -21,8 +21,8 @@ export class AuthService {
 
       return { data, error: null }
     } catch (error) {
-      return { 
-        data: null, 
+      return {
+        data: null,
         error: error instanceof Error ? error.message : 'An unexpected error occurred'
       }
     }
@@ -44,23 +44,23 @@ export class AuthService {
 
       return { data, error: null }
     } catch (error) {
-      return { 
-        data: null, 
+      return {
+        data: null,
         error: error instanceof Error ? error.message : 'An unexpected error occurred'
       }
     }
   }
 
   async signInWithOAuth(provider: 'google' | 'github' | 'discord', redirectPath?: string) {
+    console.log('[OAuth] signInWithOAuth method called with provider:', provider)
     try {
       // Get the current origin - this ensures we use localhost when on localhost,
       // and production domain when on production, regardless of Supabase Site URL setting
+      console.log('[OAuth] Getting current origin...')
       const currentOrigin = window.location.origin
       const redirectTo = new URL(`${currentOrigin}/auth/callback`)
-      
-      if (redirectPath) {
-        redirectTo.searchParams.set('next', redirectPath)
-      }
+
+
 
       // Store the expected origin in sessionStorage so the callback can verify it
       // This helps us detect if Supabase redirected to the wrong domain
@@ -72,7 +72,7 @@ export class AuthService {
       // Explicitly set the redirectTo to force Supabase to use our URL
       // The redirectTo must match one of the allowed redirect URLs in Supabase dashboard
       const redirectToUrl = redirectTo.toString()
-      
+
       console.log('[OAuth] Initiating OAuth with redirectTo:', redirectToUrl)
       console.log('[OAuth] Current origin:', currentOrigin)
       console.log('[OAuth] Provider:', provider)
@@ -81,7 +81,7 @@ export class AuthService {
         provider,
         options: {
           redirectTo: redirectToUrl,
-          skipBrowserRedirect: true 
+          skipBrowserRedirect: true
         }
       })
 
@@ -99,8 +99,8 @@ export class AuthService {
 
       return { data, error: null }
     } catch (error) {
-      return { 
-        data: null, 
+      return {
+        data: null,
         error: error instanceof Error ? error.message : 'An unexpected error occurred'
       }
     }
@@ -109,14 +109,14 @@ export class AuthService {
   async signOut() {
     try {
       const { error } = await this.supabase.auth.signOut()
-      
+
       if (error) {
         throw new Error(this.getErrorMessage(error.message))
       }
 
       return { error: null }
     } catch (error) {
-      return { 
+      return {
         error: error instanceof Error ? error.message : 'An unexpected error occurred'
       }
     }
@@ -134,7 +134,7 @@ export class AuthService {
 
       return { error: null }
     } catch (error) {
-      return { 
+      return {
         error: error instanceof Error ? error.message : 'An unexpected error occurred'
       }
     }
