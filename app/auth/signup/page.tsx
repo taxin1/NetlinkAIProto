@@ -32,7 +32,7 @@ function SignUpContent() {
       try {
         const supabase = createClient()
         const { data: { user } } = await supabase.auth.getUser()
-        
+
         if (user) {
           // User is already signed in, check if they should be on onboarding
           router.push(redirectPath)
@@ -44,7 +44,7 @@ function SignUpContent() {
         setIsCheckingAuth(false)
       }
     }
-    
+
     checkAuth()
   }, [router])
 
@@ -72,7 +72,7 @@ function SignUpContent() {
 
       console.log('[Signup] Starting signup process...', { email, redirectPath })
       const { data, error } = await authService.signUp(email, password, redirectPath)
-      
+
       if (error) {
         console.error('[Signup] Signup error:', error)
         setError(error)
@@ -80,10 +80,10 @@ function SignUpContent() {
         return
       }
 
-      console.log('[Signup] Signup response:', { 
-        hasData: !!data, 
-        hasSession: !!data?.session, 
-        hasUser: !!data?.user 
+      console.log('[Signup] Signup response:', {
+        hasData: !!data,
+        hasSession: !!data?.session,
+        hasUser: !!data?.user
       })
 
       if (data?.session) {
@@ -94,11 +94,11 @@ function SignUpContent() {
       } else if (data?.user) {
         // User created - check if session exists or email confirmation needed
         console.log('[Signup] User created, checking session...')
-        
+
         // Check for session immediately
         const supabase = createClient()
         const { data: sessionData } = await supabase.auth.getSession()
-        
+
         if (sessionData?.session) {
           console.log('[Signup] Session found, redirecting to:', redirectPath)
           setIsLoading(false)
@@ -133,12 +133,9 @@ function SignUpContent() {
         return
       }
 
-      console.clear()
-      console.log('🚀 GOOGLE SIGNUP BUTTON CLICKED')
-      console.log('📍 Redirect path:', redirectPath)
       console.log('[Signup] Starting Google OAuth signup...', { redirectPath })
       const { data, error } = await authService.signInWithOAuth('google', redirectPath)
-      
+
       if (error) {
         console.error('[Signup] Google OAuth error:', error)
         setError(error)
@@ -179,10 +176,10 @@ function SignUpContent() {
         <div className="flex justify-center mb-16">
           <Link href="/" className="flex flex-col items-center group transition-all">
             <div className="relative h-72 w-[600px] overflow-hidden transform group-hover:scale-110 transition-transform duration-700 drop-shadow-[0_0_40px_rgba(59,130,246,0.7)]">
-              <Image 
-                src="/Logo1.png" 
-                alt="Netlink AI Logo" 
-                fill 
+              <Image
+                src="/Logo1.png"
+                alt="Netlink AI Logo"
+                fill
                 className="object-contain"
                 priority
               />
@@ -233,7 +230,7 @@ function SignUpContent() {
                     </button>
                   </div>
                 </div>
-                
+
                 <div className="flex items-start gap-2">
                   <input
                     type="checkbox"
@@ -254,7 +251,7 @@ function SignUpContent() {
                     </Link>
                   </Label>
                 </div>
-                
+
                 {error && (
                   <div className="p-3 rounded-md bg-red-500/10 border border-red-500/20">
                     <p className="text-sm text-red-400 font-medium">{error}</p>
@@ -271,7 +268,7 @@ function SignUpContent() {
                   )}
                 </Button>
               </div>
-              
+
               <div className="relative my-4">
                 <div className="absolute inset-0 flex items-center">
                   <span className="w-full border-t border-slate-800" />
@@ -280,7 +277,7 @@ function SignUpContent() {
                   <span className="bg-slate-900 px-2 text-slate-500">Or continue with</span>
                 </div>
               </div>
-              
+
               <Button
                 type="button"
                 variant="outline"
@@ -300,8 +297,8 @@ function SignUpContent() {
               </Button>
               <div className="mt-4 text-center text-sm text-slate-400">
                 Already have an account?{" "}
-                <Link 
-                  href={`/auth/login${redirectPath && redirectPath !== '/onboarding' ? `?redirect=${encodeURIComponent(redirectPath)}` : ''}`} 
+                <Link
+                  href={`/auth/login${redirectPath && redirectPath !== '/onboarding' ? `?redirect=${encodeURIComponent(redirectPath)}` : ''}`}
                   className="text-cyan-400 underline underline-offset-4 hover:text-cyan-300 font-medium"
                 >
                   Sign in

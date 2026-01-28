@@ -81,10 +81,7 @@ export class AuthService {
         provider,
         options: {
           redirectTo: redirectToUrl,
-          // Add queryParams to ensure the redirect URL is preserved through the OAuth flow
-          queryParams: {
-            redirect_to: redirectToUrl
-          }
+          skipBrowserRedirect: true 
         }
       })
 
@@ -98,30 +95,7 @@ export class AuthService {
         throw new Error(this.getErrorMessage(error.message))
       }
 
-      // PERMANENT FIX: If Supabase generated a URL with the wrong redirect, fix it
-      if (data?.url) {
-        const oauthUrl = new URL(data.url)
-        const redirectParam = oauthUrl.searchParams.get('redirect_to')
-        
-        if (redirectParam) {
-          const redirectParamUrl = new URL(redirectParam)
-          // If Supabase changed our redirect URL to use a different origin, fix it
-          if (redirectParamUrl.origin !== currentOrigin) {
-            console.warn('[OAuth] ⚠️ Supabase changed redirect origin, fixing it:', {
-              expected: currentOrigin,
-              actual: redirectParamUrl.origin
-            })
-            
-            // Replace the redirect_to parameter with our correct URL
-            oauthUrl.searchParams.set('redirect_to', redirectToUrl)
-            
-            // Update data.url with the corrected URL
-            data.url = oauthUrl.toString()
-            
-            console.log('[OAuth] ✅ Fixed OAuth URL to use correct redirect:', data.url)
-          }
-        }
-      }
+      console.log('[OAuth] Generated OAuth URL:', data.url)
 
       return { data, error: null }
     } catch (error) {
