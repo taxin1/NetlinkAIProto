@@ -2,11 +2,19 @@ import { createServerClient } from "@supabase/ssr"
 import { NextResponse, type NextRequest } from "next/server"
 
 export async function updateSession(request: NextRequest) {
+  // If Supabase redirected to / with the auth code (instead of /auth/callback), redirect so the callback runs.
+  // This happens when Supabase falls back to Site URL or the configured redirect doesn't match.
+  const pathname = request.nextUrl.pathname
+  const code = request.nextUrl.searchParams.get('code')
+  if (pathname === '/' && code) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/auth/callback'
+    return NextResponse.redirect(url, 307)
+  }
+
   // Set custom header with pathname so layouts can check it
   const requestHeaders = new Headers(request.headers)
-  requestHeaders.set('x-pathname', request.nextUrl.pathname)
-  
-  const pathname = request.nextUrl.pathname
+  requestHeaders.set('x-pathname', pathname)
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
