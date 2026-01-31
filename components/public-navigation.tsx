@@ -54,9 +54,9 @@ export function PublicNavigation() {
   return (
     <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
       <div className="container mx-auto px-4 py-4">
-        <div className="flex items-center justify-between">
-          <Link href="/" className="flex items-center group transition-all">
-            <div className="relative h-32 w-[400px] overflow-hidden transform group-hover:scale-110 transition-transform duration-700 drop-shadow-[0_0_25px_rgba(59,130,246,0.6)]">
+        <div className="flex items-center justify-between gap-4">
+          <Link href="/" className="flex items-center group transition-all flex-shrink-0">
+            <div className="relative h-16 sm:h-20 md:h-24 lg:h-28 w-auto max-w-[200px] sm:max-w-[250px] md:max-w-[300px] lg:max-w-[350px] aspect-[400/128] overflow-hidden transform group-hover:scale-110 transition-transform duration-700 drop-shadow-[0_0_25px_rgba(59,130,246,0.6)]">
               <Image 
                 src="/Logo1.png" 
                 alt="Netlink AI Logo" 
@@ -68,7 +68,7 @@ export function PublicNavigation() {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center gap-4">
+          <div className="hidden lg:flex items-center gap-2 xl:gap-4 flex-shrink-0">
             <Link href="/">
               <Button variant="ghost">{t("home")}</Button>
             </Link>

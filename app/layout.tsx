@@ -7,6 +7,7 @@ import { ThemeProvider } from '@/components/theme-provider'
 import { PayPalErrorHandler } from '@/components/paypal-error-handler'
 import { ClientLoadingWrapper } from '@/components/client-loading-wrapper'
 import { GoogleTranslate } from '@/components/google-translate'
+import { AuthSessionRefresh } from '@/components/auth-session-refresh'
 import { generateMetadata } from '@/lib/seo/metadata'
 import { generateOrganizationSchema, generateWebsiteSchema, generateSoftwareApplicationSchema } from '@/lib/seo/structured-data'
 import './globals.css'
@@ -45,6 +46,7 @@ export default function RootLayout({
         />
       </head>
       <body className={`${inter.variable} ${GeistSans.variable} ${GeistMono.variable} font-sans antialiased`} suppressHydrationWarning>
+        <AuthSessionRefresh />
         <ClientLoadingWrapper>
           <PayPalErrorHandler />
           <ThemeProvider

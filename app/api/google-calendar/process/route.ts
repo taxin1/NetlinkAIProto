@@ -7,6 +7,23 @@ const REQUIRED_SCOPES = [
   'https://www.googleapis.com/auth/calendar.events',
 ]
 
+// Helper function to get base URL with proper fallbacks
+function getBaseUrl(request: NextRequest): string {
+  // First, check if NEXT_PUBLIC_APP_URL is explicitly set
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL
+  if (baseUrl) {
+    return baseUrl
+  }
+  
+  // In production, default to www.networklinkai.com
+  if (process.env.NODE_ENV === 'production') {
+    return 'https://www.networklinkai.com'
+  }
+  
+  // In development, use request origin (localhost)
+  return request.nextUrl.origin
+}
+
 function validateScopes(tokenScope?: string): boolean {
   if (!tokenScope) return false
   
@@ -36,7 +53,7 @@ export async function GET(request: NextRequest) {
 
     if (!code) {
       console.error('[Google Calendar Process] No code provided')
-      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin
+      const baseUrl = getBaseUrl(request)
       const redirectUrl = new URL('/dashboard/settings', baseUrl)
       redirectUrl.searchParams.set('error', 'no_code')
       return NextResponse.redirect(redirectUrl.toString())
@@ -48,7 +65,7 @@ export async function GET(request: NextRequest) {
 
     if (authError || !user) {
       console.error('[Google Calendar Process] Auth error:', authError)
-      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin
+      const baseUrl = getBaseUrl(request)
       return NextResponse.redirect(new URL('/auth/login', baseUrl))
     }
 
@@ -61,16 +78,18 @@ export async function GET(request: NextRequest) {
     }
 
     // Step 2: Exchange code for tokens
+    const baseUrl = getBaseUrl(request)
     let tokens
     try {
       console.log('[Google Calendar Process] Exchanging code for tokens...')
       console.log('[Google Calendar Process] Authorization code length:', code.length)
-      console.log('[Google Calendar Process] NEXT_PUBLIC_APP_URL:', process.env.NEXT_PUBLIC_APP_URL || 'Not set (using default)')
+      console.log('[Google Calendar Process] Base URL:', baseUrl)
+      console.log('[Google Calendar Process] NEXT_PUBLIC_APP_URL:', process.env.NEXT_PUBLIC_APP_URL || 'Not set (using request origin)')
       console.log('[Google Calendar Process] GOOGLE_REDIRECT_URI:', process.env.GOOGLE_REDIRECT_URI || 'Not set (using default)')
       console.log('[Google Calendar Process] GOOGLE_CLIENT_ID:', process.env.GOOGLE_CLIENT_ID ? 'Set' : 'MISSING')
       console.log('[Google Calendar Process] GOOGLE_CLIENT_SECRET:', process.env.GOOGLE_CLIENT_SECRET ? 'Set' : 'MISSING')
       
-      tokens = await withTimeout(getGoogleCalendarTokens(code), 15000)
+      tokens = await withTimeout(getGoogleCalendarTokens(code, baseUrl), 15000)
       console.log('[Google Calendar Process] Tokens received successfully')
       console.log('[Google Calendar Process] Has access token:', !!tokens.access_token)
       console.log('[Google Calendar Process] Has refresh token:', !!tokens.refresh_token)
@@ -92,7 +111,7 @@ export async function GET(request: NextRequest) {
       console.error('[Google Calendar Process] Token missing required scopes')
       console.error('[Google Calendar Process] Token scope:', tokens.scope)
       console.error('[Google Calendar Process] Required scopes:', REQUIRED_SCOPES.join(', '))
-      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin
+      const baseUrl = getBaseUrl(request)
       const redirectUrl = new URL('/dashboard/settings', baseUrl)
       redirectUrl.searchParams.set('error', 'insufficient_scopes')
       return NextResponse.redirect(redirectUrl.toString(), { status: 307 })
@@ -132,7 +151,7 @@ export async function GET(request: NextRequest) {
     console.log(`[Google Calendar Process] ✅ Success in ${elapsedTime}ms`)
 
     // Build redirect URL with base URL
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin
+    const baseUrl = getBaseUrl(request)
     const redirectUrl = new URL('/dashboard/settings', baseUrl)
     redirectUrl.searchParams.set('success', 'google_calendar_connected')
 
@@ -161,7 +180,7 @@ export async function GET(request: NextRequest) {
     
     console.error(`[Google Calendar Process] Redirecting with error: ${errorMessage}`)
     
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin
+    const baseUrl = getBaseUrl(request)
     const redirectUrl = new URL('/dashboard/settings', baseUrl)
     redirectUrl.searchParams.set('error', errorMessage)
     

@@ -21,7 +21,18 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const authUrl = getGmailAuthUrl()
+    // Determine base URL: prioritize NEXT_PUBLIC_APP_URL, then request origin, then defaults
+    let baseUrl = process.env.NEXT_PUBLIC_APP_URL
+    if (!baseUrl) {
+      // In production, default to www.networklinkai.com
+      if (process.env.NODE_ENV === 'production') {
+        baseUrl = 'https://www.networklinkai.com'
+      } else {
+        // In development, use request origin (localhost)
+        baseUrl = request.nextUrl.origin
+      }
+    }
+    const authUrl = getGmailAuthUrl(baseUrl)
     
     return NextResponse.json({ authUrl })
   } catch (error) {

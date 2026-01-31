@@ -348,9 +348,9 @@ export function LandingPage() {
         transition={{ duration: 0.6, ease: "easeOut" as const }}
       >
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="flex justify-between items-center h-20">
-            <Link href="/" className="flex items-center group">
-              <div className="relative h-32 w-[400px] overflow-hidden transition-all duration-700 transform group-hover:scale-110 drop-shadow-[0_0_25px_rgba(59,130,246,0.6)]">
+          <div className="flex justify-between items-center h-20 gap-4">
+            <Link href="/" className="flex items-center group flex-shrink-0">
+              <div className="relative h-16 sm:h-20 md:h-24 lg:h-28 w-auto max-w-[200px] sm:max-w-[250px] md:max-w-[300px] lg:max-w-[350px] aspect-[400/128] overflow-hidden transition-all duration-700 transform group-hover:scale-110 drop-shadow-[0_0_25px_rgba(59,130,246,0.6)]">
                 <Image 
                   src="/Logo1.png" 
                   alt="Netlink AI - Intelligent Professional Networking Logo" 
@@ -359,7 +359,7 @@ export function LandingPage() {
                 />
               </div>
             </Link>
-            <div className="hidden lg:flex items-center gap-3">
+            <div className="hidden lg:flex items-center gap-2 xl:gap-3 flex-shrink-0">
               <Link href="/">
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                   <Button variant="ghost" className="text-slate-400 hover:text-white hover:bg-slate-800/50 font-medium">
@@ -400,14 +400,6 @@ export function LandingPage() {
                   <Button variant="ghost" className="text-slate-400 hover:text-white hover:bg-slate-800/50 font-medium">
                     <BookOpen className="h-4 w-4 mr-2" />
                     {t("resources")}
-                  </Button>
-                </motion.div>
-              </Link>
-              <Link href="/privacy">
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Button variant="ghost" className="text-slate-400 hover:text-white hover:bg-slate-800/50 font-medium">
-                    <Shield className="h-4 w-4 mr-2" />
-                    Privacy Policy
                   </Button>
                 </motion.div>
               </Link>
@@ -505,12 +497,6 @@ export function LandingPage() {
                   <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-white hover:bg-slate-800/50 text-lg">
                     <BookOpen className="h-5 w-5 mr-3" />
                     {t("resources")}
-                  </Button>
-                </Link>
-                <Link href="/privacy" onClick={() => setMobileMenuOpen(false)}>
-                  <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-white hover:bg-slate-800/50 text-lg">
-                    <Shield className="h-5 w-5 mr-3" />
-                    Privacy Policy
                   </Button>
                 </Link>
                 

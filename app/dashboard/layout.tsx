@@ -53,7 +53,7 @@ export default async function DashboardLayout({
 
       {/* Sidebar - handles mobile/desktop rendering internally */}
       <Sidebar user={{ id: displayUser.id, email: displayUser.email || "Guest", isGuest: !!displayUser.isGuest }} />
-
+ 
       <main className="flex-1 overflow-y-auto overflow-x-hidden relative z-10 w-full lg:w-auto overscroll-contain">
         {user && <GlobalNetworkerOptInPrompt userId={user.id} />}
         {user && <GuidedTour userId={user.id} />}

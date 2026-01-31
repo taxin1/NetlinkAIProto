@@ -75,8 +75,17 @@ export async function GET(request: NextRequest) {
   const code = searchParams.get('code')
   const error = searchParams.get('error')
   
-  // Get base URL from environment or request
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin
+  // Determine base URL: prioritize NEXT_PUBLIC_APP_URL, then request origin, then defaults
+  let baseUrl = process.env.NEXT_PUBLIC_APP_URL
+  if (!baseUrl) {
+    // In production, default to www.networklinkai.com
+    if (process.env.NODE_ENV === 'production') {
+      baseUrl = 'https://www.networklinkai.com'
+    } else {
+      // In development, use request origin (localhost)
+      baseUrl = request.nextUrl.origin
+    }
+  }
 
   if (error) {
     return new NextResponse(getLoadingPage('', error, baseUrl), {

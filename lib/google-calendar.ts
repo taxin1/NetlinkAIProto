@@ -12,16 +12,20 @@ export interface GoogleCalendarToken {
 
 // Helper function to get the base URL for redirects
 function getBaseUrl(): string {
+  // First, check if NEXT_PUBLIC_APP_URL is explicitly set
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL
-  if (!baseUrl) {
-    // Warn in production if NEXT_PUBLIC_APP_URL is not set
-    if (process.env.NODE_ENV === 'production') {
-      console.warn('[Google Calendar] ⚠️ NEXT_PUBLIC_APP_URL is not set in production! OAuth redirects will use localhost.')
-      console.warn('[Google Calendar] Please set NEXT_PUBLIC_APP_URL to your production URL (e.g., https://your-domain.com)')
-    }
-    return 'http://localhost:3000'
+  if (baseUrl) {
+    return baseUrl
   }
-  return baseUrl
+  
+  // In production, default to www.networklinkai.com
+  if (process.env.NODE_ENV === 'production') {
+    console.warn('[Google Calendar] ⚠️ NEXT_PUBLIC_APP_URL is not set in production! Using default: https://www.networklinkai.com')
+    return 'https://www.networklinkai.com'
+  }
+  
+  // In development, use localhost
+  return 'http://localhost:3000'
 }
 
 // Required scopes for Google Calendar API
@@ -237,8 +241,8 @@ export async function listGoogleCalendarEvents(
   }
 }
 
-export function getGoogleCalendarAuthUrl() {
-  const baseUrl = getBaseUrl()
+export function getGoogleCalendarAuthUrl(baseUrlOverride?: string) {
+  const baseUrl = baseUrlOverride || getBaseUrl()
   let redirectUri = process.env.GOOGLE_REDIRECT_URI || `${baseUrl}/api/google-calendar/callback`
   
   // Ensure redirect URI is for Google Calendar, not Gmail
@@ -282,36 +286,33 @@ export function getGoogleCalendarAuthUrl() {
   })
 }
 
-// Cache OAuth client to avoid recreating it
-let cachedOAuthClient: ReturnType<typeof google.auth.OAuth2> | null = null
-
-function getOAuthClient() {
+// Don't cache OAuth client - redirect URI must match exactly for token exchange
+function getOAuthClient(baseUrlOverride?: string) {
   if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
     throw new Error('Google OAuth credentials not configured')
   }
 
-  if (!cachedOAuthClient) {
-    let redirectUri = process.env.GOOGLE_REDIRECT_URI || `${getBaseUrl()}/api/google-calendar/callback`
-    
-    // Ensure redirect URI is for Google Calendar, not Gmail
-    if (redirectUri.includes('/api/gmail/callback')) {
-      console.warn('[Google Calendar OAuth Client] ⚠️ GOOGLE_REDIRECT_URI was pointing to Gmail callback, auto-correcting to Google Calendar callback')
-      redirectUri = `${getBaseUrl()}/api/google-calendar/callback`
-    }
-    
-    cachedOAuthClient = new google.auth.OAuth2(
-      process.env.GOOGLE_CLIENT_ID,
-      process.env.GOOGLE_CLIENT_SECRET,
-      redirectUri
-    )
+  const baseUrl = baseUrlOverride || getBaseUrl()
+  let redirectUri = process.env.GOOGLE_REDIRECT_URI || `${baseUrl}/api/google-calendar/callback`
+  
+  // Ensure redirect URI is for Google Calendar, not Gmail
+  if (redirectUri.includes('/api/gmail/callback')) {
+    console.warn('[Google Calendar OAuth Client] ⚠️ GOOGLE_REDIRECT_URI was pointing to Gmail callback, auto-correcting to Google Calendar callback')
+    redirectUri = `${baseUrl}/api/google-calendar/callback`
   }
-
-  return cachedOAuthClient
+  
+  // Don't use cache for token exchange - redirect URI must match exactly
+  return new google.auth.OAuth2(
+    process.env.GOOGLE_CLIENT_ID,
+    process.env.GOOGLE_CLIENT_SECRET,
+    redirectUri
+  )
 }
 
-export async function getGoogleCalendarTokens(code: string) {
-  const oauth2Client = getOAuthClient()
-  let redirectUri = process.env.GOOGLE_REDIRECT_URI || `${getBaseUrl()}/api/google-calendar/callback`
+export async function getGoogleCalendarTokens(code: string, baseUrlOverride?: string) {
+  const oauth2Client = getOAuthClient(baseUrlOverride)
+  const baseUrl = baseUrlOverride || getBaseUrl()
+  let redirectUri = process.env.GOOGLE_REDIRECT_URI || `${baseUrl}/api/google-calendar/callback`
   
   // Ensure redirect URI is for Google Calendar, not Gmail
   if (redirectUri.includes('/api/gmail/callback')) {

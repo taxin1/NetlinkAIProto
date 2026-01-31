@@ -12,16 +12,20 @@ export interface GmailToken {
 
 // Helper function to get the base URL for redirects
 function getBaseUrl(): string {
+  // First, check if NEXT_PUBLIC_APP_URL is explicitly set
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL
-  if (!baseUrl) {
-    // Warn in production if NEXT_PUBLIC_APP_URL is not set
-    if (process.env.NODE_ENV === 'production') {
-      console.warn('[Gmail] ⚠️ NEXT_PUBLIC_APP_URL is not set in production! OAuth redirects will use localhost.')
-      console.warn('[Gmail] Please set NEXT_PUBLIC_APP_URL to your production URL (e.g., https://your-domain.com)')
-    }
-    return 'http://localhost:3000'
+  if (baseUrl) {
+    return baseUrl
   }
-  return baseUrl
+  
+  // In production, default to www.networklinkai.com
+  if (process.env.NODE_ENV === 'production') {
+    console.warn('[Gmail] ⚠️ NEXT_PUBLIC_APP_URL is not set in production! Using default: https://www.networklinkai.com')
+    return 'https://www.networklinkai.com'
+  }
+  
+  // In development, use localhost
+  return 'http://localhost:3000'
 }
 
 export async function getGmailClient(token: GmailToken) {
@@ -56,8 +60,8 @@ export async function getGmailClient(token: GmailToken) {
   return { client: oauth2Client, refreshedToken: null }
 }
 
-export function getGmailAuthUrl() {
-  const baseUrl = getBaseUrl()
+export function getGmailAuthUrl(baseUrlOverride?: string) {
+  const baseUrl = baseUrlOverride || getBaseUrl()
   const gmailRedirectUri = `${baseUrl}/api/gmail/callback`
   
   console.log('[Gmail Auth URL] Generating auth URL...')
@@ -94,29 +98,29 @@ export function getGmailAuthUrl() {
   return authUrl
 }
 
-// Cache OAuth client to avoid recreating it
+// Cache OAuth client to avoid recreating it (but don't cache for token exchange to ensure redirect URI matches)
 let cachedGmailOAuthClient: ReturnType<typeof google.auth.OAuth2> | null = null
 
-function getGmailOAuthClient() {
+function getGmailOAuthClient(baseUrlOverride?: string) {
   if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
     throw new Error('Google OAuth credentials not configured')
   }
 
-  if (!cachedGmailOAuthClient) {
-    const gmailRedirectUri = `${getBaseUrl()}/api/gmail/callback`
-    cachedGmailOAuthClient = new google.auth.OAuth2(
-      process.env.GOOGLE_CLIENT_ID,
-      process.env.GOOGLE_CLIENT_SECRET,
-      gmailRedirectUri
-    )
-  }
-
-  return cachedGmailOAuthClient
+  const baseUrl = baseUrlOverride || getBaseUrl()
+  const gmailRedirectUri = `${baseUrl}/api/gmail/callback`
+  
+  // Don't use cache for token exchange - redirect URI must match exactly
+  return new google.auth.OAuth2(
+    process.env.GOOGLE_CLIENT_ID,
+    process.env.GOOGLE_CLIENT_SECRET,
+    gmailRedirectUri
+  )
 }
 
-export async function getGmailTokens(code: string) {
-  const oauth2Client = getGmailOAuthClient()
-  const redirectUri = `${getBaseUrl()}/api/gmail/callback`
+export async function getGmailTokens(code: string, baseUrlOverride?: string) {
+  const baseUrl = baseUrlOverride || getBaseUrl()
+  const oauth2Client = getGmailOAuthClient(baseUrl)
+  const redirectUri = `${baseUrl}/api/gmail/callback`
 
   try {
     console.log('[Gmail Tokens] Exchanging code for tokens...')

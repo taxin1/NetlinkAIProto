@@ -12,6 +12,23 @@ function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
   ])
 }
 
+// Helper function to get base URL with proper fallbacks
+function getBaseUrl(request: NextRequest): string {
+  // First, check if NEXT_PUBLIC_APP_URL is explicitly set
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL
+  if (baseUrl) {
+    return baseUrl
+  }
+  
+  // In production, default to www.networklinkai.com
+  if (process.env.NODE_ENV === 'production') {
+    return 'https://www.networklinkai.com'
+  }
+  
+  // In development, use request origin (localhost)
+  return request.nextUrl.origin
+}
+
 export async function GET(request: NextRequest) {
   const startTime = Date.now()
   
@@ -45,15 +62,17 @@ export async function GET(request: NextRequest) {
     }
 
     // Step 2: Exchange code for tokens
+    const baseUrl = getBaseUrl(request)
     let tokens
     try {
       console.log('[Gmail Process] Exchanging code for tokens...')
       console.log('[Gmail Process] Authorization code length:', code.length)
-      console.log('[Gmail Process] NEXT_PUBLIC_APP_URL:', process.env.NEXT_PUBLIC_APP_URL || 'Not set (using default)')
+      console.log('[Gmail Process] Base URL:', baseUrl)
+      console.log('[Gmail Process] NEXT_PUBLIC_APP_URL:', process.env.NEXT_PUBLIC_APP_URL || 'Not set (using request origin)')
       console.log('[Gmail Process] GOOGLE_CLIENT_ID:', process.env.GOOGLE_CLIENT_ID ? 'Set' : 'MISSING')
       console.log('[Gmail Process] GOOGLE_CLIENT_SECRET:', process.env.GOOGLE_CLIENT_SECRET ? 'Set' : 'MISSING')
       
-      tokens = await withTimeout(getGmailTokens(code), 15000)
+      tokens = await withTimeout(getGmailTokens(code, baseUrl), 15000)
       console.log('[Gmail Process] Tokens received successfully')
       console.log('[Gmail Process] Has access token:', !!tokens.access_token)
       console.log('[Gmail Process] Has refresh token:', !!tokens.refresh_token)
@@ -73,7 +92,7 @@ export async function GET(request: NextRequest) {
     // Step 3: Get user's email address from Gmail API
     let emailAddress = user.email || null
     try {
-      const gmailRedirectUri = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/gmail/callback`
+      const gmailRedirectUri = `${baseUrl}/api/gmail/callback`
       const oauth2Client = new google.auth.OAuth2(
         process.env.GOOGLE_CLIENT_ID,
         process.env.GOOGLE_CLIENT_SECRET,
@@ -140,7 +159,7 @@ export async function GET(request: NextRequest) {
     console.log(`[Gmail Process] ✅ Success in ${elapsedTime}ms`)
 
     // Build redirect URL with base URL
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin
+    const baseUrl = getBaseUrl(request)
     const redirectUrl = new URL('/dashboard/settings', baseUrl)
     redirectUrl.searchParams.set('success', 'gmail_connected')
 
@@ -163,9 +182,9 @@ export async function GET(request: NextRequest) {
       errorMessage = 'database_error'
     }
     
-    return NextResponse.redirect(
-      new URL(`/dashboard/settings?error=${errorMessage}`, request.url),
-      { status: 307 }
-    )
+    const baseUrl = getBaseUrl(request)
+    const redirectUrl = new URL('/dashboard/settings', baseUrl)
+    redirectUrl.searchParams.set('error', errorMessage)
+    return NextResponse.redirect(redirectUrl.toString(), { status: 307 })
   }
 }
