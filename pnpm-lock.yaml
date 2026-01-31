@@ -4,6 +4,10 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  '@remix-run/react>react': ^19
+  '@remix-run/react>react-dom': ^19
+
 importers:
 
   .:

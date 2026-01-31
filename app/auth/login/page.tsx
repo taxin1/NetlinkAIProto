@@ -25,13 +25,24 @@ function LoginContent() {
   const searchParams = useSearchParams()
   const redirectPath = searchParams.get("redirect") || "/dashboard"
 
+  // Check for error messages from OAuth callback
+  useEffect(() => {
+    const errorParam = searchParams.get("error")
+    const errorDescription = searchParams.get("error_description")
+    const errorDetails = searchParams.get("details")
+
+    if (errorParam) {
+      setError(errorDetails || errorDescription || errorParam)
+    }
+  }, [searchParams])
+
   // Check if user is already authenticated
   useEffect(() => {
     const checkAuth = async () => {
       try {
         const supabase = createClient()
         const { data: { user } } = await supabase.auth.getUser()
-        
+
         if (user) {
           // User is already signed in, redirect to dashboard
           router.push(redirectPath)
@@ -43,7 +54,7 @@ function LoginContent() {
         setIsCheckingAuth(false)
       }
     }
-    
+
     checkAuth()
   }, [router, redirectPath])
 
@@ -52,30 +63,59 @@ function LoginContent() {
     setIsLoading(true)
     setError(null)
 
-    const { data, error } = await authService.signInWithPassword(email, password)
-    
-    if (error) {
-      setError(error)
-    } else if (data?.session) {
-      // Redirect to dashboard
-      router.push(redirectPath)
-      router.refresh()
+    try {
+      console.log('[Login] Starting login process...', { email, redirectPath })
+      const { data, error } = await authService.signInWithPassword(email, password)
+
+      if (error) {
+        console.error('[Login] Login error:', error)
+        setError(error)
+        setIsLoading(false)
+        return
+      }
+
+      if (data?.session) {
+        console.log('[Login] Login successful, redirecting to:', redirectPath)
+        setIsLoading(false)
+        window.location.href = redirectPath
+      } else {
+        console.error('[Login] Login completed but no session received')
+        setError("Login completed but no session received. Please try again.")
+        setIsLoading(false)
+      }
+    } catch (err) {
+      console.error('[Login] Unexpected error during login:', err)
+      setError(err instanceof Error ? err.message : "An unexpected error occurred. Please try again.")
+      setIsLoading(false)
     }
-    
-    setIsLoading(false)
   }
 
   const handleGoogleLogin = async () => {
+    console.log('[Login] handleGoogleLogin called - button clicked!')
     setIsLoading(true)
     setError(null)
 
-    const { data, error } = await authService.signInWithOAuth('google', redirectPath)
-    
-    if (error) {
-      setError(error)
+    try {
+      console.log('[Login] Calling authService.signInWithOAuth...')
+      const { data, error } = await authService.signInWithOAuth('google', redirectPath)
+
+      if (error) {
+        setError(error)
+        setIsLoading(false)
+        return
+      }
+      // Redirect to Supabase OAuth URL – required for Google sign-in to start
+      if (data?.url) {
+        window.location.href = data.url
+      } else {
+        setError('Could not start Google sign-in. Please try again.')
+        setIsLoading(false)
+      }
+    } catch (err) {
+      console.error('[Login] Google OAuth error:', err)
+      setError(err instanceof Error ? err.message : 'An unexpected error occurred.')
       setIsLoading(false)
     }
-    // OAuth redirect will handle the rest
   }
 
   // Show loading state while checking authentication
@@ -97,10 +137,10 @@ function LoginContent() {
         <div className="flex justify-center mb-16">
           <Link href="/" className="flex flex-col items-center group transition-all">
             <div className="relative h-72 w-[600px] overflow-hidden transform group-hover:scale-110 transition-transform duration-700 drop-shadow-[0_0_40px_rgba(59,130,246,0.7)]">
-              <Image 
-                src="/Logo1.png" 
-                alt="Netlink AI Logo" 
-                fill 
+              <Image
+                src="/Logo1.png"
+                alt="Netlink AI Logo"
+                fill
                 className="object-contain"
                 priority
               />
@@ -111,8 +151,8 @@ function LoginContent() {
           <CardHeader>
             <CardTitle className="text-2xl text-white font-bold tracking-tight">Welcome back</CardTitle>
             <CardDescription className="text-slate-400 font-light">
-              {redirectPath.includes('checkout') 
-                ? "Sign in to complete your subscription" 
+              {redirectPath.includes('checkout')
+                ? "Sign in to complete your subscription"
                 : "Sign in to your Netlink account"}
             </CardDescription>
           </CardHeader>
@@ -161,7 +201,7 @@ function LoginContent() {
                   {isLoading ? "Signing in..." : "Sign in"}
                 </Button>
               </div>
-              
+
               <div className="relative my-4">
                 <div className="absolute inset-0 flex items-center">
                   <span className="w-full border-t border-slate-800" />
@@ -170,7 +210,7 @@ function LoginContent() {
                   <span className="bg-slate-900 px-2 text-slate-500">Or continue with</span>
                 </div>
               </div>
-              
+
               <Button
                 type="button"
                 variant="outline"
@@ -183,8 +223,8 @@ function LoginContent() {
               </Button>
               <div className="mt-4 text-center text-sm text-slate-400">
                 Don&apos;t have an account?{" "}
-                <Link 
-                  href={`/auth/signup${redirectPath && redirectPath !== '/dashboard' ? `?redirect=${encodeURIComponent(redirectPath)}` : ''}`} 
+                <Link
+                  href={`/auth/signup${redirectPath && redirectPath !== '/dashboard' ? `?redirect=${encodeURIComponent(redirectPath)}` : ''}`}
                   className="text-cyan-400 hover:text-cyan-300 underline underline-offset-4 font-medium"
                 >
                   Sign up

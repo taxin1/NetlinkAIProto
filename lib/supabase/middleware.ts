@@ -2,11 +2,19 @@ import { createServerClient } from "@supabase/ssr"
 import { NextResponse, type NextRequest } from "next/server"
 
 export async function updateSession(request: NextRequest) {
+  // If Supabase redirected to / with the auth code (instead of /auth/callback), redirect so the callback runs.
+  // This happens when Supabase falls back to Site URL or the configured redirect doesn't match.
+  const pathname = request.nextUrl.pathname
+  const code = request.nextUrl.searchParams.get('code')
+  if (pathname === '/' && code) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/auth/callback'
+    return NextResponse.redirect(url, 307)
+  }
+
   // Set custom header with pathname so layouts can check it
   const requestHeaders = new Headers(request.headers)
-  requestHeaders.set('x-pathname', request.nextUrl.pathname)
-  
-  const pathname = request.nextUrl.pathname
+  requestHeaders.set('x-pathname', pathname)
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -30,7 +38,7 @@ export async function updateSession(request: NextRequest) {
       headers: requestHeaders,
     },
   })
-  
+
   // Set pathname header on response
   supabaseResponse.headers.set('x-pathname', pathname)
 
@@ -60,42 +68,65 @@ export async function updateSession(request: NextRequest) {
   })
 
   try {
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/fbe03cac-fcf2-46ec-8d4f-74235d23b217',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'lib/supabase/middleware.ts:56',message:'Middleware getUser check',data:{pathname:request.nextUrl.pathname},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
-    // #endregion
+    // Special handling for auth callback and completion - allow them to proceed without checking user
+    // This prevents redirect loops during OAuth flow - cookies are set in the callback route
+    const isAuthCallback = request.nextUrl.pathname === "/auth/callback" || request.nextUrl.pathname === "/auth/complete"
+    if (isAuthCallback) {
+      console.log('[Middleware] Allowing auth callback to proceed without auth check')
+      return supabaseResponse
+    }
+
     const {
       data: { user },
+      error: userError
     } = await supabase.auth.getUser()
 
     // Check for guest cookie
     const isGuestUser = request.cookies.get('netlink_guest_id')
 
-    // Allow public routes: home, auth pages, privacy, terms, pricing, public pages, portfolio pages, waitlist, and API routes
+<<<<<<< HEAD
+    // Allow public routes: home, auth pages, privacy, terms, pricing, public pages, portfolio pages, waitlist, API routes, and well-known paths
     const publicPaths = ["/", "/privacy", "/terms", "/pricing", "/waitlist", "/onboarding"]
-    const isPublicPath = publicPaths.includes(request.nextUrl.pathname) || 
-                        request.nextUrl.pathname.startsWith("/auth") || 
-                        request.nextUrl.pathname.startsWith("/api") ||
-                        request.nextUrl.pathname.startsWith("/public") ||
-                        request.nextUrl.pathname.startsWith("/portfolio") ||
-                        request.nextUrl.pathname.startsWith("/admin") ||
-                        request.nextUrl.pathname.startsWith("/resources")
-    
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/fbe03cac-fcf2-46ec-8d4f-74235d23b217',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'lib/supabase/middleware.ts:74',message:'Middleware auth check result',data:{hasUser:!!user,isGuestUser:!!isGuestUser,isPublicPath,pathname:request.nextUrl.pathname,willRedirect:!user&&!isGuestUser&&!isPublicPath},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
-    // #endregion
-    
+    const isPublicPath = publicPaths.includes(request.nextUrl.pathname) ||
+      request.nextUrl.pathname.startsWith("/auth") ||
+      request.nextUrl.pathname.startsWith("/api") ||
+      request.nextUrl.pathname.startsWith("/public") ||
+      request.nextUrl.pathname.startsWith("/portfolio") ||
+      request.nextUrl.pathname.startsWith("/admin") ||
+      request.nextUrl.pathname.startsWith("/resources") ||
+      request.nextUrl.pathname.startsWith("/.well-known") // Exclude well-known paths (Chrome DevTools, etc.)
+
+    // Log auth status for debugging (only for protected routes)
+    if (!isPublicPath && !isGuestUser) {
+      console.log('[Middleware] Auth check:', {
+        path: request.nextUrl.pathname,
+        hasUser: !!user,
+        hasGuest: !!isGuestUser,
+        error: userError?.message
+      })
+    }
+
     if (!user && !isGuestUser && !isPublicPath) {
       // #region agent log
       fetch('http://127.0.0.1:7242/ingest/fbe03cac-fcf2-46ec-8d4f-74235d23b217',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'lib/supabase/middleware.ts:75',message:'Middleware redirecting to login',data:{pathname:request.nextUrl.pathname},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
       // #endregion
       const url = request.nextUrl.clone()
       url.pathname = "/auth/login"
+      // Preserve the original path as a redirect parameter
+      if (request.nextUrl.pathname !== "/auth/login") {
+        url.searchParams.set("redirect", request.nextUrl.pathname)
+      }
+      console.log('[Middleware] Redirecting to login:', url.toString())
       return NextResponse.redirect(url)
     }
   } catch (error) {
     // If auth check fails, continue without redirecting
     // This prevents middleware from breaking the app on network errors
-    console.error("Error checking user in middleware:", error)
+    console.error("[Middleware] Error checking user:", error)
+    // For auth callback, always allow through even on error
+    if (request.nextUrl.pathname === "/auth/callback") {
+      return supabaseResponse
+    }
   }
 
   return supabaseResponse
