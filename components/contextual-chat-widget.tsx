@@ -66,6 +66,15 @@ const PAGE_CONFIGS: Record<string, PageConfig> = {
       "Help me make the most of upcoming events.",
     ],
   },
+  "/dashboard/event-matchmaking": {
+    title: "Ask about event matchmaking",
+    description: "Get help refining who to meet and how to start conversations.",
+    focusSuggestions: [
+      "Who should I prioritize meeting at my next event?",
+      "Improve my networking goals for better matches.",
+      "Suggest icebreakers for my top matches.",
+    ],
+  },
   "/dashboard/voice-agent": {
     title: "Ask alongside the voice agent",
     description: "Use chat for deeper planning while you use the voice agent.",

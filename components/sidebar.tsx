@@ -7,7 +7,7 @@ import { useState, useEffect, useCallback } from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { LayoutDashboard, Users, Mail, BarChart3, LogOut, Bot, Settings, Calendar, Menu, X, Share2, CheckCircle2, CalendarDays, Briefcase, Home, Info, Sparkles, Wand2, Crown, CreditCard, BookOpen, LucideIcon } from "lucide-react"
+import { LayoutDashboard, Users, Mail, BarChart3, LogOut, Bot, Settings, Calendar, Menu, X, Share2, CheckCircle2, CalendarDays, Briefcase, Home, Info, Sparkles, Wand2, Crown, CreditCard, BookOpen, Handshake, LucideIcon } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { useMobile } from "@/lib/hooks/use-mobile"
 import { useTranslations } from "@/lib/hooks/use-translations"
@@ -57,6 +57,7 @@ export function Sidebar({ user }: SidebarProps) {
       { name: t("networkingMode"), href: "/dashboard/networking", icon: Sparkles },
       { name: t("calendar"), href: "/dashboard/calendar", icon: CalendarDays },
       { name: t("events"), href: "/dashboard/events", icon: Calendar },
+      { name: t("eventMatchmaking"), href: "/dashboard/event-matchmaking", icon: Handshake },
     ] : []),
     { name: t("emails"), href: "/dashboard/emails", icon: Mail },
     ...(!isGuestMode ? [
@@ -213,6 +214,7 @@ export function Sidebar({ user }: SidebarProps) {
             const hrefToTourMap: Record<string, string> = {
               "/dashboard/contacts": "contacts-nav",
               "/dashboard/events": "events-nav",
+              "/dashboard/event-matchmaking": "event-matchmaking-nav",
               "/dashboard/emails": "emails-nav",
               "/dashboard/ai-assistant": "ai-assistant-nav",
               "/dashboard/portfolio": "portfolio-nav",

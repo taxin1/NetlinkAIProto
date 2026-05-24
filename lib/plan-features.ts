@@ -60,7 +60,7 @@ export async function hasFeatureAccess(
  */
 export async function checkUsageLimit(
   userId: string,
-  limitType: 'aiEmailGeneration' | 'aiAssistantMessages' | 'businessCardScans' | 'contacts' | 'events' | 'dailyEmails' | 'monthlyEmails' | 'campaignContacts' | 'networkingMode' | 'aiCampaign',
+  limitType: 'aiEmailGeneration' | 'aiAssistantMessages' | 'businessCardScans' | 'contacts' | 'events' | 'dailyEmails' | 'monthlyEmails' | 'campaignContacts' | 'networkingMode' | 'aiCampaign' | 'eventMatchmaking',
   currentUsage?: number
 ): Promise<{ allowed: boolean; limit: number | null; remaining: number | null; message?: string }> {
   const limits = await getUserPlanLimits(userId)
@@ -225,6 +225,20 @@ export async function checkUsageLimit(
         usage = usageData?.usage_count || 0
       }
       break
+
+    case 'eventMatchmaking':
+      limit = limits.eventMatchmakingFreeTrial
+      if (currentUsage === undefined) {
+        const supabase = await createClient()
+        const { data: usageData } = await supabase
+          .from("event_matchmaking_usage")
+          .select("usage_count")
+          .eq("user_id", userId)
+          .single()
+        
+        usage = usageData?.usage_count || 0
+      }
+      break
   }
   
   // If limit is null, it means unlimited
@@ -272,6 +286,9 @@ export async function checkUsageLimit(
         break
       case 'aiCampaign':
         message = `You've used all ${limit} free AI campaign runs. Upgrade to Professional for unlimited AI campaigns.`
+        break
+      case 'eventMatchmaking':
+        message = `You've used all ${limit} free event matchmaking runs. Upgrade to Professional for unlimited AI matching.`
         break
     }
   }

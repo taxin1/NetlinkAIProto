@@ -22,6 +22,7 @@ export interface PlanLimits {
   // Networking Mode & AI Campaigns
   networkingModeFreeTrial: number // Free trial uses (100)
   aiCampaignFreeTrial: number // Free trial uses (100)
+  eventMatchmakingFreeTrial: number // Free trial AI match runs (50)
   
   // Storage & Limits
   databaseStorageGB: number | null
@@ -55,6 +56,7 @@ export const PLAN_LIMITS: Record<PlanName, PlanLimits> = {
     // Networking Mode & AI Campaigns
     networkingModeFreeTrial: 100, // 100 free uses
     aiCampaignFreeTrial: 100, // 100 free uses
+    eventMatchmakingFreeTrial: 50, // 50 free AI match runs
     
     // Storage & Limits
     databaseStorageGB: 0.5,
@@ -86,6 +88,7 @@ export const PLAN_LIMITS: Record<PlanName, PlanLimits> = {
     // Networking Mode & AI Campaigns
     networkingModeFreeTrial: null, // unlimited for Pro
     aiCampaignFreeTrial: null, // unlimited for Pro
+    eventMatchmakingFreeTrial: null, // unlimited for Pro
     
     // Storage & Limits
     databaseStorageGB: 8,
@@ -117,6 +120,7 @@ export const PLAN_LIMITS: Record<PlanName, PlanLimits> = {
     // Networking Mode & AI Campaigns
     networkingModeFreeTrial: null, // unlimited for Enterprise
     aiCampaignFreeTrial: null, // unlimited for Enterprise
+    eventMatchmakingFreeTrial: null, // unlimited for Enterprise
     
     // Storage & Limits
     databaseStorageGB: null, // unlimited
