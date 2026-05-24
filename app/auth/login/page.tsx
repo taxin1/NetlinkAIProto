@@ -3,6 +3,7 @@
 import type React from "react"
 
 import { authService } from "@/lib/auth/auth-helpers"
+import { notifyAuthEvent } from "@/lib/email/notify-client"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -76,6 +77,7 @@ function LoginContent() {
 
       if (data?.session) {
         console.log('[Login] Login successful, redirecting to:', redirectPath)
+        notifyAuthEvent("login")
         setIsLoading(false)
         window.location.href = redirectPath
       } else {

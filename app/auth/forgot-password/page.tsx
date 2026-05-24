@@ -4,6 +4,7 @@ import type React from "react"
 
 import { useState } from "react"
 import { authService } from "@/lib/auth/auth-helpers"
+import { notifyAuthEvent } from "@/lib/email/notify-client"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
@@ -27,6 +28,7 @@ export default function ForgotPasswordPage() {
     if (error) {
       setError(error)
     } else {
+      notifyAuthEvent("password_reset_requested", { email })
       setSuccess("If an account exists for this email, a reset link has been sent. Please check your inbox.")
     }
 

@@ -13,6 +13,7 @@ const config: CapacitorConfig = {
     cleartext: false,
     androidScheme: "https",
     hostname: "www.networklinkai.com",
+    allowNavigation: ["www.networklinkai.com", "*.networklinkai.com"],
   },
   plugins: {
     SplashScreen: {

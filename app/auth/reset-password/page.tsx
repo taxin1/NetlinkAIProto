@@ -6,6 +6,7 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Eye, EyeOff } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
+import { notifyAuthEvent } from "@/lib/email/notify-client"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
@@ -50,6 +51,7 @@ export default function ResetPasswordPage() {
     if (error) {
       setError(error.message)
     } else {
+      notifyAuthEvent("password_reset_success")
       setSuccess("Your password has been updated. You can now sign in.")
       setTimeout(() => {
         router.push("/auth/login")

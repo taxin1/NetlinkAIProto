@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import nodemailer from 'nodemailer'
 import { sendGmailMessage, GmailToken } from '@/lib/gmail'
+import { sendEmailWithSettings } from '@/lib/email/smtp'
+import { wrapUserEmailBody } from '@/lib/email/template'
 
 export async function POST(request: Request) {
   const { emailId, contactEmail, subject, body, useGmailApi } = await request.json()
@@ -36,12 +37,12 @@ export async function POST(request: Request) {
               : undefined,
           }
 
-          // Send via Gmail API
+          const htmlBody = wrapUserEmailBody(body, { subject })
           const result = await sendGmailMessage(
             token,
             contactEmail.trim(),
             subject,
-            body.replace(/\n/g, '<br>')
+            htmlBody
           )
 
           // Update email status to 'sent' in database
@@ -77,51 +78,6 @@ export async function POST(request: Request) {
       .eq('is_active', true)
       .single()
 
-    // Prioritize user's personal email configuration
-    let emailUser, emailPass, smtpHost, smtpPort, fromName
-
-    if (settings) {
-      // Use user's personal email settings
-      emailUser = settings.email_address
-      emailPass = settings.email_password
-      smtpHost = settings.smtp_host || 'smtp.gmail.com'
-      smtpPort = settings.smtp_port || 587
-      fromName = settings.from_name || user.email
-      
-      console.log(`Using personal email settings for ${user.email}`)
-    } else {
-      // Fallback to shared Gmail (only if user hasn't configured their own)
-      emailUser = process.env.GMAIL_USER
-      emailPass = process.env.GMAIL_APP_PASSWORD
-      smtpHost = 'smtp.gmail.com'
-      smtpPort = 587
-      fromName = user.email
-      
-      console.log(`Using default Gmail settings for ${user.email}`)
-    }
-
-    if (!emailUser || !emailPass) {
-      return NextResponse.json(
-        { 
-          error: 'Email not configured. Please go to Settings → Email Configuration to set up your email account.',
-          needsConfiguration: true
-        },
-        { status: 400 }
-      )
-    }
-
-    // Create transporter
-    const transporter = nodemailer.createTransport({
-      host: smtpHost,
-      port: smtpPort,
-      secure: smtpPort === 465,
-      auth: {
-        user: emailUser,
-        pass: emailPass,
-      },
-    })
-
-    // Validate recipient email
     if (!contactEmail || !contactEmail.trim()) {
       return NextResponse.json(
         { error: 'No recipients defined. Please provide a valid email address.' },
@@ -129,15 +85,25 @@ export async function POST(request: Request) {
       )
     }
 
-    // Send email
-    await transporter.sendMail({
-      from: `"${fromName}" <${emailUser}>`,
+    const htmlBody = wrapUserEmailBody(body, { subject })
+
+    const sendResult = await sendEmailWithSettings(settings ?? null, {
       to: contactEmail.trim(),
-      subject: subject,
+      subject,
       text: body,
-      html: body.replace(/\n/g, '<br>'),
-      replyTo: emailUser,
+      html: htmlBody,
+      fallbackFromName: user.email ?? undefined,
     })
+
+    if (!sendResult.success) {
+      return NextResponse.json(
+        {
+          error: sendResult.error,
+          needsConfiguration: sendResult.needsConfiguration,
+        },
+        { status: sendResult.needsConfiguration ? 400 : 500 }
+      )
+    }
 
     // Update email status to 'sent' in database
     if (emailId) {

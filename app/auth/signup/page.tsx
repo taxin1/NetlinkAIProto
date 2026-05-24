@@ -3,6 +3,7 @@
 import type React from "react"
 
 import { authService } from "@/lib/auth/auth-helpers"
+import { notifyAuthEvent } from "@/lib/email/notify-client"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -89,6 +90,7 @@ function SignUpContent() {
       if (data?.session) {
         // User is immediately signed in (email confirmation disabled)
         console.log('[Signup] Session created, redirecting to:', redirectPath)
+        notifyAuthEvent("signup", { email })
         setIsLoading(false) // Stop loading before redirect
         window.location.href = redirectPath
       } else if (data?.user) {
@@ -101,11 +103,13 @@ function SignUpContent() {
 
         if (sessionData?.session) {
           console.log('[Signup] Session found, redirecting to:', redirectPath)
+          notifyAuthEvent("signup", { email })
           setIsLoading(false)
           window.location.href = redirectPath
         } else {
           // Email confirmation is required
           console.log('[Signup] Email confirmation required')
+          notifyAuthEvent("signup", { email })
           setIsLoading(false)
           window.location.href = "/auth/check-email"
         }

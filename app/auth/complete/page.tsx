@@ -1,6 +1,7 @@
 "use client"
 
 import { createClient } from '@/lib/supabase/client'
+import { notifyAuthEvent } from '@/lib/email/notify-client'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState, Suspense } from 'react'
 
@@ -22,6 +23,7 @@ function CompleteContent() {
 
         if (session) {
           setStatus('Session verified. Redirecting...')
+          notifyAuthEvent('oauth_login', { provider: 'Google' })
           // Check sessionStorage for the original redirect path
           const storedNext = window.sessionStorage.getItem('oauth_redirect_path')
           if (storedNext) {
