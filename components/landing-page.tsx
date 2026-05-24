@@ -35,6 +35,10 @@ import {
   X,
   Languages,
   Shield,
+  Handshake,
+  MessageCircle,
+  Target,
+  Lightbulb,
 } from "lucide-react"
 import { useTranslations } from "@/lib/hooks/use-translations"
 import {
@@ -2746,6 +2750,12 @@ export function LandingPage() {
                 gradient: "from-orange-500 to-orange-600",
               },
               {
+                icon: Handshake,
+                title: "AI Event Matchmaking",
+                description: "AI ranks the best people to meet at your events and suggests personalized icebreakers.",
+                gradient: "from-violet-500 to-indigo-600",
+              },
+              {
                 icon: BarChart3,
                 title: "Analytics & Insights",
                 description: "Track network growth, email performance, and engagement metrics in real-time.",
@@ -2780,6 +2790,158 @@ export function LandingPage() {
               </motion.div>
             ))}
           </motion.div>
+        </div>
+      </section>
+
+      {/* Event Matchmaking Section */}
+      <section className="py-24 px-4 sm:px-6 lg:px-8 relative z-10 overflow-hidden border-t border-slate-800/50">
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-1/2 left-1/4 w-96 h-96 bg-violet-500/10 rounded-full blur-3xl" />
+          <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl" />
+        </div>
+
+        <div className="max-w-7xl mx-auto relative">
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+            <motion.div
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.3 }}
+              variants={containerVariants}
+            >
+              <motion.div variants={itemVariants} className="inline-flex items-center gap-2 px-4 py-2 mb-6 rounded-full bg-violet-500/10 border border-violet-500/30">
+                <Handshake className="h-4 w-4 text-violet-400" />
+                <span className="text-sm font-semibold text-violet-300">New — AI Event Matchmaking</span>
+              </motion.div>
+              <motion.h2
+                variants={itemVariants}
+                className="text-4xl sm:text-5xl font-bold mb-6 bg-gradient-to-r from-white via-violet-200 to-cyan-300 bg-clip-text text-transparent"
+              >
+                Meet the right people — by needs or by event
+              </motion.h2>
+              <motion.p variants={itemVariants} className="text-lg text-slate-300 mb-8 leading-relaxed">
+                Match anytime based on what you need (funding, hiring, clients, partners) or pick a specific
+                event for conference-ready connections. AI ranks fits and writes icebreakers for both.
+              </motion.p>
+
+              <motion.ul variants={containerVariants} className="space-y-4 mb-10">
+                {[
+                  {
+                    icon: Lightbulb,
+                    text: "Match by needs — find help with funding, hiring, sales, and more",
+                  },
+                  {
+                    icon: Target,
+                    text: "Match by event — set goals for a conference or meetup",
+                  },
+                  {
+                    icon: Sparkles,
+                    text: "AI scores fit % and explains why each person is a good match",
+                  },
+                  {
+                    icon: MessageCircle,
+                    text: "Personalized icebreakers so you start conversations with confidence",
+                  },
+                  {
+                    icon: Users,
+                    text: "Connect via email, LinkedIn, or portfolio — contacts & global networkers",
+                  },
+                ].map((item) => (
+                  <motion.li key={item.text} variants={itemVariants} className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-violet-500/20 flex items-center justify-center shrink-0 mt-0.5">
+                      <item.icon className="h-4 w-4 text-violet-400" />
+                    </div>
+                    <span className="text-slate-300">{item.text}</span>
+                  </motion.li>
+                ))}
+              </motion.ul>
+
+              <motion.div variants={itemVariants} className="flex flex-wrap gap-4">
+                <Link href="/auth/signup">
+                  <Button size="lg" className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 shadow-lg shadow-violet-500/25">
+                    Start matching
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </Link>
+                <Link href="/dashboard/event-matchmaking">
+                  <Button size="lg" variant="outline" className="border-slate-600 text-slate-200 hover:bg-slate-800/50">
+                    Open matchmaking
+                  </Button>
+                </Link>
+              </motion.div>
+            </motion.div>
+
+            <motion.div
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.2 }}
+              variants={fadeInUp}
+              className="relative"
+            >
+              <Card className="border-2 border-violet-500/30 bg-slate-900/60 backdrop-blur-xl shadow-2xl shadow-violet-500/10 overflow-hidden">
+                <CardContent className="p-6 space-y-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-4 w-4 text-cyan-400" />
+                      <span className="text-sm font-medium text-slate-300">Tech Summit 2026</span>
+                    </div>
+                    <Badge className="bg-violet-500/20 text-violet-300 border-violet-500/30">AI matches</Badge>
+                  </div>
+
+                  {[
+                    {
+                      name: "Sarah Chen",
+                      role: "VP Product · FinTech",
+                      score: 94,
+                      reason: "Aligned on SaaS partnerships and investor intros",
+                      icebreaker: "I loved your panel on product-led growth — would love to swap notes on fintech GTM.",
+                    },
+                    {
+                      name: "Marcus Webb",
+                      role: "Founder · AI Startup",
+                      score: 87,
+                      reason: "Shared interest in B2B AI tools and seed-stage networking",
+                      icebreaker: "Your portfolio caught my eye — we're solving similar problems in enterprise AI.",
+                    },
+                  ].map((match, i) => (
+                    <motion.div
+                      key={match.name}
+                      initial={{ opacity: 0, x: 20 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: i * 0.15, duration: 0.5 }}
+                      className="rounded-xl border border-slate-700/50 bg-slate-800/50 p-4"
+                    >
+                      <div className="flex items-start justify-between gap-2 mb-2">
+                        <div>
+                          <p className="font-semibold text-white">{match.name}</p>
+                          <p className="text-xs text-slate-400">{match.role}</p>
+                        </div>
+                        <Badge variant="outline" className="border-violet-500/40 text-violet-300 shrink-0">
+                          {match.score}% fit
+                        </Badge>
+                      </div>
+                      <p className="text-xs text-slate-400 mb-2">{match.reason}</p>
+                      <div className="rounded-lg bg-slate-900/80 px-3 py-2 border border-slate-700/30">
+                        <p className="text-xs text-slate-500 mb-1 flex items-center gap-1">
+                          <MessageCircle className="h-3 w-3" /> Icebreaker
+                        </p>
+                        <p className="text-sm text-slate-300 italic">&ldquo;{match.icebreaker}&rdquo;</p>
+                      </div>
+                    </motion.div>
+                  ))}
+
+                  <motion.div
+                    className="flex items-center justify-center gap-2 pt-2 text-xs text-violet-400"
+                    animate={{ opacity: [0.5, 1, 0.5] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  >
+                    <Sparkles className="h-3.5 w-3.5" />
+                    <span>Finding more matches from your network...</span>
+                  </motion.div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </div>
         </div>
       </section>
 

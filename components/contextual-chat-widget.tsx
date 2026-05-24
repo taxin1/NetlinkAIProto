@@ -67,11 +67,11 @@ const PAGE_CONFIGS: Record<string, PageConfig> = {
     ],
   },
   "/dashboard/event-matchmaking": {
-    title: "Ask about event matchmaking",
-    description: "Get help refining who to meet and how to start conversations.",
+    title: "Ask about AI matchmaking",
+    description: "Refine needs-based or event-based matches and outreach.",
     focusSuggestions: [
-      "Who should I prioritize meeting at my next event?",
-      "Improve my networking goals for better matches.",
+      "Who can help with my current needs?",
+      "Who should I prioritize at my next event?",
       "Suggest icebreakers for my top matches.",
     ],
   },

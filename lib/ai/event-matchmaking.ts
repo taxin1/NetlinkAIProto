@@ -30,12 +30,16 @@ export interface EventContext {
   startTime?: string | null
 }
 
+export type MatchMode = "event" | "needs"
+
 interface GenerateMatchesInput {
+  matchMode: MatchMode
   userProfile: {
     name?: string | null
     title?: string | null
     company?: string | null
     goals?: string | null
+    needs?: string | null
     interests?: string[]
   }
   event?: EventContext | null
@@ -62,7 +66,7 @@ function extractJsonArray(text: string): unknown {
 export async function generateEventMatches(
   input: GenerateMatchesInput
 ): Promise<EventMatchResult[]> {
-  const { userProfile, event, candidates } = input
+  const { userProfile, event, candidates, matchMode } = input
 
   if (candidates.length === 0) {
     return []
@@ -79,8 +83,11 @@ export async function generateEventMatches(
     bio: c.bio?.slice(0, 200),
   }))
 
-  const systemPrompt = `You are an expert networking matchmaker for professional events.
-Analyze the user's profile and goals, then rank the best connection opportunities from the candidate list.
+  const systemPrompt =
+    matchMode === "needs"
+      ? `You are an expert professional networking matchmaker focused on NEEDS-based matching.
+The user has stated what they currently need (funding, hiring, clients, mentorship, partners, etc.).
+Rank candidates who can best help fulfill those needs or offer mutual value — not event attendance.
 Return ONLY valid JSON with this exact shape:
 {
   "matches": [
@@ -88,7 +95,23 @@ Return ONLY valid JSON with this exact shape:
       "id": "candidate id string",
       "type": "networker" or "contact",
       "score": 0-100,
-      "reason": "1-2 sentences why this is a good match",
+      "reason": "1-2 sentences why this person helps with the user's stated needs",
+      "icebreaker": "A natural outreach or conversation starter tied to their needs",
+      "sharedInterests": ["interest1", "interest2"]
+    }
+  ]
+}
+Return at most 8 matches, sorted by score descending. Only include candidates from the provided list.`
+      : `You are an expert networking matchmaker for professional events.
+Analyze the user's profile and event goals, then rank the best connection opportunities from the candidate list.
+Return ONLY valid JSON with this exact shape:
+{
+  "matches": [
+    {
+      "id": "candidate id string",
+      "type": "networker" or "contact",
+      "score": 0-100,
+      "reason": "1-2 sentences why this is a good match for this event",
       "icebreaker": "A natural conversation starter for meeting at the event",
       "sharedInterests": ["interest1", "interest2"]
     }
@@ -97,8 +120,9 @@ Return ONLY valid JSON with this exact shape:
 Return at most 8 matches, sorted by score descending. Only include candidates from the provided list.`
 
   const message = JSON.stringify({
+    matchMode,
     user: userProfile,
-    event: event ?? null,
+    event: matchMode === "event" ? (event ?? null) : null,
     candidates: candidateList,
   })
 

@@ -1,5 +1,16 @@
--- Event matchmaking: user preferences and usage tracking
+-- Bootstrap matchmaking tables (safe if 023 was skipped) + needs column
+-- Run this entire file in Supabase SQL Editor
 
+-- Ensure updated_at helper exists
+create or replace function update_updated_at_column()
+returns trigger as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$ language plpgsql;
+
+-- Tables
 create table if not exists public.event_matchmaking_preferences (
   id uuid primary key default gen_random_uuid(),
   user_id uuid references auth.users(id) on delete cascade not null unique,
@@ -19,6 +30,14 @@ create table if not exists public.event_matchmaking_usage (
   updated_at timestamp with time zone default now()
 );
 
+-- Add needs column when table existed from 023 without it
+alter table public.event_matchmaking_preferences
+  add column if not exists needs text;
+
+comment on column public.event_matchmaking_preferences.needs is
+  'What the user currently needs (funding, hiring, partners, etc.) for AI needs-based matching.';
+
+-- RLS
 alter table public.event_matchmaking_preferences enable row level security;
 alter table public.event_matchmaking_usage enable row level security;
 
@@ -37,6 +56,11 @@ create policy "Users can update their own matchmaking preferences"
   on public.event_matchmaking_preferences for update
   using (auth.uid() = user_id);
 
+drop policy if exists "Authenticated users can view discoverable matchmaking profiles" on public.event_matchmaking_preferences;
+create policy "Authenticated users can view discoverable matchmaking profiles"
+  on public.event_matchmaking_preferences for select
+  using (auth.uid() is not null and is_discoverable = true);
+
 drop policy if exists "Users can view their own matchmaking usage" on public.event_matchmaking_usage;
 create policy "Users can view their own matchmaking usage"
   on public.event_matchmaking_usage for select
@@ -52,15 +76,7 @@ create policy "Users can update their own matchmaking usage"
   on public.event_matchmaking_usage for update
   using (auth.uid() = user_id);
 
--- Discoverable profiles visible to authenticated users for matching
-drop policy if exists "Authenticated users can view discoverable matchmaking profiles" on public.event_matchmaking_preferences;
-create policy "Authenticated users can view discoverable matchmaking profiles"
-  on public.event_matchmaking_preferences for select
-  using (
-    auth.uid() is not null
-    and is_discoverable = true
-  );
-
+-- Indexes
 create index if not exists event_matchmaking_preferences_user_id_idx
   on public.event_matchmaking_preferences(user_id);
 
@@ -71,6 +87,7 @@ create index if not exists event_matchmaking_preferences_discoverable_idx
 create index if not exists event_matchmaking_usage_user_id_idx
   on public.event_matchmaking_usage(user_id);
 
+-- Triggers
 drop trigger if exists update_event_matchmaking_preferences_updated_at on public.event_matchmaking_preferences;
 create trigger update_event_matchmaking_preferences_updated_at
   before update on public.event_matchmaking_preferences

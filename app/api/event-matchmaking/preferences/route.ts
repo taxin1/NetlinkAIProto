@@ -14,7 +14,7 @@ export async function GET() {
 
   const { data, error } = await supabase
     .from("event_matchmaking_preferences")
-    .select("goals, interests, is_discoverable")
+    .select("goals, needs, interests, is_discoverable")
     .eq("user_id", user.id)
     .maybeSingle()
 
@@ -24,6 +24,7 @@ export async function GET() {
 
   return NextResponse.json({
     goals: data?.goals ?? "",
+    needs: data?.needs ?? "",
     interests: data?.interests ?? [],
     isDiscoverable: data?.is_discoverable ?? false,
   })
@@ -42,6 +43,7 @@ export async function PUT(request: Request) {
 
   const body = await request.json()
   const goals = typeof body.goals === "string" ? body.goals.trim() : ""
+  const needs = typeof body.needs === "string" ? body.needs.trim() : ""
   const interests = Array.isArray(body.interests)
     ? body.interests.map(String).filter(Boolean).slice(0, 12)
     : []
@@ -51,6 +53,7 @@ export async function PUT(request: Request) {
     {
       user_id: user.id,
       goals,
+      needs,
       interests,
       is_discoverable: isDiscoverable,
       updated_at: new Date().toISOString(),

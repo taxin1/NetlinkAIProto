@@ -5,6 +5,7 @@ import {
   generateEventMatches,
   type MatchCandidate,
   type EventMatchResult,
+  type MatchMode,
 } from "@/lib/ai/event-matchmaking"
 
 export async function POST(request: Request) {
@@ -32,14 +33,44 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json().catch(() => ({}))
+    const matchMode: MatchMode = body.matchMode === "needs" ? "needs" : "event"
     const eventId = typeof body.eventId === "string" ? body.eventId : null
     const goalsOverride = typeof body.goals === "string" ? body.goals.trim() : ""
+    const needsOverride = typeof body.needs === "string" ? body.needs.trim() : ""
     const interestsOverride = Array.isArray(body.interests)
       ? body.interests.map(String).filter(Boolean)
       : []
 
-    const [profileResult, prefsResult, contactsResult, networkersResult, portfoliosResult] =
-      await Promise.all([
+    if (matchMode === "event" && !eventId) {
+      return NextResponse.json(
+        { error: "Please select an event for event-based matching." },
+        { status: 400 }
+      )
+    }
+
+    if (matchMode === "needs" && !needsOverride) {
+      const { data: prefsCheck } = await supabase
+        .from("event_matchmaking_preferences")
+        .select("needs")
+        .eq("user_id", user.id)
+        .maybeSingle()
+
+      if (!prefsCheck?.needs?.trim()) {
+        return NextResponse.json(
+          { error: "Describe what you need before finding needs-based matches." },
+          { status: 400 }
+        )
+      }
+    }
+
+    const [
+      profileResult,
+      prefsResult,
+      discoverablePrefsResult,
+      contactsResult,
+      networkersResult,
+      portfoliosResult,
+    ] = await Promise.all([
         supabase
           .from("network_profiles")
           .select("name, title, company, email")
@@ -47,9 +78,15 @@ export async function POST(request: Request) {
           .maybeSingle(),
         supabase
           .from("event_matchmaking_preferences")
-          .select("goals, interests")
+          .select("goals, needs, interests")
           .eq("user_id", user.id)
           .maybeSingle(),
+        supabase
+          .from("event_matchmaking_preferences")
+          .select("user_id, goals, needs, interests")
+          .eq("is_discoverable", true)
+          .neq("user_id", user.id)
+          .limit(40),
         supabase
           .from("contacts")
           .select("id, name, company, position, email, linkedin_url, notes, tags, where_met")
@@ -75,7 +112,19 @@ export async function POST(request: Request) {
       startTime?: string | null
     } | null = null
 
-    if (eventId) {
+    const discoverableByUser = new Map<
+      string,
+      { goals: string | null; needs: string | null; interests: string[] }
+    >()
+    for (const pref of discoverablePrefsResult.data ?? []) {
+      discoverableByUser.set(pref.user_id, {
+        goals: pref.goals,
+        needs: pref.needs,
+        interests: Array.isArray(pref.interests) ? pref.interests : [],
+      })
+    }
+
+    if (matchMode === "event" && eventId) {
       const { data: calendarEvent } = await supabase
         .from("calendar_events")
         .select("title, description, location, start_time")
@@ -118,6 +167,11 @@ export async function POST(request: Request) {
 
     for (const networker of networkersResult.data ?? []) {
       const portfolio = portfoliosByUser.get(networker.user_id)
+      const discoverable = discoverableByUser.get(networker.user_id)
+      const prefSummary = discoverable
+        ? [discoverable.needs, discoverable.goals].filter(Boolean).join(" · ")
+        : null
+
       candidates.push({
         id: networker.user_id,
         type: "networker",
@@ -126,26 +180,31 @@ export async function POST(request: Request) {
         company: networker.company,
         email: networker.email,
         linkedin: networker.linkedin,
-        bio: portfolio?.bio ?? null,
+        bio: portfolio?.bio ?? prefSummary ?? null,
+        interests: discoverable?.interests ?? [],
+        goals: discoverable?.needs || discoverable?.goals || null,
         portfolioSlug: portfolio?.slug ?? null,
       })
     }
 
     const userGoals = goalsOverride || prefsResult.data?.goals || ""
+    const userNeeds = needsOverride || prefsResult.data?.needs || ""
     const userInterests =
       interestsOverride.length > 0
         ? interestsOverride
         : prefsResult.data?.interests ?? []
 
     const matches: EventMatchResult[] = await generateEventMatches({
+      matchMode,
       userProfile: {
         name: profileResult.data?.name,
         title: profileResult.data?.title,
         company: profileResult.data?.company,
         goals: userGoals,
+        needs: userNeeds,
         interests: userInterests,
       },
-      event,
+      event: matchMode === "event" ? event : null,
       candidates,
     })
 
@@ -180,7 +239,8 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       matches: enrichedMatches,
-      event,
+      matchMode,
+      event: matchMode === "event" ? event : null,
       candidateCount: candidates.length,
     })
   } catch (error: unknown) {

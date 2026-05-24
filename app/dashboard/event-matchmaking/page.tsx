@@ -24,15 +24,15 @@ export default async function EventMatchmakingPage() {
           <div className="mb-10 sm:mb-12 animate-fade-in-up">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 mb-4 sm:mb-6 rounded-full bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border border-primary/20 backdrop-blur-xl">
               <Handshake className="h-4 w-4 text-primary" />
-              <span className="text-xs font-semibold text-primary">AI Event Matchmaking</span>
+              <span className="text-xs font-semibold text-primary">AI Matchmaking</span>
             </div>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-2 sm:mb-3 tracking-tight">
               <span className="bg-gradient-to-br from-foreground via-foreground to-foreground/70 bg-clip-text text-transparent">
-                Event Matchmaking
+                AI Matchmaking
               </span>
             </h1>
             <p className="text-base sm:text-lg text-foreground/70 max-w-2xl">
-              AI matches you with the right people before and during events — then helps you connect with personalized icebreakers.
+              Match by what you need anytime, or by a specific event — AI ranks connections and suggests icebreakers for both.
             </p>
           </div>
 
