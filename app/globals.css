@@ -202,6 +202,10 @@
   }
 
   /* Native app / Android WebView touch scrolling */
+  html.native-app {
+    scroll-behavior: auto;
+  }
+
   html.native-app,
   html.native-app body {
     height: 100%;
@@ -214,6 +218,17 @@
     -webkit-overflow-scrolling: touch;
     touch-action: pan-y;
     overscroll-behavior-y: contain;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
+
+  html.native-app .animate-blob,
+  html.native-app .animate-float {
+    animation: none !important;
+  }
+
+  html.native-app .pointer-events-none.animate-blob {
+    opacity: 0.35;
   }
 
   @media (pointer: coarse) {

@@ -2,13 +2,18 @@
 
 import { useState, useEffect } from "react"
 import { LoadingScreen } from "@/components/loading-screen"
+import { isNativeApp } from "@/lib/native-app"
 
 export function ClientLoadingWrapper({ children }: { children: React.ReactNode }) {
     const [isLoading, setIsLoading] = useState(true)
     const [showContent, setShowContent] = useState(false)
 
     useEffect(() => {
-        // Show loading screen immediately
+        if (isNativeApp()) {
+            setIsLoading(false)
+            return
+        }
+
         setShowContent(true)
     }, [])
 

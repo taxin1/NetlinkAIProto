@@ -12,16 +12,17 @@ const config: CapacitorConfig = {
     url: process.env.CAPACITOR_SERVER_URL || "https://www.networklinkai.com",
     cleartext: false,
     androidScheme: "https",
+    hostname: "www.networklinkai.com",
   },
   plugins: {
     SplashScreen: {
-      launchShowDuration: 2000,
-      launchAutoHide: true,
+      launchShowDuration: 0,
+      launchAutoHide: false,
       backgroundColor: "#FFFFFF",
       showSpinner: false,
       androidSplashResourceName: "icon",
       androidScaleType: "FIT_CENTER",
-      splashFadeInDuration: 300,
+      splashFadeInDuration: 200,
       splashFullScreen: true,
     },
     StatusBar: {
