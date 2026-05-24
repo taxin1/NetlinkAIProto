@@ -120,6 +120,14 @@ export function generateMetadata({
             },
         },
         category: 'Technology',
+        icons: {
+            icon: [
+                { url: '/favicon.png', type: 'image/png' },
+                { url: '/icon-light-32x32.png', sizes: '32x32', type: 'image/png' },
+            ],
+            apple: '/apple-icon.png',
+            shortcut: '/favicon.png',
+        },
     }
 }
 

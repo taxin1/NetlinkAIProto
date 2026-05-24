@@ -1,3 +1,5 @@
+import { siteConfig } from "@/lib/seo/metadata"
+
 export function StructuredData() {
   const jsonLd = {
     "@context": "https://schema.org",
@@ -21,7 +23,7 @@ export function StructuredData() {
       "name": "Netlink AI",
       "logo": {
         "@type": "ImageObject",
-        "url": "https://netlink-ai.vercel.app/Logo1.png"
+        "url": `${siteConfig.url}/Logo1.png`
       }
     },
     "featureList": [
