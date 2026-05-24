@@ -24,7 +24,12 @@ interface ChatbotProps {
   userId: string
 }
 
-async function sendMessageToAI(message: string, language: string = "en"): Promise<string> {
+async function sendMessageToAI(
+  message: string,
+  language: string = "en",
+  userId?: string,
+  conversationHistory?: Array<{ role: string; content: string }>
+): Promise<string> {
   try {
     const response = await fetch("/api/chat", {
       method: "POST",
@@ -34,6 +39,8 @@ async function sendMessageToAI(message: string, language: string = "en"): Promis
       body: JSON.stringify({
         message,
         language,
+        userId,
+        conversationHistory,
       }),
     })
 
@@ -89,8 +96,8 @@ export function Chatbot({ userId }: ChatbotProps) {
       {
         id: "1",
         content: lang === "ja" 
-          ? "こんにちは！AIアシスタントです。タイピングまたは音声コマンドを使用できます。「メールを送信」や「連絡先を表示」と言ってみてください！"
-          : "Hello! I'm your AI assistant. You can type or use voice commands. Try saying 'send email' or 'show my contacts'!",
+          ? "こんにちは！AIアシスタントです。連絡先の「出会った場所」と「日付」を覚えて、フォローアップや活用方法を提案します。タイピングまたは音声コマンドが使えます。"
+          : "Hello! I'm your AI assistant. I remember where and when you met each contact, and I can suggest how to follow up and utilize your network. Try asking \"Who should I follow up with from last week's event?\"",
         role: "assistant",
         timestamp: new Date(),
       }
@@ -266,7 +273,11 @@ export function Chatbot({ userId }: ChatbotProps) {
     setIsLoading(true)
 
     try {
-      const response = await sendMessageToAI(userMessage.content, lang)
+      const history = messages.slice(-8).map((m) => ({
+        role: m.role,
+        content: m.content,
+      }))
+      const response = await sendMessageToAI(userMessage.content, lang, userId, history)
       
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -531,7 +542,7 @@ export function Chatbot({ userId }: ChatbotProps) {
         )}
       </CardHeader>
       <CardContent className="flex-1 flex flex-col p-4 pt-0 overflow-hidden">
-        <div className="flex-1 mb-4 pr-4 overflow-y-auto overflow-x-hidden">
+        <div className="flex-1 mb-4 pr-4 min-h-0 overflow-y-auto overflow-x-hidden touch-pan-y touch-scroll">
           <div className="space-y-4">
             {messages.map((message) => (
               <div

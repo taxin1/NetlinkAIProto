@@ -1,51 +1,10 @@
-import { callGemini, callOpenRouterChat, generateText, retryWithBackoff } from "@/lib/gemini"
-
-export const CHAT_GEMINI_MODEL = "gemini-2.5-flash"
-export const CHAT_GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta"
-
-export const CHAT_OPENROUTER_API_BASE = "https://openrouter.ai/api/v1"
-
-const CHAT_OPENROUTER_MODELS = [
-  "nvidia/nemotron-nano-9b-v2:free",
-  "openai/gpt-oss-120b:free",
-  "google/gemma-3n-e4b-it:free"
-]
-
-export const CHAT_BYTEZ_API_BASE = "https://api.bytez.com/models/v2"
-
-export const CHAT_BYTEZ_MODELS = [
-  "ek-ai/DeepSeek-R1-Distill-Qwen-1.5B",
-  "Qwen/Qwen3-0.6B",
-  "microsoft/Phi-3-mini-4k-instruct"
-]
-
-let assistantLastRequestTime = 0
-const ASSISTANT_MIN_REQUEST_INTERVAL = 1000
-
-async function assistantThrottle(): Promise<void> {
-  const now = Date.now()
-  const timeSinceLastRequest = now - assistantLastRequestTime
-  if (timeSinceLastRequest < ASSISTANT_MIN_REQUEST_INTERVAL) {
-    await new Promise(resolve => setTimeout(resolve, ASSISTANT_MIN_REQUEST_INTERVAL - timeSinceLastRequest))
-  }
-  assistantLastRequestTime = Date.now()
-}
-
-function getChatOpenRouterApiKey(): string {
-  const apiKey = process.env.OPENROUTER_API_KEY
-  if (!apiKey) {
-    throw new Error("OPENROUTER_API_KEY environment variable is not set. Please add it to your .env.local file.")
-  }
-  return apiKey
-}
-
-function getChatBytezApiKey(): string {
-  const apiKey = process.env.BYTEZ_API_KEY
-  if (!apiKey) {
-    throw new Error("BYTEZ_API_KEY environment variable is not set. Please add it to your .env.local file.")
-  }
-  return apiKey
-}
+import { generateText } from "@/lib/gemini"
+import { callAIWithFallbacks } from "@/lib/ai/providers"
+import {
+  buildAIContextPrompt,
+  buildContactUtilizationGuide,
+  type UserAIContext,
+} from "@/lib/ai/contact-context"
 
 interface AIResponse {
   content: string
@@ -58,82 +17,21 @@ interface AssistantContext {
   contacts: any[]
   recentEmails: any[]
   conversationHistory: any[]
+  userContext?: UserAIContext
 }
 
-type ChatProvider = "gemini" | "openrouter" | "bytez"
-
-type ChatErrorType =
-  | "rate_limit"
-  | "overloaded"
-  | "network"
-  | "auth"
-  | "config"
-  | "invalid_request"
-  | "unknown"
-
-type ChatProviderError = {
-  provider: ChatProvider
-  type: ChatErrorType
-  retryable: boolean
-  message: string
-}
-
-function classifyChatError(provider: ChatProvider, error: unknown): ChatProviderError {
-  const message =
-    error instanceof Error
-      ? error.message
-      : typeof error === "string"
-        ? error
-        : String(error)
-
-  const lower = message.toLowerCase()
-
-  if (lower.includes("429") || lower.includes("rate limit")) {
-    return { provider, type: "rate_limit", retryable: true, message }
-  }
-
-  if (
-    lower.includes("503") ||
-    lower.includes("overloaded") ||
-    lower.includes("unavailable")
-  ) {
-    return { provider, type: "overloaded", retryable: true, message }
-  }
-
-  if (
-    lower.includes("network") ||
-    lower.includes("econnreset") ||
-    lower.includes("fetch") ||
-    lower.includes("timeout")
-  ) {
-    return { provider, type: "network", retryable: true, message }
-  }
-
-  if (
-    lower.includes("401") ||
-    lower.includes("unauthorized") ||
-    lower.includes("forbidden")
-  ) {
-    return { provider, type: "auth", retryable: false, message }
-  }
-
-  if (
-    lower.includes("api key") ||
-    lower.includes("environment variable is not set") ||
-    lower.includes("not configured")
-  ) {
-    return { provider, type: "config", retryable: false, message }
-  }
-
-  if (lower.includes("400") || lower.includes("invalid")) {
-    return { provider, type: "invalid_request", retryable: false, message }
-  }
-
-  return { provider, type: "unknown", retryable: false, message }
+interface ChatOptions {
+  language?: string
+  userContext?: UserAIContext
+  conversationHistory?: Array<{ role: string; content: string }>
 }
 
 export async function generateAIResponse(context: AssistantContext): Promise<AIResponse> {
-  const { message, contacts, recentEmails, conversationHistory } = context
+  const { message, conversationHistory, userContext } = context
+
+  const networkContext = userContext
+    ? buildAIContextPrompt(userContext, message)
+    : `Contacts: ${context.contacts.length} | Emails: ${context.recentEmails.length}`
 
   const systemPrompt = `You are an AI networking assistant for Network Link AI, a comprehensive AI-powered business networking and contact management platform.
 
@@ -142,8 +40,8 @@ Network Link AI helps professionals build, manage, and grow their professional n
 
 PLATFORM FEATURES:
 - Business Card Scanner: Upload photos to automatically extract contact information using AI
-- Contact Management: Store and organize contacts with company, position, phone, email, LinkedIn, notes
-- AI Email Generation: Generate professional emails for cold outreach, introductions, follow-ups, thank you messages
+- Contact Management: Store contacts with where_met (where you met) and met_at (date met) for relationship memory
+- AI Email Generation: Generate professional emails using meeting context and interaction history
 - Email Campaigns: Send personalized bulk emails with AI-generated unique content per recipient
 - Event Management: Create and manage calendar events with automatic URL scraping (Zoom, Meet, Teams, Eventbrite)
 - Voice Commands: Hands-free control to send emails, add contacts, view events, check statistics
@@ -151,18 +49,9 @@ PLATFORM FEATURES:
 - Analytics: Track networking activity, email performance, contact growth
 - Real-time Updates: Live notifications for new contacts, events, email activity
 
-AVAILABLE ACTIONS:
-- Help users write professional emails using the AI email generator
-- Provide networking strategies based on their contact base
-- Suggest follow-up activities and relationship building tactics
-- Analyze contact networks and identify opportunities
-- Explain platform features and how to use them effectively
-- Assist with contact organization and management
+${buildContactUtilizationGuide()}
 
-User's Context:
-- Recent contacts: ${contacts.length} contacts (${contacts.slice(0, 3).map(c => c.name).join(', ')})
-- Recent emails: ${recentEmails.length} emails sent
-- Conversation history: ${conversationHistory.length} previous messages
+${networkContext}
 
 Current user message: "${message}"
 
@@ -185,18 +74,18 @@ WRONG Examples (NEVER DO THIS):
 * Business Networking
 * Contact Management
 
-Provide helpful, actionable advice. If the user asks about specific contacts or emails, reference the context. When explaining features, describe how they work within the Network Link AI platform.`
+Provide helpful, actionable advice. When the user asks about a contact, use their where_met and met_at data. Suggest specific next steps to utilize each relationship. When explaining features, describe how they work within the Network Link AI platform.`
 
   const conversationContext = conversationHistory
-    .slice(-6)
-    .map(msg => `${msg.type}: ${msg.content}`)
+    .slice(-8)
+    .map(msg => `${msg.type || msg.role}: ${msg.content}`)
     .join("\n")
 
-  const fullPrompt = `${systemPrompt}\n\nConversation context:\n${conversationContext}\n\nUser: ${message}\n\nAssistant:`
+  const fullPrompt = `${systemPrompt}\n\nConversation context:\n${conversationContext || "None"}\n\nUser: ${message}\n\nAssistant:`
 
   try {
     const response = await generateText(fullPrompt)
-    const suggestions = generateSuggestions(message, contacts, recentEmails)
+    const suggestions = generateSuggestions(message, userContext)
 
     return {
       content: response,
@@ -208,10 +97,19 @@ Provide helpful, actionable advice. If the user asks about specific contacts or 
   }
 }
 
-function generateSuggestions(message: string, contacts: any[], recentEmails: any[]): string[] {
+function generateSuggestions(message: string, userContext?: UserAIContext): string[] {
   const lowerMessage = message.toLowerCase()
 
   if (lowerMessage.includes("email") || lowerMessage.includes("write") || lowerMessage.includes("send")) {
+    const recentContact = userContext?.contacts.find((c) => c.where_met)
+    if (recentContact) {
+      return [
+        `Write a follow-up to ${recentContact.name} from ${recentContact.where_met}`,
+        "Who should I email first from my recent event?",
+        "Draft a warm intro email using meeting context",
+        "Create a thank you email after networking"
+      ]
+    }
     return [
       "Help me write a follow-up email",
       "Generate an introduction email",
@@ -220,29 +118,43 @@ function generateSuggestions(message: string, contacts: any[], recentEmails: any
     ]
   }
 
-  if (lowerMessage.includes("contact") || lowerMessage.includes("network") || lowerMessage.includes("connection")) {
+  if (
+    lowerMessage.includes("contact") ||
+    lowerMessage.includes("network") ||
+    lowerMessage.includes("connection") ||
+    lowerMessage.includes("met")
+  ) {
+    const eventGroup = userContext?.contacts.find((c) => c.where_met)?.where_met
+    if (eventGroup) {
+      return [
+        `Who did I meet at ${eventGroup}?`,
+        "Suggest follow-ups for contacts I met this week",
+        "Which contacts need meeting context added?",
+        "Create a networking strategy by event"
+      ]
+    }
     return [
       "Analyze my contact network",
-      "Suggest new networking opportunities",
-      "Help me organize my contacts",
+      "Who should I follow up with this week?",
+      "Group my contacts by where I met them",
       "Create a networking strategy"
     ]
   }
 
   if (lowerMessage.includes("follow") || lowerMessage.includes("next") || lowerMessage.includes("plan")) {
     return [
-      "Create a follow-up timeline",
-      "Suggest follow-up activities",
-      "Plan networking events",
+      "Create a follow-up timeline by date met",
+      "Suggest follow-up activities for recent contacts",
+      "Plan post-event outreach",
       "Set relationship goals"
     ]
   }
 
   return [
-    "Help me write an email",
-    "Give me networking tips",
+    "Who should I follow up with?",
+    "How can I use my contacts from last event?",
     "Analyze my recent activity",
-    "Suggest conversation starters"
+    "Suggest conversation starters with meeting context"
   ]
 }
 
@@ -291,43 +203,43 @@ Provide insights about network diversity, potential opportunities, and suggestio
   return await generateText(prompt)
 }
 
-export async function generateChatResponse(message: string, language: string = "en"): Promise<string> {
+export async function generateChatResponse(
+  message: string,
+  options: ChatOptions | string = "en"
+): Promise<string> {
+  const opts: ChatOptions =
+    typeof options === "string" ? { language: options } : options
+  const { language = "en", userContext, conversationHistory = [] } = opts
+
   const languagePrompt = language === "ja" || language === "japanese"
     ? "IMPORTANT: RESPOND IN JAPANESE. すべての回答は日本語で行ってください。"
     : "IMPORTANT: RESPOND IN ENGLISH."
 
-  const systemPrompt = `You are a helpful AI assistant for Network Link AI, a comprehensive AI-powered business networking platform. You help users with business networking, contact management, and professional communication.
+  const networkBlock = userContext
+    ? `\n\n${buildContactUtilizationGuide()}\n\n${buildAIContextPrompt(userContext, message)}`
+    : ""
+
+  const historyBlock =
+    conversationHistory.length > 0
+      ? `\n\nRecent conversation:\n${conversationHistory
+          .slice(-8)
+          .map((m) => `${m.role}: ${m.content}`)
+          .join("\n")}`
+      : ""
+
+  const systemPrompt = `You are a helpful AI networking assistant for Network Link AI. You help users build relationships, follow up with contacts, and utilize their network effectively.
 
 ${languagePrompt}
 
-ABOUT NETWORK LINK AI PLATFORM:
-Network Link AI is an AI-powered business networking and contact management platform that helps professionals build, manage, and grow their professional networks. The platform includes:
+You have access to the user's real contact data including where they met each person and the date they met. Use this context to give specific, personalized advice — not generic networking tips.
 
-CORE FEATURES:
-- Business Card Scanner: AI-powered OCR to extract contact information from business card photos
-- Contact Management: Comprehensive contact database with company, position, phone, email, LinkedIn, and notes
-- Email Generation: AI-powered email composition for cold emails, introductions, follow-ups, and thank you messages
-- Email Campaigns: Bulk email sending with personalized AI-generated content for each recipient
-- Event Management: Create, manage, and track calendar events and networking opportunities
-- Event URL Scraping: Automatic extraction of event details from URLs (Zoom, Google Meet, Teams, Eventbrite, etc.)
-- Voice Commands: Hands-free voice assistant for sending emails, adding contacts, viewing events, and getting statistics
-- AI Assistant: Conversational AI that provides networking advice, email writing help, and contact analysis
-- Analytics Dashboard: Track networking activity, email performance, and relationship insights
-- Real-time Notifications: Get notified about new contacts, events, and email activity
-
-TECHNICAL CAPABILITIES:
-- Uses multiple AI providers (Google Gemini 2.5 Flash, OpenRouter, and Bytez) for intelligent processing with robust fallbacks
-- Supabase backend for data storage and authentication
-- Real-time database updates using Supabase subscriptions
-- SMTP email sending (Gmail and custom servers)
-- Responsive web interface with modern UI/UX
-
-USER WORKFLOWS:
-1. Upload business card photo → AI extracts info → Contact saved automatically
-2. Select contact → Generate AI email → Review/edit → Send individually or in campaign
-3. Paste event URL → AI scrapes details → Event created with auto-filled information
-4. Voice command → AI parses intent → Action executed (with confirmation for sensitive operations)
-5. Chat with AI Assistant → Get networking advice, email help, contact analysis
+CORE CAPABILITIES:
+- Remember and reference where_met (event, conference, LinkedIn, intro) and met_at (date met) for each contact
+- Suggest how to utilize specific contacts (follow-up emails, intros, calls, invites)
+- Group contacts by event for post-conference outreach
+- Recommend who to follow up with based on days since met and email history
+- Help draft emails that reference the meeting context naturally
+${networkBlock}
 
 CRITICAL FORMATTING RULES - MUST FOLLOW STRICTLY:
 1. NEVER use asterisks (*) or double asterisks (**) in your response under any circumstances
@@ -337,196 +249,25 @@ CRITICAL FORMATTING RULES - MUST FOLLOW STRICTLY:
 5. Keep responses concise, professional, and to the point
 6. Use clear, readable formatting with plain text only - no markdown, no asterisks, no special formatting characters
 
-CORRECT Example of formatting:
-Key Features:
-- Business Networking
-- Contact Management
-- Professional Communication
+When users ask about contacts, name specific people from their data. When meeting context is missing, suggest they add where_met and met_at in the contact profile.`
 
-WRONG Examples (NEVER DO THIS):
-**Key Features:**
-* Business Networking
-* Contact Management
-
-Be friendly, professional, and knowledgeable about the platform's capabilities. When users ask about features, explain how they work within Network Link AI.`
-
-  const providerErrors: ChatProviderError[] = []
+  const userMessage =
+    conversationHistory.length > 0
+      ? `${historyBlock}\n\nUser: ${message}`
+      : message
 
   try {
-    return await retryWithBackoff(async () => {
-      await assistantThrottle()
-      return await callGemini(message, systemPrompt)
-    }, 3, 1000)
+    const { text } = await callAIWithFallbacks({
+      message: userMessage,
+      systemPrompt,
+    })
+    return text
   } catch (error) {
-    console.error("Gemini chat failed, trying OpenRouter fallback", error)
-    providerErrors.push(classifyChatError("gemini", error))
+    console.error("All AI providers failed for chat", error)
+    const providerErrors = (error as { providerErrors?: unknown }).providerErrors
+    const errorMessage = error instanceof Error ? error.message : "All AI providers failed for chat."
+    const combined: Error & { providerErrors?: unknown } = new Error(errorMessage)
+    if (providerErrors) combined.providerErrors = providerErrors
+    throw combined
   }
-
-  try {
-    return await retryWithBackoff(async () => {
-      await assistantThrottle()
-      return await callOpenRouterChat(message, systemPrompt)
-    }, 3, 1000)
-  } catch (error) {
-    console.error("OpenRouter chat fallback failed", error)
-    providerErrors.push(classifyChatError("openrouter", error))
-  }
-
-  for (const model of CHAT_OPENROUTER_MODELS) {
-    try {
-      const result = await retryWithBackoff(async () => {
-        await assistantThrottle()
-        return await callOpenRouterChatModel(model, message, systemPrompt)
-      }, 2, 1000)
-      return result
-    } catch (error) {
-      console.error("OpenRouter chat model fallback failed", model, error)
-      const classified = classifyChatError("openrouter", error)
-      providerErrors.push({
-        ...classified,
-        message: `${model}: ${classified.message}`
-      })
-    }
-  }
-
-  for (const modelId of CHAT_BYTEZ_MODELS) {
-    try {
-      const result = await retryWithBackoff(async () => {
-        await assistantThrottle()
-        return await callBytezChatModel(modelId, message, systemPrompt)
-      }, 2, 1000)
-      return result
-    } catch (error) {
-      console.error("Bytez chat model fallback failed", modelId, error)
-      const classified = classifyChatError("bytez", error)
-      providerErrors.push({
-        ...classified,
-        message: `${modelId}: ${classified.message}`
-      })
-    }
-  }
-
-  const combined = providerErrors.map(e => `${e.provider}:${e.type}:${e.message}`).join(" | ")
-  const error: any = new Error(
-    providerErrors.length > 0
-      ? `All AI providers failed for chat. Details: ${combined}`
-      : "All AI providers failed for chat."
-  )
-  error.providerErrors = providerErrors
-  throw error
-}
-
-async function callOpenRouterChatModel(
-  model: string,
-  message: string,
-  systemPrompt: string
-): Promise<string> {
-  await assistantThrottle()
-  const apiKey = getChatOpenRouterApiKey()
-
-  const messages = [
-    {
-      role: "system",
-      content: systemPrompt
-    },
-    {
-      role: "user",
-      content: message
-    }
-  ]
-
-  const response = await fetch(
-    `${CHAT_OPENROUTER_API_BASE}/chat/completions`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${apiKey}`,
-        "HTTP-Referer": process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
-        "X-Title": "Network Link AI"
-      },
-      body: JSON.stringify({
-        model,
-        messages,
-        temperature: 0.7,
-        max_tokens: 2048
-      })
-    }
-  )
-
-  if (!response.ok) {
-    const errorText = await response.text()
-    throw new Error(`OpenRouter chat API error for ${model}: ${response.status} - ${errorText}`)
-  }
-
-  const data = await response.json()
-  const content = data.choices && data.choices[0]?.message?.content
-
-  if (!content) {
-    throw new Error(`No response content from OpenRouter chat model ${model}`)
-  }
-
-  return typeof content === "string"
-    ? content
-    : Array.isArray(content)
-      ? content.map((part: any) => part.text || "").join("\n")
-      : String(content)
-}
-
-async function callBytezChatModel(
-  modelId: string,
-  message: string,
-  systemPrompt: string
-): Promise<string> {
-  await assistantThrottle()
-  const apiKey = getChatBytezApiKey()
-
-  const response = await fetch(
-    `${CHAT_BYTEZ_API_BASE}/${encodeURIComponent(modelId)}`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": apiKey
-      },
-      body: JSON.stringify({
-        messages: [
-          {
-            role: "user",
-            content: [
-              {
-                type: "text",
-                text: `${systemPrompt}\n\nUser: ${message}`
-              }
-            ]
-          }
-        ],
-        stream: false,
-        params: {
-          max_length: 2048,
-          temperature: 0.7
-        }
-      })
-    }
-  )
-
-  if (!response.ok) {
-    const errorText = await response.text()
-    throw new Error(`Bytez chat API error for ${modelId}: ${response.status} - ${errorText}`)
-  }
-
-  const data = await response.json()
-  const output = data.output
-
-  if (!output) {
-    throw new Error(`No output field in Bytez response for model ${modelId}`)
-  }
-
-  const content = typeof output.content === "string" ? output.content : output.content?.toString?.() ?? JSON.stringify(output)
-
-  if (!content) {
-    throw new Error(`No content in Bytez output for model ${modelId}`)
-  }
-
-  return content
 }

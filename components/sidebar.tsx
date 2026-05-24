@@ -18,6 +18,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Subscription } from "@/types/subscription"
+import { FileText } from "lucide-react"
 
 interface SidebarProps {
   user: {
@@ -61,6 +62,7 @@ export function Sidebar({ user }: SidebarProps) {
     ...(!isGuestMode ? [
       { name: t("aiCampaigns"), href: "/dashboard/campaigns", icon: Wand2 },
     ] : []),
+    { name: "Quotation Form", href: "/dashboard/quotation", icon: FileText },
     { name: t("analytics"), href: "/dashboard/analytics", icon: BarChart3 },
     { name: t("aiAssistant"), href: "/dashboard/ai-assistant", icon: Bot },
     { name: t("settings"), href: "/dashboard/settings", icon: Settings },
@@ -169,9 +171,15 @@ export function Sidebar({ user }: SidebarProps) {
   // 5. Internal components
   const SidebarContent = ({ onItemClick }: { onItemClick?: () => void }) => (
     <>
-      <div className="flex h-48 items-center justify-center border-b border-slate-800/50 px-4">
+      <div className={cn(
+        "flex shrink-0 items-center justify-center border-b border-slate-800/50 px-4",
+        isMobile ? "h-20" : "h-48"
+      )}>
         <Link href="/dashboard" className="flex items-center group w-full" onClick={onItemClick}>
-          <div className="relative h-40 w-full overflow-hidden transition-all duration-700 transform group-hover:scale-110 drop-shadow-[0_0_20px_rgba(59,130,246,0.5)]">
+          <div className={cn(
+            "relative w-full overflow-hidden transition-all duration-700 transform group-hover:scale-110 drop-shadow-[0_0_20px_rgba(59,130,246,0.5)]",
+            isMobile ? "h-16" : "h-40"
+          )}>
             <Image 
               src="/Logo1.png" 
               alt="Netlink AI Logo" 
@@ -192,7 +200,10 @@ export function Sidebar({ user }: SidebarProps) {
         )}
       </div>
 
-      <nav className="flex-1 space-y-1 p-4 overflow-y-auto">
+      <nav
+        data-scroll-container="true"
+        className="flex-1 min-h-0 space-y-1 overflow-y-auto overscroll-contain p-4 touch-pan-y touch-scroll"
+      >
         {navigation.map((item) => {
           const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname?.startsWith(item.href))
           const showGoogleBadge = (item.name === "Calendar" || item.name === "Events") && googleCalendarConnected
@@ -295,7 +306,7 @@ export function Sidebar({ user }: SidebarProps) {
         ))}
       </nav>
 
-      <div className="border-t border-slate-800/50 p-4">
+      <div className="shrink-0 border-t border-slate-800/50 p-4">
         <div className="mb-3 px-4">
           <p className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">{t("account")}</p>
           <p className="text-sm font-medium text-slate-300 truncate mb-2">{user.email}</p>
@@ -364,9 +375,12 @@ export function Sidebar({ user }: SidebarProps) {
 
       {isMobile && (
         <Dialog open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-          <DialogContent className="fixed left-0 top-0 h-full w-[280px] max-w-[85vw] translate-x-0 translate-y-0 rounded-none border-r border-slate-800/50 bg-slate-900/95 backdrop-blur-xl p-0">
+          <DialogContent
+            showCloseButton={false}
+            className="fixed left-0 top-0 flex h-full max-h-dvh w-[280px] max-w-[85vw] translate-x-0 translate-y-0 flex-col overflow-hidden rounded-none border-r border-slate-800/50 bg-slate-900/95 p-0 backdrop-blur-xl"
+          >
             <DialogTitle className="sr-only">Navigation Menu</DialogTitle>
-            <div className="relative z-20 flex h-full w-full flex-col">
+            <div className="relative z-20 flex h-full min-h-0 w-full flex-col overflow-hidden">
               <SidebarContent onItemClick={() => setMobileMenuOpen(false)} />
             </div>
           </DialogContent>
@@ -374,7 +388,7 @@ export function Sidebar({ user }: SidebarProps) {
       )}
 
       {!isMobile && (
-        <div className="relative z-20 flex h-screen w-64 flex-col border-r border-slate-800/50 bg-slate-900/80 backdrop-blur-xl">
+        <div className="relative z-20 flex h-screen min-h-0 w-64 flex-col overflow-hidden border-r border-slate-800/50 bg-slate-900/80 backdrop-blur-xl">
           <SidebarContent />
         </div>
       )}

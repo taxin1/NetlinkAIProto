@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import { GeistSans } from 'geist/font/sans'
 import { GeistMono } from 'geist/font/mono'
@@ -7,6 +7,7 @@ import { ThemeProvider } from '@/components/theme-provider'
 import { PayPalErrorHandler } from '@/components/paypal-error-handler'
 import { ClientLoadingWrapper } from '@/components/client-loading-wrapper'
 import { GoogleTranslate } from '@/components/google-translate'
+import { MobileTouchFix } from '@/components/mobile-touch-fix'
 import { AuthSessionRefresh } from '@/components/auth-session-refresh'
 import { generateMetadata } from '@/lib/seo/metadata'
 import { generateOrganizationSchema, generateWebsiteSchema, generateSoftwareApplicationSchema } from '@/lib/seo/structured-data'
@@ -19,6 +20,16 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = generateMetadata({})
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
+    { media: '(prefers-color-scheme: dark)', color: '#0f172a' },
+  ],
+}
 
 export default function RootLayout({
   children,
@@ -46,6 +57,7 @@ export default function RootLayout({
         />
       </head>
       <body className={`${inter.variable} ${GeistSans.variable} ${GeistMono.variable} font-sans antialiased`} suppressHydrationWarning>
+        <MobileTouchFix />
         <AuthSessionRefresh />
         <ClientLoadingWrapper>
           <PayPalErrorHandler />

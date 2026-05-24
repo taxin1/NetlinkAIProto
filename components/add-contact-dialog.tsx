@@ -52,6 +52,8 @@ export function AddContactDialog({ userId }: AddContactDialogProps) {
       const company = formData.get("company") as string
       const position = formData.get("position") as string
       const notes = formData.get("notes") as string
+      const where_met = (formData.get("where_met") as string) || null
+      const met_at = (formData.get("met_at") as string) || null
 
       if (isGuest(userId)) {
         // Handle guest contact save to LocalStorage
@@ -65,6 +67,8 @@ export function AddContactDialog({ userId }: AddContactDialogProps) {
           company,
           position,
           notes,
+          where_met,
+          met_at,
           created_at: new Date().toISOString()
         }
         guestContacts.unshift(newContact)
@@ -95,15 +99,20 @@ export function AddContactDialog({ userId }: AddContactDialogProps) {
         company,
         position,
         notes,
+        where_met,
+        met_at: met_at || null,
       })
 
       if (error) throw error
 
       // Log event
+      const meetingDesc = where_met
+        ? `Added ${name} (met at ${where_met}${met_at ? ` on ${met_at}` : ""})`
+        : `Added ${name} to contacts`
       await supabase.from("events").insert({
         user_id: userId,
         event_type: "connection",
-        description: `Added ${formData.get("name")} to contacts`,
+        description: meetingDesc,
       })
 
       // Increment guest usage
@@ -153,6 +162,19 @@ export function AddContactDialog({ userId }: AddContactDialogProps) {
           <div className="grid gap-2">
             <Label htmlFor="position">Position</Label>
             <Input id="position" name="position" className="bg-secondary border-border" />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="where_met">Where You Met</Label>
+            <Input
+              id="where_met"
+              name="where_met"
+              placeholder="Tech Conference, LinkedIn, intro from Jane..."
+              className="bg-secondary border-border"
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="met_at">Date Met</Label>
+            <Input id="met_at" name="met_at" type="date" className="bg-secondary border-border" />
           </div>
           <div className="grid gap-2">
             <Label htmlFor="notes">Notes</Label>

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { generateEmailWithGemini } from "@/lib/gemini"
 import { GEMINI_API_BASE, GEMINI_MODEL } from "@/lib/gemini"
+import { formatContactForAI } from "@/lib/ai/contact-context"
 
 interface CommandIntent {
   action: string
@@ -59,7 +60,7 @@ export async function POST(request: NextRequest) {
         .from("calendar_events")
         .select("*")
         .eq("user_id", userId)
-        .order("event_date", { ascending: true })
+        .order("start_time", { ascending: true })
         .limit(10),
       
       // Email campaigns - all campaigns with status
@@ -105,7 +106,7 @@ export async function POST(request: NextRequest) {
 
     // Build comprehensive context string
     const contactsSummary = contacts.length > 0 
-      ? contacts.slice(0, 10).map(c => `${c.name}${c.email ? ` (${c.email})` : ''}${c.company ? ` at ${c.company}` : ''}`).join(", ")
+      ? contacts.slice(0, 10).map(c => formatContactForAI(c as any)).join("; ")
       : "No contacts yet"
     
     const emailsSummary = emails.length > 0
@@ -116,7 +117,7 @@ export async function POST(request: NextRequest) {
       : "No emails yet"
     
     const eventsSummary = events.length > 0
-      ? events.slice(0, 5).map(e => `"${e.title}" on ${e.event_date}`).join(", ")
+      ? events.slice(0, 5).map(e => `"${e.title}" on ${e.start_time || e.event_date || "TBD"}`).join(", ")
       : "No upcoming events"
     
     const campaignsSummary = campaigns.length > 0
@@ -137,7 +138,7 @@ AVAILABLE VOICE ACTIONS:
 - view_campaigns: Show email campaigns
 - view_stats: Show dashboard statistics (contacts, emails, events, campaigns)
 - search_contact: Search for a specific contact by name
-- create_contact: Add a new contact with name, email, company, phone, LinkedIn, notes
+- create_contact: Add a new contact with name, email, company, phone, LinkedIn, notes, where_met (where you met), met_at (date met)
 - create_event: Create a new calendar event
 - get_stats: Show dashboard statistics
 - general_query: Answer general questions about the platform or data
@@ -283,6 +284,8 @@ Respond with ONLY a JSON object:
                   contactCompany: fullContact?.company || contact.company || "",
                   contactPosition: fullContact?.position || "",
                   contactNotes: fullContact?.notes || "",
+                  contactWhereMet: fullContact?.where_met || "",
+                  contactMetAt: fullContact?.met_at || "",
                   contactLinkedIn: fullContact?.linkedin_url || "",
                   contactTags: fullContact?.tags || [],
                   userProfile: userProfile,
@@ -404,8 +407,13 @@ Respond with ONLY a JSON object:
               company: intent.parameters.company || null,
               phone: intent.parameters.phone || null,
               notes: intent.parameters.notes || null,
+              where_met: intent.parameters.where_met || intent.parameters.event || null,
+              met_at: intent.parameters.met_at || intent.parameters.date_met || null,
             })
-            intent.response = error ? "I encountered an error while adding the contact." : `Great! I've added ${intent.parameters.name} to your contacts.`
+            const whereInfo = intent.parameters.where_met || intent.parameters.event
+            intent.response = error
+              ? "I encountered an error while adding the contact."
+              : `Great! I've added ${intent.parameters.name}${whereInfo ? ` (met at ${whereInfo})` : ""} to your contacts.`
           } else {
             intent.needsConfirmation = true
             intent.response = "To add a contact, I need at least a name and email address."
@@ -439,7 +447,7 @@ Respond with ONLY a JSON object:
           if (events.length === 0) {
             intent.response = "You don't have any upcoming events scheduled."
           } else {
-            const eventsList = events.slice(0, 5).map(e => `"${e.title}" on ${e.event_date}`).join(", ")
+            const eventsList = events.slice(0, 5).map(e => `"${e.title}" on ${e.start_time || e.event_date || "TBD"}`).join(", ")
             intent.response = `You have ${stats.totalEvents} events. Upcoming: ${eventsList}.`
           }
           break
@@ -468,7 +476,10 @@ Respond with ONLY a JSON object:
               c.email?.toLowerCase().includes(searchName)
             )
             if (found) {
-              intent.response = `Found ${found.name}${found.email ? ` (${found.email})` : ''}${found.company ? ` at ${found.company}` : ''}${found.position ? `, ${found.position}` : ''}.`
+              const meeting = found.where_met
+                ? ` Met at ${found.where_met}${found.met_at ? ` on ${found.met_at}` : ""}.`
+                : ""
+              intent.response = `Found ${found.name}${found.email ? ` (${found.email})` : ''}${found.company ? ` at ${found.company}` : ''}${found.position ? `, ${found.position}` : ''}.${meeting}`
             } else {
               intent.response = `I couldn't find a contact named "${intent.parameters.name}".`
             }

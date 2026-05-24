@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
 import { createClient } from "@/lib/supabase/client"
 import { isGuest } from "@/lib/guest-trial"
 import type { Contact } from "@/types/contact"
@@ -24,6 +25,9 @@ export function EditContactDialog({ contact, userId, open, onOpenChange }: EditC
   const [company, setCompany] = useState("")
   const [position, setPosition] = useState("")
   const [linkedinUrl, setLinkedinUrl] = useState("")
+  const [whereMet, setWhereMet] = useState("")
+  const [metAt, setMetAt] = useState("")
+  const [notes, setNotes] = useState("")
   const [isSaving, setIsSaving] = useState(false)
   const router = useRouter()
 
@@ -36,6 +40,9 @@ export function EditContactDialog({ contact, userId, open, onOpenChange }: EditC
       setCompany(contact.company || "")
       setPosition(contact.position || "")
       setLinkedinUrl(contact.linkedin_url || "")
+      setWhereMet(contact.where_met || "")
+      setMetAt(contact.met_at ? contact.met_at.split("T")[0] : "")
+      setNotes(contact.notes || "")
     } else {
       // Reset form
       setName("")
@@ -44,6 +51,9 @@ export function EditContactDialog({ contact, userId, open, onOpenChange }: EditC
       setCompany("")
       setPosition("")
       setLinkedinUrl("")
+      setWhereMet("")
+      setMetAt("")
+      setNotes("")
     }
   }, [contact])
 
@@ -67,6 +77,9 @@ export function EditContactDialog({ contact, userId, open, onOpenChange }: EditC
             company: company.trim() || null,
             position: position.trim() || null,
             linkedin_url: linkedinUrl.trim() || null,
+            where_met: whereMet.trim() || null,
+            met_at: metAt || null,
+            notes: notes.trim() || null,
             updated_at: new Date().toISOString()
           }
           localStorage.setItem(`contacts_${userId}`, JSON.stringify(guestContacts))
@@ -87,6 +100,9 @@ export function EditContactDialog({ contact, userId, open, onOpenChange }: EditC
           company: company.trim() || null,
           position: position.trim() || null,
           linkedin_url: linkedinUrl.trim() || null,
+          where_met: whereMet.trim() || null,
+          met_at: metAt || null,
+          notes: notes.trim() || null,
         })
         .eq("id", contact.id)
 
@@ -96,7 +112,7 @@ export function EditContactDialog({ contact, userId, open, onOpenChange }: EditC
       await supabase.from("events").insert({
         user_id: userId,
         contact_id: contact.id,
-        event_type: "contact_updated",
+        event_type: "note",
         description: `Updated contact ${name}`,
       })
 
@@ -190,6 +206,40 @@ export function EditContactDialog({ contact, userId, open, onOpenChange }: EditC
               value={linkedinUrl}
               onChange={(e) => setLinkedinUrl(e.target.value)}
               placeholder="https://linkedin.com/in/johndoe"
+              className="bg-slate-800/50 border-slate-700/50 text-white placeholder:text-slate-500"
+            />
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="where_met" className="text-slate-300">Where You Met</Label>
+            <Input
+              id="where_met"
+              value={whereMet}
+              onChange={(e) => setWhereMet(e.target.value)}
+              placeholder="Tech Conference, LinkedIn..."
+              className="bg-slate-800/50 border-slate-700/50 text-white placeholder:text-slate-500"
+            />
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="met_at" className="text-slate-300">Date Met</Label>
+            <Input
+              id="met_at"
+              type="date"
+              value={metAt}
+              onChange={(e) => setMetAt(e.target.value)}
+              className="bg-slate-800/50 border-slate-700/50 text-white"
+            />
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="notes" className="text-slate-300">Notes</Label>
+            <Textarea
+              id="notes"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Conversation topics, follow-up ideas..."
+              rows={3}
               className="bg-slate-800/50 border-slate-700/50 text-white placeholder:text-slate-500"
             />
           </div>

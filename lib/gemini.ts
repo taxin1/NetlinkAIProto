@@ -8,74 +8,17 @@ const DEFAULT_OPENROUTER_MODEL = "qwen/qwen3-14b:free"
 export const OPENROUTER_MODEL = DEFAULT_OPENROUTER_MODEL
 export const OPENROUTER_TEXT_MODEL = DEFAULT_OPENROUTER_MODEL
 
-const CHAT_OPENROUTER_MODELS = [
-  "google/gemma-3-12b-it:free",
-  "openai/gpt-oss-120b:free",
-  "google/gemma-3n-e4b-it:free"
-]
-
-const CORE_BYTEZ_API_BASE = "https://api.bytez.com/models/v2"
-
 export const CHAT_BYTEZ_MODELS = [
   "ek-ai/DeepSeek-R1-Distill-Qwen-1.5B",
   "Qwen/Qwen3-0.6B",
   "microsoft/Phi-3-mini-4k-instruct"
 ]
 
-const CORE_OPENROUTER_MODELS = [
-  OPENROUTER_TEXT_MODEL,
-  ...CHAT_OPENROUTER_MODELS,
-]
+export { throttle, retryWithBackoff } from "@/lib/ai/utils"
+export { callGemini, callOpenAI, generateAIContent, callAIWithFallbacks } from "@/lib/ai/providers"
 
-const CORE_BYTEZ_MODELS = CHAT_BYTEZ_MODELS
-
-let lastRequestTime = 0
-const MIN_REQUEST_INTERVAL = 1000
-
-export async function throttle(): Promise<void> {
-  const now = Date.now()
-  const timeSinceLastRequest = now - lastRequestTime
-  if (timeSinceLastRequest < MIN_REQUEST_INTERVAL) {
-    await new Promise(resolve => setTimeout(resolve, MIN_REQUEST_INTERVAL - timeSinceLastRequest))
-  }
-  lastRequestTime = Date.now()
-}
-
-export async function retryWithBackoff<T>(
-  fn: () => Promise<T>,
-  maxRetries: number = 3,
-  baseDelay: number = 2000
-): Promise<T> {
-  let lastError: Error | null = null
-
-  for (let attempt = 0; attempt < maxRetries; attempt++) {
-    try {
-      return await fn()
-    } catch (error: any) {
-      lastError = error instanceof Error ? error : new Error(String(error))
-
-      const isRetryable =
-        (error instanceof Error &&
-          (error.message.includes("503") ||
-            error.message.includes("429") ||
-            error.message.includes("overloaded") ||
-            error.message.includes("UNAVAILABLE") ||
-            error.message.includes("network") ||
-            error.message.includes("ECONNRESET"))) ||
-        (error?.response?.status === 503 || error?.response?.status === 429)
-
-      if (!isRetryable || attempt === maxRetries - 1) {
-        throw lastError
-      }
-
-      const delay = baseDelay * Math.pow(2, attempt) + Math.random() * 1000
-      console.log(`API call failed (attempt ${attempt + 1}/${maxRetries}), retrying in ${Math.round(delay)}ms...`)
-      await new Promise(resolve => setTimeout(resolve, delay))
-    }
-  }
-
-  throw lastError || new Error("Failed after retries")
-}
+import { throttle } from "@/lib/ai/utils"
+import { generateAIContent } from "@/lib/ai/providers"
 
 export function getApiKey(): string {
   const apiKey = process.env.GEMINI_API_KEY
@@ -85,74 +28,12 @@ export function getApiKey(): string {
   return apiKey
 }
 
-function getBytezApiKey(): string {
-  const apiKey = process.env.BYTEZ_API_KEY
+function getOpenRouterApiKey(): string {
+  const apiKey = process.env.OPENROUTER_API_KEY
   if (!apiKey) {
-    throw new Error("BYTEZ_API_KEY environment variable is not set. Please add it to your .env.local file.")
+    throw new Error("OPENROUTER_API_KEY environment variable is not set. Please add it to your .env.local file.")
   }
   return apiKey
-}
-
-export async function callGemini(prompt: string, systemInstruction?: string): Promise<string> {
-  await throttle()
-  const apiKey = getApiKey()
-
-  const noAsterisksRule = "CRITICAL: Never use asterisks (*) in your responses. Use plain dashes (-) for bullet points. No markdown formatting."
-
-  const systemContent = systemInstruction
-    ? `${systemInstruction}\n\n${noAsterisksRule}`
-    : noAsterisksRule
-
-  const contents: any[] = [
-    {
-      role: "user",
-      parts: [{ text: `${systemContent}\n\n${prompt}` }]
-    }
-  ]
-
-  const response = await fetch(
-    `${GEMINI_API_BASE}/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        contents,
-        generationConfig: {
-          temperature: 0.7,
-          maxOutputTokens: 2048,
-        },
-      }),
-    }
-  )
-
-  if (!response.ok) {
-    const errorText = await response.text()
-    console.error("Gemini API error response:", {
-      status: response.status,
-      statusText: response.statusText,
-      body: errorText
-    })
-    const error: any = new Error(`Gemini API request failed (${response.status}): ${errorText}`)
-    error.status = response.status
-    error.response = { status: response.status }
-    throw error
-  }
-
-  const data = await response.json()
-
-  if (data.error) {
-    console.error("Gemini API error:", data.error)
-    throw new Error(`Gemini API error: ${data.error.message || JSON.stringify(data.error)}`)
-  }
-
-  if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
-    return data.candidates[0].content.parts[0].text
-  }
-
-  console.error("No valid response from Gemini API:", data)
-  throw new Error("Failed to generate response: No valid response from AI")
 }
 
 interface EmailGenerationContext {
@@ -160,6 +41,8 @@ interface EmailGenerationContext {
   contactCompany: string
   contactPosition?: string
   contactNotes?: string
+  contactWhereMet?: string
+  contactMetAt?: string
   contactLinkedIn?: string
   contactTags?: string[]
   userProfile?: {
@@ -196,6 +79,8 @@ export async function generateEmailWithGemini(
     contactCompany,
     contactPosition,
     contactNotes,
+    contactWhereMet,
+    contactMetAt,
     contactLinkedIn,
     contactTags,
     userProfile,
@@ -294,6 +179,8 @@ RECIPIENT INFORMATION:
 - Company: ${contactCompany || 'Not specified'}
 - Position: ${contactPosition || 'Not specified'}
 - Notes about contact: ${contactNotes || 'None'}
+- Where you met: ${contactWhereMet || 'Not recorded'}
+- Date met: ${contactMetAt ? new Date(contactMetAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Not recorded'}
 - LinkedIn: ${contactLinkedIn || 'Not provided'}
 - Tags/Categories: ${contactTags?.join(', ') || 'None'}${previousEmailContext}${interactionContext}${aiMemoryContext}
 
@@ -347,62 +234,10 @@ EXAMPLES OF GOOD OPENINGS (NOT templates, but personalized):
 
 Write the email body now. Make it specific, authentic, and personalized - NOT a template.`
 
-  try {
-    return await retryWithBackoff(async () => {
-      return await callGemini(prompt)
-    }, 3, 1000)
-  } catch (error) {
-    console.error("Gemini email generation failed, trying OpenRouter fallback", error)
-  }
-
-  try {
-    return await retryWithBackoff(async () => {
-      return await callOpenRouterChat(
-        prompt,
-        "You are an expert email writer. Follow all instructions in the user message exactly."
-      )
-    }, 3, 1000)
-  } catch (error) {
-    console.error("OpenRouter primary email model failed", error)
-  }
-
-  for (const model of CORE_OPENROUTER_MODELS) {
-    try {
-      return await retryWithBackoff(async () => {
-        return await callOpenRouterChatModel(
-          model,
-          prompt,
-          "You are an expert email writer. Follow all instructions in the user message exactly."
-        )
-      }, 2, 1000)
-    } catch (modelError) {
-      console.error("OpenRouter email fallback model failed", model, modelError)
-    }
-  }
-
-  for (const modelId of CORE_BYTEZ_MODELS) {
-    try {
-      return await retryWithBackoff(async () => {
-        return await callBytezChatModel(
-          modelId,
-          prompt,
-          "You are an expert email writer. Follow all instructions in the user message exactly."
-        )
-      }, 2, 1000)
-    } catch (modelError) {
-      console.error("Bytez email fallback model failed", modelId, modelError)
-    }
-  }
-
-  throw new Error("All AI providers failed for email generation")
-}
-
-function getOpenRouterApiKey(): string {
-  const apiKey = process.env.OPENROUTER_API_KEY
-  if (!apiKey) {
-    throw new Error("OPENROUTER_API_KEY environment variable is not set. Please add it to your .env.local file.")
-  }
-  return apiKey
+  return generateAIContent({
+    message: prompt,
+    systemPrompt: "You are an expert email writer. Follow all instructions in the user message exactly.",
+  })
 }
 
 export async function callOpenRouterChat(
@@ -469,64 +304,6 @@ async function callOpenRouterChatModel(
       : String(content)
 }
 
-async function callBytezChatModel(
-  modelId: string,
-  message: string,
-  systemPrompt: string
-): Promise<string> {
-  await throttle()
-  const apiKey = getBytezApiKey()
-
-  const response = await fetch(
-    `${CORE_BYTEZ_API_BASE}/${encodeURIComponent(modelId)}`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": apiKey
-      },
-      body: JSON.stringify({
-        messages: [
-          {
-            role: "user",
-            content: [
-              {
-                type: "text",
-                text: `${systemPrompt}\n\nUser: ${message}`
-              }
-            ]
-          }
-        ],
-        stream: false,
-        params: {
-          max_length: 2048,
-          temperature: 0.7
-        }
-      })
-    }
-  )
-
-  if (!response.ok) {
-    const errorText = await response.text()
-    throw new Error(`Bytez chat API error for ${modelId}: ${response.status} - ${errorText}`)
-  }
-
-  const data = await response.json()
-  const output = data.output
-
-  if (!output) {
-    throw new Error(`No output field in Bytez response for model ${modelId}`)
-  }
-
-  const content = typeof output.content === "string" ? output.content : output.content?.toString?.() ?? JSON.stringify(output)
-
-  if (!content) {
-    throw new Error(`No content in Bytez output for model ${modelId}`)
-  }
-
-  return content
-}
-
 export async function generateText(prompt: string): Promise<string> {
   const formattingRules = `
 
@@ -549,54 +326,10 @@ WRONG Example (DO NOT DO THIS):
 
   const fullPrompt = prompt + formattingRules
 
-  try {
-    return await retryWithBackoff(async () => {
-      return await callGemini(fullPrompt)
-    }, 3, 1000)
-  } catch (error) {
-    console.error("Gemini text generation failed, trying OpenRouter fallback", error)
-  }
-
-  try {
-    return await retryWithBackoff(async () => {
-      return await callOpenRouterChat(
-        fullPrompt,
-        "You are a helpful text generator. Follow all formatting rules in the user message."
-      )
-    }, 3, 1000)
-  } catch (error) {
-    console.error("OpenRouter primary text model failed", error)
-  }
-
-  for (const model of CORE_OPENROUTER_MODELS) {
-    try {
-      return await retryWithBackoff(async () => {
-        return await callOpenRouterChatModel(
-          model,
-          fullPrompt,
-          "You are a helpful text generator. Follow all formatting rules in the user message."
-        )
-      }, 2, 1000)
-    } catch (modelError) {
-      console.error("OpenRouter text fallback model failed", model, modelError)
-    }
-  }
-
-  for (const modelId of CORE_BYTEZ_MODELS) {
-    try {
-      return await retryWithBackoff(async () => {
-        return await callBytezChatModel(
-          modelId,
-          fullPrompt,
-          "You are a helpful text generator. Follow all formatting rules in the user message."
-        )
-      }, 2, 1000)
-    } catch (modelError) {
-      console.error("Bytez text fallback model failed", modelId, modelError)
-    }
-  }
-
-  throw new Error("All AI providers failed for text generation")
+  return generateAIContent({
+    message: fullPrompt,
+    systemPrompt: "You are a helpful text generator. Follow all formatting rules in the user message.",
+  })
 }
 
 export async function fetchUrlPreview(url: string): Promise<{
@@ -624,60 +357,16 @@ CRITICAL FORMATTING RULES:
 Keep descriptions concise and to the point.`
 
   try {
-    const text = await callGemini(prompt)
+    const text = await generateAIContent({
+      message: prompt,
+      systemPrompt: "You generate URL previews and must respond with JSON only.",
+    })
     const jsonMatch = text.match(/\{[\s\S]*\}/)
     if (jsonMatch) {
       return JSON.parse(jsonMatch[0])
     }
-    return { title: url, description: "Event link" }
   } catch (error) {
-    console.error("Gemini URL preview error, trying OpenRouter fallback:", error)
-  }
-
-  try {
-    const text = await callOpenRouterChat(
-      prompt,
-      "You generate URL previews and must respond with JSON only."
-    )
-    const jsonMatch = text.match(/\{[\s\S]*\}/)
-    if (jsonMatch) {
-      return JSON.parse(jsonMatch[0])
-    }
-    return { title: url, description: "Event link" }
-  } catch (error) {
-    console.error("OpenRouter primary URL preview model error:", error)
-  }
-
-  for (const model of CORE_OPENROUTER_MODELS) {
-    try {
-      const text = await callOpenRouterChatModel(
-        model,
-        prompt,
-        "You generate URL previews and must respond with JSON only."
-      )
-      const jsonMatch = text.match(/\{[\s\S]*\}/)
-      if (jsonMatch) {
-        return JSON.parse(jsonMatch[0])
-      }
-    } catch (modelError) {
-      console.error("OpenRouter URL preview fallback model error:", model, modelError)
-    }
-  }
-
-  for (const modelId of CORE_BYTEZ_MODELS) {
-    try {
-      const text = await callBytezChatModel(
-        modelId,
-        prompt,
-        "You generate URL previews and must respond with JSON only."
-      )
-      const jsonMatch = text.match(/\{[\s\S]*\}/)
-      if (jsonMatch) {
-        return JSON.parse(jsonMatch[0])
-      }
-    } catch (modelError) {
-      console.error("Bytez URL preview fallback model error:", modelId, modelError)
-    }
+    console.error("URL preview generation failed:", error)
   }
 
   return { title: url, description: "Event link" }
@@ -736,61 +425,14 @@ Example outputs:
 - "https://meet.google.com/abc-defg-hij" → {"title": "Google Meet - abc-defg-hij", "description": "Online video conference", "startTime": null, "endTime": null, "location": "Google Meet (Online)"}
 - "https://eventbrite.com/e/product-launch-123" → {"title": "Product Launch", "description": "Event", "startTime": null, "endTime": null, "location": "TBD"}`
 
-  try {
-    const text = await callGemini(prompt)
-    const jsonMatch = text.match(/\{[\s\S]*\}/)
-    if (jsonMatch) {
-      return JSON.parse(jsonMatch[0])
-    }
-    throw new Error("Failed to extract event data from Gemini response")
-  } catch (error) {
-    console.error("Gemini API error for event data, trying OpenRouter fallback:", error)
+  const text = await generateAIContent({
+    message: prompt,
+    systemPrompt: "You extract structured event data from URLs and must respond with JSON only.",
+  })
+  const jsonMatch = text.match(/\{[\s\S]*\}/)
+  if (jsonMatch) {
+    return JSON.parse(jsonMatch[0])
   }
 
-  try {
-    const text = await callOpenRouterChat(
-      prompt,
-      "You extract structured event data from URLs and must respond with JSON only."
-    )
-    const jsonMatch = text.match(/\{[\s\S]*\}/)
-    if (jsonMatch) {
-      return JSON.parse(jsonMatch[0])
-    }
-  } catch (error) {
-    console.error("OpenRouter primary event data model error:", error)
-  }
-
-  for (const model of CORE_OPENROUTER_MODELS) {
-    try {
-      const text = await callOpenRouterChatModel(
-        model,
-        prompt,
-        "You extract structured event data from URLs and must respond with JSON only."
-      )
-      const jsonMatch = text.match(/\{[\s\S]*\}/)
-      if (jsonMatch) {
-        return JSON.parse(jsonMatch[0])
-      }
-    } catch (modelError) {
-      console.error("OpenRouter event data fallback model error:", model, modelError)
-    }
-  }
-
-  for (const modelId of CORE_BYTEZ_MODELS) {
-    try {
-      const text = await callBytezChatModel(
-        modelId,
-        prompt,
-        "You extract structured event data from URLs and must respond with JSON only."
-      )
-      const jsonMatch = text.match(/\{[\s\S]*\}/)
-      if (jsonMatch) {
-        return JSON.parse(jsonMatch[0])
-      }
-    } catch (modelError) {
-      console.error("Bytez event data fallback model error:", modelId, modelError)
-    }
-  }
-
-  throw new Error("All AI providers failed to extract event data from URL")
+  throw new Error("Failed to extract event data from AI response")
 }

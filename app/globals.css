@@ -199,10 +199,27 @@
     select {
       font-size: 16px;
     }
+  }
 
-    /* Better scrolling on mobile */
-    * {
+  /* Native app / Android WebView touch scrolling */
+  html.native-app,
+  html.native-app body {
+    height: 100%;
+    height: 100dvh;
+    overscroll-behavior-y: none;
+  }
+
+  html.native-app .touch-scroll,
+  html.native-app [data-scroll-container="true"] {
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+    overscroll-behavior-y: contain;
+  }
+
+  @media (pointer: coarse) {
+    .touch-pan-y {
       -webkit-overflow-scrolling: touch;
+      touch-action: pan-y;
     }
   }
 }

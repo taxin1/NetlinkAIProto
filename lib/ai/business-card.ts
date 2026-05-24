@@ -1,4 +1,5 @@
 import { throttle as geminiThrottle } from "@/lib/gemini"
+import { callOpenAIVision, isProviderConfigured } from "@/lib/ai/providers"
 
 export const GEMINI_MODEL = "gemini-2.5-flash"
 export const GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta"
@@ -81,13 +82,28 @@ export async function extractBusinessCardInfo(imageBase64: string): Promise<Busi
     throw new Error("No image data provided for business card scanning")
   }
 
+  const errors: string[] = []
+
+  if (isProviderConfigured("openai")) {
+    try {
+      return await extractBusinessCardFromText(
+        await callOpenAIVision({
+          prompt: BUSINESS_CARD_EXTRACTION_PROMPT,
+          imageBase64,
+        })
+      )
+    } catch (error) {
+      console.error("OpenAI business card extraction failed, trying fallbacks", error)
+      if (error instanceof Error) errors.push(`openai: ${error.message}`)
+    }
+  }
+
   try {
     return await extractBusinessCardInfoWithGemini(imageBase64)
   } catch (error) {
     console.error("Gemini business card extraction failed, trying OpenRouter fallbacks", error)
+    if (error instanceof Error) errors.push(`gemini: ${error.message}`)
   }
-
-  const errors: string[] = []
 
   for (const model of BUSINESS_CARD_OPENROUTER_MODELS) {
     try {
@@ -120,6 +136,19 @@ export async function extractBusinessCardInfo(imageBase64: string): Promise<Busi
   }
 
   throw new Error("All AI providers failed for business card scanning")
+}
+
+function extractBusinessCardFromText(text: string): BusinessCardInfo {
+  const jsonMatch = text.match(/\{[\s\S]*\}/)
+  if (jsonMatch) {
+    try {
+      return JSON.parse(jsonMatch[0])
+    } catch (parseError) {
+      console.error("JSON parsing error:", parseError)
+      throw new Error("Failed to parse business card information from AI response")
+    }
+  }
+  throw new Error("No valid JSON found in AI response")
 }
 
 async function extractBusinessCardInfoWithGemini(imageBase64: string): Promise<BusinessCardInfo> {
@@ -171,18 +200,7 @@ async function extractBusinessCardInfoWithGemini(imageBase64: string): Promise<B
   if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
     const text = data.candidates[0].content.parts[0].text
     console.log("Gemini response text:", text)
-
-    const jsonMatch = text.match(/\{[\s\S]*\}/)
-    if (jsonMatch) {
-      try {
-        return JSON.parse(jsonMatch[0])
-      } catch (parseError) {
-        console.error("JSON parsing error:", parseError)
-        throw new Error("Failed to parse business card information from AI response")
-      }
-    } else {
-      throw new Error("No valid JSON found in AI response")
-    }
+    return extractBusinessCardFromText(text)
   }
 
   throw new Error("No valid response from Gemini API")

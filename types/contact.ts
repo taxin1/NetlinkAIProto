@@ -7,6 +7,8 @@ export interface Contact {
   company: string | null
   position: string | null
   notes: string | null
+  where_met: string | null
+  met_at: string | null
   tags: string[] | null
   avatar_url: string | null
   linkedin_url: string | null
@@ -21,6 +23,8 @@ export interface CreateContactData {
   company?: string
   position?: string
   notes?: string
+  where_met?: string
+  met_at?: string
   tags?: string[]
   avatar_url?: string
   linkedin_url?: string

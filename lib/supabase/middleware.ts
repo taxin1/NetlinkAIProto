@@ -48,9 +48,6 @@ export async function updateSession(request: NextRequest) {
         return request.cookies.getAll()
       },
       setAll(cookiesToSet) {
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/fbe03cac-fcf2-46ec-8d4f-74235d23b217',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'lib/supabase/middleware.ts:42',message:'Middleware setAll called',data:{cookieCount:cookiesToSet.length,cookieNames:cookiesToSet.map(c=>c.name),pathname},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-        // #endregion
         cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
         supabaseResponse = NextResponse.next({
           request: {
@@ -60,9 +57,6 @@ export async function updateSession(request: NextRequest) {
         // Preserve the pathname header
         supabaseResponse.headers.set('x-pathname', pathname)
         cookiesToSet.forEach(({ name, value, options }) => supabaseResponse.cookies.set(name, value, options))
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/fbe03cac-fcf2-46ec-8d4f-74235d23b217',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'lib/supabase/middleware.ts:51',message:'Middleware cookies set on response',data:{cookieCount:cookiesToSet.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-        // #endregion
       },
     },
   })
@@ -84,7 +78,6 @@ export async function updateSession(request: NextRequest) {
     // Check for guest cookie
     const isGuestUser = request.cookies.get('netlink_guest_id')
 
-<<<<<<< HEAD
     // Allow public routes: home, auth pages, privacy, terms, pricing, public pages, portfolio pages, waitlist, API routes, and well-known paths
     const publicPaths = ["/", "/privacy", "/terms", "/pricing", "/waitlist", "/onboarding"]
     const isPublicPath = publicPaths.includes(request.nextUrl.pathname) ||
@@ -107,9 +100,6 @@ export async function updateSession(request: NextRequest) {
     }
 
     if (!user && !isGuestUser && !isPublicPath) {
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/fbe03cac-fcf2-46ec-8d4f-74235d23b217',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'lib/supabase/middleware.ts:75',message:'Middleware redirecting to login',data:{pathname:request.nextUrl.pathname},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
-      // #endregion
       const url = request.nextUrl.clone()
       url.pathname = "/auth/login"
       // Preserve the original path as a redirect parameter

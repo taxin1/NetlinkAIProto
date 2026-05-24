@@ -150,7 +150,7 @@ export function GuidedTour({ userId }: { userId: string }) {
         // Get user's actual creation date from Supabase
         const supabase = createClient()
         const { data: { user }, error: userError } = await supabase.auth.getUser()
-        
+
         if (userError || !user) {
           // If we can't get user, don't show tour
           setIsOpen(false)
@@ -248,10 +248,10 @@ export function GuidedTour({ userId }: { userId: string }) {
     if (targetElement) {
       window.addEventListener("scroll", updateRect, true)
       window.addEventListener("resize", updateRect)
-      
+
       // Update rect periodically to catch any changes
       const rectInterval = setInterval(updateRect, 100)
-      
+
       return () => {
         window.removeEventListener("scroll", updateRect, true)
         window.removeEventListener("resize", updateRect)
@@ -326,8 +326,8 @@ export function GuidedTour({ userId }: { userId: string }) {
       }
 
       // On mobile, prefer bottom positioning for better visibility
-      const effectivePosition = isMobile && (currentStepData.position === "left" || currentStepData.position === "right") 
-        ? "bottom" 
+      const effectivePosition = isMobile && (currentStepData.position === "left" || currentStepData.position === "right")
+        ? "bottom"
         : currentStepData.position
 
       switch (effectivePosition) {
@@ -392,15 +392,11 @@ export function GuidedTour({ userId }: { userId: string }) {
         const padding = isMobile ? 16 : 20
         if (leftValue < tooltipWidth / 2 + padding) {
           newStyle.left = `${tooltipWidth / 2 + padding}px`
-          if (effectivePosition !== "center") {
-            newStyle.transform = isMobile ? "translate(-50%, 0)" : "translate(-50%, -50%)"
-          }
+          newStyle.transform = isMobile ? "translate(-50%, 0)" : "translate(-50%, -50%)"
         }
         if (leftValue > window.innerWidth - tooltipWidth / 2 - padding) {
           newStyle.left = `${window.innerWidth - tooltipWidth / 2 - padding}px`
-          if (effectivePosition !== "center") {
-            newStyle.transform = isMobile ? "translate(-50%, 0)" : "translate(-50%, -50%)"
-          }
+          newStyle.transform = isMobile ? "translate(-50%, 0)" : "translate(-50%, -50%)"
         }
       }
 
@@ -440,7 +436,7 @@ export function GuidedTour({ userId }: { userId: string }) {
                 const highlightHeight = rect.height + padding * 2
                 const highlightTop = rect.top - padding
                 const highlightLeft = rect.left - padding
-                
+
                 return (
                   <>
                     {/* Top overlay */}

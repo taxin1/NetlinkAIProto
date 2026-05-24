@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
     const [contactsResult, emailsResult, eventsResult] = await Promise.all([
       supabase
         .from("contacts")
-        .select("name, company, position, notes, tags, linkedin_url")
+        .select("name, company, position, notes, tags, linkedin_url, where_met, met_at")
         .eq("user_id", user.id)
         .limit(100),
       supabase
@@ -125,6 +125,51 @@ ${emails.map((e, i) => `${i + 1}. Subject: ${e.subject}\nBody: ${e.body.substrin
           memory_key: "target_industries",
           memory_value: JSON.stringify(industries),
           importance_score: 6,
+          usage_count: 0,
+        })
+      }
+
+      // Store per-contact meeting context as insights
+      for (const contact of contacts.slice(0, 30)) {
+        if (contact.where_met || contact.notes) {
+          const insight = [
+            contact.where_met ? `Met at: ${contact.where_met}` : null,
+            contact.met_at ? `Date met: ${contact.met_at}` : null,
+            contact.notes ? `Notes: ${contact.notes.substring(0, 200)}` : null,
+            contact.company ? `Company: ${contact.company}` : null,
+          ]
+            .filter(Boolean)
+            .join(". ")
+
+          if (insight) {
+            await supabase.from("ai_trainer_memories").upsert({
+              user_id: user.id,
+              memory_type: "contact_insight",
+              memory_key: contact.name,
+              memory_value: insight,
+              importance_score: 7,
+              usage_count: 0,
+            })
+          }
+        }
+      }
+
+      // Group event contexts
+      const eventGroups = contacts.reduce<Record<string, string[]>>((acc, c) => {
+        if (c.where_met) {
+          if (!acc[c.where_met]) acc[c.where_met] = []
+          acc[c.where_met].push(c.name)
+        }
+        return acc
+      }, {})
+
+      for (const [event, names] of Object.entries(eventGroups)) {
+        await supabase.from("ai_trainer_memories").upsert({
+          user_id: user.id,
+          memory_type: "event_context",
+          memory_key: event,
+          memory_value: `Contacts met at ${event}: ${names.join(", ")}`,
+          importance_score: 8,
           usage_count: 0,
         })
       }

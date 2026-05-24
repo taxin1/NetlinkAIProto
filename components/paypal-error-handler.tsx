@@ -17,11 +17,6 @@ export function PayPalErrorHandler() {
 
     // Intercept console.error to catch PayPal SDK errors that are logged directly
     console.error = (...args: any[]) => {
-      // #region agent log
-      if (args.length > 0 && typeof args[0] === 'string' && args[0].includes('Error fetching subscription')) {
-        fetch('http://127.0.0.1:7242/ingest/fbe03cac-fcf2-46ec-8d4f-74235d23b217',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'paypal-error-handler.tsx:20',message:'Intercepted Error fetching subscription',data:{args: args.map(a => a instanceof Error ? {name:a.name,message:a.message,stack:a.stack} : a)},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'3'})}).catch(()=>{});
-      }
-      // #endregion
       const errorMessage = args.map(arg => {
         if (arg instanceof Error) {
           return `${arg.name}: ${arg.message}\n${arg.stack}`;

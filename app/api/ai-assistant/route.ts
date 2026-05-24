@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
 import { generateAIResponse } from "@/lib/ai/assistant"
+import { loadUserAIContext } from "@/lib/ai/contact-context"
 import { checkUsageLimit } from "@/lib/plan-features"
+import { isGuest } from "@/lib/guest-trial"
 
 export async function POST(request: NextRequest) {
   try {
@@ -27,6 +29,15 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    let userContext
+    if (!isGuest(userId)) {
+      try {
+        userContext = await loadUserAIContext(userId)
+      } catch (err) {
+        console.warn("Could not load user AI context:", err)
+      }
+    }
+
     try {
       const response = await generateAIResponse({
         message,
@@ -34,6 +45,7 @@ export async function POST(request: NextRequest) {
         contacts: contacts || [],
         recentEmails: recentEmails || [],
         conversationHistory: conversationHistory || [],
+        userContext,
       })
       
       return NextResponse.json({

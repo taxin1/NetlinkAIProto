@@ -1,9 +1,16 @@
 import { NextRequest, NextResponse } from "next/server"
 import { generateChatResponse } from "@/lib/ai/assistant"
+import { loadUserAIContext } from "@/lib/ai/contact-context"
+import { isGuest } from "@/lib/guest-trial"
 
 export async function POST(request: NextRequest) {
   try {
-    const { message, language = "en" } = await request.json()
+    const {
+      message,
+      language = "en",
+      userId,
+      conversationHistory = [],
+    } = await request.json()
 
     if (!message) {
       return NextResponse.json(
@@ -12,9 +19,22 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    let userContext
+    if (userId && !isGuest(userId)) {
+      try {
+        userContext = await loadUserAIContext(userId)
+      } catch (err) {
+        console.warn("Could not load user AI context:", err)
+      }
+    }
+
     try {
       console.log(`Chat API: Calling generateChatResponse (lang: ${language}) with message:`, message.substring(0, 50))
-      const response = await generateChatResponse(message, language)
+      const response = await generateChatResponse(message, {
+        language,
+        userContext,
+        conversationHistory,
+      })
       console.log("Chat API: Got response successfully")
       
       return NextResponse.json({

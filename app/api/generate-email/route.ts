@@ -65,6 +65,8 @@ export async function POST(request: NextRequest) {
           company: contact.company,
           position: contact.position,
           notes: contact.notes,
+          where_met: contact.where_met,
+          met_at: contact.met_at,
           linkedin_url: contact.linkedin_url,
           tags: contact.tags || []
         }
@@ -134,6 +136,8 @@ export async function POST(request: NextRequest) {
         contactCompany: contactDetails.company || contactCompany || "",
         contactPosition: contactDetails.position || "",
         contactNotes: contactDetails.notes || "",
+        contactWhereMet: contactDetails.where_met || "",
+        contactMetAt: contactDetails.met_at || "",
         contactLinkedIn: contactDetails.linkedin_url || "",
         contactTags: contactDetails.tags || [],
         userProfile: Object.keys(userProfile).length > 0 ? userProfile : undefined,

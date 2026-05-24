@@ -33,7 +33,7 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="relative flex min-h-screen bg-gradient-to-br from-background via-background to-primary/5 overflow-hidden">
+    <div className="relative flex h-dvh max-h-dvh bg-gradient-to-br from-background via-background to-primary/5 overflow-hidden">
       {/* Animated Network Background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
         {/* Network Grid */}
@@ -54,7 +54,7 @@ export default async function DashboardLayout({
       {/* Sidebar - handles mobile/desktop rendering internally */}
       <Sidebar user={{ id: displayUser.id, email: displayUser.email || "Guest", isGuest: !!displayUser.isGuest }} />
  
-      <main className="flex-1 overflow-y-auto overflow-x-hidden relative z-10 w-full lg:w-auto overscroll-contain">
+      <main className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden relative z-10 w-full lg:w-auto touch-pan-y touch-scroll" data-scroll-container="true">
         {user && <GlobalNetworkerOptInPrompt userId={user.id} />}
         {user && <GuidedTour userId={user.id} />}
         {!user && (

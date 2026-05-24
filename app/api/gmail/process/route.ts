@@ -159,7 +159,6 @@ export async function GET(request: NextRequest) {
     console.log(`[Gmail Process] ✅ Success in ${elapsedTime}ms`)
 
     // Build redirect URL with base URL
-    const baseUrl = getBaseUrl(request)
     const redirectUrl = new URL('/dashboard/settings', baseUrl)
     redirectUrl.searchParams.set('success', 'gmail_connected')
 

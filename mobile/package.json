@@ -1,0 +1,25 @@
+{
+  "name": "netlink-mobile",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Netlink AI mobile shell — loads the live web app, separate from the Next.js project",
+  "scripts": {
+    "sync": "cap sync",
+    "open:android": "powershell -ExecutionPolicy Bypass -File ./scripts/open-android.ps1",
+    "open:ios": "cap open ios",
+    "build:android": "cap sync android",
+    "build:ios": "cap sync ios"
+  },
+  "dependencies": {
+    "@capacitor/android": "^7.4.2",
+    "@capacitor/browser": "^7.0.2",
+    "@capacitor/core": "^7.4.2",
+    "@capacitor/ios": "^7.4.2",
+    "@capacitor/splash-screen": "^7.0.2",
+    "@capacitor/status-bar": "^7.0.2"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.4.2",
+    "typescript": "^5.8.3"
+  }
+}

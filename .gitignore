@@ -27,3 +27,6 @@ next-env.d.ts
 # environment variables
 .env.local
 .env*.local
+
+# Capacitor mobile app (separate from Next.js — see /mobile)
+/mobile/node_modules

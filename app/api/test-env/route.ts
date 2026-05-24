@@ -5,24 +5,28 @@ import { NextRequest, NextResponse } from "next/server"
  * This helps debug Netlify deployment issues
  */
 export async function GET(request: NextRequest) {
+  const hasOpenAIKey = !!process.env.OPENAI_API_KEY
   const hasGeminiKey = !!process.env.GEMINI_API_KEY
-  const geminiKeyLength = process.env.GEMINI_API_KEY?.length || 0
+  const hasOpenRouterKey = !!process.env.OPENROUTER_API_KEY
+  const hasBytezKey = !!process.env.BYTEZ_API_KEY
   const nodeEnv = process.env.NODE_ENV
   
-  // Don't expose the actual key, just check if it exists
   return NextResponse.json({
     success: true,
     environment: {
       nodeEnv,
+      hasOpenAIKey,
       hasGeminiKey,
-      geminiKeyLength,
-      // Check other important env vars
+      hasOpenRouterKey,
+      hasBytezKey,
       hasSupabaseUrl: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
       hasSupabaseKey: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     },
-    message: hasGeminiKey 
-      ? "GEMINI_API_KEY is set" 
-      : "GEMINI_API_KEY is NOT set - this is the problem!",
+    message: hasOpenAIKey
+      ? "OPENAI_API_KEY is set (primary AI provider)"
+      : hasGeminiKey || hasOpenRouterKey || hasBytezKey
+        ? "Fallback AI keys configured; set OPENAI_API_KEY for primary provider"
+        : "No AI API keys configured",
     timestamp: new Date().toISOString(),
   })
 }

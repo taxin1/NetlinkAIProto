@@ -258,8 +258,8 @@ export function BusinessCardScanner({
       
       if (error instanceof Error) {
         if (error.message.includes("No AI API keys configured")) {
-          errorMessage = "No AI API keys configured. Please add GEMINI_API_KEY to your .env.local file."
-        } else if (error.message.includes("API key not configured") || error.message.includes("GEMINI_API_KEY")) {
+          errorMessage = "No AI API keys configured. Add OPENAI_API_KEY (recommended) or GEMINI_API_KEY to your .env.local file."
+        } else if (error.message.includes("API key not configured") || error.message.includes("OPENAI_API_KEY") || error.message.includes("GEMINI_API_KEY")) {
           errorMessage = "API key not configured. Please set up your AI API key in the environment variables."
         } else if (error.message.includes("API request failed")) {
           errorMessage = "API request failed. Please check your internet connection and try again."
