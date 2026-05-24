@@ -1,0 +1,11 @@
+specVersion: "v1"
+serviceId: "netlink"
+location: "us-central1"
+schemas:
+  - source: "./schema"
+    datasource:
+      postgresql:
+        database: "fdcdb"
+        cloudSql:
+          instanceId: "netlink-fdc"
+connectorDirs: ["./connector"]

@@ -89,8 +89,8 @@ export function Sidebar({ user }: SidebarProps) {
       router.refresh()
       return
     }
-    const supabase = createClient()
-    await supabase.auth.signOut()
+    const { authService } = await import("@/lib/auth/auth-helpers")
+    await authService.signOut()
     router.push("/auth/login")
     router.refresh()
     setMobileMenuOpen(false)

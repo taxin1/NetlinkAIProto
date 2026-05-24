@@ -1,0 +1,8 @@
+connectorId: netlink
+generate:
+  javascriptSdk:
+    - outputDir: ../../lib/firebase/dataconnect-generated
+      package: "@netlink/dataconnect"
+      packageJsonDir: ../..
+      react: true
+      angular: false

@@ -1,0 +1,54 @@
+query GetCurrentUser @auth(level: USER) {
+  user(key: { id_expr: "auth.uid" }) {
+    id
+    email
+    displayName
+    supabaseUserId
+    createdAt
+    updatedAt
+    profile: networkProfile_on_user {
+      headline
+      bio
+      company
+      location
+      websiteUrl
+      linkedinUrl
+    }
+  }
+}
+
+query ListMyContacts($limit: Int) @auth(level: USER) {
+  contacts(
+    where: { user: { id: { eq_expr: "auth.uid" } } }
+    orderBy: [{ updatedAt: DESC }]
+    limit: $limit
+  ) {
+    id
+    name
+    email
+    phone
+    company
+    position
+    notes
+    linkedinUrl
+    avatarUrl
+    createdAt
+    updatedAt
+  }
+}
+
+query GetContact($id: UUID!) @auth(level: USER) {
+  contact(id: $id) {
+    id
+    name
+    email
+    phone
+    company
+    position
+    notes
+    linkedinUrl
+    avatarUrl
+    createdAt
+    updatedAt
+  }
+}

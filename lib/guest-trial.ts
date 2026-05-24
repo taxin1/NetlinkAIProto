@@ -1,5 +1,3 @@
-import { createClient } from "@/lib/supabase/client"
-
 export const GUEST_COOKIE_NAME = "netlink_guest_id"
 export const TRIAL_LIMITS = {
   ACTIONS: 15, // Total AI-powered actions allowed for guests
@@ -28,8 +26,8 @@ export function getGuestId(): string | null {
 
 export async function startGuestSession(): Promise<string> {
   try {
-    const supabase = createClient()
-    await supabase.auth.signOut()
+    const { authService } = await import("@/lib/auth/auth-helpers")
+    await authService.signOut()
   } catch (error) {
     console.warn("Unable to sign out before starting demo session:", error)
   }

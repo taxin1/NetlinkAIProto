@@ -6,7 +6,11 @@
     "build": "next build --webpack",
     "dev": "next dev",
     "lint": "next lint",
-    "start": "next start"
+    "start": "next start",
+    "firebase:dataconnect:generate": "npx -y firebase-tools@latest dataconnect:sdk:generate",
+    "firebase:emulators": "npx -y firebase-tools@latest emulators:start --only firestore,storage,dataconnect",
+    "firebase:deploy:rules": "npx -y firebase-tools@latest deploy --only firestore:rules,storage",
+    "firebase:deploy:dataconnect": "npx -y firebase-tools@latest deploy --only dataconnect"
   },
   "dependencies": {
     "@daytonaio/sdk": "^0.125.0",
@@ -52,11 +56,13 @@
     "cmdk": "1.0.4",
     "code": "^5.2.4",
     "d3": "^7.9.0",
+    "dataconnect-generated": "link:C:/Users/farha/AppData/Roaming/pnpm/global/5/node_modules/lib/firebase/dataconnect-generated",
     "date-fns": "latest",
     "dotenv": "^17.2.3",
     "elevenlabs": "^1.59.0",
     "embla-carousel-react": "8.5.1",
     "express": "^5.2.1",
+    "firebase": "^12.13.0",
     "framer-motion": "12.23.22",
     "geist": "latest",
     "googleapis": "^169.0.0",

@@ -1,0 +1,89 @@
+mutation UpsertUser($email: String!, $displayName: String, $supabaseUserId: String) @auth(level: USER) {
+  user_upsert(
+    data: {
+      id_expr: "auth.uid"
+      email: $email
+      displayName: $displayName
+      supabaseUserId: $supabaseUserId
+      updatedAt_expr: "request.time"
+    }
+  )
+}
+
+mutation UpsertNetworkProfile(
+  $headline: String
+  $bio: String
+  $company: String
+  $location: String
+  $websiteUrl: String
+  $linkedinUrl: String
+) @auth(level: USER) {
+  networkProfile_upsert(
+    data: {
+      userId_expr: "auth.uid"
+      headline: $headline
+      bio: $bio
+      company: $company
+      location: $location
+      websiteUrl: $websiteUrl
+      linkedinUrl: $linkedinUrl
+      updatedAt_expr: "request.time"
+    }
+  )
+}
+
+mutation CreateContact(
+  $name: String!
+  $email: String
+  $phone: String
+  $company: String
+  $position: String
+  $notes: String
+  $linkedinUrl: String
+  $avatarUrl: String
+) @auth(level: USER) {
+  contact_insert(
+    data: {
+      userId_expr: "auth.uid"
+      name: $name
+      email: $email
+      phone: $phone
+      company: $company
+      position: $position
+      notes: $notes
+      linkedinUrl: $linkedinUrl
+      avatarUrl: $avatarUrl
+    }
+  )
+}
+
+mutation UpdateContact(
+  $id: UUID!
+  $name: String
+  $email: String
+  $phone: String
+  $company: String
+  $position: String
+  $notes: String
+  $linkedinUrl: String
+  $avatarUrl: String
+) @auth(level: USER) {
+  contact_update(
+    id: $id
+    data: {
+      name: $name
+      email: $email
+      phone: $phone
+      company: $company
+      position: $position
+      notes: $notes
+      linkedinUrl: $linkedinUrl
+      avatarUrl: $avatarUrl
+      updatedAt_expr: "request.time"
+    }
+  )
+}
+
+mutation DeleteContact($id: UUID!) @auth(level: USER) {
+  contact_delete(id: $id)
+}

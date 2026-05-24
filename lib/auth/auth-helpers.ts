@@ -1,4 +1,13 @@
 import { createClient } from '@/lib/supabase/client'
+import { isFirebaseAuthEnabled } from '@/lib/firebase/config'
+import {
+  firebaseSignInWithEmail,
+  firebaseSignUpWithEmail,
+  firebaseSignInWithGoogle,
+  firebaseSignOutUser,
+  firebaseResetPassword,
+} from '@/lib/firebase/client'
+import { bridgeFirebaseToSupabaseSession } from '@/lib/auth/firebase-supabase-bridge'
 
 export interface AuthError {
   message: string
@@ -15,7 +24,35 @@ export class AuthService {
     return this._supabase
   }
 
-  async signInWithPassword(email: string, password: string) {
+  private get useFirebase(): boolean {
+    return isFirebaseAuthEnabled()
+  }
+
+  async signInWithPassword(email: string, password: string, redirectPath = '/dashboard') {
+    if (this.useFirebase) {
+      try {
+        await firebaseSignInWithEmail(email, password)
+        const bridge = await bridgeFirebaseToSupabaseSession(redirectPath, { forceRefresh: true })
+        if (!bridge.success) {
+          throw new Error(bridge.error || 'Could not complete sign in.')
+        }
+        const { data: { session } } = await this.supabase.auth.getSession()
+        return {
+          data: {
+            session,
+            user: session?.user ?? null,
+            redirectTo: bridge.redirectTo,
+          },
+          error: null,
+        }
+      } catch (error) {
+        return {
+          data: null,
+          error: error instanceof Error ? error.message : 'An unexpected error occurred',
+        }
+      }
+    }
+
     try {
       const { data, error } = await this.supabase.auth.signInWithPassword({
         email,
@@ -36,12 +73,34 @@ export class AuthService {
   }
 
   async signUp(email: string, password: string, redirectPath?: string) {
+    const next = redirectPath || '/onboarding'
+
+    if (this.useFirebase) {
+      try {
+        await firebaseSignUpWithEmail(email, password)
+        const bridge = await bridgeFirebaseToSupabaseSession(next, { forceRefresh: true })
+        if (!bridge.success) {
+          throw new Error(bridge.error || 'Account created but sign in failed. Try logging in.')
+        }
+        const { data: { session, user } } = await this.supabase.auth.getSession()
+        return {
+          data: { session, user, redirectTo: bridge.redirectTo },
+          error: null,
+        }
+      } catch (error) {
+        return {
+          data: null,
+          error: error instanceof Error ? this.getErrorMessage(error.message) : 'An unexpected error occurred',
+        }
+      }
+    }
+
     try {
       const { data, error } = await this.supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}${redirectPath || '/onboarding'}`,
+          emailRedirectTo: `${window.location.origin}${next}`,
         },
       })
 
@@ -59,30 +118,44 @@ export class AuthService {
   }
 
   async signInWithOAuth(provider: 'google' | 'github' | 'discord', redirectPath?: string) {
+    const next = redirectPath || '/dashboard'
+
+    if (this.useFirebase && provider === 'google') {
+      try {
+        await firebaseSignInWithGoogle()
+        const bridge = await bridgeFirebaseToSupabaseSession(next, { forceRefresh: true })
+        if (!bridge.success) {
+          throw new Error(bridge.error || 'Could not complete Google sign in.')
+        }
+        const { data: { session } } = await this.supabase.auth.getSession()
+        return {
+          data: {
+            session,
+            user: session?.user ?? null,
+            url: null,
+            redirectTo: bridge.redirectTo,
+          },
+          error: null,
+        }
+      } catch (error) {
+        return {
+          data: null,
+          error: error instanceof Error ? error.message : 'An unexpected error occurred',
+        }
+      }
+    }
+
     console.log('[OAuth] signInWithOAuth method called with provider:', provider)
     try {
-      // Get the current origin - this ensures we use localhost when on localhost,
-      // and production domain when on production, regardless of Supabase Site URL setting
-      console.log('[OAuth] Getting current origin...')
       const currentOrigin = window.location.origin
       const redirectTo = new URL(`${currentOrigin}/auth/callback`)
 
-
-
-      // Store the expected origin in sessionStorage so the callback can verify it
-      // This helps us detect if Supabase redirected to the wrong domain
       if (typeof window !== 'undefined' && window.sessionStorage) {
         sessionStorage.setItem('oauth_expected_origin', currentOrigin)
-        sessionStorage.setItem('oauth_redirect_path', redirectPath || '/dashboard')
+        sessionStorage.setItem('oauth_redirect_path', next)
       }
 
-      // Explicitly set the redirectTo to force Supabase to use our URL
-      // The redirectTo must match one of the allowed redirect URLs in Supabase dashboard
       const redirectToUrl = redirectTo.toString()
-
-      console.log('[OAuth] Initiating OAuth with redirectTo:', redirectToUrl)
-      console.log('[OAuth] Current origin:', currentOrigin)
-      console.log('[OAuth] Provider:', provider)
 
       const { data, error } = await this.supabase.auth.signInWithOAuth({
         provider,
@@ -93,16 +166,12 @@ export class AuthService {
       })
 
       if (error) {
-        console.error('[OAuth] Error initiating OAuth:', error)
-        // Clean up sessionStorage on error
         if (typeof window !== 'undefined' && window.sessionStorage) {
           sessionStorage.removeItem('oauth_expected_origin')
           sessionStorage.removeItem('oauth_redirect_path')
         }
         throw new Error(this.getErrorMessage(error.message))
       }
-
-      console.log('[OAuth] Generated OAuth URL:', data.url)
 
       return { data, error: null }
     } catch (error) {
@@ -115,6 +184,9 @@ export class AuthService {
 
   async signOut() {
     try {
+      if (this.useFirebase) {
+        await firebaseSignOutUser()
+      }
       const { error } = await this.supabase.auth.signOut()
 
       if (error) {
@@ -130,6 +202,17 @@ export class AuthService {
   }
 
   async resetPassword(email: string) {
+    if (this.useFirebase) {
+      try {
+        await firebaseResetPassword(email)
+        return { error: null }
+      } catch (error) {
+        return {
+          error: error instanceof Error ? this.getErrorMessage(error.message) : 'An unexpected error occurred',
+        }
+      }
+    }
+
     try {
       const { error } = await this.supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/auth/reset-password`,
@@ -148,15 +231,23 @@ export class AuthService {
   }
 
   private getErrorMessage(error: string): string {
-    // Map Supabase error messages to user-friendly messages
     const errorMap: Record<string, string> = {
       'Invalid login credentials': 'Invalid email or password',
+      'INVALID_LOGIN_CREDENTIALS': 'Invalid email or password',
+      'auth/invalid-credential': 'Invalid email or password',
+      'auth/user-not-found': 'Invalid email or password',
+      'auth/wrong-password': 'Invalid email or password',
+      'auth/email-already-in-use': 'An account with this email already exists',
       'Email not confirmed': 'Please check your email and click the confirmation link',
       'User already registered': 'An account with this email already exists',
       'Password should be at least 6 characters': 'Password must be at least 6 characters long',
+      'auth/weak-password': 'Password must be at least 6 characters long',
       'Unable to validate email address: invalid format': 'Please enter a valid email address',
+      'auth/invalid-email': 'Please enter a valid email address',
       'Signup is disabled': 'Account creation is currently disabled',
       'Email rate limit exceeded': 'Too many attempts. Please try again later',
+      'auth/popup-closed-by-user': 'Sign in was cancelled',
+      'auth/popup-blocked': 'Pop-up was blocked. Allow pop-ups and try again.',
     }
 
     return errorMap[error] || error

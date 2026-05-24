@@ -31,8 +31,14 @@ export function AdminLayoutWrapper({ children }: { children: React.ReactNode }) 
           <h1 className="text-xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
             Netlink AI Admin
           </h1>
-          <nav className="flex items-center gap-4">
-            <a href="/admin" className="text-sm font-medium hover:text-purple-400 transition-colors">Dashboard</a>
+          <nav className="flex items-center gap-4 text-sm">
+            <a href="/admin" className="font-medium hover:text-purple-400 transition-colors">
+              Dashboard
+            </a>
+            <span className="text-slate-600">|</span>
+            <span className="text-slate-500 text-xs hidden sm:inline">
+              Users · Payments · Analytics
+            </span>
             <LogoutButton />
           </nav>
         </div>

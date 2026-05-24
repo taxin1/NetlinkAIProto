@@ -87,12 +87,16 @@ function SignUpContent() {
         hasUser: !!data?.user
       })
 
-      if (data?.session) {
-        // User is immediately signed in (email confirmation disabled)
-        console.log('[Signup] Session created, redirecting to:', redirectPath)
+      const signupDestination =
+        (data as { redirectTo?: string })?.redirectTo ||
+        (data?.session ? redirectPath : null)
+
+      if (signupDestination) {
+        console.log('[Signup] Session created, redirecting to:', signupDestination)
         notifyAuthEvent("signup", { email })
-        setIsLoading(false) // Stop loading before redirect
-        window.location.href = redirectPath
+        setIsLoading(false)
+        window.location.href = signupDestination
+        return
       } else if (data?.user) {
         // User created - check if session exists or email confirmation needed
         console.log('[Signup] User created, checking session...')
@@ -147,13 +151,24 @@ function SignUpContent() {
         return
       }
 
-      // Redirect to Supabase OAuth URL – required for Google sign-in to start
+      const oauthData = data as { redirectTo?: string; session?: { user: unknown } | null }
+      const destination =
+        oauthData?.redirectTo ||
+        (oauthData?.session ? redirectPath : null)
+
+      if (destination) {
+        notifyAuthEvent("signup", { email: "" })
+        window.location.href = destination
+        return
+      }
+
       if (data?.url) {
         window.location.href = data.url
-      } else {
-        setError('Could not start Google sign-in. Please try again.')
-        setIsLoading(false)
+        return
       }
+
+      setError('Could not start Google sign-in. Please try again.')
+      setIsLoading(false)
     } catch (err) {
       console.error('[Signup] Unexpected error during Google signup:', err)
       setError(err instanceof Error ? err.message : "An unexpected error occurred. Please try again.")

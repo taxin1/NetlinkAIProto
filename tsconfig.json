@@ -26,6 +26,9 @@
     "paths": {
       "@/*": [
         "./*"
+      ],
+      "@netlink/dataconnect": [
+        "./lib/firebase/dataconnect-generated"
       ]
     }
   },

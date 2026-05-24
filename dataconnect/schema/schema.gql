@@ -1,0 +1,37 @@
+# Netlink AI — Data Connect schema (PostgreSQL via Cloud SQL)
+# Primary app data remains in Supabase; this layer supports Firebase-native clients.
+
+type User @table(key: "id") {
+  id: String! @default(expr: "auth.uid")
+  email: String! @unique
+  displayName: String
+  supabaseUserId: String
+  createdAt: Timestamp! @default(expr: "request.time")
+  updatedAt: Timestamp! @default(expr: "request.time")
+}
+
+type NetworkProfile @table(key: "user") {
+  user: User!
+  headline: String
+  bio: String
+  company: String
+  location: String
+  websiteUrl: String
+  linkedinUrl: String
+  updatedAt: Timestamp! @default(expr: "request.time")
+}
+
+type Contact @table {
+  id: UUID! @default(expr: "uuidV4()")
+  user: User!
+  name: String!
+  email: String
+  phone: String
+  company: String
+  position: String
+  notes: String
+  linkedinUrl: String
+  avatarUrl: String
+  createdAt: Timestamp! @default(expr: "request.time")
+  updatedAt: Timestamp! @default(expr: "request.time")
+}

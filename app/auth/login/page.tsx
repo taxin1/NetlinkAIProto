@@ -66,7 +66,7 @@ function LoginContent() {
 
     try {
       console.log('[Login] Starting login process...', { email, redirectPath })
-      const { data, error } = await authService.signInWithPassword(email, password)
+      const { data, error } = await authService.signInWithPassword(email, password, redirectPath)
 
       if (error) {
         console.error('[Login] Login error:', error)
@@ -75,16 +75,22 @@ function LoginContent() {
         return
       }
 
-      if (data?.session) {
-        console.log('[Login] Login successful, redirecting to:', redirectPath)
+      const oauthData = data as { redirectTo?: string; session?: { user: unknown } | null }
+      const destination =
+        oauthData?.redirectTo ||
+        (oauthData?.session ? redirectPath : null)
+
+      if (destination) {
+        console.log('[Login] Login successful, redirecting to:', destination)
         notifyAuthEvent("login")
         setIsLoading(false)
-        window.location.href = redirectPath
-      } else {
-        console.error('[Login] Login completed but no session received')
-        setError("Login completed but no session received. Please try again.")
-        setIsLoading(false)
+        window.location.href = destination
+        return
       }
+
+      console.error('[Login] Login completed but no session received')
+      setError("Login completed but no session received. Please try again.")
+      setIsLoading(false)
     } catch (err) {
       console.error('[Login] Unexpected error during login:', err)
       setError(err instanceof Error ? err.message : "An unexpected error occurred. Please try again.")
@@ -106,13 +112,25 @@ function LoginContent() {
         setIsLoading(false)
         return
       }
-      // Redirect to Supabase OAuth URL – required for Google sign-in to start
+      const oauthData = data as { redirectTo?: string; session?: { user: unknown } | null }
+      const destination =
+        oauthData?.redirectTo ||
+        (oauthData?.session ? redirectPath : null)
+
+      if (destination) {
+        notifyAuthEvent("login")
+        window.location.href = destination
+        return
+      }
+
+      // Supabase OAuth redirect URL
       if (data?.url) {
         window.location.href = data.url
-      } else {
-        setError('Could not start Google sign-in. Please try again.')
-        setIsLoading(false)
+        return
       }
+
+      setError('Could not start Google sign-in. Please try again.')
+      setIsLoading(false)
     } catch (err) {
       console.error('[Login] Google OAuth error:', err)
       setError(err instanceof Error ? err.message : 'An unexpected error occurred.')

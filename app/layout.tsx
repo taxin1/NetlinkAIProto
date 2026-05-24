@@ -9,6 +9,7 @@ import { ClientLoadingWrapper } from '@/components/client-loading-wrapper'
 import { GoogleTranslate } from '@/components/google-translate'
 import { MobileTouchFix } from '@/components/mobile-touch-fix'
 import { AuthSessionRefresh } from '@/components/auth-session-refresh'
+import { FirebaseProvider } from '@/components/firebase-provider'
 import { generateMetadata } from '@/lib/seo/metadata'
 import { generateOrganizationSchema, generateWebsiteSchema, generateSoftwareApplicationSchema } from '@/lib/seo/structured-data'
 import './globals.css'
@@ -59,7 +60,8 @@ export default function RootLayout({
       <body className={`${inter.variable} ${GeistSans.variable} ${GeistMono.variable} font-sans antialiased`} suppressHydrationWarning>
         <MobileTouchFix />
         <AuthSessionRefresh />
-        <ClientLoadingWrapper>
+        <FirebaseProvider>
+          <ClientLoadingWrapper>
           <PayPalErrorHandler />
           <ThemeProvider
             attribute="class"
@@ -72,6 +74,7 @@ export default function RootLayout({
           </ThemeProvider>
           <Analytics />
         </ClientLoadingWrapper>
+        </FirebaseProvider>
       </body>
     </html>
   )
