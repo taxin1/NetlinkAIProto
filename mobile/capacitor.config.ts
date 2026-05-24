@@ -21,6 +21,8 @@ const config: CapacitorConfig = {
       showSpinner: false,
       androidSplashResourceName: "icon",
       androidScaleType: "FIT_CENTER",
+      splashFadeInDuration: 300,
+      splashFullScreen: true,
     },
     StatusBar: {
       style: "DARK",
