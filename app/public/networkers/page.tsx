@@ -1,6 +1,8 @@
 import { createPublicClient } from "@/lib/supabase/public-server"
 import { NetworkersPage } from "@/components/networkers-page"
 
+export const dynamic = "force-dynamic"
+
 export default async function NetworkersPageRoute() {
   try {
     // Use public client to ensure we can access all profiles regardless of auth state

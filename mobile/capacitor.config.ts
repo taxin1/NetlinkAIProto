@@ -17,13 +17,13 @@ const config: CapacitorConfig = {
   },
   plugins: {
     SplashScreen: {
-      launchShowDuration: 0,
-      launchAutoHide: false,
+      launchShowDuration: 3000,
+      launchAutoHide: true,
       backgroundColor: "#FFFFFF",
       showSpinner: false,
       androidSplashResourceName: "icon",
       androidScaleType: "FIT_CENTER",
-      splashFadeInDuration: 200,
+      splashFadeInDuration: 300,
       splashFullScreen: true,
     },
     StatusBar: {
