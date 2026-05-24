@@ -23,7 +23,7 @@ export function StructuredData() {
       "name": "Netlink AI",
       "logo": {
         "@type": "ImageObject",
-        "url": `${siteConfig.url}/Logo1.png`
+        "url": `${siteConfig.url}/logo.png`
       }
     },
     "featureList": [

@@ -181,7 +181,7 @@ export function Sidebar({ user }: SidebarProps) {
             isMobile ? "h-16" : "h-40"
           )}>
             <Image 
-              src="/Logo1.png" 
+              src="/logo.png" 
               alt="Netlink AI Logo" 
               fill 
               className="object-contain"

@@ -181,7 +181,7 @@ function SignUpContent() {
           <Link href="/" className="flex flex-col items-center group transition-all">
             <div className="relative h-72 w-[600px] overflow-hidden transform group-hover:scale-110 transition-transform duration-700 drop-shadow-[0_0_40px_rgba(59,130,246,0.7)]">
               <Image
-                src="/Logo1.png"
+                src="/logo.png"
                 alt="Netlink AI Logo"
                 fill
                 className="object-contain"

@@ -5,7 +5,7 @@ export const siteConfig = {
     shortName: 'Netlink AI',
     description: 'Transform your professional networking with AI-powered automation. Scan business cards, generate personalized emails, and manage relationships 10x faster with intelligent CRM.',
     url: process.env.NEXT_PUBLIC_APP_URL || 'https://www.networklinkai.com',
-    ogImage: '/Logo1.png',
+    ogImage: '/logo.png',
     links: {
         twitter: 'https://twitter.com/NetlinkAI',
         linkedin: 'https://linkedin.com/company/netlink-ai',

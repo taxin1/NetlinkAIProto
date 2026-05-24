@@ -58,7 +58,7 @@ export function PublicNavigation() {
           <Link href="/" className="flex items-center group transition-all flex-shrink-0">
             <div className="relative h-16 sm:h-20 md:h-24 lg:h-28 w-auto max-w-[200px] sm:max-w-[250px] md:max-w-[300px] lg:max-w-[350px] aspect-[400/128] overflow-hidden transform group-hover:scale-110 transition-transform duration-700 drop-shadow-[0_0_25px_rgba(59,130,246,0.6)]">
               <Image 
-                src="/Logo1.png" 
+                src="/logo.png" 
                 alt="Netlink AI Logo" 
                 fill 
                 className="object-contain"

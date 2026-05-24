@@ -17,7 +17,7 @@ export function generateOrganizationSchema() {
         name: siteConfig.name,
         alternateName: siteConfig.shortName,
         url: siteConfig.url,
-        logo: `${siteConfig.url}/Logo1.png`,
+        logo: `${siteConfig.url}/logo.png`,
         description: siteConfig.description,
         email: siteConfig.email,
         sameAs: [
@@ -46,7 +46,7 @@ export function generateWebsiteSchema() {
             name: siteConfig.name,
             logo: {
                 '@type': 'ImageObject',
-                url: `${siteConfig.url}/Logo1.png`,
+                url: `${siteConfig.url}/logo.png`,
             },
         },
         potentialAction: {
@@ -82,7 +82,7 @@ export function generateSoftwareApplicationSchema() {
             worstRating: '1',
         },
         description: siteConfig.description,
-        screenshot: `${siteConfig.url}/Logo1.png`,
+        screenshot: `${siteConfig.url}/logo.png`,
         featureList: [
             'AI-Powered Business Card Scanning',
             'Automated Email Generation',
@@ -112,7 +112,7 @@ export function generateArticleSchema(article: Article) {
             name: siteConfig.name,
             logo: {
                 '@type': 'ImageObject',
-                url: `${siteConfig.url}/Logo1.png`,
+                url: `${siteConfig.url}/logo.png`,
             },
         },
         mainEntityOfPage: {

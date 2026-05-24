@@ -30,7 +30,7 @@ export function getEmailBaseUrl(): string {
 }
 
 export function getLogoUrl(): string {
-  return `${getEmailBaseUrl()}/Logo1.png`
+  return `${getEmailBaseUrl()}/logo.png`
 }
 
 export interface EmailCta {

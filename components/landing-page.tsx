@@ -352,7 +352,7 @@ export function LandingPage() {
             <Link href="/" className="flex items-center group flex-shrink-0">
               <div className="relative h-16 sm:h-20 md:h-24 lg:h-28 w-auto max-w-[200px] sm:max-w-[250px] md:max-w-[300px] lg:max-w-[350px] aspect-[400/128] overflow-hidden transition-all duration-700 transform group-hover:scale-110 drop-shadow-[0_0_25px_rgba(59,130,246,0.6)]">
                 <Image 
-                  src="/Logo1.png" 
+                  src="/logo.png" 
                   alt="Netlink AI - Intelligent Professional Networking Logo" 
                   fill 
                   className="object-contain"
@@ -3136,7 +3136,7 @@ export function LandingPage() {
           >
             <div className="relative h-72 w-[900px] overflow-hidden transition-all duration-700 transform group-hover:scale-110 drop-shadow-[0_0_40px_rgba(59,130,246,0.7)]">
               <Image 
-                src="/Logo1.png" 
+                src="/logo.png" 
                 alt="Netlink AI - AI-Powered Business Networking Platform" 
                 fill 
                 className="object-contain"
