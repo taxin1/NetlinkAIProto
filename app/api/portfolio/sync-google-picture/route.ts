@@ -5,16 +5,39 @@ import { createClient } from "@/lib/supabase/server"
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
 
-    if (authError || !user) {
+    let user = null
+    const authHeader = request.headers.get("authorization")
+    const bearerToken = authHeader?.startsWith("Bearer ") ? authHeader.substring(7) : null
+    if (bearerToken) {
+      const { data, error } = await supabase.auth.getUser(bearerToken)
+      if (!error && data?.user) {
+        user = data.user
+      }
+    }
+
+    if (!user) {
+      const { data: { user: cookieUser }, error: authError } = await supabase.auth.getUser()
+      if (!authError && cookieUser) {
+        user = cookieUser
+      }
+    }
+
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
+    const body = await request.json().catch(() => ({}))
     let profilePictureUrl: string | null = null
 
+    // Option 0: Direct avatar URL provided in request body (e.g. from client OAuth metadata)
+    if (body?.avatarUrl && typeof body.avatarUrl === 'string' && body.avatarUrl.startsWith('http')) {
+      profilePictureUrl = body.avatarUrl.trim()
+      console.log("[Sync Google Picture] Received avatarUrl in request body:", profilePictureUrl)
+    }
+
     // Option 1: Try to get from auth.identities FIRST (Supabase stores OAuth data here - most reliable)
-    if (user.identities && user.identities.length > 0) {
+    if (!profilePictureUrl && user.identities && user.identities.length > 0) {
       console.log("[Sync Google Picture] Checking identities:", user.identities.length)
       const googleIdentity = user.identities.find(
         (identity: any) => identity.provider === 'google'
@@ -100,6 +123,16 @@ export async function POST(request: NextRequest) {
       const { data: { publicUrl } } = supabase.storage
         .from("portfolios")
         .getPublicUrl(fileName)
+
+      // Also persist to network_profiles table if the profile exists
+      try {
+        await supabase
+          .from("network_profiles")
+          .update({ avatar_url: publicUrl })
+          .eq("user_id", user.id)
+      } catch (dbErr) {
+        console.warn("[Sync Google Picture] Non-fatal: failed to update network_profiles", dbErr)
+      }
 
       return NextResponse.json({ 
         success: true, 

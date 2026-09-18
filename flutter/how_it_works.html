@@ -1,0 +1,211 @@
+<!DOCTYPE html><html class="dark" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Netlink AI - How It Works</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1E40AF',
+                        'primary-fixed-dim': '#93C5FD',
+                        surface: '#0F172A',
+                        'surface-container': '#1E293B',
+                        'surface-variant': '#334155',
+                        'on-surface': '#F8FAFC',
+                        'on-surface-variant': '#94A3B8',
+                        'glass-border': 'rgba(255, 255, 255, 0.1)'
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.25rem",
+                        lg: "0.5rem",
+                        xl: "0.75rem",
+                        full: "9999px",
+                        '2xl': '1rem',
+                        '3xl': '1.5rem'
+                    },
+                    fontFamily: {
+                        headline: ["Public Sans", "sans-serif"],
+                        display: ["Public Sans", "sans-serif"],
+                        body: ["Public Sans", "sans-serif"],
+                        label: ["Public Sans", "sans-serif"]
+                    },
+                    fontSize: {
+                        'headline-md': ['1.5rem', { lineHeight: '2rem', fontWeight: '700' }],
+                        'display-lg-mobile': ['2rem', { lineHeight: '2.5rem', fontWeight: '800' }],
+                        'label-caps': ['0.75rem', { lineHeight: '1rem', fontWeight: '600', letterSpacing: '0.05em' }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Public Sans', sans-serif; background-color: #0F172A; color: #F8FAFC; }
+        .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .text-gradient {
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-image: linear-gradient(to right, #38BDF8, #818CF8);
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface antialiased pb-12">
+<!-- TopAppBar -->
+<div class="flex justify-center w-full pt-8 relative"><button class="absolute left-4 top-8 flex items-center justify-center w-10 h-10 rounded-full bg-surface-variant/30 border border-glass-border text-on-surface-variant hover:text-white transition-colors group backdrop-blur-md"><span class="material-symbols-outlined group-hover:-translate-x-1 transition-transform">arrow_back</span></button><img alt="Netlink AI Logo" class="h-[144px] w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AP1WRLuNwtUrY5DPsxyaeqw0rBZlrPuBLCWtH7KariAd39gGuSqx-GMB4BN5aWWulURMBmdsxA-SWPK6-WSJxHYNnabGP_fejRmkj7wPX7ca9ErOXNgxE_ngq4qXAgyx9xMP-w1GpfZJBOIgOaScb68cSKOa3gJ0U-Fv1eipg3HAHXI9h8fMUB0IM9HX1HVjFiTC51IlWRPYgcRRuFmIYoAk4CgnjDq96PDU37j9KiRN4LLVFNHwjwefy12jYg"></div>
+<main class="px-4 max-w-lg mx-auto space-y-12 pt-4">
+<!-- Hero Section -->
+<section class="text-center space-y-4">
+<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-primary/30 bg-primary/10 text-primary-fixed-dim text-xs font-semibold uppercase tracking-wider mb-2">
+<span class="material-symbols-outlined text-sm">info</span>
+                How It Works
+            </div>
+<h2 class="text-3xl font-display font-extrabold leading-tight">
+                We're reimagining how professionals build <br>
+<span class="text-gradient">meaningful networks</span>
+</h2>
+<p class="text-on-surface-variant text-sm mt-4 leading-relaxed">
+                We believe networking should be meaningful, not mechanical. Netlink AI combines artificial intelligence with thoughtful design to eliminate the friction in professional networking.
+            </p>
+</section>
+<!-- Mission & Vision -->
+<section class="space-y-4">
+<div class="glass-card p-6 rounded-2xl relative overflow-hidden">
+<div class="absolute top-0 left-0 w-1 h-full bg-blue-500 rounded-l-2xl"></div>
+<h3 class="text-xl font-bold mb-2 flex items-center gap-2">
+<span class="material-symbols-outlined text-blue-400">flag</span> Mission
+                </h3>
+<p class="font-semibold text-sm mb-2">We're eliminating the busywork that stands between professionals and real relationships.</p>
+<p class="text-on-surface-variant text-xs leading-relaxed">
+                    Traditional networking tools force you to manage spreadsheets and remember follow-ups. We've built something different: an intelligent platform that handles the logistics so you can focus on what matters—building genuine connections.
+                </p>
+</div>
+<div class="glass-card p-6 rounded-2xl relative overflow-hidden">
+<div class="absolute top-0 left-0 w-1 h-full bg-indigo-500 rounded-l-2xl"></div>
+<h3 class="text-xl font-bold mb-2 flex items-center gap-2">
+<span class="material-symbols-outlined text-indigo-400">visibility</span> Vision
+                </h3>
+<p class="font-semibold text-sm mb-2">A world where every professional has the tools to build a global network effortlessly.</p>
+<p class="text-on-surface-variant text-xs leading-relaxed">
+                    We envision a future where geographic boundaries don't limit professional relationships. By removing the administrative burden of networking, we enable professionals to connect more frequently, more meaningfully, and more globally.
+                </p>
+</div>
+</section>
+<!-- Step-by-Step Guide (Timeline) -->
+<section>
+<h3 class="text-2xl font-bold mb-8 text-center">How it works</h3>
+<div class="relative ml-4 border-l-2 border-surface-variant space-y-8 pb-4">
+<!-- Step 1 -->
+<div class="relative pl-8">
+<div class="absolute -left-[17px] top-1 w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold text-sm shadow-[0_0_15px_rgba(59,130,246,0.5)]">
+                        01
+                    </div>
+<div class="flex items-center gap-3 mb-2">
+<span class="material-symbols-outlined text-blue-400 p-2 bg-blue-500/10 rounded-lg">person_add</span>
+<h4 class="text-lg font-bold">Sign Up &amp; Create Profile</h4>
+</div>
+<p class="text-on-surface-variant text-sm pl-11">Join Network Link AI in seconds. Create your professional profile and connect your accounts.</p>
+</div>
+<!-- Step 2 -->
+<div class="relative pl-8">
+<div class="absolute -left-[17px] top-1 w-8 h-8 rounded-full bg-cyan-500 text-white flex items-center justify-center font-bold text-sm shadow-[0_0_15px_rgba(6,182,212,0.5)]">
+                        02
+                    </div>
+<div class="flex items-center gap-3 mb-2">
+<span class="material-symbols-outlined text-cyan-400 p-2 bg-cyan-500/10 rounded-lg">group_add</span>
+<h4 class="text-lg font-bold">Build Your Network</h4>
+</div>
+<p class="text-on-surface-variant text-sm pl-11">Scan business cards, import contacts, or discover professionals in our global directory.</p>
+</div>
+<!-- Step 3 -->
+<div class="relative pl-8">
+<div class="absolute -left-[17px] top-1 w-8 h-8 rounded-full bg-indigo-500 text-white flex items-center justify-center font-bold text-sm shadow-[0_0_15px_rgba(99,102,241,0.5)]">
+                        03
+                    </div>
+<div class="flex items-center gap-3 mb-2">
+<span class="material-symbols-outlined text-indigo-400 p-2 bg-indigo-500/10 rounded-lg">smart_toy</span>
+<h4 class="text-lg font-bold">Let AI Assist You</h4>
+</div>
+<p class="text-on-surface-variant text-sm pl-11">Our AI helps you draft emails, schedule meetings, and maintain meaningful connections.</p>
+</div>
+<!-- Step 4 -->
+<div class="relative pl-8">
+<div class="absolute -left-[17px] top-1 w-8 h-8 rounded-full bg-purple-500 text-white flex items-center justify-center font-bold text-sm shadow-[0_0_15px_rgba(168,85,247,0.5)]">
+                        04
+                    </div>
+<div class="flex items-center gap-3 mb-2">
+<span class="material-symbols-outlined text-purple-400 p-2 bg-purple-500/10 rounded-lg">trending_up</span>
+<h4 class="text-lg font-bold">Grow &amp; Succeed</h4>
+</div>
+<p class="text-on-surface-variant text-sm pl-11">Track your progress, analyze insights, and watch your professional network flourish.</p>
+</div>
+</div>
+</section>
+<!-- Core Values Bento Grid -->
+<section>
+<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-surface-variant bg-surface-container text-on-surface-variant text-xs font-semibold uppercase tracking-wider mb-4 mx-auto block w-max">
+<span class="material-symbols-outlined text-sm">diamond</span>
+                Our Principles
+            </div>
+<h3 class="text-2xl font-bold mb-6 text-center">What drives us</h3>
+<div class="grid grid-cols-2 gap-4">
+<!-- User-Centric -->
+<div class="glass-card p-4 rounded-xl flex flex-col items-start gap-3">
+<div class="p-2 bg-blue-500/20 text-blue-400 rounded-lg">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">favorite</span>
+</div>
+<div>
+<h4 class="font-bold text-sm mb-1">User-Centric</h4>
+<p class="text-on-surface-variant text-xs">Everything we build is designed with our users' needs in mind.</p>
+</div>
+</div>
+<!-- Innovation -->
+<div class="glass-card p-4 rounded-xl flex flex-col items-start gap-3">
+<div class="p-2 bg-indigo-500/20 text-indigo-400 rounded-lg">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">lightbulb</span>
+</div>
+<div>
+<h4 class="font-bold text-sm mb-1">Innovation</h4>
+<p class="text-on-surface-variant text-xs">Pushing the boundaries of what's possible with AI.</p>
+</div>
+</div>
+<!-- Privacy First -->
+<div class="glass-card p-4 rounded-xl flex flex-col items-start gap-3">
+<div class="p-2 bg-cyan-500/20 text-cyan-400 rounded-lg">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">shield</span>
+</div>
+<div>
+<h4 class="font-bold text-sm mb-1">Privacy First</h4>
+<p class="text-on-surface-variant text-xs">Your data is yours. Enterprise-grade security to protect you.</p>
+</div>
+</div>
+<!-- Growth -->
+<div class="glass-card p-4 rounded-xl flex flex-col items-start gap-3">
+<div class="p-2 bg-purple-500/20 text-purple-400 rounded-lg">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">rocket_launch</span>
+</div>
+<div>
+<h4 class="font-bold text-sm mb-1">Growth</h4>
+<p class="text-on-surface-variant text-xs">Committed to helping you grow your network and achieve goals.</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+
+
+
+
+
+
+</body></html>

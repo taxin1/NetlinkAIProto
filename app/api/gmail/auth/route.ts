@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getGmailAuthUrl } from '@/lib/gmail'
 
@@ -9,7 +9,15 @@ export async function GET(request: NextRequest) {
       data: { user },
     } = await supabase.auth.getUser()
 
+    const acceptHeader = request.headers.get('accept') || ''
+    const wantsRedirect =
+      request.nextUrl.searchParams.get('redirect') === 'true' ||
+      (acceptHeader.includes('text/html') && !acceptHeader.includes('application/json'))
+
     if (!user) {
+      if (wantsRedirect) {
+        return NextResponse.redirect(new URL('/auth/login', request.url))
+      }
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -33,6 +41,10 @@ export async function GET(request: NextRequest) {
       }
     }
     const authUrl = getGmailAuthUrl(baseUrl)
+
+    if (wantsRedirect) {
+      return NextResponse.redirect(authUrl, { status: 307 })
+    }
     
     return NextResponse.json({ authUrl })
   } catch (error) {

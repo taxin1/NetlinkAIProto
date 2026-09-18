@@ -1,0 +1,258 @@
+<!DOCTYPE html><html class="dark" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Contacts - Netlink AI</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-fixed": "#351000",
+                        "tertiary": "#ffb695",
+                        "on-surface": "#e1e2eb",
+                        "on-primary-fixed": "#001a41",
+                        "surface-container-lowest": "#0b0e14",
+                        "tertiary-container": "#ef6719",
+                        "tertiary-fixed-dim": "#ffb695",
+                        "surface-container-low": "#191c22",
+                        "on-primary": "#002e68",
+                        "on-primary-container": "#00285b",
+                        "inverse-surface": "#e1e2eb",
+                        "error-container": "#93000a",
+                        "surface-tint": "#adc7ff",
+                        "surface-dim": "#10131a",
+                        "on-secondary-fixed": "#2c0051",
+                        "on-secondary": "#480081",
+                        "surface-container-highest": "#32353c",
+                        "surface-container-high": "#272a31",
+                        "primary": "#adc7ff",
+                        "surface-bright": "#363940",
+                        "outline": "#8b90a0",
+                        "secondary-fixed-dim": "#dcb8ff",
+                        "outline-variant": "#414754",
+                        "on-secondary-fixed-variant": "#6700b5",
+                        "background": "#10131a",
+                        "error-ruby": "#FF3B30",
+                        "glass-border": "rgba(255, 255, 255, 0.12)",
+                        "secondary-container": "#7701d0",
+                        "on-error-container": "#ffdad6",
+                        "surface": "#10131a",
+                        "on-tertiary-fixed-variant": "#7c2e00",
+                        "inverse-on-surface": "#2e3037",
+                        "on-secondary-container": "#dcb7ff",
+                        "warning-amber": "#FFB800",
+                        "error": "#ffb4ab",
+                        "inverse-primary": "#005bc0",
+                        "primary-fixed-dim": "#adc7ff",
+                        "on-error": "#690005",
+                        "secondary": "#dcb8ff",
+                        "on-tertiary-container": "#4c1a00",
+                        "success-glow": "#00FFC2",
+                        "surface-variant": "#32353c",
+                        "on-tertiary": "#571e00",
+                        "secondary-fixed": "#efdbff",
+                        "surface-container": "#1d2026",
+                        "tertiary-fixed": "#ffdbcc",
+                        "primary-container": "#4a8eff",
+                        "on-surface-variant": "#c1c6d7",
+                        "surface-card": "#161B22",
+                        "primary-fixed": "#d8e2ff",
+                        "on-primary-fixed-variant": "#004493",
+                        "on-background": "#e1e2eb"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter-mobile": "16px",
+                        "base-unit": "4px",
+                        "margin-mobile": "20px",
+                        "touch-target-min": "44px",
+                        "section-gap": "64px",
+                        "card-padding": "24px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Hanken Grotesk"],
+                        "stats-number": ["Sora"],
+                        "label-caps": ["JetBrains Mono"],
+                        "display-lg": ["Sora"],
+                        "headline-md": ["Sora"],
+                        "display-lg-mobile": ["Sora"],
+                        "body-md": ["Hanken Grotesk"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "stats-number": ["20px", { "lineHeight": "24px", "fontWeight": "700" }],
+                        "label-caps": ["12px", { "lineHeight": "16px", "letterSpacing": "0.08em", "fontWeight": "500" }],
+                        "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "display-lg-mobile": ["32px", { "lineHeight": "38px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        @import url('https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@500&family=Sora:wght@600;700&display=swap');
+        
+        body {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Custom Scrollbar for a premium feel */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Subtle radial gradient background common in dark themes */
+        .bg-radial-subtle {
+            background: radial-gradient(circle at top right, rgba(173, 199, 255, 0.03), transparent 40%),
+                        radial-gradient(circle at bottom left, rgba(119, 1, 208, 0.03), transparent 40%);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+        .glow-sm { box-shadow: 0 0 12px rgba(173, 199, 255, 0.4); }
+        .bg-grid-pattern {
+            background-image: linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+        .neon-gradient {
+            background: linear-gradient(135deg, #4a8eff, #7701d0);
+        }
+        .midnight-gradient {
+            background: linear-gradient(180deg, #0b0e14, #10131a);
+        }
+    </style></head>
+<body class="midnight-gradient text-on-background min-h-screen pb-24 font-body-md antialiased bg-grid-pattern relative opacity-100 transition-opacity duration-500">
+<input class="peer hidden" id="drawer-toggle" type="checkbox">
+<label class="fixed inset-0 bg-black/60 z-[60] opacity-0 pointer-events-none peer-checked:opacity-100 peer-checked:pointer-events-auto transition-opacity duration-300 md:hidden backdrop-blur-sm" for="drawer-toggle"></label>
+<!-- TopAppBar -->
+<header class="bg-surface-dim/80 dark:bg-surface-dim/80 backdrop-blur-xl border-b border-glass-border fixed top-0 left-0 right-0 h-[64px] flex justify-between items-center px-margin-mobile w-full z-50 md:hidden">
+<label class="text-on-surface-variant hover:opacity-80 p-2 -ml-2 h-touch-target-min w-touch-target-min flex items-center justify-center cursor-pointer relative z-10 mt-3" for="drawer-toggle">
+<span class="material-symbols-outlined" data-icon="menu">menu</span>
+</label>
+<div class="flex items-center justify-center flex-1 absolute inset-0 pointer-events-none">
+<img alt="Netlink AI Logo" class="h-32 object-contain pointer-events-auto mt-2" src="https://lh3.googleusercontent.com/aida/AP1WRLuNwtUrY5DPsxyaeqw0rBZlrPuBLCWtH7KariAd39gGuSqx-GMB4BN5aWWulURMBmdsxA-SWPK6-WSJxHYNnabGP_fejRmkj7wPX7ca9ErOXNgxE_ngq4qXAgyx9xMP-w1GpfZJBOIgOaScb68cSKOa3gJ0U-Fv1eipg3HAHXI9h8fMUB0IM9HX1HVjFiTC51IlWRPYgcRRuFmIYoAk4CgnjDq96PDU37j9KiRN4LLVFNHwjwefy12jYg">
+</div>
+<div class="w-touch-target-min"></div>
+</header>
+<!-- Navigation Drawer -->
+<nav class="fixed inset-y-0 left-0 z-[70] flex flex-col h-full w-[280px] -translate-x-full peer-checked:translate-x-0 md:translate-x-0 transition-transform duration-300 ease-in-out bg-surface-container-low dark:bg-surface-container-low rounded-r-xl border-r border-glass-border backdrop-blur-xl shadow-lg md:z-40">
+<div class="p-6 border-b border-glass-border mb-4 flex items-center justify-between">
+<img alt="Netlink AI Logo" class="h-24 object-contain" src="https://lh3.googleusercontent.com/aida/AP1WRLuNwtUrY5DPsxyaeqw0rBZlrPuBLCWtH7KariAd39gGuSqx-GMB4BN5aWWulURMBmdsxA-SWPK6-WSJxHYNnabGP_fejRmkj7wPX7ca9ErOXNgxE_ngq4qXAgyx9xMP-w1GpfZJBOIgOaScb68cSKOa3gJ0U-Fv1eipg3HAHXI9h8fMUB0IM9HX1HVjFiTC51IlWRPYgcRRuFmIYoAk4CgnjDq96PDU37j9KiRN4LLVFNHwjwefy12jYg">
+<label class="md:hidden text-on-surface-variant p-2 cursor-pointer rounded-full hover:bg-surface-variant/50" for="drawer-toggle">
+<span class="material-symbols-outlined">close</span>
+</label>
+</div>
+<div class="flex-1 overflow-y-auto px-2">
+<a class="text-on-surface-variant px-4 py-3 hover:bg-surface-variant/50 font-body-md text-body-md duration-200 transition-colors flex items-center mb-1 rounded-r-md" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="dashboard">dashboard</span>
+            Dashboard
+        </a>
+<a class="text-on-surface-variant px-4 py-3 hover:bg-surface-variant/50 font-body-md text-body-md duration-200 transition-colors flex items-center mb-1 rounded-r-md" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="person_search">person_search</span>
+            Network Profile
+        </a>
+<a class="text-on-surface-variant px-4 py-3 hover:bg-surface-variant/50 font-body-md text-body-md duration-200 transition-colors flex items-center mb-1 rounded-r-md" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="folder_shared">folder_shared</span>
+            Portfolio
+        </a>
+<a class="bg-primary-container/20 text-primary border-l-4 border-primary px-4 py-3 font-body-md text-body-md duration-200 transition-colors flex items-center mb-1 rounded-r-md" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="group" style="font-variation-settings: 'FILL' 1;">group</span>
+            Contacts
+        </a>
+<a class="text-on-surface-variant px-4 py-3 hover:bg-surface-variant/50 font-body-md text-body-md duration-200 transition-colors flex items-center mb-1 rounded-r-md" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="mail">mail</span>
+            Emails
+        </a>
+<a class="text-on-surface-variant px-4 py-3 hover:bg-surface-variant/50 font-body-md text-body-md duration-200 transition-colors flex items-center mb-1 rounded-r-md" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="description">description</span>
+            Quotation Form
+        </a>
+<a class="text-on-surface-variant px-4 py-3 hover:bg-surface-variant/50 font-body-md text-body-md duration-200 transition-colors flex items-center mb-1 rounded-r-md" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="analytics">analytics</span>
+            Analytics
+        </a>
+<a class="text-on-surface-variant px-4 py-3 hover:bg-surface-variant/50 font-body-md text-body-md duration-200 transition-colors flex items-center mb-1 rounded-r-md" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="smart_toy">smart_toy</span>
+            AI Assistant
+        </a>
+<a class="text-on-surface-variant px-4 py-3 hover:bg-surface-variant/50 font-body-md text-body-md duration-200 transition-colors flex items-center mb-1 rounded-r-md" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="settings">settings</span>
+            Settings
+        </a>
+</div>
+<div class="p-4 border-t border-glass-border">
+<div class="bg-surface-card p-3 rounded-lg border border-glass-border flex items-center">
+<div class="h-10 w-10 rounded-full bg-surface-variant flex items-center justify-center text-on-surface-variant mr-3 overflow-hidden">
+<span class="material-symbols-outlined">person</span>
+</div>
+<div>
+<div class="text-sm font-semibold text-on-surface">Guest Mode</div>
+<div class="text-xs text-primary">Limited Trial</div>
+</div>
+</div>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="w-full md:pl-[280px] pt-[64px] md:pt-0 flex flex-col min-h-screen relative bg-surface">
+<!-- Page Content -->
+<div class="flex-1 p-6 md:p-10 flex flex-col w-full max-w-7xl mx-auto">
+<!-- Header Section -->
+<div class="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-8 md:mb-12">
+<div class="flex flex-col gap-1 sm:gap-2">
+<h1 class="font-display-lg-mobile md:font-display-lg text-display-lg-mobile md:text-display-lg text-on-surface">Contacts</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant opacity-80">Manage your network connections</p>
+</div>
+<button class="neon-gradient text-white px-6 py-2.5 rounded-lg font-medium shadow-lg hover:shadow-primary/20 transition-all active:scale-95 h-touch-target-min flex items-center gap-2 relative z-10">
+<span class="material-symbols-outlined text-[20px]" data-icon="add">add</span>
+                Add Contact
+            </button>
+</div>
+<!-- Main Canvas Area - Empty State -->
+<div class="flex-1 w-full bg-surface-card border border-glass-border rounded-xl flex flex-col items-center justify-center p-8 relative overflow-hidden group min-h-[400px]"><div class="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-50"></div>
+<div class="relative z-10 flex flex-col items-center text-center max-w-lg mx-auto">
+<div class="h-20 w-20 rounded-2xl bg-surface-variant border border-glass-border flex items-center justify-center mb-6 opacity-50 shadow-lg">
+<span class="material-symbols-outlined text-4xl text-on-surface-variant">person_off</span>
+</div>
+<h4 class="text-on-surface font-headline-md text-lg mb-2">No contacts yet</h4>
+<p class="text-on-surface-variant text-sm mb-8">
+                        Add your first contact to get started and build your network!
+                    </p>
+<button class="neon-gradient text-white px-8 py-2 rounded-lg font-medium text-sm transition-transform active:scale-95 h-touch-target-min">
+                        Create your first contact
+                    </button>
+</div>
+<div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-3/4 h-24 bg-primary/5 blur-3xl rounded-full pointer-events-none"></div></div>
+</div>
+</main>
+
+
+
+
+</body></html>

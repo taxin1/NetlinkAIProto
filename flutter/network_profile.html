@@ -1,0 +1,461 @@
+<!DOCTYPE html><html class="dark scroll-smooth" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Network Profile - Netlink AI</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&amp;family=JetBrains+Mono:wght@500&amp;family=Hanken+Grotesk:wght@400&amp;display=swap" rel="stylesheet">
+<style>
+        .material-symbols-outlined {
+            font-family: 'Material Symbols Outlined';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 24px;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            -webkit-font-feature-settings: 'liga';
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        .glow-sm { box-shadow: 0 0 12px rgba(0, 229, 255, 0.4); }
+        .bg-grid-pattern {
+            background-image: linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+        .neon-gradient {
+            background: linear-gradient(135deg, #00e5ff, #7701d0);
+        }
+        .midnight-gradient {
+            background: linear-gradient(180deg, #0b0e14, #10131a);
+        }
+        .nav-item-active {
+            color: #00e5ff !important;
+            opacity: 1 !important;
+            text-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
+        }
+        .nav-item-active .material-symbols-outlined {
+            font-variation-settings: 'FILL' 1;
+        }
+        
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-background": "#e1e2eb",
+                    "error-container": "#93000a",
+                    "primary-container": "#00e5ff",
+                    "surface-bright": "#363940",
+                    "on-secondary-container": "#dcb7ff",
+                    "warning-amber": "#FFB800",
+                    "outline-variant": "#414754",
+                    "tertiary": "#ffb695",
+                    "tertiary-fixed": "#ffdbcc",
+                    "on-secondary-fixed": "#2c0051",
+                    "surface-container-highest": "#32353c",
+                    "tertiary-container": "#ef6719",
+                    "surface-variant": "#32353c",
+                    "on-primary-fixed-variant": "#004493",
+                    "surface-container-low": "#191c22",
+                    "on-primary-container": "#00285b",
+                    "secondary-fixed-dim": "#dcb8ff",
+                    "error": "#ffb4ab",
+                    "surface-container": "#1d2026",
+                    "surface-container-high": "#272a31",
+                    "inverse-on-surface": "#2e3037",
+                    "surface-dim": "#10131a",
+                    "primary": "#00e5ff",
+                    "on-error-container": "#ffdad6",
+                    "success-glow": "#00FFC2",
+                    "primary-fixed": "#d8e2ff",
+                    "on-primary": "#002e68",
+                    "on-tertiary": "#571e00",
+                    "on-error": "#690005",
+                    "error-ruby": "#FF3B30",
+                    "surface-card": "#161B22",
+                    "on-tertiary-container": "#4c1a00",
+                    "on-surface-variant": "#c1c6d7",
+                    "on-surface": "#e1e2eb",
+                    "on-primary-fixed": "#001a41",
+                    "inverse-primary": "#005bc0",
+                    "surface-container-lowest": "#0b0e14",
+                    "on-secondary": "#480081",
+                    "surface": "#10131a",
+                    "background": "#10131a",
+                    "secondary-fixed": "#efdbff",
+                    "on-tertiary-fixed": "#351000",
+                    "glass-border": "rgba(255, 255, 255, 0.12)",
+                    "on-tertiary-fixed-variant": "#7c2e00",
+                    "tertiary-fixed-dim": "#ffb695",
+                    "primary-fixed-dim": "#00e5ff",
+                    "inverse-surface": "#e1e2eb",
+                    "secondary": "#dcb8ff",
+                    "outline": "#8b90a0",
+                    "on-secondary-fixed-variant": "#6700b5",
+                    "secondary-container": "#7701d0",
+                    "surface-tint": "#00e5ff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "card-padding": "24px",
+                    "section-gap": "64px",
+                    "gutter-mobile": "16px",
+                    "margin-mobile": "20px",
+                    "touch-target-min": "44px",
+                    "base-unit": "4px"
+            },
+            "fontFamily": {
+                    "display-lg": ["Sora"],
+                    "label-caps": ["JetBrains Mono"],
+                    "display-lg-mobile": ["Sora"],
+                    "stats-number": ["Sora"],
+                    "headline-md": ["Sora"],
+                    "body-lg": ["Hanken Grotesk"],
+                    "body-md": ["Hanken Grotesk"]
+            },
+            "fontSize": {
+                    "display-lg": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.08em", "fontWeight": "500"}],
+                    "display-lg-mobile": ["32px", {"lineHeight": "38px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "stats-number": ["20px", {"lineHeight": "24px", "fontWeight": "700"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+            }
+          }
+        }
+      }
+    </script>
+</head>
+<body class="midnight-gradient text-on-background font-body-md antialiased bg-grid-pattern relative pb-24 min-h-screen opacity-100 transition-opacity duration-500">
+<input class="peer hidden" id="drawer-toggle" type="checkbox">
+<label class="fixed inset-0 bg-black/60 z-[60] opacity-0 pointer-events-none peer-checked:opacity-100 peer-checked:pointer-events-auto transition-opacity duration-300 md:hidden backdrop-blur-sm" for="drawer-toggle"></label>
+<!-- Refined Header (Matches Dashboard) -->
+<header class="bg-surface-dim/80 dark:bg-surface-dim/80 backdrop-blur-xl border-b border-glass-border fixed top-0 left-0 right-0 h-[64px] flex justify-between items-center px-margin-mobile w-full z-50 md:hidden">
+<label class="text-on-surface-variant hover:opacity-80 p-2 -ml-2 h-touch-target-min w-touch-target-min flex items-center justify-center cursor-pointer relative z-10 mt-3" for="drawer-toggle">
+<span class="material-symbols-outlined text-primary" data-icon="menu">menu</span>
+</label>
+<div class="flex items-center justify-center flex-1 absolute inset-0 pointer-events-none">
+<img alt="Netlink AI Logo" class="h-32 object-contain pointer-events-auto mt-2" src="https://lh3.googleusercontent.com/aida/AP1WRLtKMoLEIiva0vAnOKlCcq2aG3bQd_Fnv_sMu6in4tTsRDi1lZlS8mMlSgpxJUc0CuyW4qJfDTtANgyWqdn_9fEd4EF9w789ewLroLfC4JQqu4HcF9HotfHr9mTcj0RZkpdez22Brl3bANNA_vFAoHYjw5ig2tsf_zI0jAeApdmYErxiKn7_drI4mKJv-FSaPOUmVFf-WT-G41qSQtbO8pbltlvjdGeKUou35eNnvZHke-6gImanGYmmlA">
+</div>
+<div class="w-touch-target-min"></div>
+</header>
+<!-- Navigation Drawer -->
+<nav class="fixed inset-y-0 left-0 z-[70] flex flex-col h-full w-[280px] -translate-x-full peer-checked:translate-x-0 md:translate-x-0 transition-transform duration-300 ease-in-out bg-surface-container-low dark:bg-surface-container-low rounded-r-xl border-r border-glass-border backdrop-blur-xl shadow-lg md:z-40">
+<div class="p-6 border-b border-glass-border mb-4 flex items-center justify-between">
+<img alt="Netlink AI Logo" class="h-24 object-contain" src="https://lh3.googleusercontent.com/aida/AP1WRLtKMoLEIiva0vAnOKlCcq2aG3bQd_Fnv_sMu6in4tTsRDi1lZlS8mMlSgpxJUc0CuyW4qJfDTtANgyWqdn_9fEd4EF9w789ewLroLfC4JQqu4HcF9HotfHr9mTcj0RZkpdez22Brl3bANNA_vFAoHYjw5ig2tsf_zI0jAeApdmYErxiKn7_drI4mKJv-FSaPOUmVFf-WT-G41qSQtbO8pbltlvjdGeKUou35eNnvZHke-6gImanGYmmlA">
+<label class="md:hidden text-on-surface-variant p-2 cursor-pointer rounded-full hover:bg-surface-variant/50" for="drawer-toggle">
+<span class="material-symbols-outlined">close</span>
+</label>
+</div>
+<div class="flex-1 overflow-y-auto px-2 no-scrollbar">
+<a class="text-on-surface-variant px-4 py-3 hover:bg-surface-variant/50 font-body-md text-body-md duration-200 transition-colors flex items-center mb-1 rounded-r-md" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="dashboard">dashboard</span>
+                Dashboard
+            </a>
+<a class="bg-primary-container/20 text-primary border-l-4 border-primary px-4 py-3 font-body-md text-body-md duration-200 transition-colors flex items-center mb-1 rounded-r-md" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="person_search">person_search</span>
+                Network Profile
+            </a>
+<a class="text-on-surface-variant px-4 py-3 hover:bg-surface-variant/50 font-body-md text-body-md duration-200 transition-colors flex items-center mb-1 rounded-r-md" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="folder_shared">folder_shared</span>
+                Portfolio
+            </a>
+<a class="text-on-surface-variant px-4 py-3 hover:bg-surface-variant/50 font-body-md text-body-md duration-200 transition-colors flex items-center mb-1 rounded-r-md" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="group">group</span>
+                Contacts
+            </a>
+<a class="text-on-surface-variant px-4 py-3 hover:bg-surface-variant/50 font-body-md text-body-md duration-200 transition-colors flex items-center mb-1 rounded-r-md" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="mail">mail</span>
+                Emails
+            </a>
+<a class="text-on-surface-variant px-4 py-3 hover:bg-surface-variant/50 font-body-md text-body-md duration-200 transition-colors flex items-center mb-1 rounded-r-md" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="description">description</span>
+                Quotation Form
+            </a>
+<a class="text-on-surface-variant px-4 py-3 hover:bg-surface-variant/50 font-body-md text-body-md duration-200 transition-colors flex items-center mb-1 rounded-r-md" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="analytics">analytics</span>
+                Analytics
+            </a>
+<a class="text-on-surface-variant px-4 py-3 hover:bg-surface-variant/50 font-body-md text-body-md duration-200 transition-colors flex items-center mb-1 rounded-r-md" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="smart_toy">smart_toy</span>
+                AI Assistant
+            </a>
+<a class="text-on-surface-variant px-4 py-3 hover:bg-surface-variant/50 font-body-md text-body-md duration-200 transition-colors flex items-center mb-1 rounded-r-md" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="settings">settings</span>
+                Settings
+            </a>
+</div>
+<div class="p-4 border-t border-glass-border">
+<div class="bg-surface-card p-3 rounded-lg border border-glass-border flex items-center">
+<div class="h-10 w-10 rounded-full bg-surface-variant flex items-center justify-center text-on-surface-variant mr-3 overflow-hidden">
+<span class="material-symbols-outlined">person</span>
+</div>
+<div>
+<div class="text-sm font-semibold text-on-surface">Guest Mode</div>
+<div class="text-xs text-primary">Limited Trial</div>
+</div>
+</div>
+</div>
+</nav>
+<!-- Main Content -->
+<main class="w-full md:pl-[280px] px-gutter-mobile md:px-card-padding pt-[84px] md:pt-6 pb-6 max-w-7xl mx-auto space-y-6">
+<!-- Trial Banner -->
+<div class="bg-surface-card/80 backdrop-blur-xl border border-glass-border rounded-lg p-3 text-center text-sm text-primary flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">info</span>
+            You are in Trial Mode. Progress will not be saved. <a class="font-bold underline text-on-surface hover:text-primary transition-colors" href="#">Sign up now</a>
+</div>
+<!-- Network Profile Hero Card -->
+<div class="bg-surface-card/80 backdrop-blur-xl border border-glass-border rounded-xl p-card-padding relative overflow-hidden flex flex-col items-start gap-4">
+<div class="absolute -top-32 -right-32 w-64 h-64 bg-primary/10 rounded-full blur-[80px] pointer-events-none"></div>
+<div class="flex items-center gap-5 z-10 w-full">
+<div class="w-14 h-14 rounded-2xl neon-gradient text-white flex items-center justify-center shadow-[0_0_20px_rgba(0,229,255,0.4)] shrink-0">
+<span class="material-symbols-outlined text-[28px]" data-icon="share">share</span>
+</div>
+<div>
+<h1 class="font-display-lg-mobile md:font-display-lg text-white tracking-tight mb-1 text-[22px] md:text-3xl font-semibold">Network Profile</h1>
+<p class="font-body-md md:font-body-lg text-on-surface-variant text-sm md:text-base">Share your profile instantly with QR codes</p>
+</div>
+</div>
+<div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-primary/30 text-primary font-label-caps text-label-caps z-10 mt-2">
+<span class="material-symbols-outlined text-[16px]" data-icon="qr_code_scanner">qr_code_scanner</span> QR Code Ready
+            </div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<div class="lg:col-span-2 space-y-6 scroll-mt-24" id="profile-info">
+<!-- Profile Information Section -->
+<div class="bg-surface-card/80 backdrop-blur-xl border border-glass-border rounded-xl p-card-padding flex flex-col gap-6 relative overflow-hidden">
+<div class="flex items-center gap-4 mb-2">
+<div class="w-10 h-10 rounded-xl bg-surface-variant border border-glass-border text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" data-icon="person">person</span>
+</div>
+<div>
+<h2 class="font-headline-md text-on-surface text-lg">Profile Information</h2>
+<p class="font-body-md text-on-surface-variant text-sm">Your networking details</p>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+<div class="flex flex-col gap-2">
+<label class="font-label-caps text-[11px] text-on-surface-variant uppercase tracking-wider ml-1">Full Name</label>
+<input class="w-full bg-surface-container-low/50 border border-glass-border rounded-xl px-4 py-3 min-h-touch-target-min font-body-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-on-surface-variant/30" type="text" value="John Doe">
+</div>
+<div class="flex flex-col gap-2">
+<label class="font-label-caps text-[11px] text-on-surface-variant uppercase tracking-wider ml-1">Job Title</label>
+<input class="w-full bg-surface-container-low/50 border border-glass-border rounded-xl px-4 py-3 min-h-touch-target-min font-body-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-on-surface-variant/30" type="text" value="Software Engineer">
+</div>
+<div class="flex flex-col gap-2">
+<label class="font-label-caps text-[11px] text-on-surface-variant uppercase tracking-wider ml-1">Company</label>
+<input class="w-full bg-surface-container-low/50 border border-glass-border rounded-xl px-4 py-3 min-h-touch-target-min font-body-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-on-surface-variant/30" type="text" value="Acme Inc.">
+</div>
+<div class="flex flex-col gap-2">
+<label class="font-label-caps text-[11px] text-on-surface-variant uppercase tracking-wider ml-1">Phone</label>
+<input class="w-full bg-surface-container-low/50 border border-glass-border rounded-xl px-4 py-3 min-h-touch-target-min font-body-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-on-surface-variant/30" type="tel" value="+1 234 567 8900">
+</div>
+</div>
+<!-- Social Links Section -->
+<div class="mt-4 pt-6 border-t border-glass-border">
+<h3 class="font-body-md font-semibold flex items-center gap-2 text-on-surface mb-5 text-[16px]">
+<span class="material-symbols-outlined text-primary text-[20px]" data-icon="hub">hub</span> Social Links
+                        </h3>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<!-- LinkedIn -->
+<div class="flex items-center gap-3 bg-surface-container-low/40 p-3 rounded-xl border border-glass-border">
+<div class="w-10 h-10 rounded-lg bg-[#0077b5] text-white flex items-center justify-center shrink-0 font-bold">in</div>
+<input class="w-full bg-transparent border-none p-0 font-body-md text-on-surface focus:ring-0 outline-none placeholder:text-on-surface-variant/30" placeholder="LinkedIn URL" type="text" value="linkedin.com/in/johndoe">
+</div>
+<!-- Twitter/X -->
+<div class="flex items-center gap-3 bg-surface-container-low/40 p-3 rounded-xl border border-glass-border">
+<div class="w-10 h-10 rounded-lg bg-white text-black flex items-center justify-center shrink-0 font-bold">𝕏</div>
+<input class="w-full bg-transparent border-none p-0 font-body-md text-on-surface focus:ring-0 outline-none placeholder:text-on-surface-variant/30" placeholder="Twitter/X handle" type="text" value="@johndoe">
+</div>
+<!-- GitHub -->
+<div class="flex items-center gap-3 bg-surface-container-low/40 p-3 rounded-xl border border-glass-border">
+<div class="w-10 h-10 rounded-lg bg-[#333] text-white flex items-center justify-center shrink-0">
+<svg aria-hidden="true" class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" fill-rule="evenodd"></path></svg>
+</div>
+<input class="w-full bg-transparent border-none p-0 font-body-md text-on-surface focus:ring-0 outline-none placeholder:text-on-surface-variant/30" placeholder="GitHub URL" type="text">
+</div>
+<!-- Instagram -->
+<div class="flex items-center gap-3 bg-surface-container-low/40 p-3 rounded-xl border border-glass-border">
+<div class="w-10 h-10 rounded-lg bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] text-white flex items-center justify-center shrink-0">
+<svg aria-hidden="true" class="w-6 h-6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><rect height="20" rx="5" ry="5" width="20" x="2" y="2"></rect><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"></path><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"></line></svg>
+</div>
+<input class="w-full bg-transparent border-none p-0 font-body-md text-on-surface focus:ring-0 outline-none placeholder:text-on-surface-variant/30" placeholder="Instagram handle" type="text">
+</div>
+<!-- Website -->
+<div class="flex items-center gap-3 bg-surface-container-low/40 p-3 rounded-xl border border-glass-border md:col-span-2">
+<div class="w-10 h-10 rounded-lg bg-primary text-on-primary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[20px] text-on-primary">language</span>
+</div>
+<input class="w-full bg-transparent border-none p-0 font-body-md text-on-surface focus:ring-0 outline-none placeholder:text-on-surface-variant/30" placeholder="Personal Website URL" type="text">
+</div>
+</div>
+</div>
+</div>
+<!-- Public Profile Toggle -->
+<div class="bg-surface-card/80 backdrop-blur-xl border border-glass-border rounded-xl p-card-padding flex flex-col gap-5">
+<div class="flex items-center justify-between">
+<div>
+<h4 class="font-body-md font-semibold text-on-surface">Public Profile</h4>
+<p class="font-body-md text-on-surface-variant text-sm mt-1">Show your profile in the directory.</p>
+</div>
+<button aria-checked="false" class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-surface-variant transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background" id="public-profile-toggle" role="switch" type="button">
+<span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-on-surface-variant shadow ring-0 transition duration-200 ease-in-out translate-x-0"></span>
+</button>
+</div>
+<button class="w-full min-h-[44px] bg-surface-variant hover:bg-surface-bright border border-glass-border text-on-surface rounded-lg font-body-md font-semibold transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-primary" data-icon="public">public</span> View Public Directory
+                    </button>
+<div class="pt-4 mt-2 border-t border-glass-border">
+<button class="w-full min-h-[44px] neon-gradient text-white rounded-lg font-body-md font-medium shadow-lg hover:shadow-primary/20 transition-all flex items-center justify-center gap-2 active:scale-95">
+<span class="material-symbols-outlined text-[20px] text-white" data-icon="save">save</span> Save Profile
+                        </button>
+</div>
+</div>
+</div>
+<!-- LinkedIn QR Code Section -->
+<div class="lg:col-span-1 scroll-mt-24" id="linkedin-qr">
+<div class="bg-surface-card/80 backdrop-blur-xl border border-glass-border rounded-xl p-card-padding flex flex-col items-center justify-center gap-4 min-h-[350px] text-center sticky top-[100px]">
+<div class="w-14 h-14 rounded-2xl bg-[#0077b5] text-white flex items-center justify-center mb-2 font-display-lg font-bold text-2xl shadow-[0_0_15px_rgba(0,119,181,0.4)]">
+                        in
+                    </div>
+<h2 class="font-headline-md text-on-surface text-lg">LinkedIn QR Code</h2>
+<p class="font-body-md text-on-surface-variant text-sm">Scan to connect instantly</p>
+<div class="w-48 h-48 border-2 border-dashed border-glass-border bg-surface-container-low/30 flex items-center justify-center rounded-xl mt-4 group hover:border-primary/50 transition-all duration-300">
+<div class="flex flex-col items-center gap-2 relative">
+<img alt="LinkedIn QR Code" class="w-full h-full object-contain p-2" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBHRiIwxr9vxfjP26SkwlVez1yJC5-3Wiez15Cnu6JlsANj92Q2kI01YxaxYtfjS4zviFlhchPYcwiQ3SUUfF8khabtyqt4aKC_k86iZ0QprMIkJEg9IDrFwwuCNmmeiYHOKowcGxBEPwIPISdwJ6AyyLLT4YeOXe-UjGvQi5VfAX4qfoEePrW61iPpEcwKu6wnF2_QWWnDl-sAM3sbzXlZ-cuC9qKmP8kHbA1mfQFsVG2Yf1GkxCAPlTjmKoTs92ZNKvik6c8rGkc">
+</div>
+</div>
+<p class="font-body-md text-on-surface-variant/50 text-xs mt-6 px-4 leading-relaxed">
+                        Complete your LinkedIn URL in the form to generate your personal QR code.
+                    </p>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation (Matches Dashboard Style) -->
+<nav class="md:hidden bg-surface-container/90 dark:bg-surface-container/90 backdrop-blur-xl border-t border-glass-border fixed bottom-0 left-0 right-0 w-full z-50 flex justify-around items-center h-[72px] pb-safe px-4 transition-transform duration-150">
+<a class="flex flex-col items-center justify-center text-on-surface-variant opacity-60 flex-1 h-full transition-all active:scale-95 duration-150 nav-item-active" href="#profile-info" id="nav-profile-info">
+<span class="material-symbols-outlined mb-1">person</span>
+<span class="font-label-caps text-label-caps text-[10px]">Profile Info</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant opacity-60 flex-1 h-full transition-all active:scale-95 duration-150" href="#linkedin-qr" id="nav-linkedin-qr">
+<span class="material-symbols-outlined mb-1">qr_code</span>
+<span class="font-label-caps text-label-caps text-[10px]">LinkedIn QR</span>
+</a>
+</nav>
+<!-- Interaction Scripts -->
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const toggleBtn = document.getElementById('public-profile-toggle');
+            const toggleCircle = toggleBtn.querySelector('span');
+
+            if(toggleBtn) {
+                toggleBtn.addEventListener('click', () => {
+                    const isChecked = toggleBtn.getAttribute('aria-checked') === 'true';
+                    
+                    if (isChecked) {
+                        toggleBtn.setAttribute('aria-checked', 'false');
+                        toggleBtn.classList.remove('bg-primary');
+                        toggleBtn.classList.add('bg-surface-variant');
+                        toggleCircle.classList.remove('translate-x-5', 'bg-white');
+                        toggleCircle.classList.add('translate-x-0', 'bg-on-surface-variant');
+                    } else {
+                        toggleBtn.setAttribute('aria-checked', 'true');
+                        toggleBtn.classList.remove('bg-surface-variant');
+                        toggleBtn.classList.add('bg-primary');
+                        toggleCircle.classList.remove('translate-x-0', 'bg-on-surface-variant');
+                        toggleCircle.classList.add('translate-x-5', 'bg-white');
+                    }
+                });
+            }
+
+            const sections = ['profile-info', 'linkedin-qr'];
+            const navItems = {
+                'profile-info': document.getElementById('nav-profile-info'),
+                'linkedin-qr': document.getElementById('nav-linkedin-qr')
+            };
+
+            const observerOptions = {
+                root: null,
+                rootMargin: '-30% 0px -30% 0px', 
+                threshold: 0.1
+            };
+
+            const observerCallback = (entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const id = entry.target.id;
+                        Object.values(navItems).forEach(item => {
+                            if (item) {
+                                item.classList.remove('nav-item-active');
+                                item.classList.add('opacity-60');
+                            }
+                        });
+                        if (navItems[id]) {
+                            navItems[id].classList.add('nav-item-active');
+                            navItems[id].classList.remove('opacity-60');
+                        }
+                    }
+                });
+            };
+
+            const observer = new IntersectionObserver(observerCallback, observerOptions);
+
+            sections.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) observer.observe(el);
+            });
+
+            document.querySelectorAll('nav a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    const href = this.getAttribute('href');
+                    if (href && href.startsWith('#')) {
+                        e.preventDefault();
+                        const targetId = href.substring(1);
+                        const targetElement = document.getElementById(targetId);
+                        
+                        if (targetElement) {
+                            targetElement.scrollIntoView({
+                                behavior: 'smooth'
+                            });
+                        }
+                    }
+                });
+            });
+
+            const drawerLinks = document.querySelectorAll('nav a');
+            const drawerToggle = document.getElementById('drawer-toggle');
+            if(drawerToggle) {
+                drawerLinks.forEach(link => {
+                    link.addEventListener('click', () => {
+                        if(!link.getAttribute('href').startsWith('#')) return;
+                        drawerToggle.checked = false;
+                    });
+                });
+            }
+        });
+    </script>
+</body></html>

@@ -1,0 +1,251 @@
+<!DOCTYPE html><html class="dark" lang="en" style="scroll-behavior: smooth; opacity: 0;" data-stitch-anim-opacity="true"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Netlink AI - Project Requirements</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-tertiary-container": "#00664b",
+                    "surface-glass": "rgba(16, 19, 26, 0.4)",
+                    "on-error-container": "#ffdad6",
+                    "on-secondary-fixed": "#2e004d",
+                    "on-surface": "#e1e2eb",
+                    "on-tertiary": "#003828",
+                    "surface-bright": "#363940",
+                    "primary": "#c3f5ff",
+                    "surface": "#10131a",
+                    "on-background": "#e1e2eb",
+                    "secondary-container": "#7e00c6",
+                    "on-tertiary-fixed-variant": "#00513c",
+                    "secondary-fixed-dim": "#e1b6ff",
+                    "surface-container-high": "#272a31",
+                    "on-error": "#690005",
+                    "error": "#ffb4ab",
+                    "surface-container-lowest": "#0b0e14",
+                    "outline-variant": "#3b494c",
+                    "on-secondary-container": "#e1b5ff",
+                    "on-primary": "#00363d",
+                    "inverse-surface": "#e1e2eb",
+                    "primary-fixed-dim": "#00daf3",
+                    "error-container": "#93000a",
+                    "tertiary-fixed": "#36ffc4",
+                    "tertiary-fixed-dim": "#00e1ab",
+                    "on-surface-variant": "#bac9cc",
+                    "text-gradient-start": "#FFFFFF",
+                    "border-glass": "rgba(255, 255, 255, 0.08)",
+                    "glow-primary": "rgba(0, 85, 201, 0.15)",
+                    "surface-variant": "#32353c",
+                    "inverse-on-surface": "#2e3037",
+                    "background": "#10131a",
+                    "on-primary-fixed": "#001f24",
+                    "primary-fixed": "#9cf0ff",
+                    "on-secondary": "#4c007b",
+                    "on-primary-container": "#00626e",
+                    "text-gradient-end": "#afc6ff",
+                    "secondary": "#e1b6ff",
+                    "on-secondary-fixed-variant": "#6d00ad",
+                    "outline": "#849396",
+                    "glow-secondary": "rgba(182, 85, 255, 0.12)",
+                    "tertiary": "#a2ffd9",
+                    "surface-dim": "#10131a",
+                    "on-primary-fixed-variant": "#004f58",
+                    "surface-tint": "#00daf3",
+                    "secondary-fixed": "#f2daff",
+                    "on-tertiary-fixed": "#002116",
+                    "surface-container-highest": "#32353c",
+                    "tertiary-container": "#00ecb3",
+                    "surface-container": "#1d2026",
+                    "inverse-primary": "#006875",
+                    "primary-container": "#00e5ff",
+                    "surface-container-low": "#191c22"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "unit-md": "16px",
+                    "gutter": "24px",
+                    "container-max": "1280px",
+                    "margin-desktop": "80px",
+                    "unit-xl": "64px",
+                    "unit-xs": "4px",
+                    "unit-sm": "8px",
+                    "margin-mobile": "20px",
+                    "unit-lg": "32px"
+            },
+            "fontFamily": {
+                    "display-lg-mobile": ["Sora"],
+                    "headline-md": ["Sora"],
+                    "body-md": ["Sora"],
+                    "body-lg": ["Sora"],
+                    "label-sm": ["Sora"],
+                    "headline-lg": ["Sora"],
+                    "display-lg": ["Sora"]
+            },
+            "fontSize": {
+                    "display-lg-mobile": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "headline-md": ["24px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                    "body-md": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                    "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                    "label-sm": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "headline-lg": ["32px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                    "display-lg": ["64px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #10131a;
+            color: #e1e2eb;
+            font-family: 'Sora', sans-serif;
+        }
+        
+        /* Subtle Grid Overlay */
+        .bg-grid {
+            background-size: 40px 40px;
+            background-image: 
+                linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        }
+
+        /* Ambient Glows */
+        .glow-top-right {
+            background: radial-gradient(circle at top right, rgba(0, 218, 243, 0.15) 0%, transparent 60%);
+        }
+        .glow-bottom-left {
+            background: radial-gradient(circle at bottom left, rgba(126, 0, 198, 0.15) 0%, transparent 60%);
+        }
+        
+        /* Voice Pulse Animation */
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); opacity: 0.5; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+        .animate-pulse-ring::before {
+            content: '';
+            position: absolute;
+            inset: -20px;
+            border-radius: 50%;
+            background-color: rgba(0, 218, 243, 0.2);
+            animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+        }
+    </style>
+</head>
+<body class="relative min-h-screen antialiased bg-grid overflow-x-hidden pb-40">
+<!-- Ambient Glows -->
+<div class="fixed inset-0 pointer-events-none glow-top-right z-0"></div>
+<div class="fixed inset-0 pointer-events-none glow-bottom-left z-0"></div>
+<!-- Top App Bar -->
+<header class="bg-surface-dim/80 dark:bg-surface-dim/80 backdrop-blur-xl border-b border-glass-border fixed top-0 left-0 right-0 h-[64px] flex justify-between items-center px-margin-mobile w-full z-50 md:hidden">
+<label class="text-on-surface-variant hover:opacity-80 p-2 -ml-2 h-touch-target-min w-touch-target-min flex items-center justify-center cursor-pointer relative z-10 mt-1" for="drawer-toggle">
+<span class="material-symbols-outlined" data-icon="menu">menu</span>
+</label>
+<div class="flex items-center justify-center flex-1 absolute inset-0 pointer-events-none">
+<img alt="Netlink AI Logo" class="h-24 object-contain pointer-events-auto" src="https://lh3.googleusercontent.com/aida/AP1WRLsPBMwoBEgjHjPItziagpygFogLLVlf4SU6sh7M1C3mCHyYx9rhVWNvfOTVRb8tw6eQAL2m-qB-pPW_MyZOxNXdKC4fGgYRyjNAb8PcjHRLWOVsYmAqnMnxnaS5gAhWtzj5xnaXQB3Qu6waOHgjpWUi3_yod8IsvjoR-peh991n_Eekku9Ablgjxh_uQvks-GXUvuytwLfjNP2f48kDQIrfTSYDQFrLQdz6s7Ktu5zMgNjIn7IRDGHJhw">
+</div>
+<div class="w-touch-target-min"></div>
+</header>
+<!-- Main Content Canvas -->
+<main class="relative z-10 pt-24 px-margin-mobile max-w-container-max mx-auto flex flex-col gap-unit-xl">
+<!-- Header Section -->
+<section class="flex flex-col gap-unit-sm">
+<div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-glass border border-border-glass backdrop-blur-md self-start">
+<span class="material-symbols-outlined text-[14px] text-primary">auto_awesome</span>
+<span class="font-label-sm text-label-sm text-primary uppercase tracking-widest">AI-Powered Quotation</span>
+</div>
+<h1 class="font-display-lg-mobile text-display-lg-mobile md:font-display-lg md:text-display-lg text-on-surface mt-4">
+                Project Requirements
+            </h1>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-2xl mt-2">
+                Tell us about your project. You can type out the details or use our <span class="text-primary font-semibold">Voice AI Assistant</span> to simply explain what you need.
+            </p>
+</section>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-unit-xl">
+<!-- Form Section -->
+<section class="lg:col-span-7 flex flex-col gap-unit-md" id="project-req">
+<div class="bg-surface-glass border border-border-glass rounded-xl p-unit-md md:p-unit-lg backdrop-blur-md relative overflow-hidden group hover:bg-surface-glass/60 transition-colors">
+<!-- Subtle top gradient border accent -->
+<div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary to-secondary opacity-50"></div>
+<form class="flex flex-col gap-unit-md mt-2">
+<!-- Project Name -->
+<div class="flex flex-col gap-2">
+<label class="flex items-center gap-2 font-label-sm text-label-sm text-on-surface">
+<span class="material-symbols-outlined text-[16px] text-primary">description</span>
+                                Project Name <span class="text-error">*</span>
+</label>
+<input class="w-full bg-surface-container border border-border-glass rounded-lg px-4 py-3 font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" placeholder="e.g., E-commerce Website Revamp" type="text">
+</div>
+<!-- Estimated Budget -->
+<div class="flex flex-col gap-2 mt-2">
+<label class="flex items-center gap-2 font-label-sm text-label-sm text-on-surface">
+<span class="material-symbols-outlined text-[16px] text-primary">payments</span>
+                                Estimated Budget (Optional)
+                            </label>
+<input class="w-full bg-surface-container border border-border-glass rounded-lg px-4 py-3 font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" placeholder="e.g., $5,000 - $10,000" type="text">
+</div>
+<!-- Client Needs & Requirements -->
+<div class="flex flex-col gap-2 mt-2">
+<label class="flex items-center gap-2 font-label-sm text-label-sm text-on-surface">
+<span class="material-symbols-outlined text-[16px] text-primary">psychology</span>
+                                Client Needs &amp; Requirements <span class="text-error">*</span>
+</label>
+<textarea class="w-full bg-surface-container border border-border-glass rounded-lg px-4 py-3 font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all resize-none" placeholder="Describe what you want to achieve, features needed, target audience, etc..." rows="5"></textarea>
+</div>
+<!-- Submit Button -->
+<button class="mt-6 w-full h-[56px] rounded-xl bg-gradient-to-r from-primary-container to-secondary-container text-on-primary-container font-headline-md text-headline-md flex items-center justify-center gap-3 shadow-[0_0_20px_rgba(0,229,255,0.3)] hover:shadow-[0_0_30px_rgba(0,229,255,0.5)] active:scale-95 transition-all duration-200" type="button">
+<span class="material-symbols-outlined">send</span>
+                            Send to cognisor.ai
+                        </button>
+</form>
+</div>
+</section>
+<!-- Voice AI Assistant Section -->
+<section class="lg:col-span-5 flex flex-col h-full" id="voice-assistant">
+<div class="bg-surface-glass border border-border-glass rounded-xl p-unit-lg backdrop-blur-md flex flex-col items-center justify-center text-center h-full min-h-[400px]">
+<h2 class="font-headline-md text-headline-md text-on-surface mb-3">Voice AI Assistant</h2>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-[280px] mb-12">
+                        Too much to type? Just tell us what you need. Tap the microphone and speak naturally.
+                    </p>
+<!-- Interactive Microphone -->
+<div class="relative flex items-center justify-center w-32 h-32 mb-8 group cursor-pointer active:scale-95 transition-transform">
+<!-- Pulse Rings -->
+<div class="absolute inset-0 rounded-full border border-primary/20 animate-pulse-ring"></div>
+<div class="absolute inset-4 rounded-full border border-primary/40 animate-pulse-ring" style="animation-delay: 0.5s"></div>
+<!-- Core Button -->
+<div class="relative z-10 w-24 h-24 rounded-full bg-surface-container-high border border-border-glass flex items-center justify-center shadow-xl group-hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined text-[48px] text-primary" style="font-variation-settings: 'FILL' 1;">mic</span>
+</div>
+</div>
+<p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Tap to start recording</p>
+</div>
+</section>
+</div>
+</main>
+
+
+<nav class="fixed bottom-0 left-0 right-0 z-50 bg-surface-container/80 backdrop-blur-xl border-t border-border-glass px-margin-mobile pt-3 pb-[calc(12px+env(safe-area-inset-bottom))] md:hidden">
+  <div class="flex justify-around items-center max-w-md mx-auto">
+    <!-- Link to Project Req -->
+    <a href="#project-req" class="flex flex-col items-center gap-1 text-primary">
+      <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">description</span>
+      <span class="font-label-sm text-[10px] uppercase tracking-wider">Project Req</span>
+    </a>
+    <!-- Link to AI Voice Asst -->
+    <a href="#voice-assistant" class="flex flex-col items-center gap-1 text-on-surface-variant hover:text-on-surface transition-colors">
+      <span class="material-symbols-outlined">mic</span>
+      <span class="font-label-sm text-[10px] uppercase tracking-wider">AI Voice Asst</span>
+    </a>
+  </div>
+</nav></body></html>

@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+
+<html class="light scroll-smooth" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Netlink AI - Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&amp;family=JetBrains+Mono:wght@500&amp;family=Hanken+Grotesk:wght@400&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-background": "#1a1c1e",
+                      "error-container": "#ffdad6",
+                      "primary-container": "#eff4ff",
+                      "surface-bright": "#ffffff",
+                      "on-secondary-container": "#001f24",
+                      "warning-amber": "#b38600",
+                      "outline-variant": "#dee3e5",
+                      "tertiary": "#984816",
+                      "tertiary-fixed": "#ffdbcc",
+                      "on-secondary-fixed": "#002025",
+                      "surface-container-highest": "#e1e2e5",
+                      "tertiary-container": "#ffdbcc",
+                      "surface-variant": "#f0f1f3",
+                      "on-primary-fixed-variant": "#004e57",
+                      "surface-container-low": "#f8f9ff",
+                      "on-primary-container": "#001f24",
+                      "secondary-fixed-dim": "#4df5ff",
+                      "error": "#ba1a1a",
+                      "surface-container": "#eff4ff",
+                      "surface-container-high": "#e7e8ea",
+                      "inverse-on-surface": "#f1f0f4",
+                      "surface-dim": "#f8f9ff",
+                      "primary": "#006874",
+                      "on-error-container": "#410002",
+                      "success-glow": "#006d52",
+                      "primary-fixed": "#76f7ff",
+                      "on-primary": "#ffffff",
+                      "on-tertiary": "#ffffff",
+                      "on-error": "#ffffff",
+                      "error-ruby": "#ba1a1a",
+                      "surface-card": "#ffffff",
+                      "on-tertiary-container": "#351000",
+                      "on-surface-variant": "#3f484a",
+                      "on-surface": "#1a1c1e",
+                      "on-primary-fixed": "#002024",
+                      "inverse-primary": "#4df5ff",
+                      "surface-container-lowest": "#ffffff",
+                      "on-secondary": "#ffffff",
+                      "surface": "#f8f9ff",
+                      "background": "#f8f9ff",
+                      "secondary-fixed": "#76f7ff",
+                      "on-tertiary-fixed": "#351000",
+                      "glass-border": "rgba(0, 0, 0, 0.08)",
+                      "on-tertiary-fixed-variant": "#7c2e00",
+                      "tertiary-fixed-dim": "#ffb695",
+                      "primary-fixed-dim": "#4df5ff",
+                      "inverse-surface": "#2f3033",
+                      "secondary": "#006874",
+                      "outline": "#6f797a",
+                      "on-secondary-fixed-variant": "#004e57",
+                      "secondary-container": "#eff4ff",
+                      "surface-tint": "#006874"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.5rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "card-padding": "24px",
+                      "section-gap": "64px",
+                      "gutter-mobile": "16px",
+                      "margin-mobile": "20px",
+                      "touch-target-min": "44px",
+                      "base-unit": "4px"
+              },
+              "fontFamily": {
+                      "display-lg": ["Sora"],
+                      "label-caps": ["JetBrains Mono"],
+                      "display-lg-mobile": ["Sora"],
+                      "stats-number": ["Sora"],
+                      "headline-md": ["Sora"],
+                      "body-lg": ["Hanken Grotesk"],
+                      "body-md": ["Hanken Grotesk"]
+              },
+              "fontSize": {
+                      "display-lg": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.08em", "fontWeight": "500"}],
+                      "display-lg-mobile": ["32px", {"lineHeight": "38px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "stats-number": ["20px", {"lineHeight": "24px", "fontWeight": "700"}],
+                      "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                      "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                      "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+              }
+            },
+          }
+        }
+    </script>
+<style>
+        .glow-sm { box-shadow: 0 0 12px rgba(0, 104, 116, 0.15); }
+        .bg-grid-pattern {
+            background-image: linear-gradient(to right, rgba(0,0,0,0.03) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(0,0,0,0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+        .neon-gradient {
+            background: linear-gradient(135deg, #006874, #004e57);
+        }
+        .midnight-gradient {
+            background: linear-gradient(180deg, #f8f9ff, #eff4ff);
+        }
+        .nav-item-active {
+            color: #006874 !important;
+            opacity: 1 !important;
+            font-weight: 600;
+        }
+        .nav-item-active .material-symbols-outlined {
+            font-variation-settings: 'FILL' 1;
+        }
+    </style>
+</head>
+<body class="midnight-gradient text-on-background min-h-screen pb-24 font-body-md antialiased bg-grid-pattern relative opacity-100 transition-opacity duration-500">
+<input class="peer hidden" id="drawer-toggle" type="checkbox"/>
+<label class="fixed inset-0 bg-black/40 z-[60] opacity-0 pointer-events-none peer-checked:opacity-100 peer-checked:pointer-events-auto transition-opacity duration-300 md:hidden backdrop-blur-sm" for="drawer-toggle"></label>
+<!-- TopAppBar -->
+<header class="bg-surface-bright/90 backdrop-blur-xl border-b border-glass-border fixed top-0 left-0 right-0 h-[64px] flex justify-between items-center px-margin-mobile w-full z-50 md:hidden">
+<label class="text-on-surface-variant hover:opacity-80 p-2 -ml-2 h-touch-target-min w-touch-target-min flex items-center justify-center cursor-pointer relative z-10" for="drawer-toggle">
+<span class="material-symbols-outlined" data-icon="menu">menu</span>
+</label>
+<div class="flex items-center justify-center flex-1 absolute inset-0 pointer-events-none">
+<img alt="Netlink AI Logo" class="h-[48px] object-contain pointer-events-auto" src="https://lh3.googleusercontent.com/aida/AP1WRLtKMoLEIiva0vAnOKlCcq2aG3bQd_Fnv_sMu6in4tTsRDi1lZlS8mMlSgpxJUc0CuyW4qJfDTtANgyWqdn_9fEd4EF9w789ewLroLfC4JQqu4HcF9HotfHr9mTcj0RZkpdez22Brl3bANNA_vFAoHYjw5ig2tsf_zI0jAeApdmYErxiKn7_drI4mKJv-FSaPOUmVFf-WT-G41qSQtbO8pbltlvjdGeKUou35eNnvZHke-6gImanGYmmlA"/>
+</div>
+<div class="w-touch-target-min"></div>
+</header>
+<!-- Navigation Drawer -->
+<nav class="fixed inset-y-0 left-0 z-[70] flex flex-col h-full w-[280px] -translate-x-full peer-checked:translate-x-0 md:translate-x-0 transition-transform duration-300 ease-in-out bg-surface-bright rounded-r-xl border-r border-glass-border backdrop-blur-xl shadow-lg md:z-40">
+<div class="p-6 border-b border-glass-border mb-4 flex items-center justify-between">
+<img alt="Netlink AI Logo" class="h-12 object-contain" src="https://lh3.googleusercontent.com/aida/AP1WRLtKMoLEIiva0vAnOKlCcq2aG3bQd_Fnv_sMu6in4tTsRDi1lZlS8mMlSgpxJUc0CuyW4qJfDTtANgyWqdn_9fEd4EF9w789ewLroLfC4JQqu4HcF9HotfHr9mTcj0RZkpdez22Brl3bANNA_vFAoHYjw5ig2tsf_zI0jAeApdmYErxiKn7_drI4mKJv-FSaPOUmVFf-WT-G41qSQtbO8pbltlvjdGeKUou35eNnvZHke-6gImanGYmmlA"/>
+<label class="md:hidden text-on-surface-variant p-2 cursor-pointer rounded-full hover:bg-surface-variant/50" for="drawer-toggle">
+<span class="material-symbols-outlined">close</span>
+</label>
+</div>
+<div class="flex-1 overflow-y-auto px-2">
+<a class="bg-primary/10 text-primary border-l-4 border-primary px-4 py-3 font-body-md text-body-md duration-200 transition-colors flex items-center mb-1 rounded-r-md" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="dashboard">dashboard</span>
+            Dashboard
+        </a>
+<a class="text-on-surface-variant px-4 py-3 hover:bg-surface-variant/50 font-body-md text-body-md duration-200 transition-colors flex items-center mb-1 rounded-r-md" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="person_search">person_search</span>
+            Network Profile
+        </a>
+<a class="text-on-surface-variant px-4 py-3 hover:bg-surface-variant/50 font-body-md text-body-md duration-200 transition-colors flex items-center mb-1 rounded-r-md" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="folder_shared">folder_shared</span>
+            Portfolio
+        </a>
+<a class="text-on-surface-variant px-4 py-3 hover:bg-surface-variant/50 font-body-md text-body-md duration-200 transition-colors flex items-center mb-1 rounded-r-md" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="group">group</span>
+            Contacts
+        </a>
+<a class="text-on-surface-variant px-4 py-3 hover:bg-surface-variant/50 font-body-md text-body-md duration-200 transition-colors flex items-center mb-1 rounded-r-md" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="mail">mail</span>
+            Emails
+        </a>
+<a class="text-on-surface-variant px-4 py-3 hover:bg-surface-variant/50 font-body-md text-body-md duration-200 transition-colors flex items-center mb-1 rounded-r-md" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="description">description</span>
+            Quotation Form
+        </a>
+<a class="text-on-surface-variant px-4 py-3 hover:bg-surface-variant/50 font-body-md text-body-md duration-200 transition-colors flex items-center mb-1 rounded-r-md" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="analytics">analytics</span>
+            Analytics
+        </a>
+<a class="text-on-surface-variant px-4 py-3 hover:bg-surface-variant/50 font-body-md text-body-md duration-200 transition-colors flex items-center mb-1 rounded-r-md" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="smart_toy">smart_toy</span>
+            AI Assistant
+        </a>
+<a class="text-on-surface-variant px-4 py-3 hover:bg-surface-variant/50 font-body-md text-body-md duration-200 transition-colors flex items-center mb-1 rounded-r-md" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="settings">settings</span>
+            Settings
+        </a>
+</div>
+<div class="p-4 border-t border-glass-border">
+<div class="bg-surface-variant p-3 rounded-lg border border-glass-border flex items-center">
+<div class="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary mr-3 overflow-hidden">
+<span class="material-symbols-outlined">person</span>
+</div>
+<div>
+<div class="text-sm font-semibold text-on-surface">Guest Mode</div>
+<div class="text-xs text-primary font-medium">Limited Trial</div>
+</div>
+</div>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="w-full md:pl-[280px] px-gutter-mobile md:px-card-padding pt-[84px] md:pt-6 pb-6 max-w-7xl mx-auto space-y-6">
+<!-- Trial Banner -->
+<div class="bg-primary/10 border border-primary/20 rounded-lg p-3 text-center text-sm text-primary flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">info</span>
+        You are in Trial Mode. Progress will not be saved. <a class="font-bold underline ml-1" href="#">Sign up now</a>
+</div>
+<!-- Business Card Scanner Hero -->
+<section class="space-y-4 pt-4 md:pt-0 scroll-mt-24" id="scanner">
+<div class="flex items-center gap-2 text-primary text-sm mb-2">
+<span class="material-symbols-outlined text-[16px]">smart_toy</span>
+<span class="font-semibold">AI-Powered Networking</span>
+</div>
+<h2 class="font-headline-md text-headline-md font-bold mb-1 text-on-surface">Business Card Scanner</h2>
+<p class="text-on-surface-variant text-sm mb-6">Upload a business card photo to instantly extract and save contact information</p>
+<div class="bg-surface-card backdrop-blur-xl border-2 border-glass-border border-dashed rounded-xl p-8 flex flex-col items-center justify-center min-h-[300px] relative overflow-hidden group shadow-sm">
+<div class="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-50"></div>
+<div class="flex gap-4 mb-8 relative z-10">
+<button class="flex items-center gap-2 bg-surface-variant hover:bg-surface-container-high text-on-surface px-4 py-2 rounded-lg border border-glass-border transition-colors h-touch-target-min shadow-sm">
+<span class="material-symbols-outlined" data-icon="upload">upload</span>
+                    Upload
+                </button>
+<button class="flex items-center gap-2 bg-surface-variant hover:bg-surface-container-high text-on-surface px-4 py-2 rounded-lg border border-glass-border transition-colors h-touch-target-min shadow-sm">
+<span class="material-symbols-outlined" data-icon="camera">photo_camera</span>
+                    Camera
+                </button>
+</div>
+<div class="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mb-4 border border-primary/20 relative z-10 group-hover:scale-110 transition-transform duration-300">
+<span class="material-symbols-outlined text-primary text-3xl" data-icon="document_scanner">document_scanner</span>
+</div>
+<h3 class="text-lg font-bold text-on-surface mb-2 relative z-10">Scan Business Card</h3>
+<p class="text-on-surface-variant text-sm text-center max-w-sm mb-6 relative z-10">
+                Upload a photo or use your camera to scan a business card and we'll automatically extract the contact information using AI
+            </p>
+<button class="neon-gradient text-white px-6 py-2.5 rounded-lg font-semibold shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all active:scale-95 h-touch-target-min flex items-center gap-2 relative z-10">
+<span class="material-symbols-outlined text-[20px]" data-icon="upload">upload</span>
+                Upload Business Card
+            </button>
+</div>
+</section>
+<!-- Quick Stats Grid -->
+<section class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+<div class="bg-surface-card border border-glass-border rounded-xl p-5 flex flex-col justify-between h-[120px] shadow-sm">
+<div class="flex justify-between items-start">
+<span class="text-on-surface-variant text-sm font-semibold">Total Contacts</span>
+<div class="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-[18px]">group</span>
+</div>
+</div>
+<div>
+<div class="font-stats-number text-2xl text-on-surface">0</div>
+<div class="text-xs text-success-glow flex items-center gap-1 mt-1 font-medium">
+<span class="material-symbols-outlined text-[14px]">trending_up</span>
+                    +0 this week
+                </div>
+</div>
+</div>
+<div class="bg-surface-card border border-glass-border rounded-xl p-5 flex flex-col justify-between h-[120px] shadow-sm">
+<div class="flex justify-between items-start">
+<span class="text-on-surface-variant text-sm font-semibold">Emails Sent</span>
+<div class="h-8 w-8 rounded-full bg-success-glow/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-success-glow text-[18px]">mail</span>
+</div>
+</div>
+<div>
+<div class="font-stats-number text-2xl text-on-surface">0</div>
+<div class="text-xs text-on-surface-variant mt-1 font-medium">All time</div>
+</div>
+</div>
+<div class="bg-surface-card border border-glass-border rounded-xl p-5 flex flex-col justify-between h-[120px] shadow-sm">
+<div class="flex justify-between items-start">
+<span class="text-on-surface-variant text-sm font-semibold">Upcoming Events</span>
+<div class="h-8 w-8 rounded-full bg-tertiary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-tertiary text-[18px]">calendar_today</span>
+</div>
+</div>
+<div>
+<div class="font-stats-number text-2xl text-on-surface">0</div>
+<div class="text-xs text-on-surface-variant mt-1 font-medium">Scheduled</div>
+</div>
+</div>
+<div class="bg-surface-card border border-glass-border rounded-xl p-5 flex flex-col justify-between h-[120px] shadow-sm">
+<div class="flex justify-between items-start">
+<span class="text-on-surface-variant text-sm font-semibold">Network Growth</span>
+<div class="h-8 w-8 rounded-full bg-warning-amber/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-warning-amber text-[18px]">monitoring</span>
+</div>
+</div>
+<div>
+<div class="font-stats-number text-2xl text-on-surface">+0</div>
+<div class="text-xs text-on-surface-variant mt-1 font-medium">Last 7 days</div>
+</div>
+</div>
+</section>
+<!-- Upcoming Events Section -->
+<section class="bg-surface-card border border-glass-border rounded-xl p-6 relative overflow-hidden scroll-mt-24 shadow-sm" id="events">
+<div class="flex justify-between items-start mb-8 relative z-10">
+<div class="flex items-center gap-3">
+<div class="h-10 w-10 rounded-lg bg-surface-variant flex items-center justify-center border border-glass-border">
+<span class="material-symbols-outlined text-primary">calendar_month</span>
+</div>
+<div>
+<h3 class="text-lg font-bold text-on-surface">Upcoming Events</h3>
+<p class="text-sm text-on-surface-variant">Your schedule at a glance</p>
+</div>
+</div>
+<button class="bg-primary text-white hover:bg-primary/90 px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors flex items-center gap-1 h-touch-target-min shadow-sm">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                Add Event
+            </button>
+</div>
+<div class="flex flex-col items-center justify-center py-12 relative z-10">
+<div class="h-16 w-16 rounded-2xl bg-surface-variant border border-glass-border flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-3xl text-on-surface-variant/50">event_busy</span>
+</div>
+<h4 class="text-on-surface font-bold mb-1">No upcoming events</h4>
+<p class="text-on-surface-variant text-sm mb-6 text-center">Start organizing your schedule by adding your first event</p>
+<button class="neon-gradient text-white px-6 py-2 rounded-lg font-semibold text-sm shadow-md transition-transform active:scale-95 h-touch-target-min">
+                Create your first event
+            </button>
+</div>
+<div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-3/4 h-24 bg-primary/5 blur-3xl rounded-full pointer-events-none"></div>
+</section>
+<!-- Highlights & Summary -->
+<section class="space-y-4 pt-4 scroll-mt-24" id="portfolio">
+<div>
+<h3 class="font-headline-md text-headline-md font-bold mb-1 text-on-surface">Highlights &amp; Summary</h3>
+<p class="text-on-surface-variant text-sm mb-4">Key insights from your emails and networking activity</p>
+</div>
+<div class="grid md:grid-cols-2 gap-4">
+<div class="bg-surface-card border border-glass-border rounded-xl p-5 shadow-sm">
+<div class="flex justify-between items-center mb-6 border-b border-glass-border pb-3">
+<div class="flex items-center gap-2 text-primary font-bold">
+<span class="material-symbols-outlined text-[18px]">magic_button</span>
+                        Email &amp; Calendar Highlights
+                    </div>
+<button class="text-on-surface-variant hover:text-on-surface p-1 rounded-full hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined text-[18px]">sync</span>
+</button>
+</div>
+<div class="flex items-center gap-2 text-error text-sm font-medium">
+<span class="material-symbols-outlined text-[16px]">warning</span>
+                    Unauthorized access or setup incomplete.
+                </div>
+</div>
+<div class="bg-surface-card border border-glass-border rounded-xl p-5 flex flex-col h-full min-h-[160px] shadow-sm">
+<div class="flex justify-between items-center mb-4 border-b border-glass-border pb-3">
+<div class="flex items-center gap-2 text-primary font-bold">
+<span class="material-symbols-outlined text-[18px]">hub</span>
+                        Networking Events Summary
+                    </div>
+<button class="text-on-surface-variant hover:text-on-surface p-1 rounded-full hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined text-[18px]">sync</span>
+</button>
+</div>
+<div class="flex-1 flex items-center justify-center text-center">
+<p class="text-on-surface-variant text-sm font-medium">No networking events in the last 30 days. Start connecting to see your activity summary here!</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="md:hidden bg-surface-bright/95 backdrop-blur-xl border-t border-glass-border fixed bottom-0 left-0 right-0 w-full z-50 flex justify-around items-center h-[72px] pb-safe px-4 shadow-[0_-4px_12px_rgba(0,0,0,0.03)] transition-transform duration-150">
+<a class="flex flex-col items-center justify-center text-on-surface-variant opacity-70 flex-1 h-full transition-all active:scale-95 duration-150" href="#scanner" id="nav-scanner">
+<span class="material-symbols-outlined mb-1">document_scanner</span>
+<span class="font-label-caps text-[10px]">Scanner</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant opacity-70 flex-1 h-full transition-all active:scale-95 duration-150" href="#events" id="nav-events">
+<span class="material-symbols-outlined mb-1">calendar_today</span>
+<span class="font-label-caps text-[10px]">Events</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant opacity-70 flex-1 h-full transition-all active:scale-95 duration-150 nav-item-active" href="#portfolio" id="nav-portfolio">
+<span class="material-symbols-outlined mb-1">work</span>
+<span class="font-label-caps text-[10px]">Portfolio</span>
+</a>
+</nav>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const sections = ['scanner', 'events', 'portfolio'];
+        const navItems = {
+            scanner: document.getElementById('nav-scanner'),
+            events: document.getElementById('nav-events'),
+            portfolio: document.getElementById('nav-portfolio')
+        };
+
+        const observerOptions = {
+            root: null,
+            rootMargin: '-20% 0px -60% 0px', 
+            threshold: 0.1
+        };
+
+        const observerCallback = (entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const id = entry.target.id;
+                    Object.values(navItems).forEach(item => {
+                        if (item) item.classList.remove('nav-item-active');
+                    });
+                    if (navItems[id]) {
+                        navItems[id].classList.add('nav-item-active');
+                    }
+                }
+            });
+        };
+
+        const observer = new IntersectionObserver(observerCallback, observerOptions);
+
+        sections.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) observer.observe(el);
+        });
+
+        document.querySelectorAll('nav a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                const href = this.getAttribute('href');
+                if (href && href.startsWith('#')) {
+                    e.preventDefault();
+                    const targetId = href.substring(1);
+                    const targetElement = document.getElementById(targetId);
+                    
+                    if (targetElement) {
+                        targetElement.scrollIntoView({
+                            behavior: 'smooth'
+                        });
+                    }
+                }
+            });
+        });
+    });
+</script>
+</body></html>

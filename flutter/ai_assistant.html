@@ -1,0 +1,261 @@
+<!DOCTYPE html><html class="dark" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Netlink AI - AI Voice Assistant</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#c3f5ff",
+                        "on-background": "#e1e2eb",
+                        "error": "#ffb4ab",
+                        "outline": "#849396",
+                        "secondary-fixed": "#f2daff",
+                        "on-primary-container": "#00626e",
+                        "tertiary-fixed": "#36ffc4",
+                        "surface-container-high": "#272a31",
+                        "inverse-surface": "#e1e2eb",
+                        "text-gradient-start": "#FFFFFF",
+                        "on-secondary-container": "#e1b5ff",
+                        "on-secondary-fixed-variant": "#6d00ad",
+                        "tertiary-container": "#00ecb3",
+                        "secondary-fixed-dim": "#e1b6ff",
+                        "surface-container": "#1d2026",
+                        "on-surface-variant": "#bac9cc",
+                        "on-tertiary-fixed": "#002116",
+                        "outline-variant": "#3b494c",
+                        "primary-fixed-dim": "#00daf3",
+                        "on-error-container": "#ffdad6",
+                        "error-container": "#93000a",
+                        "inverse-primary": "#006875",
+                        "on-tertiary-fixed-variant": "#00513c",
+                        "on-tertiary": "#003828",
+                        "primary-fixed": "#9cf0ff",
+                        "tertiary": "#a2ffd9",
+                        "secondary-container": "#7e00c6",
+                        "on-primary-fixed-variant": "#004f58",
+                        "primary-container": "#00e5ff",
+                        "inverse-on-surface": "#2e3037",
+                        "surface-variant": "#32353c",
+                        "surface-container-lowest": "#0b0e14",
+                        "on-secondary-fixed": "#2e004d",
+                        "text-gradient-end": "#afc6ff",
+                        "on-tertiary-container": "#00664b",
+                        "tertiary-fixed-dim": "#00e1ab",
+                        "on-secondary": "#4c007b",
+                        "on-primary-fixed": "#001f24",
+                        "surface": "#10131a",
+                        "glow-secondary": "rgba(182, 85, 255, 0.12)",
+                        "on-error": "#690005",
+                        "surface-dim": "#10131a",
+                        "on-primary": "#00363d",
+                        "on-surface": "#e1e2eb",
+                        "surface-tint": "#00daf3",
+                        "border-glass": "rgba(255, 255, 255, 0.08)",
+                        "surface-container-highest": "#32353c",
+                        "background": "#10131a",
+                        "surface-container-low": "#191c22",
+                        "surface-glass": "rgba(16, 19, 26, 0.4)",
+                        "surface-bright": "#363940",
+                        "glow-primary": "rgba(0, 85, 201, 0.15)",
+                        "secondary": "#e1b6ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-mobile": "20px",
+                        "unit-xs": "4px",
+                        "unit-lg": "32px",
+                        "gutter": "24px",
+                        "unit-sm": "8px",
+                        "container-max": "1280px",
+                        "unit-md": "16px",
+                        "unit-xl": "64px",
+                        "margin-desktop": "80px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Sora"],
+                        "display-lg-mobile": ["Sora"],
+                        "body-md": ["Sora"],
+                        "label-sm": ["Sora"],
+                        "headline-lg": ["Sora"],
+                        "headline-md": ["Sora"],
+                        "display-lg": ["Sora"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["18px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "display-lg-mobile": ["32px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "body-md": ["16px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "label-sm": ["12px", { "lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "1.3", "fontWeight": "600" }],
+                        "headline-md": ["24px", { "lineHeight": "1.4", "fontWeight": "600" }],
+                        "display-lg": ["64px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .bg-grid-pattern {
+            background-size: 40px 40px;
+            background-image: 
+                linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        }
+        .glass-panel {
+            background-color: theme('colors.surface-glass');
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid theme('colors.border-glass');
+        }
+        .glow-cyan {
+            box-shadow: 0 0 20px rgba(0, 229, 255, 0.2);
+        }
+        .gradient-btn {
+            background: linear-gradient(135deg, theme('colors.primary-container'), theme('colors.secondary-container'));
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md antialiased min-h-screen relative flex flex-col overflow-hidden">
+<!-- Ambient Glows -->
+<div class="fixed top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-glow-primary blur-[120px] pointer-events-none z-0"></div>
+<div class="fixed bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-glow-secondary blur-[120px] pointer-events-none z-0"></div>
+<!-- Background Grid -->
+<div class="fixed inset-0 bg-grid-pattern pointer-events-none z-0 opacity-50"></div>
+<!-- Top App Bar (Mobile) -->
+<input class="peer hidden" id="drawer-toggle" type="checkbox">
+<label class="fixed inset-0 bg-black/60 z-[60] opacity-0 pointer-events-none peer-checked:opacity-100 peer-checked:pointer-events-auto transition-opacity duration-300 md:hidden backdrop-blur-sm" for="drawer-toggle"></label><header class="bg-surface-dim/80 dark:bg-surface-dim/80 backdrop-blur-xl border-b border-glass-border fixed top-0 left-0 right-0 h-[64px] flex justify-between items-center px-margin-mobile w-full z-50 md:hidden">
+<label class="text-on-surface-variant hover:opacity-80 p-2 -ml-2 h-touch-target-min w-touch-target-min flex items-center justify-center cursor-pointer relative z-10 mt-3" for="drawer-toggle">
+<span class="material-symbols-outlined" data-icon="menu">menu</span>
+</label>
+<div class="flex items-center justify-center flex-1 absolute inset-0 pointer-events-none">
+<img alt="Netlink AI Logo" class="h-32 object-contain pointer-events-auto mt-2" src="https://lh3.googleusercontent.com/aida/AP1WRLuNwtUrY5DPsxyaeqw0rBZlrPuBLCWtH7KariAd39gGuSqx-GMB4BN5aWWulURMBmdsxA-SWPK6-WSJxHYNnabGP_fejRmkj7wPX7ca9ErOXNgxE_ngq4qXAgyx9xMP-w1GpfZJBOIgOaScb68cSKOa3gJ0U-Fv1eipg3HAHXI9h8fMUB0IM9HX1HVjFiTC51IlWRPYgcRRuFmIYoAk4CgnjDq96PDU37j9KiRN4LLVFNHwjwefy12jYg">
+</div>
+<div class="w-touch-target-min"></div>
+</header><nav class="fixed inset-y-0 left-0 z-[70] flex flex-col h-full w-[280px] -translate-x-full peer-checked:translate-x-0 md:translate-x-0 transition-transform duration-300 ease-in-out bg-surface-container-low dark:bg-surface-container-low rounded-r-xl border-r border-glass-border backdrop-blur-xl shadow-lg md:z-40">
+<div class="p-6 border-b border-glass-border mb-4 flex items-center justify-between">
+<img alt="Netlink AI Logo" class="h-24 object-contain" src="https://lh3.googleusercontent.com/aida/AP1WRLuNwtUrY5DPsxyaeqw0rBZlrPuBLCWtH7KariAd39gGuSqx-GMB4BN5aWWulURMBmdsxA-SWPK6-WSJxHYNnabGP_fejRmkj7wPX7ca9ErOXNgxE_ngq4qXAgyx9xMP-w1GpfZJBOIgOaScb68cSKOa3gJ0U-Fv1eipg3HAHXI9h8fMUB0IM9HX1HVjFiTC51IlWRPYgcRRuFmIYoAk4CgnjDq96PDU37j9KiRN4LLVFNHwjwefy12jYg">
+<label class="md:hidden text-on-surface-variant p-2 cursor-pointer rounded-full hover:bg-surface-variant/50" for="drawer-toggle">
+<span class="material-symbols-outlined">close</span>
+</label>
+</div>
+<div class="flex-1 overflow-y-auto px-2">
+<a class="text-on-surface-variant px-4 py-3 hover:bg-surface-variant/50 font-body-md text-body-md duration-200 transition-colors flex items-center mb-1 rounded-r-md" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="dashboard">dashboard</span>
+            Dashboard
+        </a>
+<a class="text-on-surface-variant px-4 py-3 hover:bg-surface-variant/50 font-body-md text-body-md duration-200 transition-colors flex items-center mb-1 rounded-r-md" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="person_search">person_search</span>
+            Network Profile
+        </a>
+<a class="text-on-surface-variant px-4 py-3 hover:bg-surface-variant/50 font-body-md text-body-md duration-200 transition-colors flex items-center mb-1 rounded-r-md" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="folder_shared">folder_shared</span>
+            Portfolio
+        </a>
+<a class="text-on-surface-variant px-4 py-3 hover:bg-surface-variant/50 font-body-md text-body-md duration-200 transition-colors flex items-center mb-1 rounded-r-md" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="group">group</span>
+            Contacts
+        </a>
+<a class="text-on-surface-variant px-4 py-3 hover:bg-surface-variant/50 font-body-md text-body-md duration-200 transition-colors flex items-center mb-1 rounded-r-md" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="mail">mail</span>
+            Emails
+        </a>
+<a class="text-on-surface-variant px-4 py-3 hover:bg-surface-variant/50 font-body-md text-body-md duration-200 transition-colors flex items-center mb-1 rounded-r-md" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="description">description</span>
+            Quotation Form
+        </a>
+<a class="text-on-surface-variant px-4 py-3 hover:bg-surface-variant/50 font-body-md text-body-md duration-200 transition-colors flex items-center mb-1 rounded-r-md" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="analytics">analytics</span>
+            Analytics
+        </a>
+<a class="bg-primary-container/20 text-primary border-l-4 border-primary px-4 py-3 font-body-md text-body-md duration-200 transition-colors flex items-center mb-1 rounded-r-md" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="smart_toy">smart_toy</span>
+            AI Assistant
+        </a>
+<a class="text-on-surface-variant px-4 py-3 hover:bg-surface-variant/50 font-body-md text-body-md duration-200 transition-colors flex items-center mb-1 rounded-r-md" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="settings">settings</span>
+            Settings
+        </a>
+</div>
+<div class="p-4 border-t border-glass-border">
+<div class="bg-surface-container-highest p-3 rounded-lg border border-glass-border flex items-center">
+<div class="h-10 w-10 rounded-full bg-surface-variant flex items-center justify-center text-on-surface-variant mr-3 overflow-hidden">
+<span class="material-symbols-outlined">person</span>
+</div>
+<div>
+<div class="text-sm font-semibold text-on-surface">Guest Mode</div>
+<div class="text-xs text-primary">Limited Trial</div>
+</div>
+</div>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="flex-1 relative z-10 w-full md:pl-[280px] flex flex-col items-center h-[100dvh] pt-[64px]">
+<div class="w-full max-w-4xl px-4 md:px-margin-desktop py-6 flex flex-col gap-6 flex-1 overflow-hidden">
+<!-- Header Section -->
+<section class="flex flex-col gap-2 text-center md:text-left flex-shrink-0 mt-2">
+<div class="flex items-center gap-3 justify-center md:justify-start">
+<span class="material-symbols-outlined text-3xl text-primary" style="font-variation-settings: &quot;FILL&quot; 1;">mic</span>
+<h1 class="font-headline-md text-on-surface">AI Voice Assistant</h1>
+</div>
+<p class="font-body-md text-on-surface-variant text-sm max-w-2xl mx-auto md:mx-0">Chat with your AI assistant using <strong>voice or text</strong>. Send emails, manage contacts, and get networking advice - all hands-free!</p>
+</section>
+<!-- Chat Interface -->
+<section class="glass-panel rounded-xl overflow-hidden flex flex-col flex-1 border border-glass-border shadow-2xl relative min-h-0 mb-4">
+<!-- Chat Header -->
+<div class="p-3 border-b border-glass-border flex justify-between items-center bg-surface-glass flex-shrink-0">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">smart_toy</span>
+<span class="font-body-md font-semibold text-on-surface">AI Assistant</span>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2 bg-surface-container px-3 py-1.5 rounded-full border border-glass-border">
+<span class="material-symbols-outlined text-sm text-tertiary">mic</span>
+<span class="font-label-sm text-tertiary uppercase tracking-wider">Voice Ready</span>
+</div>
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">help</span>
+</button>
+</div>
+</div>
+<!-- Chat Messages Area -->
+<div class="flex-1 overflow-y-auto p-4 flex flex-col gap-6">
+<!-- AI Message -->
+<div class="flex gap-4 max-w-[90%]">
+<div class="w-10 h-10 rounded-full bg-primary-container/20 flex items-center justify-center border border-primary/30 flex-shrink-0">
+<span class="material-symbols-outlined text-primary">smart_toy</span>
+</div>
+<div class="flex flex-col gap-2">
+<div class="bg-surface-container/60 backdrop-blur-md p-3 rounded-2xl rounded-tl-sm border border-glass-border text-on-surface font-body-md text-[15px] shadow-sm">
+                                Hello! I'm your AI assistant. I remember where and when you met each contact, and I can suggest how to follow up and utilize your network. Try asking "Who should I follow up with from last week's event?"
+                            </div>
+</div>
+</div>
+<!-- Space for future messages -->
+</div>
+<!-- Input Area -->
+<div class="p-4 border-t border-glass-border bg-surface-glass mt-auto flex-shrink-0">
+<div class="flex items-center gap-2 bg-surface/50 backdrop-blur-md rounded-full border border-glass-border p-2 focus-within:border-primary/50 focus-within:glow-cyan transition-all">
+<button class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-variant transition-colors flex-shrink-0"><span class="material-symbols-outlined text-[22px]">mic</span></button>
+<input class="flex-1 bg-transparent border-none text-on-surface placeholder:text-on-surface-variant focus:ring-0 font-body-md min-w-0 px-2" placeholder="Type or speak..." type="text">
+<div class="flex items-center gap-1 flex-shrink-0">
+<button class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-variant transition-colors"><span class="material-symbols-outlined text-[22px]">volume_up</span></button>
+<button class="w-10 h-10 rounded-full gradient-btn flex items-center justify-center text-on-primary hover:opacity-90 transition-all shadow-[0_0_15px_rgba(0,229,255,0.4)] hover:shadow-[0_0_25px_rgba(0,229,255,0.6)] active:scale-95 bg-primary-container"><span class="material-symbols-outlined text-lg ml-0.5">send</span></button>
+</div>
+</div>
+</div>
+</section>
+</div>
+</main>
+
+
+</body></html>

@@ -1,0 +1,232 @@
+<!DOCTYPE html><html class="dark" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Netlink AI - Emails Locked</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;family=Sora:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-fixed": "#351000",
+                        "tertiary": "#ffb695",
+                        "on-surface": "#e1e2eb",
+                        "on-primary-fixed": "#001a41",
+                        "surface-container-lowest": "#0b0e14",
+                        "tertiary-container": "#ef6719",
+                        "tertiary-fixed-dim": "#ffb695",
+                        "surface-container-low": "#191c22",
+                        "on-primary": "#002e68",
+                        "on-primary-container": "#00285b",
+                        "inverse-surface": "#e1e2eb",
+                        "error-container": "#93000a",
+                        "surface-tint": "#adc7ff",
+                        "surface-dim": "#10131a",
+                        "on-secondary-fixed": "#2c0051",
+                        "on-secondary": "#480081",
+                        "surface-container-highest": "#32353c",
+                        "surface-container-high": "#272a31",
+                        "primary": "#adc7ff",
+                        "surface-bright": "#363940",
+                        "outline": "#8b90a0",
+                        "secondary-fixed-dim": "#dcb8ff",
+                        "outline-variant": "#414754",
+                        "on-secondary-fixed-variant": "#6700b5",
+                        "background": "#10131a",
+                        "error-ruby": "#FF3B30",
+                        "glass-border": "rgba(255, 255, 255, 0.12)",
+                        "secondary-container": "#7701d0",
+                        "on-error-container": "#ffdad6",
+                        "surface": "#10131a",
+                        "on-tertiary-fixed-variant": "#7c2e00",
+                        "inverse-on-surface": "#2e3037",
+                        "on-secondary-container": "#dcb7ff",
+                        "warning-amber": "#FFB800",
+                        "error": "#ffb4ab",
+                        "inverse-primary": "#005bc0",
+                        "primary-fixed-dim": "#adc7ff",
+                        "on-error": "#690005",
+                        "secondary": "#dcb8ff",
+                        "on-tertiary-container": "#4c1a00",
+                        "success-glow": "#00FFC2",
+                        "surface-variant": "#32353c",
+                        "on-tertiary": "#571e00",
+                        "secondary-fixed": "#efdbff",
+                        "surface-container": "#1d2026",
+                        "tertiary-fixed": "#ffdbcc",
+                        "primary-container": "#4a8eff",
+                        "on-surface-variant": "#c1c6d7",
+                        "surface-card": "#161B22",
+                        "primary-fixed": "#d8e2ff",
+                        "on-primary-fixed-variant": "#004493",
+                        "on-background": "#e1e2eb"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter-mobile": "16px",
+                        "base-unit": "4px",
+                        "margin-mobile": "20px",
+                        "touch-target-min": "44px",
+                        "section-gap": "64px",
+                        "card-padding": "24px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Hanken Grotesk"],
+                        "stats-number": ["Sora"],
+                        "label-caps": ["JetBrains Mono"],
+                        "display-lg": ["Sora"],
+                        "headline-md": ["Sora"],
+                        "display-lg-mobile": ["Sora"],
+                        "body-md": ["Hanken Grotesk"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "stats-number": ["20px", { "lineHeight": "24px", "fontWeight": "700" }],
+                        "label-caps": ["12px", { "lineHeight": "16px", "letterSpacing": "0.08em", "fontWeight": "500" }],
+                        "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "display-lg-mobile": ["32px", { "lineHeight": "38px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .tech-grid-bg {
+            background-image: 
+                linear-gradient(to right, rgba(139, 144, 160, 0.05) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(139, 144, 160, 0.05) 1px, transparent 1px);
+            background-size: 40px 40px;
+            background-position: center center;
+        }
+        .radial-glow {
+            background: radial-gradient(circle at center, rgba(173, 199, 255, 0.08) 0%, transparent 70%);
+        }
+        .neon-gradient {
+            background: linear-gradient(135deg, #4a8eff, #7701d0);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="text-on-surface font-body-md h-screen w-full flex overflow-hidden antialiased bg-background">
+<input class="peer hidden" id="drawer-toggle" type="checkbox">
+<label class="fixed inset-0 bg-black/60 z-[60] opacity-0 pointer-events-none peer-checked:opacity-100 peer-checked:pointer-events-auto transition-opacity duration-300 md:hidden backdrop-blur-sm" for="drawer-toggle"></label>
+<!-- Mobile Top App Bar -->
+<header class="bg-surface-dim/80 dark:bg-surface-dim/80 backdrop-blur-xl border-b border-glass-border fixed top-0 left-0 right-0 h-[64px] flex justify-between items-center px-margin-mobile w-full z-50 md:hidden">
+<label class="text-on-surface-variant hover:opacity-80 p-2 -ml-2 h-touch-target-min w-touch-target-min flex items-center justify-center cursor-pointer relative z-10 mt-3" for="drawer-toggle">
+<span class="material-symbols-outlined" data-icon="menu">menu</span>
+</label>
+<div class="flex items-center justify-center flex-1 absolute inset-0 pointer-events-none">
+<img alt="Netlink AI Logo" class="h-32 object-contain pointer-events-auto mt-2" src="https://lh3.googleusercontent.com/aida/AP1WRLuNwtUrY5DPsxyaeqw0rBZlrPuBLCWtH7KariAd39gGuSqx-GMB4BN5aWWulURMBmdsxA-SWPK6-WSJxHYNnabGP_fejRmkj7wPX7ca9ErOXNgxE_ngq4qXAgyx9xMP-w1GpfZJBOIgOaScb68cSKOa3gJ0U-Fv1eipg3HAHXI9h8fMUB0IM9HX1HVjFiTC51IlWRPYgcRRuFmIYoAk4CgnjDq96PDU37j9KiRN4LLVFNHwjwefy12jYg">
+</div>
+<div class="w-touch-target-min"></div>
+</header>
+<!-- Navigation Drawer (Identical to Dashboard) -->
+<nav class="fixed inset-y-0 left-0 z-[70] flex flex-col h-full w-[280px] -translate-x-full peer-checked:translate-x-0 md:translate-x-0 transition-transform duration-300 ease-in-out bg-surface-container-low dark:bg-surface-container-low border-r border-glass-border backdrop-blur-xl shadow-lg md:z-40">
+<div class="p-6 border-b border-glass-border mb-4 flex items-center justify-between">
+<img alt="Netlink AI Logo" class="h-24 object-contain" src="https://lh3.googleusercontent.com/aida/AP1WRLuNwtUrY5DPsxyaeqw0rBZlrPuBLCWtH7KariAd39gGuSqx-GMB4BN5aWWulURMBmdsxA-SWPK6-WSJxHYNnabGP_fejRmkj7wPX7ca9ErOXNgxE_ngq4qXAgyx9xMP-w1GpfZJBOIgOaScb68cSKOa3gJ0U-Fv1eipg3HAHXI9h8fMUB0IM9HX1HVjFiTC51IlWRPYgcRRuFmIYoAk4CgnjDq96PDU37j9KiRN4LLVFNHwjwefy12jYg">
+<label class="md:hidden text-on-surface-variant p-2 cursor-pointer rounded-full hover:bg-surface-variant/50" for="drawer-toggle">
+<span class="material-symbols-outlined">close</span>
+</label>
+</div>
+<div class="flex-1 overflow-y-auto px-2">
+<a class="text-on-surface-variant px-4 py-3 hover:bg-surface-variant/50 font-body-md text-body-md duration-200 transition-colors flex items-center mb-1 rounded-r-md" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="dashboard">dashboard</span>
+            Dashboard
+        </a>
+<a class="text-on-surface-variant px-4 py-3 hover:bg-surface-variant/50 font-body-md text-body-md duration-200 transition-colors flex items-center mb-1 rounded-r-md" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="person_search">person_search</span>
+            Network Profile
+        </a>
+<a class="text-on-surface-variant px-4 py-3 hover:bg-surface-variant/50 font-body-md text-body-md duration-200 transition-colors flex items-center mb-1 rounded-r-md" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="folder_shared">folder_shared</span>
+            Portfolio
+        </a>
+<a class="text-on-surface-variant px-4 py-3 hover:bg-surface-variant/50 font-body-md text-body-md duration-200 transition-colors flex items-center mb-1 rounded-r-md" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="group">group</span>
+            Contacts
+        </a>
+<a class="bg-primary-container/20 text-primary border-l-4 border-primary px-4 py-3 font-body-md text-body-md duration-200 transition-colors flex items-center mb-1 rounded-r-md" href="#">
+<span class="material-symbols-outlined mr-3" style="font-variation-settings: 'FILL' 1;">mail</span>
+            Emails
+        </a>
+<a class="text-on-surface-variant px-4 py-3 hover:bg-surface-variant/50 font-body-md text-body-md duration-200 transition-colors flex items-center mb-1 rounded-r-md" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="description">description</span>
+            Quotation Form
+        </a>
+<a class="text-on-surface-variant px-4 py-3 hover:bg-surface-variant/50 font-body-md text-body-md duration-200 transition-colors flex items-center mb-1 rounded-r-md" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="analytics">analytics</span>
+            Analytics
+        </a>
+<a class="text-on-surface-variant px-4 py-3 hover:bg-surface-variant/50 font-body-md text-body-md duration-200 transition-colors flex items-center mb-1 rounded-r-md" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="smart_toy">smart_toy</span>
+            AI Assistant
+        </a>
+<a class="text-on-surface-variant px-4 py-3 hover:bg-surface-variant/50 font-body-md text-body-md duration-200 transition-colors flex items-center mb-1 rounded-r-md" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="settings">settings</span>
+            Settings
+        </a>
+</div>
+<div class="p-4 border-t border-glass-border">
+<div class="bg-surface-card p-3 rounded-lg border border-glass-border flex items-center">
+<div class="h-10 w-10 rounded-full bg-surface-variant flex items-center justify-center text-on-surface-variant mr-3 overflow-hidden">
+<span class="material-symbols-outlined">person</span>
+</div>
+<div>
+<div class="text-sm font-semibold text-on-surface">Guest Mode</div>
+<div class="text-xs text-primary">Limited Trial</div>
+</div>
+</div>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="flex-1 flex flex-col relative overflow-hidden bg-background pt-[64px] md:pt-0 md:ml-[280px]">
+<!-- Interactive Content Area with Grid -->
+<div class="flex-1 relative flex flex-col items-center justify-center p-6 lg:p-12 z-10 tech-grid-bg">
+<!-- Radial Glow Effect behind central content -->
+<div class="absolute inset-0 radial-glow z-0 pointer-events-none"></div>
+<!-- Lock Centerpiece -->
+<div class="relative z-10 flex flex-col items-center max-w-lg text-center animate-fade-in-up bg-surface-card/80 backdrop-blur-xl border border-glass-border rounded-xl p-8 md:p-12 shadow-lg">
+<div class="w-24 h-24 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center mb-8 relative z-10">
+<span class="material-symbols-outlined text-primary text-[48px]" style="font-variation-settings: &quot;FILL&quot; 1;">lock</span>
+</div>
+<h2 class="font-display-lg text-display-lg-mobile md:text-display-lg text-on-surface font-bold mb-4 tracking-tight">
+                    Email Features are Locked
+                </h2>
+<p class="font-body-md text-body-lg text-on-surface-variant mb-10 leading-relaxed max-w-md">
+                    To send personalized emails, sync with Gmail, and see AI highlights, you need to create a full account.
+                </p>
+<button class="neon-gradient text-white px-6 py-2.5 rounded-lg font-bold shadow-lg hover:shadow-primary/20 transition-all active:scale-95 h-[56px] w-full flex items-center justify-center gap-2 relative z-10" style="box-shadow: rgba(77, 127, 255, 0.4) 0px 0px 20px, rgba(138, 43, 226, 0.2) 0px 0px 40px;">
+<span class="material-symbols-outlined text-[20px]">auto_awesome</span>
+                Sign Up to Unlock Emails
+            </button>
+</div>
+</div>
+</main>
+<style>
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in-up {
+            animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+    </style>
+
+
+
+
+</body></html>

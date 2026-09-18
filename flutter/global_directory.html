@@ -1,0 +1,244 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Global Networkers - Netlink AI</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            DEFAULT: '#3b82f6', // Blue-500
+                            container: '#1e3a8a',
+                        },
+                        surface: {
+                            DEFAULT: '#0f172a', // Slate-900
+                            dim: '#020617', // Slate-950
+                            container: '#1e293b', // Slate-800
+                            variant: '#334155', // Slate-700
+                        },
+                        on: {
+                            surface: {
+                                DEFAULT: '#f8fafc',
+                                variant: '#cbd5e1',
+                            },
+                            primary: {
+                                DEFAULT: '#ffffff',
+                                container: '#bfdbfe',
+                            }
+                        },
+                        glass: {
+                            border: 'rgba(255, 255, 255, 0.1)',
+                            bg: 'rgba(30, 41, 59, 0.5)' // surface-container with opacity
+                        }
+                    },
+                    fontFamily: {
+                        headline: ["Public Sans", "sans-serif"],
+                        display: ["Public Sans", "sans-serif"],
+                        body: ["Public Sans", "sans-serif"],
+                        label: ["Public Sans", "sans-serif"]
+                    },
+                    boxShadow: {
+                        'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.3)',
+                        'glow': '0 0 15px rgba(59, 130, 246, 0.4)',
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Public Sans', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .glass-card {
+            background: var(--tw-colors-glass-bg, rgba(30, 41, 59, 0.5));
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--tw-colors-glass-border, rgba(255, 255, 255, 0.1));
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface min-h-screen antialiased selection:bg-primary/30 selection:text-white"><button class="fixed left-4 top-4 z-50 w-10 h-10 rounded-full glass-card flex items-center justify-center text-on-surface-variant hover:text-white transition-all hover:scale-110 active:scale-95 group shadow-glass">
+<span class="material-symbols-outlined group-hover:-translate-x-0.5 transition-transform">arrow_back</span>
+</button>
+<!-- Header -->
+<header class="w-full flex justify-center items-center relative z-40 bg-surface/80 backdrop-blur-xl border-b border-glass-border sticky top-0 px-4 py-4">
+<!-- Back Navigation (Moved to Header for Mobile) -->
+
+<img alt="Netlink AI Logo" class="h-[144px] w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AP1WRLuNwtUrY5DPsxyaeqw0rBZlrPuBLCWtH7KariAd39gGuSqx-GMB4BN5aWWulURMBmdsxA-SWPK6-WSJxHYNnabGP_fejRmkj7wPX7ca9ErOXNgxE_ngq4qXAgyx9xMP-w1GpfZJBOIgOaScb68cSKOa3gJ0U-Fv1eipg3HAHXI9h8fMUB0IM9HX1HVjFiTC51IlWRPYgcRRuFmIYoAk4CgnjDq96PDU37j9KiRN4LLVFNHwjwefy12jYg">
+<!-- Hamburger (Mobile) -->
+
+</header>
+<!-- Main Content Canvas -->
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative py-4">
+<!-- Background decorative elements -->
+<div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+<div class="absolute top-[10%] left-[5%] w-96 h-96 bg-blue-600/10 rounded-full mix-blend-screen filter blur-[100px]"></div>
+<div class="absolute top-[40%] right-[10%] w-[500px] h-[500px] bg-indigo-600/10 rounded-full mix-blend-screen filter blur-[120px]"></div>
+<div class="absolute bottom-[20%] left-[20%] w-[400px] h-[400px] bg-purple-600/10 rounded-full mix-blend-screen filter blur-[100px]"></div>
+</div>
+<!-- Back Navigation (Desktop) -->
+
+<!-- Title Section -->
+<div class="mb-12 relative z-10 text-center md:text-left">
+<h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-white mb-4 pb-1">
+                Global Networkers
+            </h1>
+<p class="text-on-surface-variant text-lg md:text-xl max-w-2xl font-light mx-auto md:mx-0">
+                Discover and connect with professionals from around the world (5 members)
+            </p>
+</div>
+<!-- Directory Grid (Bento/Glassmorphism) -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10">
+<!-- Member Card 1 (Basic) -->
+<div class="glass-card rounded-2xl p-6 shadow-glass hover:-translate-y-1 hover:shadow-2xl hover:shadow-primary/20 transition-all duration-300 flex flex-col items-center text-center group relative overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+<div class="w-24 h-24 rounded-full bg-surface-container flex items-center justify-center text-primary mb-4 shadow-inner border border-glass-border relative z-10">
+<span class="material-symbols-outlined text-4xl" style="font-variation-settings: 'FILL' 1;">person</span>
+</div>
+<div class="flex items-center justify-center gap-2 mb-1 relative z-10">
+<h3 class="text-xl font-bold text-white">arrafihasan7530</h3>
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-[0_0_10px_rgba(16,185,129,0.2)]">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Public
+                    </span>
+</div>
+<p class="text-sm text-on-surface-variant mb-6 relative z-10">arrafihasan7530@gmail.com</p>
+<div class="mt-auto w-full pt-6 border-t border-glass-border relative z-10">
+<div class="flex items-center justify-center gap-2 text-on-surface-variant text-sm mb-4 opacity-70">
+<span class="material-symbols-outlined text-sm">mail</span>
+<span class="">arrafihasan7530@gmail.com</span>
+</div>
+<p class="text-xs font-medium bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-400 uppercase tracking-wider">Portfolio coming soon</p>
+</div>
+</div>
+<!-- Member Card 2 (Basic) -->
+<div class="glass-card rounded-2xl p-6 shadow-glass hover:-translate-y-1 hover:shadow-2xl hover:shadow-primary/20 transition-all duration-300 flex flex-col items-center text-center group relative overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+<div class="w-24 h-24 rounded-full bg-surface-container flex items-center justify-center text-primary mb-4 shadow-inner border border-glass-border relative z-10">
+<span class="material-symbols-outlined text-4xl" style="font-variation-settings: 'FILL' 1;">person</span>
+</div>
+<div class="flex items-center justify-center gap-2 mb-1 relative z-10">
+<h3 class="text-xl font-bold text-white">farhanmorshed07</h3>
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-[0_0_10px_rgba(16,185,129,0.2)]">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Public
+                    </span>
+</div>
+<p class="text-sm text-on-surface-variant mb-6 relative z-10">farhanmorshed07@gmail.com</p>
+<div class="mt-auto w-full pt-6 border-t border-glass-border relative z-10">
+<div class="flex items-center justify-center gap-2 text-on-surface-variant text-sm mb-4 opacity-70">
+<span class="material-symbols-outlined text-sm">mail</span>
+<span class="">farhanmorshed07@gmail.com</span>
+</div>
+<p class="text-xs font-medium bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-400 uppercase tracking-wider">Portfolio coming soon</p>
+</div>
+</div>
+<!-- Member Card 3 (Basic) -->
+<div class="glass-card rounded-2xl p-6 shadow-glass hover:-translate-y-1 hover:shadow-2xl hover:shadow-primary/20 transition-all duration-300 flex flex-col items-center text-center group relative overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+<div class="w-24 h-24 rounded-full bg-surface-container flex items-center justify-center text-primary mb-4 shadow-inner border border-glass-border relative z-10">
+<span class="material-symbols-outlined text-4xl" style="font-variation-settings: 'FILL' 1;">person</span>
+</div>
+<div class="flex items-center justify-center gap-2 mb-1 relative z-10">
+<h3 class="text-xl font-bold text-white">cognisor.ai</h3>
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-[0_0_10px_rgba(16,185,129,0.2)]">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Public
+                    </span>
+</div>
+<p class="text-sm text-on-surface-variant mb-6 relative z-10">cognisor.ai@gmail.com</p>
+<div class="mt-auto w-full pt-6 border-t border-glass-border relative z-10">
+<div class="flex items-center justify-center gap-2 text-on-surface-variant text-sm mb-4 opacity-70">
+<span class="material-symbols-outlined text-sm">mail</span>
+<span class="">cognisor.ai@gmail.com</span>
+</div>
+<p class="text-xs font-medium bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-400 uppercase tracking-wider">Portfolio coming soon</p>
+</div>
+</div>
+<!-- Member Card 4 (Basic) -->
+<div class="glass-card rounded-2xl p-6 shadow-glass hover:-translate-y-1 hover:shadow-2xl hover:shadow-primary/20 transition-all duration-300 flex flex-col items-center text-center group relative overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+<div class="w-24 h-24 rounded-full bg-surface-container flex items-center justify-center text-primary mb-4 shadow-inner border border-glass-border relative z-10">
+<span class="material-symbols-outlined text-4xl" style="font-variation-settings: 'FILL' 1;">person</span>
+</div>
+<div class="flex items-center justify-center gap-2 mb-1 relative z-10">
+<h3 class="text-xl font-bold text-white">gashinshoutan9</h3>
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-[0_0_10px_rgba(16,185,129,0.2)]">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Public
+                    </span>
+</div>
+<p class="text-sm text-on-surface-variant mb-6 relative z-10">gashinshoutan9@gmail.com</p>
+<div class="mt-auto w-full pt-6 border-t border-glass-border relative z-10">
+<div class="flex items-center justify-center gap-2 text-on-surface-variant text-sm mb-4 opacity-70">
+<span class="material-symbols-outlined text-sm">mail</span>
+<span class="">gashinshoutan9@gmail.com</span>
+</div>
+<p class="text-xs font-medium bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-400 uppercase tracking-wider">Portfolio coming soon</p>
+</div>
+</div>
+<!-- Member Card 5 (Detailed Highlight Card) - Spans 2 cols on tablet, 1 on desktop -->
+<div class="glass-card rounded-2xl p-6 shadow-glass hover:-translate-y-1 hover:shadow-2xl hover:shadow-primary/30 transition-all duration-300 flex flex-col items-center text-center group relative overflow-hidden md:col-span-2 lg:col-span-1 border border-primary/30 shadow-[0_0_15px_rgba(59,130,246,0.15)]">
+<div class="absolute inset-0 bg-gradient-to-br from-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+<div class="w-28 h-28 rounded-full mb-4 shadow-[0_0_20px_rgba(59,130,246,0.3)] border border-white/10 relative z-10 overflow-hidden">
+<img alt="Mir Farhan Morshed Profile" class="w-full h-full object-cover" data-alt="A highly professional corporate headshot of a young male executive smiling confidently. He wears a crisp modern suit suitable for a premium business networking platform. The lighting is bright and even, reinforcing a clean, bright light-mode aesthetic. The background features a soft, blurred modern office environment with subtle architectural details." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAU1O4GqbLHVugGwC8pappVWk23LLiAFp36m0DdPKSua_1UfIEXSCz8dGao-SBaa9jpXgSQ8_1BsRsOR6EDbZDwDj6BmH_2S8nO18_DfxlhW6QN9qVl2Tu0UrAERhA3J3Ueorrl61btVxFENO8xleaO5TlfkrkVFAnrbCl-OuRsuIsD8po5VVVZTxDF-ZXlE3nu0mvFaw_c98L3hZS_7rj-XSeXuvxQDp6YX6zkBbr4on4ZdvTZwWeAQXjhHidDBRoIlh_DVTHLX5Q">
+</div>
+<div class="flex items-center justify-center gap-2 mb-1 relative z-10">
+<h3 class="text-2xl font-bold text-white">Mir Farhan Morshed</h3>
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-[0_0_10px_rgba(16,185,129,0.2)]">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Public
+                    </span>
+</div>
+<div class="flex flex-col items-center text-sm font-medium text-on-surface-variant mb-4 relative z-10">
+<span class="">Founder &amp; CEO</span>
+<span class="flex items-center gap-1 text-primary mt-1">
+<span class="material-symbols-outlined text-[16px]">domain</span> Ujjibon
+                    </span>
+</div>
+<p class="text-sm text-on-surface-variant/90 mb-6 px-4 line-clamp-3 relative z-10 italic">
+                    "Mir Farhan Morshed is a dynamic SDG advocate, educator, and creative designer with a profound commitment to social impact and youth empowerment..."
+                </p>
+<div class="flex items-center justify-center gap-3 mb-6 relative z-10">
+<a class="w-8 h-8 rounded-full bg-surface-container text-primary flex items-center justify-center hover:bg-primary hover:text-white transition-colors border border-glass-border" href="#">
+<span class="material-symbols-outlined text-sm">link</span>
+</a>
+</div>
+<div class="mt-auto w-full pt-6 border-t border-glass-border relative z-10 flex flex-col gap-3">
+<div class="flex items-center text-on-surface-variant text-sm justify-center gap-2">
+<span class="material-symbols-outlined text-[16px]">mail</span>
+<span class="">farhanmorshed007@gmail.com</span>
+</div>
+<div class="flex items-center text-on-surface-variant text-sm justify-center gap-2">
+<span class="material-symbols-outlined text-[16px]">call</span>
+<span class="">+818072497474</span>
+</div>
+<button class="mt-4 w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold py-3 px-4 rounded-xl shadow-glow hover:opacity-90 hover:shadow-lg hover:shadow-blue-500/40 transition-all duration-300 flex justify-center items-center gap-2 border border-blue-400/20">
+                        View Portfolio <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="mt-12 border-t border-glass-border bg-surface/50 backdrop-blur-sm py-8 relative z-10">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-on-surface-variant">
+<p class="">© 2026 Network Link AI. All rights reserved.</p>
+<div class="flex gap-6">
+<a class="hover:text-white transition-colors" href="#">About</a>
+<a class="hover:text-white transition-colors" href="#">Privacy</a>
+<a class="hover:text-white transition-colors" href="#">Terms</a>
+</div>
+</div>
+</footer>
+
+
+
+
+
+
+</body></html>
