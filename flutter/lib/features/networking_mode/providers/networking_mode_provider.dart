@@ -7,7 +7,14 @@ import '../models/networking_mode_state.dart';
 
 final networkingModeProvider =
     StateNotifierProvider<NetworkingModeNotifier, NetworkingModeState>((ref) {
-  return NetworkingModeNotifier(ref);
+  final notifier = NetworkingModeNotifier(ref);
+  ref.listen(authProvider, (previous, next) {
+    if (previous?.user?.id != next.user?.id ||
+        previous?.user?.isGuest != next.user?.isGuest) {
+      notifier.refresh();
+    }
+  });
+  return notifier;
 });
 
 class NetworkingModeNotifier extends StateNotifier<NetworkingModeState> {
@@ -19,9 +26,18 @@ class NetworkingModeNotifier extends StateNotifier<NetworkingModeState> {
 
   SupabaseClient? get _client => SupabaseService.client;
 
+  Future<void> refresh() async {
+    await _init();
+  }
+
   Future<void> _init() async {
     final user = _ref.read(authProvider).user;
-    if (user == null || user.isGuest) return;
+    if (user == null || user.isGuest) {
+      if (state.emailTemplate == null) {
+        _setGuestDefaultTemplate();
+      }
+      return;
+    }
 
     try {
       // 1. Check user profile for name & portfolio slug
@@ -31,22 +47,53 @@ class NetworkingModeNotifier extends StateNotifier<NetworkingModeState> {
           .eq('user_id', user.id)
           .maybeSingle();
 
-      // 2. Count networking mode usages from events
-      final countRes = await _client
-          ?.from('events')
-          .select('id')
-          .eq('user_id', user.id)
-          .eq('event_type', 'email_sent');
+      // 2. Check if user is on Pro or Enterprise plan (unlimited networking mode)
+      final isPro = await SupabaseService.isUserPro(user.id);
 
-      final count = (countRes as List?)?.length ?? state.usageCount;
+      // 3. Fetch real networking mode usage from Supabase
+      int count = 0;
+      try {
+        final usageRes = await _client
+            ?.from('networking_mode_usage')
+            .select('usage_count')
+            .eq('user_id', user.id)
+            .maybeSingle();
+
+        if (usageRes != null && usageRes['usage_count'] != null) {
+          count = (usageRes['usage_count'] as num).toInt();
+        } else {
+          // Fallback to subscriptions table
+          final subRes = await _client
+              ?.from('subscriptions')
+              .select('networking_mode_usage')
+              .eq('user_id', user.id)
+              .maybeSingle();
+
+          if (subRes != null && subRes['networking_mode_usage'] != null) {
+            count = (subRes['networking_mode_usage'] as num).toInt();
+          } else {
+            // Fallback to counting emails sent through networking events
+            final countRes = await _client
+                ?.from('events')
+                .select('id')
+                .eq('user_id', user.id)
+                .eq('event_type', 'email_sent');
+            count = (countRes as List?)?.length ?? 0;
+          }
+        }
+      } catch (_) {
+        count = 0;
+      }
 
       state = state.copyWith(
+        isPro: isPro,
         usageCount: count,
       );
 
       // Pre-generate a default template if not prepared
       if (state.emailTemplate == null) {
-        final name = profileRes?['full_name'] as String? ?? (user.name.isNotEmpty ? user.name : 'Innovator');
+        final name = profileRes?['full_name'] as String? ??
+            (user.name.isNotEmpty ? user.name : 'Innovator');
         final title = profileRes?['title'] as String? ?? 'Professional';
         final company = profileRes?['company'] as String? ?? 'Network Link AI';
         final slug = profileRes?['custom_slug'] as String? ?? '';
@@ -73,6 +120,24 @@ class NetworkingModeNotifier extends StateNotifier<NetworkingModeState> {
     } catch (_) {}
   }
 
+  void _setGuestDefaultTemplate() {
+    if (state.emailTemplate != null) return;
+    const defaultTemplate =
+        "Hi [Contact Name],\n\n"
+        "Great meeting you at the event today! As discussed, I'd love to stay in touch and explore collaboration opportunities.\n\n"
+        "You can review my background and latest interactive portfolio here:\n"
+        "https://www.networklinkai.com\n\n"
+        "Looking forward to connecting again soon.\n\n"
+        "Best regards,\n"
+        "Innovator\n"
+        "Professional | Network Link AI";
+
+    state = state.copyWith(
+      emailTemplate: defaultTemplate,
+      isTemplatePrepared: true,
+    );
+  }
+
   void updateContextMessage(String message) {
     state = state.copyWith(
       contextMessage: message,
@@ -80,11 +145,12 @@ class NetworkingModeNotifier extends StateNotifier<NetworkingModeState> {
     );
   }
 
-  void toggleEnabled(bool checked) {
+  bool toggleEnabled(bool checked) {
     if (checked && state.isLimitReached) {
-      return;
+      return false;
     }
     state = state.copyWith(isEnabled: checked);
+    return true;
   }
 
   void setActiveEvent(String? title) {
@@ -97,7 +163,8 @@ class NetworkingModeNotifier extends StateNotifier<NetworkingModeState> {
     await Future.delayed(const Duration(milliseconds: 700));
 
     final user = _ref.read(authProvider).user;
-    String name = (user != null && user.name.isNotEmpty) ? user.name : 'Innovator';
+    String name =
+        (user != null && user.name.isNotEmpty) ? user.name : 'Innovator';
     String title = 'Professional';
     String company = 'Network Link AI';
     String portfolioUrl = 'https://www.networklinkai.com';
@@ -200,9 +267,24 @@ class NetworkingModeNotifier extends StateNotifier<NetworkingModeState> {
             await _client?.from('events').insert({
               'user_id': user.id,
               'event_type': 'email_sent',
-              'description': 'Networking Mode auto follow-up email sent to $name ($email)',
+              'description':
+                  'Networking Mode auto follow-up email sent to $name ($email)',
               'created_at': DateTime.now().toUtc().toIso8601String(),
             });
+
+            // Sync usage with Supabase networking_mode_usage table
+            final nextCount = state.usageCount + 1;
+            await _client?.from('networking_mode_usage').upsert({
+              'user_id': user.id,
+              'usage_count': nextCount,
+              'updated_at': DateTime.now().toUtc().toIso8601String(),
+            }, onConflict: 'user_id');
+
+            try {
+              await _client?.from('subscriptions').update({
+                'networking_mode_usage': nextCount,
+              }).eq('user_id', user.id);
+            } catch (_) {}
           } catch (_) {}
         }
 

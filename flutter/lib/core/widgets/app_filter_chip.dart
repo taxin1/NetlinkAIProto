@@ -42,9 +42,8 @@ class AppFilterChip extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
       ),
       labelStyle: AppTypography.bodySm.copyWith(
-        color: selected
-            ? context.colors.primary
-            : context.colors.onSurfaceVariant,
+        color:
+            selected ? context.colors.primary : context.colors.onSurfaceVariant,
         fontWeight: selected ? FontWeight.bold : FontWeight.normal,
         fontSize: fontSize,
       ),

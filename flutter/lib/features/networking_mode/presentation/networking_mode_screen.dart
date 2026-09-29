@@ -52,6 +52,12 @@ class _NetworkingModeScreenState extends ConsumerState<NetworkingModeScreen> {
     final state = ref.read(networkingModeProvider);
     _contextController = TextEditingController(text: state.contextMessage);
     _templateController = TextEditingController(text: state.emailTemplate ?? '');
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        ref.read(networkingModeProvider.notifier).refresh();
+      }
+    });
   }
 
   @override
@@ -569,6 +575,58 @@ class _NetworkingModeScreenState extends ConsumerState<NetworkingModeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Free Trial Limit Reached Banner
+          if (state.isLimitReached) ...[
+            Container(
+              margin: const EdgeInsets.only(bottom: 16),
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: Colors.orange.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.orangeAccent.withValues(alpha: 0.5)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.warning_amber_rounded, size: 20, color: Colors.orangeAccent),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          context.tr('freeTrialLimitReached'),
+                          style: AppTypography.bodyMd.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: Colors.orangeAccent,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    context.tr('freeTrialLimitReachedDesc'),
+                    style: AppTypography.bodySm.copyWith(
+                      color: context.colors.onSurfaceVariant,
+                      fontSize: 12,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  ElevatedButton.icon(
+                    onPressed: () => context.push(AppRoutes.pricing),
+                    icon: const Icon(Icons.workspace_premium_rounded, size: 16),
+                    label: Text(context.tr('upgradeToPro')),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: context.colors.primary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
           Row(
             children: [
               Expanded(
@@ -603,8 +661,22 @@ class _NetworkingModeScreenState extends ConsumerState<NetworkingModeScreen> {
                   Switch(
                     value: state.isEnabled,
                     activeThumbColor: context.colors.primary,
-                    onChanged: (val) =>
-                        ref.read(networkingModeProvider.notifier).toggleEnabled(val),
+                    onChanged: (val) {
+                      if (val && state.isLimitReached) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(context.tr('freeTrialLimitReachedDesc')),
+                            action: SnackBarAction(
+                              label: context.tr('upgradeToPro'),
+                              textColor: context.colors.primary,
+                              onPressed: () => context.push(AppRoutes.pricing),
+                            ),
+                          ),
+                        );
+                        return;
+                      }
+                      ref.read(networkingModeProvider.notifier).toggleEnabled(val);
+                    },
                   ),
                 ],
               ),
@@ -693,7 +765,11 @@ class _NetworkingModeScreenState extends ConsumerState<NetworkingModeScreen> {
               children: [
                 Row(
                   children: [
-                    Icon(Icons.speed_rounded, size: 16, color: context.colors.primary),
+                    Icon(
+                      state.isPro ? Icons.workspace_premium_rounded : Icons.speed_rounded,
+                      size: 16,
+                      color: context.colors.primary,
+                    ),
                     const SizedBox(width: 8),
                     Text(
                       state.isPro

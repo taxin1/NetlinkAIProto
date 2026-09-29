@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
     const messageLimitCheck = await checkUsageLimit(userId, 'aiAssistantMessages')
     if (!messageLimitCheck.allowed) {
       return NextResponse.json(
-        { 
+        {
           error: messageLimitCheck.message || "You've reached your daily AI assistant message limit. Upgrade to Professional for unlimited messages.",
           limitReached: true,
           limit: messageLimitCheck.limit,
@@ -47,18 +47,18 @@ export async function POST(request: NextRequest) {
         conversationHistory: conversationHistory || [],
         userContext,
       })
-      
+
       return NextResponse.json({
         success: true,
         response,
       })
     } catch (error) {
       console.error("AI assistant error:", error)
-      
+
       if (error instanceof Error) {
         if (error.message.includes("GEMINI_API_KEY") || error.message.includes("environment variable is not set")) {
           return NextResponse.json(
-            { 
+            {
               error: "AI service not configured. GEMINI_API_KEY environment variable is missing.",
               details: process.env.NODE_ENV === "development" ? "Set GEMINI_API_KEY in your .env.local file" : "Set GEMINI_API_KEY in Vercel environment variables"
             },
@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
           )
         }
       }
-      
+
       return NextResponse.json(
         { error: error instanceof Error ? error.message : "Failed to generate AI response" },
         { status: 500 }

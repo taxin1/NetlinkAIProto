@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
@@ -329,14 +330,69 @@ class CalendarNotifier extends StateNotifier<CalendarState> {
         );
       } catch (_) {}
     } else {
-      // Launch real Google Calendar OAuth
+      // Launch real Google Calendar OAuth directly into Google's consent screen
       try {
-        final authUri = Uri.parse(
-            '${BusinessCardScannerService.apiBaseUrl}/api/google-calendar/auth?redirect=true');
+        String? targetAuthUrl;
+        try {
+          final res = await http.get(
+            Uri.parse('${BusinessCardScannerService.webBaseUrl}/api/google-calendar/auth'),
+            headers: {
+              if (_client?.auth.currentSession?.accessToken != null)
+                'Authorization': 'Bearer ${_client!.auth.currentSession!.accessToken}',
+            },
+          ).timeout(const Duration(seconds: 4));
+
+          if (res.statusCode == 200) {
+            final data = jsonDecode(res.body);
+            if (data is Map && data['authUrl'] != null) {
+              targetAuthUrl = data['authUrl'] as String;
+            }
+          }
+        } catch (_) {}
+
+        // Direct fallback to Google OAuth consent screen if API is unreachable
+        targetAuthUrl ??= 'https://accounts.google.com/o/oauth2/v2/auth'
+            '?access_type=offline'
+            '&scope=${Uri.encodeComponent('https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/calendar.events')}'
+            '&prompt=consent'
+            '&response_type=code'
+            '&client_id=783966653046-n6quk2616a8t1rk61r2mn0rtcurnt9q9.apps.googleusercontent.com'
+            '&redirect_uri=${Uri.encodeComponent('https://www.networklinkai.com/api/google-calendar/callback')}';
+
+        final authUri = Uri.parse(targetAuthUrl);
         if (await canLaunchUrl(authUri)) {
           await launchUrl(authUri, mode: LaunchMode.externalApplication);
+          _startConnectionPolling(user.id, user.email);
         }
       } catch (_) {}
     }
+  }
+
+  void _startConnectionPolling(String userId, String userEmail) {
+    int attempts = 0;
+    Timer.periodic(const Duration(seconds: 2), (timer) async {
+      attempts++;
+      if (attempts > 60 || state.isGoogleCalendarConnected) {
+        timer.cancel();
+        return;
+      }
+
+      try {
+        final connRes = await _client
+            ?.from('google_calendar_connections')
+            .select('calendar_id, sync_enabled')
+            .eq('user_id', userId)
+            .maybeSingle();
+
+        if (connRes != null && connRes['sync_enabled'] == true) {
+          timer.cancel();
+          state = state.copyWith(
+            isGoogleCalendarConnected: true,
+            googleCalendarEmail: userEmail,
+          );
+          await loadEvents();
+        }
+      } catch (_) {}
+    });
   }
 }

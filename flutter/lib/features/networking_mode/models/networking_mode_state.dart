@@ -73,7 +73,7 @@ class NetworkingModeState {
     this.isGeneratingTemplate = false,
     this.isTemplatePrepared = false,
     this.isEditingTemplate = false,
-    this.usageCount = 12,
+    this.usageCount = 0,
     this.usageLimit = 100,
     this.isPro = false,
     this.isScanning = false,

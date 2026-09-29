@@ -31,7 +31,7 @@ class SettingsScreen extends ConsumerStatefulWidget {
   ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
 }
 
-class _SettingsScreenState extends ConsumerState<SettingsScreen> {
+class _SettingsScreenState extends ConsumerState<SettingsScreen> with WidgetsBindingObserver {
   // Email Config Form State
   String _emailProvider = 'gmail'; // gmail, outlook, smtp
   late final TextEditingController _emailController;
@@ -53,6 +53,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     final user = ref.read(authProvider).user;
     final userEmail = (user != null && !user.isGuest && user.email.isNotEmpty)
         ? user.email

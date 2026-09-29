@@ -50,11 +50,15 @@ class SectionHeader extends StatelessWidget {
             ),
             const SizedBox(width: 10),
           ],
-          Text(
-            label,
-            style: AppTypography.headlineSm.copyWith(
-              fontSize: 18,
-              color: context.colors.onSurface,
+          Flexible(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppTypography.headlineSm.copyWith(
+                fontSize: 18,
+                color: context.colors.onSurface,
+              ),
             ),
           ),
           const SizedBox(width: 14),

@@ -1,0 +1,24 @@
+{
+    "project_target": "NetlinkAIProto",
+    "framework": "Flutter (Riverpod / GoRouter)",
+    "anti_ai_constraints": {
+        "structure": {
+            "ban_floating_action_button_menus": true,
+            "max_border_radius_px": 6,
+            "prefer_dense_tables_over_cards": true,
+            "enforce_system_font_stack": true
+        },
+        "visual_tropes_blacklist": [
+            "linear-gradient",
+            "backdrop-filter",
+            "box-shadow: 0 10px 15px",
+            "border-radius: 24px"
+        ]
+    },
+    "feature_mappings": {
+        "lib/features/auth": "Minimalist single-column input form, tight layouts, solid active accents.",
+        "dashboard.html": "Dense modular matrix grid utilizing 1px solid slate borders, strictly text-and-metric driven.",
+        "emails.html": "Traditional multi-pane split view structure, zero floating overlay badges.",
+        "quotation.html": "Strict ledger table styling, high tabular numeric data alignment, monospace currency formatting."
+    }
+}

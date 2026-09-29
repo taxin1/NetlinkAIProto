@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { GEMINI_MODEL, GEMINI_API_BASE } from '@/lib/gemini'
+import { generateAIContent } from '@/lib/ai/providers'
 
 export async function POST(request: NextRequest) {
   try {
@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
     }
 
     const html = await response.text()
-    
+
     // Extract meta tags
     const extractMeta = (patterns: string[]): string => {
       for (const pattern of patterns) {
@@ -39,15 +39,15 @@ export async function POST(request: NextRequest) {
       }
       return ''
     }
-    
+
     let previewImage = extractMeta([
       '<meta\\s+property=["\']og:image["\']\\s+content=["\']([^"\']+)["\']',
       '<meta\\s+content=["\']([^"\']+)["\']\\s+property=["\']og:image["\']',
     ])
-    
+
     if (previewImage?.startsWith('//')) previewImage = 'https:' + previewImage
     else if (previewImage?.startsWith('/')) previewImage = new URL(url).origin + previewImage
-    
+
     const cleanText = html
       .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
       .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '')
@@ -56,11 +56,6 @@ export async function POST(request: NextRequest) {
       .trim()
       .substring(0, 15000)
 
-    const apiKey = process.env.GEMINI_API_KEY
-    if (!apiKey) {
-      throw new Error("GEMINI_API_KEY not configured")
-    }
-    
     const prompt = `Analyze this webpage and extract event information. Return ONLY a JSON object:
 {
   "title": "event title",
@@ -74,24 +69,15 @@ export async function POST(request: NextRequest) {
 URL: ${url}
 PAGE CONTENT: ${cleanText}`
 
-    const geminiResponse = await fetch(
-      `${GEMINI_API_BASE}/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: prompt }] }] }),
-      },
-    )
-
-    if (!geminiResponse.ok) {
-      throw new Error(`Gemini API error: ${geminiResponse.status}`)
-    }
-
-    const geminiData = await geminiResponse.json()
-    const aiResponse = geminiData.candidates?.[0]?.content?.parts?.[0]?.text
+    const aiResponse = await generateAIContent({
+      message: prompt,
+      systemPrompt: "You extract structured event data from web page content. Return only a valid JSON object, no markdown.",
+      maxTokens: 1024,
+      temperature: 0.2,
+    })
 
     if (!aiResponse) {
-      throw new Error('No response from Gemini API')
+      throw new Error('No response from AI service')
     }
 
     const jsonMatch = aiResponse.match(/\{[\s\S]*\}/)

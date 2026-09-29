@@ -5,11 +5,36 @@ import { getGoogleCalendarAuthUrl } from '@/lib/google-calendar'
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
+    const authHeader = request.headers.get("authorization")
+    const bearerToken = authHeader?.startsWith("Bearer ") ? authHeader.substring(7) : null
+
+    let user = null
+    if (bearerToken) {
+      const { data } = await supabase.auth.getUser(bearerToken)
+      user = data?.user
+    } else {
+      const { data } = await supabase.auth.getUser()
+      user = data?.user
+    }
+
+    const shouldRedirect = request.nextUrl.searchParams.get('redirect') === 'true'
+
+    // Determine base URL: prioritize NEXT_PUBLIC_APP_URL, then request origin, then defaults
+    let baseUrl = process.env.NEXT_PUBLIC_APP_URL
+    if (!baseUrl) {
+      if (process.env.NODE_ENV === 'production') {
+        baseUrl = 'https://www.networklinkai.com'
+      } else {
+        baseUrl = request.nextUrl.origin
+      }
+    }
 
     if (!user) {
+      if (shouldRedirect) {
+        const loginUrl = new URL('/auth/login', baseUrl)
+        loginUrl.searchParams.set('redirect', request.nextUrl.pathname + request.nextUrl.search)
+        return NextResponse.redirect(loginUrl.toString())
+      }
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -21,19 +46,12 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Determine base URL: prioritize NEXT_PUBLIC_APP_URL, then request origin, then defaults
-    let baseUrl = process.env.NEXT_PUBLIC_APP_URL
-    if (!baseUrl) {
-      // In production, default to www.networklinkai.com
-      if (process.env.NODE_ENV === 'production') {
-        baseUrl = 'https://www.networklinkai.com'
-      } else {
-        // In development, use request origin (localhost)
-        baseUrl = request.nextUrl.origin
-      }
-    }
     const authUrl = getGoogleCalendarAuthUrl(baseUrl)
     
+    if (shouldRedirect) {
+      return NextResponse.redirect(authUrl)
+    }
+
     // Store state in session or use a secure token to link to user
     return NextResponse.json({ authUrl })
   } catch (error) {

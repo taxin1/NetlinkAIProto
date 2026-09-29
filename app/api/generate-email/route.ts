@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
       const emailLimitCheck = await checkUsageLimit(userId, 'aiEmailGeneration')
       if (!emailLimitCheck.allowed) {
         return NextResponse.json(
-          { 
+          {
             error: emailLimitCheck.message || "You've reached your monthly AI email generation limit. Upgrade to Professional for unlimited AI emails.",
             limitReached: true,
             limit: emailLimitCheck.limit,
@@ -122,7 +122,7 @@ export async function POST(request: NextRequest) {
           for (const memory of memories) {
             await supabase
               .from("ai_trainer_memories")
-              .update({ 
+              .update({
                 usage_count: (memory.usage_count || 0) + 1,
                 last_used_at: new Date().toISOString()
               })
@@ -147,7 +147,7 @@ export async function POST(request: NextRequest) {
         userId: userId,
         aiMemories: aiMemories.length > 0 ? aiMemories : undefined
       })
-      
+
       if (!emailBody || typeof emailBody !== 'string') {
         console.error("Invalid email body returned:", emailBody)
         return NextResponse.json(

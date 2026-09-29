@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
-import { generateEmailWithGemini } from "@/lib/gemini"
-import { GEMINI_API_BASE, GEMINI_MODEL } from "@/lib/gemini"
+import { generateAIContent } from "@/lib/ai/providers"
 import { formatContactForAI } from "@/lib/ai/contact-context"
 
 interface CommandIntent {
@@ -43,7 +42,7 @@ export async function POST(request: NextRequest) {
         .eq("user_id", userId)
         .order("created_at", { ascending: false })
         .limit(20),
-      
+
       // Emails - get recent emails with status
       supabase
         .from("emails")
@@ -54,7 +53,7 @@ export async function POST(request: NextRequest) {
         .eq("user_id", userId)
         .order("created_at", { ascending: false })
         .limit(10),
-      
+
       // Calendar events - upcoming events
       supabase
         .from("calendar_events")
@@ -62,7 +61,7 @@ export async function POST(request: NextRequest) {
         .eq("user_id", userId)
         .order("start_time", { ascending: true })
         .limit(10),
-      
+
       // Email campaigns - all campaigns with status
       supabase
         .from("email_campaigns")
@@ -76,7 +75,7 @@ export async function POST(request: NextRequest) {
         .eq("user_id", userId)
         .order("created_at", { ascending: false })
         .limit(10),
-      
+
       // Statistics - get counts
       Promise.all([
         supabase.from("contacts").select("*", { count: "exact", head: true }).eq("user_id", userId),
@@ -90,7 +89,7 @@ export async function POST(request: NextRequest) {
     const emails = emailsResult.data || []
     const events = eventsResult.data || []
     const campaigns = campaignsResult.data || []
-    
+
     // Calculate stats
     const stats = {
       totalContacts: statsResult[0].count || 0,
@@ -99,27 +98,23 @@ export async function POST(request: NextRequest) {
       totalCampaigns: statsResult[3].count || 0,
     }
 
-    const apiKey = process.env.GEMINI_API_KEY
-    if (!apiKey) {
-      throw new Error("GEMINI_API_KEY environment variable is not set")
-    }
 
     // Build comprehensive context string
-    const contactsSummary = contacts.length > 0 
+    const contactsSummary = contacts.length > 0
       ? contacts.slice(0, 10).map(c => formatContactForAI(c as any)).join("; ")
       : "No contacts yet"
-    
+
     const emailsSummary = emails.length > 0
       ? emails.slice(0, 5).map(e => {
-          const contact = e.contacts || {}
-          return `${contact.name || 'Unknown'}: "${e.subject}" (${e.status})`
-        }).join(", ")
+        const contact = e.contacts || {}
+        return `${contact.name || 'Unknown'}: "${e.subject}" (${e.status})`
+      }).join(", ")
       : "No emails yet"
-    
+
     const eventsSummary = events.length > 0
       ? events.slice(0, 5).map(e => `"${e.title}" on ${e.start_time || e.event_date || "TBD"}`).join(", ")
       : "No upcoming events"
-    
+
     const campaignsSummary = campaigns.length > 0
       ? campaigns.map(c => `"${c.name}" (${c.status}, ${c.sent_count || 0}/${c.total_count || 0} sent)`).join(", ")
       : "No campaigns yet"
@@ -175,50 +170,15 @@ Respond with ONLY a JSON object:
   "response": "Natural language response (no asterisks, plain text, in ${language === "ja" ? "JAPANESE" : "ENGLISH"})"
 }`
 
-    const response = await fetch(
-      `${GEMINI_API_BASE}/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              role: "user",
-              parts: [
-                {
-                  text: `You are a voice command parser for Netlink. Always respond with ONLY a valid JSON object, no other text.\n\n${prompt}`
-                }
-              ]
-            }
-          ],
-          generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: 1024,
-          },
-        }),
-      }
-    )
+    const responseText = await generateAIContent({
+      message: prompt,
+      systemPrompt: "You are a voice command parser for Netlink. Always respond with ONLY a valid JSON object, no other text.",
+      maxTokens: 1024,
+      temperature: 0.7,
+    })
 
-    if (!response.ok) {
-      const errorText = await response.text()
-      throw new Error(`Gemini API request failed (${response.status}): ${errorText}`)
-    }
-
-    const data = await response.json()
-
-    if (data.error) {
-      throw new Error(`Gemini API error: ${data.error.message || JSON.stringify(data.error)}`)
-    }
-
-    if (!data.candidates || !data.candidates[0]?.content?.parts?.[0]?.text) {
-      throw new Error("No valid response from Gemini API")
-    }
-
-    const responseText = data.candidates[0].content.parts[0].text
     const jsonMatch = responseText.match(/\{[\s\S]*\}/)
-    
+
     if (!jsonMatch) {
       return NextResponse.json({
         action: "general_query",
@@ -237,11 +197,11 @@ Respond with ONLY a JSON object:
           if (intent.parameters.recipient && intent.parameters.purpose) {
             // Find the contact
             const recipientName = intent.parameters.recipient.toLowerCase()
-            const contact = contacts.find(c => 
-              c.name?.toLowerCase().includes(recipientName) || 
+            const contact = contacts.find(c =>
+              c.name?.toLowerCase().includes(recipientName) ||
               c.email?.toLowerCase().includes(recipientName)
             )
-            
+
             if (contact && contact.email) {
               try {
                 // Fetch additional contact details and context
@@ -293,7 +253,7 @@ Respond with ONLY a JSON object:
                   previousEmails: previousEmails || undefined,
                   recentInteractions: events || undefined
                 })
-                
+
                 intent.parameters.generatedEmail = emailBody
                 intent.parameters.contactId = contact.id
                 intent.parameters.contactEmail = contact.email
@@ -313,46 +273,46 @@ Respond with ONLY a JSON object:
             intent.response = "To write an email, I need the recipient's name and what the email should be about."
           }
           break
-          
+
         case "send_email":
           intent.needsConfirmation = true
           intent.response = `I'll help you send an email. ${intent.response}`
           break
-          
+
         case "create_campaign":
           // Create email campaign
           if (intent.parameters.campaign_name && intent.parameters.purpose && intent.parameters.subject) {
             // Determine which contacts to include
             let contactIds: string[] = []
-            
+
             if (intent.parameters.contacts === "all" || intent.parameters.contacts === "all contacts") {
               contactIds = contacts.filter(c => c.email).map(c => c.id)
             } else if (Array.isArray(intent.parameters.contacts)) {
               // Find contacts by name
               const contactNames = intent.parameters.contacts.map((n: string) => n.toLowerCase())
               contactIds = contacts
-                .filter(c => contactNames.some((name: string) => 
-                  c.name?.toLowerCase().includes(name) || 
+                .filter(c => contactNames.some((name: string) =>
+                  c.name?.toLowerCase().includes(name) ||
                   c.email?.toLowerCase().includes(name)
                 ))
                 .filter(c => c.email)
                 .map(c => c.id)
             } else if (typeof intent.parameters.contacts === "string") {
               const contactName = intent.parameters.contacts.toLowerCase()
-              const found = contacts.find(c => 
-                c.name?.toLowerCase().includes(contactName) || 
+              const found = contacts.find(c =>
+                c.name?.toLowerCase().includes(contactName) ||
                 c.email?.toLowerCase().includes(contactName)
               )
               if (found && found.email) {
                 contactIds = [found.id]
               }
             }
-            
+
             if (contactIds.length === 0) {
               // Default to all contacts with emails
               contactIds = contacts.filter(c => c.email).map(c => c.id)
             }
-            
+
             if (contactIds.length === 0) {
               intent.response = "I couldn't find any contacts with email addresses to include in the campaign."
             } else {
@@ -370,21 +330,21 @@ Respond with ONLY a JSON object:
                   })
                   .select()
                   .single()
-                
+
                 if (campaignError) throw campaignError
-                
+
                 // Add contacts to campaign
                 const campaignContacts = contactIds.map(contactId => ({
                   campaign_id: campaign.id,
                   contact_id: contactId,
                 }))
-                
+
                 const { error: contactsError } = await supabase
                   .from("campaign_contacts")
                   .insert(campaignContacts)
-                
+
                 if (contactsError) throw contactsError
-                
+
                 intent.response = `I've created the campaign "${intent.parameters.campaign_name}" with ${contactIds.length} contacts. Would you like me to start sending emails now?`
                 intent.parameters.campaignId = campaign.id
                 intent.needsConfirmation = true
@@ -397,7 +357,7 @@ Respond with ONLY a JSON object:
             intent.response = "To create a campaign, I need a campaign name, purpose, subject, and which contacts to include."
           }
           break
-          
+
         case "create_contact":
           if (intent.parameters.name && intent.parameters.email) {
             const { error } = await supabase.from("contacts").insert({
@@ -419,18 +379,18 @@ Respond with ONLY a JSON object:
             intent.response = "To add a contact, I need at least a name and email address."
           }
           break
-          
+
         case "view_contacts":
           if (contacts.length === 0) {
             intent.response = "You don't have any contacts yet."
           } else {
-            const contactsList = contacts.slice(0, 10).map(c => 
+            const contactsList = contacts.slice(0, 10).map(c =>
               `${c.name}${c.company ? ` at ${c.company}` : ''}${c.email ? ` (${c.email})` : ''}`
             ).join(", ")
             intent.response = `You have ${stats.totalContacts} contacts. Recent ones: ${contactsList}.`
           }
           break
-          
+
         case "view_emails":
           if (emails.length === 0) {
             intent.response = "You haven't sent any emails yet."
@@ -442,7 +402,7 @@ Respond with ONLY a JSON object:
             intent.response = `You have ${stats.sentEmails} sent emails. Recent ones: ${emailsList}.`
           }
           break
-          
+
         case "view_events":
           if (events.length === 0) {
             intent.response = "You don't have any upcoming events scheduled."
@@ -451,28 +411,28 @@ Respond with ONLY a JSON object:
             intent.response = `You have ${stats.totalEvents} events. Upcoming: ${eventsList}.`
           }
           break
-          
+
         case "view_campaigns":
           if (campaigns.length === 0) {
             intent.response = "You don't have any email campaigns yet."
           } else {
-            const campaignsList = campaigns.map(c => 
+            const campaignsList = campaigns.map(c =>
               `"${c.name}" (${c.status}, ${c.sent_count || 0}/${c.total_count || 0} sent)`
             ).join(", ")
             intent.response = `You have ${stats.totalCampaigns} campaigns: ${campaignsList}.`
           }
           break
-          
+
         case "view_stats":
         case "get_stats":
           intent.response = `Here are your statistics: ${stats.totalContacts} contacts, ${stats.sentEmails} sent emails, ${stats.totalEvents} events, and ${stats.totalCampaigns} email campaigns.`
           break
-          
+
         case "search_contact":
           if (intent.parameters.name) {
             const searchName = intent.parameters.name.toLowerCase()
-            const found = contacts.find(c => 
-              c.name?.toLowerCase().includes(searchName) || 
+            const found = contacts.find(c =>
+              c.name?.toLowerCase().includes(searchName) ||
               c.email?.toLowerCase().includes(searchName)
             )
             if (found) {

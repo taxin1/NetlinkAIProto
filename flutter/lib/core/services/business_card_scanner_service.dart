@@ -72,6 +72,19 @@ class BusinessCardScannerService {
     _customApiBaseUrl = url;
   }
 
+  /// Base URL for public web pages (e.g. checkout, landing).
+  /// Falls back to the public production domain if apiBaseUrl points to localhost.
+  static String get webBaseUrl {
+    final base = apiBaseUrl;
+    if (base.contains('localhost') || base.contains('127.0.0.1') || base.isEmpty) {
+      return 'https://www.networklinkai.com';
+    }
+    return base;
+  }
+
+  /// Direct URL to the professional plan web subscription checkout page.
+  static Uri get checkoutUri => Uri.parse('$webBaseUrl/checkout?plan=professional');
+
   /// Scans a business card image provided as raw bytes or base64
   static Future<ScannedCardData> scanCard({
     required Uint8List imageBytes,

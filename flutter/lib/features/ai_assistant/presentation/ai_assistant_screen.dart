@@ -81,8 +81,8 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
 
     final currentMessages = ref.read(_chatMessagesProvider);
     final history = currentMessages.take(10).map((m) => {
-      'role': m.isUser ? 'user' : 'model',
-      'parts': [{'text': m.text}],
+      'role': m.isUser ? 'user' : 'assistant',
+      'content': m.text,
     }).toList();
 
     ref.read(_chatMessagesProvider.notifier).update((state) => [
@@ -557,7 +557,7 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
                     message.time,
                     style: AppTypography.labelSm.copyWith(
                       color: context.colors.onSurfaceVariant.withValues(alpha: 0.6),
-                      fontSize: 10,
+                      fontSize: 11,
                     ),
                   ),
                 ],
@@ -652,7 +652,7 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
                   message.time,
                   style: AppTypography.labelSm.copyWith(
                     color: context.colors.onSurfaceVariant.withValues(alpha: 0.6),
-                    fontSize: 10,
+                    fontSize: 11,
                   ),
                 ),
               ],
