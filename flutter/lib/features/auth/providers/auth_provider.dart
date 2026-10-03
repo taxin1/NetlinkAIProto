@@ -398,7 +398,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
           'access_type': 'offline',
           'prompt': 'consent',
         },
-        authScreenLaunchMode: LaunchMode.platformDefault,
+        authScreenLaunchMode:
+            kIsWeb ? LaunchMode.platformDefault : LaunchMode.externalApplication,
       );
 
       // On mobile the above opens the browser/in-app-web-view and then the

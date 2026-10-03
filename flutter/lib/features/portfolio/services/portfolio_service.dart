@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/services/business_card_scanner_service.dart';
 import '../../../core/services/supabase_service.dart';
@@ -252,11 +253,16 @@ class PortfolioService {
   /// Trigger a Google OAuth sign-in / linking flow
   static Future<void> triggerGoogleOAuth() async {
     try {
+      final redirectUrl = kIsWeb
+          ? '${Uri.base.origin}/auth/callback'
+          : 'io.supabase.netlink://login-callback';
       await _supabase.auth.signInWithOAuth(
         OAuthProvider.google,
-        redirectTo: '${Uri.base.origin}/auth/callback',
+        redirectTo: redirectUrl,
         scopes: 'openid email profile',
         queryParams: {'prompt': 'select_account'},
+        authScreenLaunchMode:
+            kIsWeb ? LaunchMode.platformDefault : LaunchMode.externalApplication,
       );
     } catch (_) {}
   }
