@@ -233,17 +233,19 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // ── Page Heading (Standardized) ──
-                  PopInItem(
-                    index: 0,
-                    child: Center(
-                      child: Text(
-                        context.l10n.events,
-                        style: AppTypography.headlineMd,
-                        textAlign: TextAlign.center,
+                  if (!Responsive.hasShellTopBar(context)) ...[
+                    PopInItem(
+                      index: 0,
+                      child: Center(
+                        child: Text(
+                          context.l10n.events,
+                          style: AppTypography.headlineMd,
+                          textAlign: TextAlign.center,
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 24),
+                    const SizedBox(height: 24),
+                  ],
 
                   // ── Trial Banner (Shows when not signed in) ──
                   if (isGuest) ...[

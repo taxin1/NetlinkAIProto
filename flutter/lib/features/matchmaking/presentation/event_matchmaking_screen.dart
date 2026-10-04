@@ -13,7 +13,6 @@ import '../../../core/widgets/gradient_button.dart';
 import '../../../core/widgets/pop_in_item.dart';
 import '../../../core/widgets/section_header.dart';
 import '../../../core/widgets/trial_banner_card.dart';
-import '../../../core/widgets/stat_card.dart';
 import '../../../core/utils/responsive.dart';
 import '../../../core/router/app_router.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -128,17 +127,19 @@ class _EventMatchmakingScreenState extends ConsumerState<EventMatchmakingScreen>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // ── Page Heading (Standardized) ──
-                  PopInItem(
-                    index: 0,
-                    child: Center(
-                      child: Text(
-                        context.l10n.eventMatchmaking,
-                        style: AppTypography.headlineMd,
-                        textAlign: TextAlign.center,
+                  if (!Responsive.hasShellTopBar(context)) ...[
+                    PopInItem(
+                      index: 0,
+                      child: Center(
+                        child: Text(
+                          context.l10n.eventMatchmaking,
+                          style: AppTypography.headlineMd,
+                          textAlign: TextAlign.center,
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 24),
+                    const SizedBox(height: 24),
+                  ],
 
                   // ── Trial Banner (Shows when not signed in) ──
                   if (isGuest) ...[
@@ -231,70 +232,162 @@ class _EventMatchmakingScreenState extends ConsumerState<EventMatchmakingScreen>
         : state.profiles.map((p) => p.compatibilityScore).fold<int>(0, (m, s) => s > m ? s : m);
     final topCompatibilityText = maxScore > 0 ? '$maxScore%' : '0%';
 
-    return GlassCard(
-      borderRadius: BorderRadius.circular(20),
-      padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final width = constraints.maxWidth;
-              final cols = width > 500 ? 4 : 2;
-              const spacing = 10.0;
-              final itemWidth = (width - (cols - 1) * spacing) / cols;
-              final targetHeight = cols == 4 ? 112.0 : 108.0;
-              final childAspectRatio = itemWidth / targetHeight;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isDesktop = constraints.maxWidth > 750;
+        final cardWidth = isDesktop ? (constraints.maxWidth - 42) / 4 : (constraints.maxWidth - 14) / 2;
 
-              return GridView.count(
-                crossAxisCount: cols,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                mainAxisSpacing: spacing,
-                crossAxisSpacing: spacing,
-                childAspectRatio: childAspectRatio,
-                children: [
-                  StatCard(
-                    label: context.tr('analyzedProfiles'),
-                    value: '${state.profiles.length}',
-                    icon: Icons.people_alt_outlined,
-                    iconColor: context.colors.primary,
-                    trendLabel: context.tr('activePool'),
-                    trendColor: context.colors.primary,
-                    trendIcon: Icons.bolt,
+        return Wrap(
+          spacing: 14,
+          runSpacing: 14,
+          children: [
+            _buildKpiCard(
+              context,
+              width: cardWidth,
+              title: context.tr('analyzedProfiles'),
+              value: '${state.profiles.length}',
+              growth: context.tr('activePool'),
+              icon: Icons.people_alt_outlined,
+            ),
+            _buildKpiCard(
+              context,
+              width: cardWidth,
+              title: context.tr('highSynergy'),
+              value: '$highMatchCount',
+              growth: context.tr('highPriority'),
+              icon: Icons.auto_awesome_rounded,
+            ),
+            _buildKpiCard(
+              context,
+              width: cardWidth,
+              title: context.tr('meetingsBooked'),
+              value: '$scheduledCount',
+              growth: context.tr('scheduled'),
+              icon: Icons.calendar_month_rounded,
+            ),
+            _buildKpiCard(
+              context,
+              width: cardWidth,
+              title: context.tr('topCompatibility'),
+              value: topCompatibilityText,
+              growth: maxScore >= 90 ? context.tr('optimal') : context.tr('activePool'),
+              icon: Icons.verified_outlined,
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildKpiCard(
+    BuildContext context, {
+    required double width,
+    required String title,
+    required String value,
+    required String? growth,
+    required IconData icon,
+  }) {
+    final hasPill = growth != null && growth.trim().isNotEmpty;
+    final isUp = growth?.startsWith('+') ?? false;
+    final isDown = growth?.startsWith('-') ?? false;
+
+    return SizedBox(
+      width: width,
+      child: GlassCard(
+        tintColor: null, // Neutral glass: no colored gradient tint
+        glowColor: null,
+        borderRadius: BorderRadius.circular(18),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: context.colors.surfaceContainerHighest.withValues(alpha: 0.35),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: context.colors.glassBorder, width: 0.8),
                   ),
-                  StatCard(
-                    label: context.tr('highSynergy'),
-                    value: '$highMatchCount',
-                    icon: Icons.auto_awesome,
-                    iconColor: const Color(0xFF8B5CF6),
-                    trendLabel: context.tr('highPriority'),
-                    trendColor: const Color(0xFF8B5CF6),
-                    trendIcon: Icons.star_rounded,
+                  child: Icon(icon, color: context.colors.onSurfaceVariant, size: 18),
+                ),
+                if (hasPill)
+                  Flexible(
+                    child: Container(
+                      margin: const EdgeInsets.only(left: 6),
+                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: context.colors.surfaceContainerHighest.withValues(alpha: 0.35),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: context.colors.glassBorder,
+                          width: 0.8,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (isUp) ...[
+                            Icon(
+                              Icons.arrow_upward_rounded,
+                              size: 10,
+                              color: context.colors.onSurfaceVariant,
+                            ),
+                            const SizedBox(width: 2.5),
+                          ] else if (isDown) ...[
+                            Icon(
+                              Icons.arrow_downward_rounded,
+                              size: 10,
+                              color: context.colors.onSurfaceVariant,
+                            ),
+                            const SizedBox(width: 2.5),
+                          ],
+                          Flexible(
+                            child: Text(
+                              growth,
+                              style: AppTypography.labelSm.copyWith(
+                                color: context.colors.onSurface,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                  StatCard(
-                    label: context.tr('meetingsBooked'),
-                    value: '$scheduledCount',
-                    icon: Icons.calendar_today_rounded,
-                    iconColor: const Color(0xFF10B981),
-                    trendLabel: context.tr('scheduled'),
-                    trendColor: const Color(0xFF10B981),
-                    trendIcon: Icons.check_circle_outline,
-                  ),
-                  StatCard(
-                    label: context.tr('topCompatibility'),
-                    value: topCompatibilityText,
-                    icon: Icons.verified_outlined,
-                    iconColor: const Color(0xFF06B6D4),
-                    trendLabel: maxScore >= 90 ? context.tr('optimal') : context.tr('activePool'),
-                    trendColor: const Color(0xFF06B6D4),
-                    trendIcon: Icons.trending_up,
-                  ),
-                ],
-              );
-            },
-          ),
-        ],
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              value,
+              style: AppTypography.headlineMd.copyWith(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: context.colors.onSurface,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 2),
+            Text(
+              title,
+              style: AppTypography.bodySm.copyWith(
+                color: context.colors.onSurfaceVariant.withValues(alpha: 0.8),
+                fontSize: 11.5,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              softWrap: true,
+            ),
+          ],
+        ),
       ),
     );
   }

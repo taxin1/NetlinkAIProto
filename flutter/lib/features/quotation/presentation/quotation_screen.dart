@@ -236,17 +236,19 @@ class _QuotationScreenState extends ConsumerState<QuotationScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // ── Page Heading (Standardized) ──
-                  PopInItem(
-                    index: 0,
-                    child: Center(
-                      child: Text(
-                        context.tr('aiQuotationBuilder'),
-                        style: AppTypography.headlineMd,
-                        textAlign: TextAlign.center,
+                  if (!Responsive.hasShellTopBar(context)) ...[
+                    PopInItem(
+                      index: 0,
+                      child: Center(
+                        child: Text(
+                          context.tr('aiQuotationBuilder'),
+                          style: AppTypography.headlineMd,
+                          textAlign: TextAlign.center,
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 24),
+                    const SizedBox(height: 24),
+                  ],
 
                   // ── Trial Banner (Shows when not signed in) ──
                   if (isGuest) ...[
@@ -565,6 +567,10 @@ class _QuotationScreenState extends ConsumerState<QuotationScreen> {
                 color: context.colors.onSurfaceVariant.withValues(alpha: 0.5),
               ),
               border: InputBorder.none,
+              enabledBorder: InputBorder.none,
+              focusedBorder: InputBorder.none,
+              filled: false,
+              fillColor: Colors.transparent,
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             ),
           ),

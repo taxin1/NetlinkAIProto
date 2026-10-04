@@ -184,8 +184,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
     );
   }
 
-  /// Auto-syncs Google user OAuth token & email into the gmail_connections table
-  /// so that email & highlights features connect automatically.
+  /// Auto-syncs Google user OAuth token & email into gmail_connections and google_calendar_connections
+  /// so that email, highlights, and calendar features connect automatically.
   void _syncGmailConnection(User user, Session? session) {
     final isGoogleUser = user.appMetadata['provider'] == 'google' ||
         user.identities?.any((i) => i.provider == 'google') == true ||
@@ -199,6 +199,15 @@ class AuthNotifier extends StateNotifier<AuthState> {
           'access_token': session?.providerToken ?? session?.accessToken ?? 'oauth_google',
           'refresh_token': session?.providerRefreshToken,
           'email_address': user.email,
+          'updated_at': DateTime.now().toUtc().toIso8601String(),
+        }, onConflict: 'user_id');
+
+        await SupabaseService.client.from('google_calendar_connections').upsert({
+          'user_id': user.id,
+          'access_token': session?.providerToken ?? session?.accessToken ?? 'oauth_google',
+          'refresh_token': session?.providerRefreshToken,
+          'calendar_id': 'primary',
+          'sync_enabled': true,
           'updated_at': DateTime.now().toUtc().toIso8601String(),
         }, onConflict: 'user_id');
       } catch (_) {}
@@ -393,7 +402,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         OAuthProvider.google,
         redirectTo: _oauthRedirectUrl,
         scopes:
-            'email profile https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.send https://www.googleapis.com/auth/gmail.modify',
+            'email profile https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.send https://www.googleapis.com/auth/gmail.modify https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/calendar.events',
         queryParams: {
           'access_type': 'offline',
           'prompt': 'consent',

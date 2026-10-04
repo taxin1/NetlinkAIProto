@@ -8,6 +8,7 @@ class DashboardData {
   final int emailsSent;
   final int upcomingEvents;
   final int networkGrowth;
+  final List<double> weeklyGrowthPoints;
   final List<DashboardEventItem> upcomingEventsList;
   final NetworkingSummaryData networkingSummary;
   final EmailHighlightsData emailHighlights;
@@ -19,6 +20,7 @@ class DashboardData {
     this.emailsSent = 0,
     this.upcomingEvents = 0,
     this.networkGrowth = 0,
+    this.weeklyGrowthPoints = const [0, 0, 0, 0, 0, 0, 0],
     this.upcomingEventsList = const [],
     this.networkingSummary = const NetworkingSummaryData(),
     this.emailHighlights = const EmailHighlightsData(),
@@ -33,6 +35,7 @@ class DashboardData {
     int? emailsSent,
     int? upcomingEvents,
     int? networkGrowth,
+    List<double>? weeklyGrowthPoints,
     List<DashboardEventItem>? upcomingEventsList,
     NetworkingSummaryData? networkingSummary,
     EmailHighlightsData? emailHighlights,
@@ -44,6 +47,7 @@ class DashboardData {
       emailsSent: emailsSent ?? this.emailsSent,
       upcomingEvents: upcomingEvents ?? this.upcomingEvents,
       networkGrowth: networkGrowth ?? this.networkGrowth,
+      weeklyGrowthPoints: weeklyGrowthPoints ?? this.weeklyGrowthPoints,
       upcomingEventsList: upcomingEventsList ?? this.upcomingEventsList,
       networkingSummary: networkingSummary ?? this.networkingSummary,
       emailHighlights: emailHighlights ?? this.emailHighlights,

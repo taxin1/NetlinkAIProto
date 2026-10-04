@@ -234,17 +234,19 @@ class _CampaignsScreenState extends ConsumerState<CampaignsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   // ── Page Heading (Standardized, Center-Aligned, No Extra Subtitle) ──
-                  PopInItem(
-                    index: 0,
-                    child: Center(
-                      child: Text(
-                        context.l10n.campaigns,
-                        style: AppTypography.headlineMd,
-                        textAlign: TextAlign.center,
+                  if (!Responsive.hasShellTopBar(context)) ...[
+                    PopInItem(
+                      index: 0,
+                      child: Center(
+                        child: Text(
+                          context.l10n.campaigns,
+                          style: AppTypography.headlineMd,
+                          textAlign: TextAlign.center,
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 24),
+                    const SizedBox(height: 24),
+                  ],
 
                   // ── Trial Banner (Shows when not signed in) ──
                   if (isGuest) ...[
@@ -594,6 +596,10 @@ class _CampaignsScreenState extends ConsumerState<CampaignsScreen> {
                                         ),
                                         prefixIcon: Icon(Icons.search_rounded, size: 18, color: context.colors.onSurfaceVariant),
                                         border: InputBorder.none,
+                                        enabledBorder: InputBorder.none,
+                                        focusedBorder: InputBorder.none,
+                                        filled: false,
+                                        fillColor: Colors.transparent,
                                         isDense: true,
                                         contentPadding: const EdgeInsets.symmetric(vertical: 10),
                                       ),

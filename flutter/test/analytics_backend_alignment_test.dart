@@ -77,5 +77,35 @@ void main() {
       final state = container.read(calendarNotifierProvider);
       expect(state.events, isEmpty);
     });
+
+    test('Growth pills are dynamic and scaled per timeframe in preview mode', () {
+      final data7d = AnalyticsData.mockPreview(timeframe: '7d');
+      expect(data7d.impressionsGrowth, equals('+12.4%'));
+      expect(data7d.connectionsGrowth, equals('+6 new'));
+      expect(data7d.responseGrowth, equals('+2.1%'));
+      expect(data7d.meetingsGrowth, equals('+2 booked'));
+
+      final data30d = AnalyticsData.mockPreview(timeframe: '30d');
+      expect(data30d.impressionsGrowth, equals('+18.4%'));
+      expect(data30d.connectionsGrowth, equals('+24 new'));
+      expect(data30d.responseGrowth, equals('+4.2%'));
+      expect(data30d.meetingsGrowth, equals('+6 booked'));
+
+      final data90d = AnalyticsData.mockPreview(timeframe: '90d');
+      expect(data90d.impressionsGrowth, equals('+28.6%'));
+      expect(data90d.connectionsGrowth, equals('+68 new'));
+
+      final dataAll = AnalyticsData.mockPreview(timeframe: 'all');
+      expect(dataAll.impressionsGrowth, equals('+44.2%'));
+      expect(dataAll.connectionsGrowth, equals('+142 new'));
+    });
+
+    test('Growth pills are null for empty real user so fake pills are not rendered', () {
+      final empty = AnalyticsData.empty();
+      expect(empty.impressionsGrowth, isNull);
+      expect(empty.connectionsGrowth, isNull);
+      expect(empty.responseGrowth, isNull);
+      expect(empty.meetingsGrowth, isNull);
+    });
   });
 }

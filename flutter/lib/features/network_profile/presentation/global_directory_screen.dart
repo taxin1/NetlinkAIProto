@@ -22,32 +22,6 @@ class GlobalDirectoryScreen extends StatelessWidget {
       backgroundColor: context.colors.surface,
       body: Stack(
         children: [
-          // Background decorative elements
-          Positioned(
-            top: MediaQuery.of(context).size.height * 0.1,
-            left: MediaQuery.of(context).size.width * 0.05,
-            child: Container(
-              width: 300,
-              height: 300,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.blue.withValues(alpha: 0.1),
-              ),
-            ),
-          ),
-          Positioned(
-            top: MediaQuery.of(context).size.height * 0.4,
-            right: MediaQuery.of(context).size.width * 0.1,
-            child: Container(
-              width: 400,
-              height: 400,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.indigo.withValues(alpha: 0.1),
-              ),
-            ),
-          ),
-
           Column(
             children: [
               // Top Bar (Fixed)
@@ -87,6 +61,7 @@ class GlobalDirectoryScreen extends StatelessWidget {
                               context.tr('globalNetworkers'),
                               style: AppTypography.headlineMd,
                               textAlign: TextAlign.center,
+                              softWrap: true,
                             ),
                           ),
                           const SizedBox(height: 24),
@@ -151,8 +126,9 @@ class GlobalDirectoryScreen extends StatelessWidget {
                                     );
                                   }
 
-                                  // Tablet/Desktop: grid with fixed 320px card height to prevent overflow
+                                  // Tablet/Desktop: grid with compact card height
                                   int crossAxisCount = isTablet ? 2 : 3;
+                                  double cardExtent = isTablet ? 190 : 250;
                                   return GridView.builder(
                                     shrinkWrap: true,
                                     physics: const NeverScrollableScrollPhysics(),
@@ -161,7 +137,7 @@ class GlobalDirectoryScreen extends StatelessWidget {
                                       crossAxisCount: crossAxisCount,
                                       mainAxisSpacing: 16,
                                       crossAxisSpacing: 16,
-                                      mainAxisExtent: 320,
+                                      mainAxisExtent: cardExtent,
                                     ),
                                     itemCount: children.length,
                                     itemBuilder: (context, index) =>
@@ -186,233 +162,319 @@ class GlobalDirectoryScreen extends StatelessWidget {
 
   Widget _buildMemberCard(BuildContext context, String name, String email) {
     return GlassCard(
-      borderRadius: BorderRadius.circular(24),
-      padding: const EdgeInsets.all(20),
-      glowColor: context.colors.primary.withValues(alpha: 0.15),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            width: 64,
-            height: 64,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  context.colors.primary.withValues(alpha: 0.25),
-                  context.colors.primary.withValues(alpha: 0.08),
-                ],
+      borderRadius: BorderRadius.circular(20),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      glowColor: null,
+      tintColor: null,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          // Fit side-by-side if available card width is at least 280px
+          final bool canFitHorizontal = constraints.maxWidth >= 280;
+
+          final topPart = Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                width: 50,
+                height: 50,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: context.colors.surfaceContainerHighest.withValues(alpha: 0.35),
+                  border: Border.all(
+                    color: context.colors.glassBorder,
+                    width: 0.8,
+                  ),
+                ),
+                child: Icon(
+                  Icons.person,
+                  size: 26,
+                  color: context.colors.onSurfaceVariant,
+                ),
               ),
-              border: Border.all(
-                  color: context.colors.primary.withValues(alpha: 0.3)),
-              boxShadow: [
-                BoxShadow(
-                  color: context.colors.primary.withValues(alpha: 0.2),
-                  blurRadius: 16,
-                  offset: const Offset(0, 4),
+              const SizedBox(height: 8),
+              Text(
+                name,
+                style: AppTypography.headlineSm.copyWith(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
+                  color: context.colors.onSurface,
                 ),
-              ],
-            ),
-            child: Icon(Icons.person, size: 32, color: context.colors.primary),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            name,
-            style: AppTypography.headlineSm.copyWith(
-              fontWeight: FontWeight.bold,
-              fontSize: 17,
-            ),
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 6),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-            decoration: BoxDecoration(
-              color: Colors.green.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(99),
-              border: Border.all(color: Colors.green.withValues(alpha: 0.3)),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 6,
-                  height: 6,
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.green,
-                  ),
+                textAlign: TextAlign.center,
+                softWrap: true,
+              ),
+              const SizedBox(height: 4),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2.5),
+                decoration: BoxDecoration(
+                  color: context.colors.surfaceContainerHighest.withValues(alpha: 0.35),
+                  borderRadius: BorderRadius.circular(99),
+                  border: Border.all(color: context.colors.glassBorder, width: 0.8),
                 ),
-                const SizedBox(width: 4),
-                Text(
-                  context.tr('publicBadge'),
-                  style: AppTypography.labelSm.copyWith(
-                    color: Colors.green,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(email,
-              style: AppTypography.bodySm
-                  .copyWith(color: context.colors.onSurfaceVariant)),
-          const SizedBox(height: 24),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.only(top: 20),
-            decoration: BoxDecoration(
-                border:
-                    Border(top: BorderSide(color: context.colors.glassBorder))),
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.mail_outline,
-                        size: 16,
-                        color: context.colors.onSurfaceVariant
-                            .withValues(alpha: 0.7)),
-                    const SizedBox(width: 8),
-                    Flexible(
-                      child: Text(email,
-                          style: AppTypography.bodySm.copyWith(
-                              color: context.colors.onSurfaceVariant
-                                  .withValues(alpha: 0.7)),
-                          overflow: TextOverflow.ellipsis),
+                    Container(
+                      width: 5,
+                      height: 5,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: context.colors.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      context.tr('publicBadge'),
+                      style: AppTypography.labelSm.copyWith(
+                        color: context.colors.onSurfaceVariant,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      softWrap: true,
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
-                Text(
-                  context.tr('portfolioComingSoon'),
-                  style: AppTypography.labelSm.copyWith(
-                      color: context.colors.primary,
-                      letterSpacing: 1.5,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 10),
+              ),
+              const SizedBox(height: 5),
+              Text(
+                email,
+                style: AppTypography.bodySm.copyWith(
+                  color: context.colors.onSurfaceVariant,
+                  fontSize: 12,
                 ),
-              ],
+                textAlign: TextAlign.center,
+                softWrap: true,
+              ),
+            ],
+          );
+
+          final portfolioPart = Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Text(
+                context.tr('portfolioComingSoon'),
+                style: AppTypography.labelSm.copyWith(
+                  color: context.colors.onSurfaceVariant,
+                  letterSpacing: 1.2,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 10,
+                ),
+                textAlign: TextAlign.center,
+                softWrap: true,
+              ),
             ),
-          ),
-        ],
+          );
+
+          if (canFitHorizontal) {
+            return IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(
+                    flex: 11,
+                    child: topPart,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    child: Container(
+                      width: 0.8,
+                      color: context.colors.glassBorder,
+                    ),
+                  ),
+                  Expanded(
+                    flex: 9,
+                    child: portfolioPart,
+                  ),
+                ],
+              ),
+            );
+          } else {
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                topPart,
+                const SizedBox(height: 12),
+                Container(
+                  width: double.infinity,
+                  height: 0.8,
+                  color: context.colors.glassBorder,
+                ),
+                const SizedBox(height: 12),
+                portfolioPart,
+              ],
+            );
+          }
+        },
       ),
     );
   }
 
   Widget _buildDetailedMemberCard(BuildContext context) {
     return GlassCard(
-      borderRadius: BorderRadius.circular(24),
-      padding: const EdgeInsets.all(20),
-      glowColor: context.colors.primary.withValues(alpha: 0.3),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            width: 68,
-            height: 68,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  context.colors.primary.withValues(alpha: 0.35),
-                  context.colors.primary.withValues(alpha: 0.12),
+      borderRadius: BorderRadius.circular(20),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      glowColor: null,
+      tintColor: null,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final bool canFitHorizontal = constraints.maxWidth >= 280;
+
+          final topPart = Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                width: 50,
+                height: 50,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: context.colors.surfaceContainerHighest.withValues(alpha: 0.35),
+                  border: Border.all(
+                    color: context.colors.glassBorder,
+                    width: 0.8,
+                  ),
+                ),
+                child: Icon(
+                  Icons.person,
+                  size: 26,
+                  color: context.colors.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Mir Farhan Morshed',
+                style: AppTypography.headlineSm.copyWith(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
+                  color: context.colors.onSurface,
+                ),
+                textAlign: TextAlign.center,
+                softWrap: true,
+              ),
+              const SizedBox(height: 4),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2.5),
+                decoration: BoxDecoration(
+                  color: context.colors.surfaceContainerHighest.withValues(alpha: 0.35),
+                  borderRadius: BorderRadius.circular(99),
+                  border: Border.all(color: context.colors.glassBorder, width: 0.8),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 5,
+                      height: 5,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: context.colors.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      context.tr('publicBadge'),
+                      style: AppTypography.labelSm.copyWith(
+                        color: context.colors.onSurfaceVariant,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      softWrap: true,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 5),
+              Text(
+                context.tr('founderAndCeo'),
+                style: AppTypography.bodySm.copyWith(
+                  color: context.colors.onSurfaceVariant,
+                  fontWeight: FontWeight.w500,
+                  fontSize: 12,
+                ),
+                textAlign: TextAlign.center,
+                softWrap: true,
+              ),
+              const SizedBox(height: 3),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.domain, size: 14, color: context.colors.onSurfaceVariant),
+                  const SizedBox(width: 4),
+                  Flexible(
+                    child: Text(
+                      'Ujjibon',
+                      style: AppTypography.bodySm.copyWith(
+                        color: context.colors.onSurface,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 12,
+                      ),
+                      softWrap: true,
+                    ),
+                  ),
                 ],
               ),
-              border: Border.all(
-                  color: context.colors.primary.withValues(alpha: 0.5)),
-              boxShadow: [
-                BoxShadow(
-                  color: context.colors.primary.withValues(alpha: 0.35),
-                  blurRadius: 24,
-                  offset: const Offset(0, 6),
-                ),
-              ],
-            ),
-            child: Icon(Icons.person, size: 34, color: context.colors.primary),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            'Mir Farhan Morshed',
-            style: AppTypography.headlineSm
-                .copyWith(fontWeight: FontWeight.bold, fontSize: 18),
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 6),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-            decoration: BoxDecoration(
-              color: Colors.green.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(99),
-              border: Border.all(color: Colors.green.withValues(alpha: 0.3)),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 6,
-                  height: 6,
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.green,
-                  ),
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  context.tr('publicBadge'),
-                  style: AppTypography.labelSm.copyWith(
-                    color: Colors.green,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(context.tr('founderAndCeo'),
-              style: AppTypography.bodySm.copyWith(
-                  color: context.colors.onSurfaceVariant,
-                  fontWeight: FontWeight.w500)),
-          const SizedBox(height: 4),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.domain, size: 16, color: context.colors.primary),
-              const SizedBox(width: 4),
-              Text('Ujjibon',
-                  style: AppTypography.bodySm.copyWith(
-                      color: context.colors.primary,
-                      fontWeight: FontWeight.w600)),
             ],
-          ),
-          const SizedBox(height: 12),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.only(top: 10),
-            decoration: BoxDecoration(
-                border:
-                    Border(top: BorderSide(color: context.colors.glassBorder))),
-            child: GradientButton(
-              label: context.tr('previewPortfolio'),
-              icon: Icons.arrow_forward_rounded,
-              height: 38,
-              onPressed: () {},
+          );
+
+          final portfolioPart = Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: LiquidGlassButton(
+                label: context.tr('previewPortfolio'),
+                icon: Icons.arrow_forward_rounded,
+                height: 36,
+                fontSize: 12,
+                iconSize: 16,
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                expand: !canFitHorizontal,
+                onPressed: () {},
+              ),
             ),
-          ),
-        ],
+          );
+
+          if (canFitHorizontal) {
+            return IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(
+                    flex: 11,
+                    child: topPart,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    child: Container(
+                      width: 0.8,
+                      color: context.colors.glassBorder,
+                    ),
+                  ),
+                  Expanded(
+                    flex: 9,
+                    child: portfolioPart,
+                  ),
+                ],
+              ),
+            );
+          } else {
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                topPart,
+                const SizedBox(height: 12),
+                Container(
+                  width: double.infinity,
+                  height: 0.8,
+                  color: context.colors.glassBorder,
+                ),
+                const SizedBox(height: 12),
+                portfolioPart,
+              ],
+            );
+          }
+        },
       ),
     );
   }

@@ -12,6 +12,7 @@ import 'post_login_dialogs.dart';
 import 'app_modal_dialog.dart';
 import '../tour/tour_controller.dart';
 import '../tour/feature_showcase_tour.dart';
+import 'app_shell_scope.dart';
 
 
 import '../localization/app_localizations.dart';
@@ -128,14 +129,17 @@ class _AppShellState extends ConsumerState<AppShell> {
       );
     }
 
-    return Stack(
-      children: [
-        shellContent,
-        // Post-login dialogs (profile reminder after tour)
-        const PostLoginDialogs(),
-        // Top-level 11-step interactive feature showcase tour
-        const FeatureShowcaseTourOverlay(),
-      ],
+    return AppShellScope(
+      hasTopBar: !isDesktop,
+      child: Stack(
+        children: [
+          shellContent,
+          // Post-login dialogs (profile reminder after tour)
+          const PostLoginDialogs(),
+          // Top-level 11-step interactive feature showcase tour
+          const FeatureShowcaseTourOverlay(),
+        ],
+      ),
     );
   }
 }
@@ -202,6 +206,22 @@ class _OrbPainter extends CustomPainter {
   bool shouldRepaint(_OrbPainter old) => old.isDark != isDark;
 }
 
+String _resolvePageTitle(BuildContext context, String location) {
+  for (final item in _navItems) {
+    if (location == item.route ||
+        (item.route != AppRoutes.dashboard && location.startsWith('${item.route}/'))) {
+      return context.tr(item.labelKey);
+    }
+  }
+  if (location.startsWith(AppRoutes.pricing)) {
+    return context.tr('pricing');
+  }
+  if (location.startsWith(AppRoutes.directory)) {
+    return context.tr('networkProfile');
+  }
+  return context.l10n.dashboard;
+}
+
 // ── Lightweight glass top bar ────────────────────────────────────────────────
 class _AppTopBar extends ConsumerWidget {
   final bool showHamburger;
@@ -209,6 +229,14 @@ class _AppTopBar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    String location = '';
+    try {
+      location = GoRouterState.of(context).matchedLocation;
+    } catch (_) {
+      location = ModalRoute.of(context)?.settings.name ?? '';
+    }
+    final title = _resolvePageTitle(context, location);
+
     return RepaintBoundary(
       child: Container(
         height: kToolbarHeight + MediaQuery.of(context).padding.top,
@@ -241,11 +269,15 @@ class _AppTopBar extends ConsumerWidget {
                 else
                   const SizedBox(width: 40),
 
-                const Expanded(
+                Expanded(
                   child: Center(
-                    child: OverflowBox(
-                      maxHeight: 180,
-                      child: NetlinkLogo(size: 180, showText: true),
+                    child: Text(
+                      title,
+                      style: AppTypography.headlineMd.copyWith(
+                        color: context.colors.onSurface,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ),
@@ -267,7 +299,12 @@ class _PersistentSidebar extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authProvider);
     final user = authState.user;
-    final location = GoRouterState.of(context).matchedLocation;
+    String location = '';
+    try {
+      location = GoRouterState.of(context).matchedLocation;
+    } catch (_) {
+      location = ModalRoute.of(context)?.settings.name ?? '';
+    }
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
@@ -342,7 +379,12 @@ class _NavigationRail extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final location = GoRouterState.of(context).matchedLocation;
+    String location = '';
+    try {
+      location = GoRouterState.of(context).matchedLocation;
+    } catch (_) {
+      location = ModalRoute.of(context)?.settings.name ?? '';
+    }
     final authState = ref.watch(authProvider);
     final user = authState.user;
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -797,7 +839,12 @@ class _AppDrawer extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authProvider);
     final user = authState.user;
-    final location = GoRouterState.of(context).matchedLocation;
+    String location = '';
+    try {
+      location = GoRouterState.of(context).matchedLocation;
+    } catch (_) {
+      location = ModalRoute.of(context)?.settings.name ?? '';
+    }
 
     return Drawer(
       width: 280,
@@ -813,21 +860,33 @@ class _AppDrawer extends ConsumerWidget {
           // Drawer Header
           Container(
             padding: EdgeInsets.only(
-              top: MediaQuery.of(context).padding.top + 16,
-              left: 24,
+              top: MediaQuery.of(context).padding.top + 14,
+              left: 20,
               right: 16,
-              bottom: 16,
+              bottom: 14,
             ),
             decoration: BoxDecoration(
               border: Border(bottom: BorderSide(color: context.colors.glassBorder)),
             ),
             child: Row(
               children: [
-                Text(
-                  context.tr('menu'),
-                  style: AppTypography.headlineSm.copyWith(
-                    color: context.colors.onSurface,
-                    fontWeight: FontWeight.w600,
+                GestureDetector(
+                  onTap: () {
+                    final scaffold = Scaffold.maybeOf(context);
+                    if (scaffold != null && scaffold.isDrawerOpen) {
+                      Navigator.of(context).pop();
+                    }
+                    context.go(AppRoutes.dashboard);
+                  },
+                  child: const SizedBox(
+                    width: 110,
+                    height: 38,
+                    child: OverflowBox(
+                      maxWidth: 110,
+                      maxHeight: 110,
+                      alignment: Alignment.centerLeft,
+                      child: NetlinkLogo(size: 110, showText: true),
+                    ),
                   ),
                 ),
                 const Spacer(),
@@ -947,11 +1006,15 @@ class _DrawerNavItem extends StatelessWidget {
                   size: 20,
                 ),
                 const SizedBox(width: 12),
-                Text(
-                  label,
-                  style: AppTypography.bodyMd.copyWith(
-                    color: isActive ? context.colors.primary : context.colors.onSurfaceVariant,
-                    fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
+                Expanded(
+                  child: Text(
+                    label,
+                    style: AppTypography.bodyMd.copyWith(
+                      color: isActive ? context.colors.primary : context.colors.onSurfaceVariant,
+                      fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],

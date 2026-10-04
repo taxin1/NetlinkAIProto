@@ -287,7 +287,7 @@ class _LiquidGlassButtonState extends State<LiquidGlassButton> {
                               ? [
                                   Color(_isHovered ? 0x50FFFFFF : 0x38FFFFFF),
                                   Color(_isHovered ? 0x20FFFFFF : 0x12FFFFFF),
-                                  Color(_isHovered ? 0x1A00E5FF : 0x0A1C3A80),
+                                  Color(_isHovered ? 0x207EB0FF : 0x0A1C3A80),
                                 ]
                               : [
                                   Color(_isHovered ? 0xFFFFFFFF : 0xF4FFFFFF),

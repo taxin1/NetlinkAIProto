@@ -14,8 +14,8 @@ import '../../../core/widgets/glass_card.dart';
 import '../../../core/widgets/gradient_button.dart';
 import '../../../core/widgets/pop_in_item.dart';
 import '../../../core/widgets/section_header.dart';
-import '../../../core/widgets/stat_card.dart';
 import '../../../core/widgets/trial_banner_card.dart';
+import 'widgets/dashboard_stats_section.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../contacts/providers/contacts_provider.dart';
 import '../../../core/services/business_card_scanner_service.dart';
@@ -189,17 +189,19 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  PopInItem(
-                    index: 0,
-                    child: Center(
-                      child: Text(
-                        context.l10n.dashboard,
-                        style: AppTypography.headlineMd,
-                        textAlign: TextAlign.center,
+                  if (!Responsive.hasShellTopBar(context)) ...[
+                    PopInItem(
+                      index: 0,
+                      child: Center(
+                        child: Text(
+                          context.l10n.dashboard,
+                          style: AppTypography.headlineMd,
+                          textAlign: TextAlign.center,
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 24),
+                    const SizedBox(height: 24),
+                  ],
 
                   if (isGuest) ...[
                     const PopInItem(
@@ -260,80 +262,18 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
                         PopInItem(
                           index: 3,
-                          child: LayoutBuilder(builder: (context, constraints) {
-                            final width = constraints.maxWidth;
-                            final cols = width > 600 ? 4 : 2;
-                            const spacing = 12.0;
-                            final itemWidth = (width - (cols - 1) * spacing) / cols;
-                            final targetHeight = cols == 4 ? 104.0 : 96.0;
-                            final childAspectRatio = itemWidth / targetHeight;
-                            final data = dashboardData;
-
-                            return GridView.count(
-                              crossAxisCount: cols,
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              mainAxisSpacing: spacing,
-                              crossAxisSpacing: spacing,
-                              childAspectRatio: childAspectRatio,
-                              children: [
-                                GestureDetector(
-                                  behavior: HitTestBehavior.opaque,
-                                  onTap: () => context.go(AppRoutes.contacts),
-                                  child: StatCard(
-                                    label: context.l10n.totalContacts,
-                                    value: '${data.totalContacts}',
-                                    icon: Icons.group_outlined,
-                                    iconColor: context.colors.primary,
-                                    trendLabel: '+${data.networkGrowth} ${context.tr('thisWeek')}',
-                                    trendColor: context.colors.successGlow,
-                                    trendIcon: Icons.trending_up,
-                                  ),
-                                ),
-                                GestureDetector(
-                                  behavior: HitTestBehavior.opaque,
-                                  onTap: () => context.go(AppRoutes.emails),
-                                  child: StatCard(
-                                    label: context.l10n.emailsSent,
-                                    value: '${data.emailsSent}',
-                                    icon: Icons.mail_outlined,
-                                    iconColor: context.colors.successGlow,
-                                    trendLabel: context.tr('allTime'),
-                                    trendColor: context.colors.onSurfaceVariant,
-                                  ),
-                                ),
-                                GestureDetector(
-                                  behavior: HitTestBehavior.opaque,
-                                  onTap: () => _scrollTo(_eventsKey),
-                                  child: StatCard(
-                                    label: context.l10n.upcomingEvents,
-                                    value: '${data.upcomingEvents}',
-                                    icon: Icons.calendar_today_outlined,
-                                    iconColor: context.colors.secondary,
-                                    trendLabel: context.tr('scheduled'),
-                                    trendColor: context.colors.onSurfaceVariant,
-                                  ),
-                                ),
-                                GestureDetector(
-                                  behavior: HitTestBehavior.opaque,
-                                  onTap: () => context.go(AppRoutes.analytics),
-                                  child: StatCard(
-                                    label: context.l10n.networkGrowth,
-                                    value: '+${data.networkGrowth}',
-                                    icon: Icons.show_chart_outlined,
-                                    iconColor: context.colors.warningAmber,
-                                    trendLabel: context.tr('last7Days'),
-                                    trendColor: context.colors.onSurfaceVariant,
-                                  ),
-                                ),
-                              ],
-                            );
-                          }),
+                          child: DashboardStatsSection(
+                            data: dashboardData,
+                            onContactsTap: () => context.go(AppRoutes.contacts),
+                            onEmailsTap: () => context.go(AppRoutes.emails),
+                            onEventsTap: () => _scrollTo(_eventsKey),
+                            onGrowthTap: () => context.go(AppRoutes.analytics),
+                          ),
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 60),
+                  const SectionDivider(margin: EdgeInsets.symmetric(vertical: 36)),
 
                   PopInItem(
                     index: 4,
@@ -587,7 +527,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 60),
+                  const SectionDivider(margin: EdgeInsets.symmetric(vertical: 36)),
 
                   // â”€â”€ Highlights & Summary â”€â”€
                   PopInItem(

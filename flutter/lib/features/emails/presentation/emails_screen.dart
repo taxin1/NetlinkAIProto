@@ -167,17 +167,19 @@ class _EmailsScreenState extends ConsumerState<EmailsScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Page Heading (Standardized)
-        PopInItem(
-          index: 0,
-          child: Center(
-            child: Text(
-              context.l10n.emails,
-              style: AppTypography.headlineMd,
-              textAlign: TextAlign.center,
+        if (!Responsive.hasShellTopBar(context)) ...[
+          PopInItem(
+            index: 0,
+            child: Center(
+              child: Text(
+                context.l10n.emails,
+                style: AppTypography.headlineMd,
+                textAlign: TextAlign.center,
+              ),
             ),
           ),
-        ),
-        const SizedBox(height: 24),
+          const SizedBox(height: 24),
+        ],
 
         // Trial Banner (shows when not signed in)
         if (isGuest) ...[

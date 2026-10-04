@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/app_shell_scope.dart';
 
 /// Responsive breakpoints — industry standard (Material 3 / Google)
 /// Mobile:  < 600
@@ -21,6 +22,11 @@ class Responsive {
 
   static bool isWide(BuildContext context) =>
       MediaQuery.of(context).size.width >= mobileMax;
+
+  /// Returns true if an ancestor AppShell is currently providing a top bar.
+  /// Used by pages to hide redundant in-page headlines when a top bar is present.
+  static bool hasShellTopBar(BuildContext context) =>
+      AppShellScope.hasTopBarOf(context);
 
   /// Column count helper — 1 on mobile, 2 on tablet, n on desktop
   static int gridColumns(BuildContext context, {int desktopColumns = 3}) {

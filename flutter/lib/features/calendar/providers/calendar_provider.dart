@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/services/business_card_scanner_service.dart';
 import '../../../core/services/supabase_service.dart';
+import '../../../core/services/integration_service.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../models/calendar_models.dart';
 
@@ -16,6 +17,7 @@ final calendarNotifierProvider =
 
 class CalendarNotifier extends StateNotifier<CalendarState> {
   final Ref _ref;
+  StreamSubscription<Uri>? _integrationSub;
 
   CalendarNotifier(this._ref)
       : super(CalendarState(
@@ -23,6 +25,24 @@ class CalendarNotifier extends StateNotifier<CalendarState> {
           selectedDate: DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day),
         )) {
     loadEvents();
+    _integrationSub = IntegrationEvents.onConnectCallback.listen((uri) {
+      final provider = uri.queryParameters['provider'];
+      final success = uri.queryParameters['success'] == 'true';
+      if (provider == 'google-calendar' && success) {
+        final user = _ref.read(authProvider).user;
+        state = state.copyWith(
+          isGoogleCalendarConnected: true,
+          googleCalendarEmail: user?.email,
+        );
+        loadEvents();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _integrationSub?.cancel();
+    super.dispose();
   }
 
   SupabaseClient? get _client => SupabaseService.client;
@@ -332,33 +352,7 @@ class CalendarNotifier extends StateNotifier<CalendarState> {
     } else {
       // Launch real Google Calendar OAuth directly into Google's consent screen
       try {
-        String? targetAuthUrl;
-        try {
-          final res = await http.get(
-            Uri.parse('${BusinessCardScannerService.webBaseUrl}/api/google-calendar/auth'),
-            headers: {
-              if (_client?.auth.currentSession?.accessToken != null)
-                'Authorization': 'Bearer ${_client!.auth.currentSession!.accessToken}',
-            },
-          ).timeout(const Duration(seconds: 4));
-
-          if (res.statusCode == 200) {
-            final data = jsonDecode(res.body);
-            if (data is Map && data['authUrl'] != null) {
-              targetAuthUrl = data['authUrl'] as String;
-            }
-          }
-        } catch (_) {}
-
-        // Direct fallback to Google OAuth consent screen if API is unreachable
-        targetAuthUrl ??= 'https://accounts.google.com/o/oauth2/v2/auth'
-            '?access_type=offline'
-            '&scope=${Uri.encodeComponent('https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/calendar.events')}'
-            '&prompt=consent'
-            '&response_type=code'
-            '&client_id=783966653046-n6quk2616a8t1rk61r2mn0rtcurnt9q9.apps.googleusercontent.com'
-            '&redirect_uri=${Uri.encodeComponent('https://www.networklinkai.com/api/google-calendar/callback')}';
-
+        final targetAuthUrl = IntegrationEvents.buildGoogleCalendarOAuthUrl(userId: user.id);
         final authUri = Uri.parse(targetAuthUrl);
         if (await canLaunchUrl(authUri)) {
           await launchUrl(authUri, mode: LaunchMode.externalApplication);

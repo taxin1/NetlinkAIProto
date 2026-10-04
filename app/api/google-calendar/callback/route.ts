@@ -13,11 +13,12 @@ function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
 }
 
 // Return optimized HTML loading page with instant redirect
-function getLoadingPage(code: string, error?: string, baseUrl?: string) {
+function getLoadingPage(code: string, error?: string, baseUrl?: string, state?: string) {
   const base = baseUrl || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000')
+  const stateQuery = state ? `&state=${encodeURIComponent(state)}` : ''
   const redirectUrl = error 
-    ? `${base}/dashboard/settings?error=${encodeURIComponent(error)}`
-    : `${base}/api/google-calendar/process?code=${encodeURIComponent(code)}`
+    ? `${base}/dashboard/settings?error=${encodeURIComponent(error)}${stateQuery}`
+    : `${base}/api/google-calendar/process?code=${encodeURIComponent(code)}${stateQuery}`
   
   // Use both meta refresh and JS for fastest redirect
   return `<!DOCTYPE html>
@@ -88,6 +89,7 @@ export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
   const code = searchParams.get('code')
   const error = searchParams.get('error')
+  const state = searchParams.get('state') || undefined
   
   // Determine base URL: prioritize NEXT_PUBLIC_APP_URL, then request origin, then defaults
   let baseUrl = process.env.NEXT_PUBLIC_APP_URL
@@ -103,19 +105,19 @@ export async function GET(request: NextRequest) {
 
   // Return loading page immediately
   if (error) {
-    return new NextResponse(getLoadingPage('', error, baseUrl), {
+    return new NextResponse(getLoadingPage('', error, baseUrl, state), {
       headers: { 'Content-Type': 'text/html' },
     })
   }
 
   if (!code) {
-    return new NextResponse(getLoadingPage('', 'no_code', baseUrl), {
+    return new NextResponse(getLoadingPage('', 'no_code', baseUrl, state), {
       headers: { 'Content-Type': 'text/html' },
     })
   }
 
   // Return loading page and let the process route handle the actual work
-  return new NextResponse(getLoadingPage(code, undefined, baseUrl), {
+  return new NextResponse(getLoadingPage(code, undefined, baseUrl, state), {
     headers: { 'Content-Type': 'text/html' },
   })
 }

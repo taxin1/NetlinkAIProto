@@ -314,17 +314,19 @@ class _NetworkProfileScreenState extends ConsumerState<NetworkProfileScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // ── Page Heading (Standardized) ──
-                  PopInItem(
-                    index: 0,
-                    child: Center(
-                      child: Text(
-                        context.tr('networkProfile'),
-                        style: AppTypography.headlineMd,
-                        textAlign: TextAlign.center,
+                  if (!Responsive.hasShellTopBar(context)) ...[
+                    PopInItem(
+                      index: 0,
+                      child: Center(
+                        child: Text(
+                          context.tr('networkProfile'),
+                          style: AppTypography.headlineMd,
+                          textAlign: TextAlign.center,
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 24),
+                    const SizedBox(height: 24),
+                  ],
 
                   // ── Trial Banner ──
                   if (isGuest) ...[

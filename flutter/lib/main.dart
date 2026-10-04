@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:app_links/app_links.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_provider.dart';
 import 'core/router/app_router.dart';
@@ -11,6 +12,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'core/services/integration_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,6 +23,9 @@ void main() async {
     SharedPreferences.getInstance(),
   ]);
   final prefs = results[1] as SharedPreferences;
+
+  // Handle incoming deep links (OAuth callbacks on mobile)
+  _initDeepLinks();
 
   // Lock to portrait orientation
   SystemChrome.setPreferredOrientations([
@@ -36,6 +41,34 @@ void main() async {
       child: const NetworkLinkApp(),
     ),
   );
+}
+
+/// Listens to incoming deep links:
+/// - io.supabase.netlink://login-callback: passes to Supabase to exchange PKCE code for session
+/// - io.supabase.netlink://connect-callback: notifies integration listeners (Gmail, Google Calendar)
+void _initDeepLinks() {
+  final appLinks = AppLinks();
+
+  void handleIncomingUri(Uri uri) {
+    if (uri.scheme == 'io.supabase.netlink' &&
+        (uri.host == 'connect-callback' || uri.path.contains('connect-callback'))) {
+      IntegrationEvents.dispatchConnectCallback(uri);
+    } else {
+      SupabaseService.auth.getSessionFromUrl(uri);
+    }
+  }
+
+  // Handle link that launched the app from a cold start
+  appLinks.getInitialLink().then((uri) {
+    if (uri != null) {
+      handleIncomingUri(uri);
+    }
+  }).catchError((_) {});
+
+  // Handle links while app is already running (background / foreground)
+  appLinks.uriLinkStream.listen((uri) {
+    handleIncomingUri(uri);
+  }, onError: (_) {});
 }
 
 class NetworkLinkApp extends ConsumerWidget {

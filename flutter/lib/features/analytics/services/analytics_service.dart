@@ -14,6 +14,10 @@ class AnalyticsData {
   final List<FunnelStageItem> funnelStages;
   final List<EventRoiItemData> eventRois;
   final bool hasData;
+  final String? impressionsGrowth;
+  final String? connectionsGrowth;
+  final String? responseGrowth;
+  final String? meetingsGrowth;
 
   const AnalyticsData({
     required this.totalImpressions,
@@ -27,6 +31,10 @@ class AnalyticsData {
     required this.funnelStages,
     required this.eventRois,
     required this.hasData,
+    this.impressionsGrowth,
+    this.connectionsGrowth,
+    this.responseGrowth,
+    this.meetingsGrowth,
   });
 
   factory AnalyticsData.empty() {
@@ -55,6 +63,10 @@ class AnalyticsData {
       ],
       eventRois: [],
       hasData: false,
+      impressionsGrowth: null,
+      connectionsGrowth: null,
+      responseGrowth: null,
+      meetingsGrowth: null,
     );
   }
 
@@ -72,6 +84,39 @@ class AnalyticsData {
     final emails = (184 * mult).round();
     final meetings = (19 * mult).round();
 
+    // Dynamically calculate concise growth trends based on timeframe
+    final impressionsGrowth = timeframe == '7d'
+        ? '+12.4%'
+        : timeframe == '90d'
+            ? '+28.6%'
+            : timeframe == 'all'
+                ? '+44.2%'
+                : '+18.4%';
+
+    final connectionsGrowth = timeframe == '7d'
+        ? '+6 new'
+        : timeframe == '90d'
+            ? '+68 new'
+            : timeframe == 'all'
+                ? '+142 new'
+                : '+24 new';
+
+    final responseGrowth = timeframe == '7d'
+        ? '+2.1%'
+        : timeframe == '90d'
+            ? '+6.4%'
+            : timeframe == 'all'
+                ? '+10.8%'
+                : '+4.2%';
+
+    final meetingsGrowth = timeframe == '7d'
+        ? '+2 booked'
+        : timeframe == '90d'
+            ? '+14 booked'
+            : timeframe == 'all'
+                ? '+28 booked'
+                : '+6 booked';
+
     return AnalyticsData(
       totalImpressions: impressions,
       activeConnections: connections,
@@ -79,6 +124,10 @@ class AnalyticsData {
       meetingsScheduled: meetings,
       totalInteractions: (connections + emails + meetings),
       mostActiveType: 'Emails Sent',
+      impressionsGrowth: impressionsGrowth,
+      connectionsGrowth: connectionsGrowth,
+      responseGrowth: responseGrowth,
+      meetingsGrowth: meetingsGrowth,
       eventCounts: {
         'email_sent': (emails * 0.6).round(),
         'connection': (connections * 0.3).round(),
@@ -303,6 +352,15 @@ class AnalyticsService {
         meetings: meetingsCount,
       );
 
+      // 7. Dynamic growth metrics computation
+      final growthMetrics = _computeDynamicGrowth(
+        eventsList: eventsList,
+        timeframe: timeframe,
+        contactsCount: contactsCount,
+        emailsSentCount: emailsSentCount,
+        meetingsCount: meetingsCount,
+      );
+
       return AnalyticsData(
         totalImpressions: contactsCount * 3 + emailsSentCount * 2,
         activeConnections: contactsCount,
@@ -315,6 +373,10 @@ class AnalyticsService {
         funnelStages: funnelStages,
         eventRois: const [],
         hasData: true,
+        impressionsGrowth: growthMetrics['impressionsGrowth'],
+        connectionsGrowth: growthMetrics['connectionsGrowth'],
+        responseGrowth: growthMetrics['responseGrowth'],
+        meetingsGrowth: growthMetrics['meetingsGrowth'],
       );
     } catch (e) {
       debugPrint('Analytics fetch exception: $e');
@@ -409,5 +471,98 @@ class AnalyticsService {
         progress: replies > 0 ? (meetings / replies).clamp(0.0, 1.0) : (emailsSent > 0 ? (meetings / emailsSent).clamp(0.0, 1.0) : 0.0),
       ),
     ];
+  }
+
+  static Map<String, String?> _computeDynamicGrowth({
+    required List<dynamic> eventsList,
+    required String timeframe,
+    required int contactsCount,
+    required int emailsSentCount,
+    required int meetingsCount,
+  }) {
+    if (eventsList.isEmpty && contactsCount == 0 && emailsSentCount == 0 && meetingsCount == 0) {
+      return {
+        'impressionsGrowth': null,
+        'connectionsGrowth': null,
+        'responseGrowth': null,
+        'meetingsGrowth': null,
+      };
+    }
+
+    final int days = timeframe == '7d'
+        ? 7
+        : timeframe == '90d'
+            ? 90
+            : timeframe == 'all'
+                ? 365
+                : 30;
+
+    final now = DateTime.now();
+    final windowStart = now.subtract(Duration(days: days));
+    final prevWindowStart = now.subtract(Duration(days: days * 2));
+
+    int currentPeriodImpressions = 0;
+    int prevPeriodImpressions = 0;
+    int currentPeriodConnections = 0;
+    int prevPeriodConnections = 0;
+    int currentPeriodMeetings = 0;
+    int prevPeriodMeetings = 0;
+    int currentPeriodEmails = 0;
+    int prevPeriodEmails = 0;
+
+    for (final item in eventsList) {
+      if (item is! Map<String, dynamic>) continue;
+      final createdAtStr = item['created_at'] as String?;
+      if (createdAtStr == null) continue;
+      final dt = DateTime.tryParse(createdAtStr);
+      if (dt == null) continue;
+
+      final type = (item['event_type'] as String?) ?? '';
+
+      if (dt.isAfter(windowStart)) {
+        if (type == 'connection') currentPeriodConnections++;
+        if (type == 'email_sent') currentPeriodEmails++;
+        if (type == 'meeting') currentPeriodMeetings++;
+        currentPeriodImpressions++;
+      } else if (dt.isAfter(prevWindowStart)) {
+        if (type == 'connection') prevPeriodConnections++;
+        if (type == 'email_sent') prevPeriodEmails++;
+        if (type == 'meeting') prevPeriodMeetings++;
+        prevPeriodImpressions++;
+      }
+    }
+
+    String? calcPercent(int current, int prev) {
+      if (current == 0 && prev == 0) return null;
+      if (prev == 0) return '+$current new';
+      final change = ((current - prev) / prev) * 100;
+      final sign = change >= 0 ? '+' : '';
+      return '$sign${change.toStringAsFixed(1)}%';
+    }
+
+    String? calcCountGrowth(int current, String label) {
+      if (current <= 0) return null;
+      return '+$current $label';
+    }
+
+    final impressionsGrowth = calcPercent(currentPeriodImpressions, prevPeriodImpressions);
+    final connectionsGrowth = prevPeriodConnections > 0
+        ? calcPercent(currentPeriodConnections, prevPeriodConnections)
+        : (currentPeriodConnections > 0
+            ? calcCountGrowth(currentPeriodConnections, 'new')
+            : null);
+    final responseGrowth = calcPercent(currentPeriodEmails, prevPeriodEmails);
+    final meetingsGrowth = prevPeriodMeetings > 0
+        ? calcPercent(currentPeriodMeetings, prevPeriodMeetings)
+        : (currentPeriodMeetings > 0
+            ? calcCountGrowth(currentPeriodMeetings, 'booked')
+            : null);
+
+    return {
+      'impressionsGrowth': impressionsGrowth,
+      'connectionsGrowth': connectionsGrowth,
+      'responseGrowth': responseGrowth,
+      'meetingsGrowth': meetingsGrowth,
+    };
   }
 }

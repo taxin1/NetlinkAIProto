@@ -106,7 +106,7 @@ class _LandingScreenState extends ConsumerState<LandingScreen>
                           Row(
                             children: [
                               Icon(Icons.explore_outlined,
-                                  color: context.colors.primary, size: 22),
+                                  color: context.colors.onSurface, size: 22),
                               const SizedBox(width: 8),
                               Text(
                                 context.tr('explorePlatform'),
@@ -136,7 +136,6 @@ class _LandingScreenState extends ConsumerState<LandingScreen>
                                 description:
                                     context.tr('landingHowItWorksDesc'),
                                 icon: Icons.lightbulb_outlined,
-                                color: Colors.blue,
                                 onTap: () {
                                   Navigator.pop(context);
                                   context.push(AppRoutes.howItWorks);
@@ -148,7 +147,6 @@ class _LandingScreenState extends ConsumerState<LandingScreen>
                                 description:
                                     context.tr('landingGlobalDirectoryDesc'),
                                 icon: Icons.public_outlined,
-                                color: Colors.purple,
                                 onTap: () {
                                   Navigator.pop(context);
                                   context.push(AppRoutes.directory);
@@ -160,7 +158,6 @@ class _LandingScreenState extends ConsumerState<LandingScreen>
                                 description:
                                     context.tr('landingPricingDesc'),
                                 icon: Icons.payments_outlined,
-                                color: Colors.cyan,
                                 onTap: () {
                                   Navigator.pop(context);
                                   context.push(AppRoutes.pricing);
@@ -172,7 +169,6 @@ class _LandingScreenState extends ConsumerState<LandingScreen>
                                 description:
                                     context.tr('landingResourcesDesc'),
                                 icon: Icons.menu_book_outlined,
-                                color: Colors.amber,
                                 onTap: () {
                                   Navigator.pop(context);
                                   context.push(AppRoutes.resources);
@@ -679,72 +675,101 @@ class _LandingScreenState extends ConsumerState<LandingScreen>
 }
 
 // ── Quick Link Tile for Card List Bottom Sheet ─────────────────────────────────
-class _QuickLinkTile extends StatelessWidget {
+// ── Quick Link Tile for Card List Bottom Sheet ─────────────────────────────────
+class _QuickLinkTile extends StatefulWidget {
   final String title;
   final String description;
   final IconData icon;
-  final Color color;
   final VoidCallback onTap;
 
   const _QuickLinkTile({
     required this.title,
     required this.description,
     required this.icon,
-    required this.color,
     required this.onTap,
   });
 
   @override
+  State<_QuickLinkTile> createState() => _QuickLinkTileState();
+}
+
+class _QuickLinkTileState extends State<_QuickLinkTile> {
+  bool _isHovered = false;
+
+  @override
   Widget build(BuildContext context) {
-    return GlassCard(
-      borderRadius: BorderRadius.circular(20),
-      padding: const EdgeInsets.all(16),
-      glowColor: color.withValues(alpha: 0.2),
-      onTap: onTap,
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  color.withValues(alpha: 0.3),
-                  color.withValues(alpha: 0.1),
+    final primaryBlue = context.colors.primary;
+
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: GlassCard(
+        borderRadius: BorderRadius.circular(20),
+        padding: const EdgeInsets.all(16),
+        glowColor: primaryBlue, // Bluish hover glow like other buttons
+        tintColor: _isHovered ? primaryBlue.withValues(alpha: 0.06) : null,
+        onTap: widget.onTap,
+        child: Row(
+          children: [
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 150),
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: _isHovered
+                    ? primaryBlue.withValues(alpha: 0.15)
+                    : context.colors.surfaceContainerHighest.withValues(alpha: 0.35),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: _isHovered
+                      ? primaryBlue.withValues(alpha: 0.5)
+                      : context.colors.glassBorder,
+                  width: 0.8,
+                ),
+              ),
+              child: Icon(
+                widget.icon,
+                color: _isHovered ? primaryBlue : context.colors.onSurfaceVariant,
+                size: 22,
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  AnimatedDefaultTextStyle(
+                    duration: const Duration(milliseconds: 150),
+                    style: AppTypography.bodyLg.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: _isHovered ? primaryBlue : context.colors.onSurface,
+                    ),
+                    child: Text(widget.title),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    widget.description,
+                    style: AppTypography.bodySm.copyWith(
+                      color: context.colors.onSurfaceVariant,
+                      fontSize: 12,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ],
               ),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: color.withValues(alpha: 0.4)),
             ),
-            child: Icon(icon, color: color, size: 22),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: AppTypography.bodyLg.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: context.colors.onSurface,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  description,
-                  style: AppTypography.bodySm.copyWith(
-                    color: context.colors.onSurfaceVariant,
-                    fontSize: 12,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 150),
+              child: Icon(
+                Icons.arrow_forward_ios_rounded,
+                color: _isHovered
+                    ? primaryBlue
+                    : context.colors.onSurfaceVariant.withValues(alpha: 0.6),
+                size: 16,
+              ),
             ),
-          ),
-          Icon(Icons.arrow_forward_ios_rounded,
-              color: context.colors.outline, size: 16),
-        ],
+          ],
+        ),
       ),
     );
   }

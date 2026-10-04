@@ -400,8 +400,15 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
                                     : context.colors.onSurfaceVariant.withValues(alpha: 0.6),
                               ),
                               border: InputBorder.none,
+                              enabledBorder: InputBorder.none,
+                              focusedBorder: InputBorder.none,
+                              disabledBorder: InputBorder.none,
+                              errorBorder: InputBorder.none,
+                              focusedErrorBorder: InputBorder.none,
+                              filled: false,
+                              fillColor: Colors.transparent,
                               isDense: true,
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                             ),
                             onSubmitted: (_) => _sendMessage(),
                           ),
@@ -453,22 +460,23 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
                 child: Column(
                   children: [
                     // Header OUTSIDE & ABOVE container
-                    PopInItem(
-                      index: 0,
-                      child: Padding(
-                        padding: EdgeInsets.only(
-                          top: isConstrainedHeight ? 12 : 20,
-                          bottom: isConstrainedHeight ? 12 : 18,
-                        ),
-                        child: Center(
-                          child: Text(
-                            context.l10n.aiAssistant,
-                            style: AppTypography.headlineMd,
-                            textAlign: TextAlign.center,
+                    if (!Responsive.hasShellTopBar(context))
+                      PopInItem(
+                        index: 0,
+                        child: Padding(
+                          padding: EdgeInsets.only(
+                            top: isConstrainedHeight ? 12 : 20,
+                            bottom: isConstrainedHeight ? 12 : 18,
+                          ),
+                          child: Center(
+                            child: Text(
+                              context.l10n.aiAssistant,
+                              style: AppTypography.headlineMd,
+                              textAlign: TextAlign.center,
+                            ),
                           ),
                         ),
                       ),
-                    ),
 
                     // Single Unified GlassCard Container
                     isConstrainedHeight

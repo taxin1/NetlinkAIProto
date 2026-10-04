@@ -380,17 +380,19 @@ class _PortfolioScreenState extends ConsumerState<PortfolioScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Page Heading (Standardized)
-              PopInItem(
-                index: 0,
-                child: Center(
-                  child: Text(
-                    context.tr('portfolioBuilder'),
-                    style: AppTypography.headlineMd,
-                    textAlign: TextAlign.center,
+              if (!Responsive.hasShellTopBar(context)) ...[
+                PopInItem(
+                  index: 0,
+                  child: Center(
+                    child: Text(
+                      context.tr('portfolioBuilder'),
+                      style: AppTypography.headlineMd,
+                      textAlign: TextAlign.center,
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 24),
+                const SizedBox(height: 24),
+              ],
 
               // Trial Banner (Shows when not signed in)
               if (isGuest) ...[

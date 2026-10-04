@@ -847,10 +847,10 @@ class AppLocalizations {
       'confirmSend': 'Confirm & Send',
       'clearChat': 'Clear Chat',
       'netlinkAiAssistant': 'Netlink AI Assistant',
-      'topMatchesChip': '🤝 Top Matches',
-      'draftFollowUpChip': '✉️ Draft Follow-Up',
-      'projectQuotationChip': '📝 Project Quotation',
-      'growthAnalyticsChip': '📊 Growth Analytics',
+      'topMatchesChip': 'Top Matches',
+      'draftFollowUpChip': 'Draft Follow-Up',
+      'projectQuotationChip': 'Project Quotation',
+      'growthAnalyticsChip': 'Growth Analytics',
       'clearChatConfirm': 'Are you sure you want to clear conversation history?',
       'aiGreeting': 'Hello! How can I assist with your networking and outreach today?',
 
@@ -873,6 +873,9 @@ class AppLocalizations {
       'subscriptionAndUsage': 'Subscription & Usage',
       'aiTrainer': 'AI Assistant Trainer',
       'connectedIntegrations': 'Connected Integrations',
+      'integrations': 'Integrations',
+      'plan': 'Plan',
+      'appearance': 'Appearance',
       'sessionAndSecurity': 'Session & Security',
       'freeStarterPlan': 'Free Starter Plan',
       'freeTier': 'Free Tier',
@@ -1398,10 +1401,10 @@ class AppLocalizations {
       'voiceActionConfirmTitle': 'Confirm this action to execute across your Netlink stack?',
       'voiceActionDismiss': 'Dismiss',
       'voiceAgentIntro': 'Hello! I am ARIA, your personal voice intelligence copilot. Tell me what to do — schedule meetings, draft and send outreach emails, log event contacts, or summarize networking metrics.',
-      'voiceChipAddContact': '👤 Add contact Marcus Chen',
-      'voiceChipFollowUpElena': '✉️ Send follow-up to Elena',
-      'voiceChipScheduleTomorrow': '📅 Schedule meeting tomorrow at 2pm',
-      'voiceChipSummarizeStats': '📊 Summarize network stats',
+      'voiceChipAddContact': 'Add contact Marcus Chen',
+      'voiceChipFollowUpElena': 'Send follow-up to Elena',
+      'voiceChipScheduleTomorrow': 'Schedule meeting tomorrow at 2pm',
+      'voiceChipSummarizeStats': 'Summarize network stats',
       'voiceCommandCaptured': 'Voice command captured! Processing with AI...',
       'voiceLiveListeningPrompt': 'Listening to your voice command... Speak naturally.',
       'voiceLiveTapToSpeak': 'Tap microphone and speak: "Send email", "Book meeting", or "Add contact".',
@@ -1475,6 +1478,9 @@ class AppLocalizations {
       'aiGenerationsQuotaLabel': 'AI Generations',
       'cardScansQuotaLabel': 'Card Scans',
       'emailSyncQuotaLabel': 'Email Sync',
+      'aiCampaignsQuotaLabel': 'AI Generations',
+      'networkingModeUsageLabel': 'Card Scans',
+      'savedContactsQuotaLabel': 'Saved Contacts',
       'outboundProvider': 'Outbound Provider',
       'customSmtp': 'Custom SMTP',
       'gmailAppPasswordGuide': 'For Gmail, generate an App Password in Google Account > Security > 2-Step Verification.',
@@ -2346,10 +2352,10 @@ class AppLocalizations {
       'confirmSend': '確認して送信',
       'clearChat': 'チャットをクリア',
       'netlinkAiAssistant': 'Netlink AI アシスタント',
-      'topMatchesChip': '🤝 おすすめマッチ',
-      'draftFollowUpChip': '✉️ フォローアップ下書き',
-      'projectQuotationChip': '📝 プロジェクト見積',
-      'growthAnalyticsChip': '📊 成長分析',
+      'topMatchesChip': 'おすすめマッチ',
+      'draftFollowUpChip': 'フォローアップ下書き',
+      'projectQuotationChip': 'プロジェクト見積',
+      'growthAnalyticsChip': '成長分析',
       'clearChatConfirm': '会話履歴をすべてクリアしてもよろしいですか？',
       'aiGreeting': 'こんにちは！人脈作りやメール作成など、何でもお手伝いします。',
 
@@ -2372,6 +2378,9 @@ class AppLocalizations {
       'subscriptionAndUsage': 'プラン＆使用状況',
       'aiTrainer': 'AIアシスタント学習',
       'connectedIntegrations': '連携サービス',
+      'integrations': '連携機能',
+      'plan': 'プラン',
+      'appearance': '外観',
       'sessionAndSecurity': 'セッション＆セキュリティ',
       'freeStarterPlan': '無料スタータープラン',
       'freeTier': '無料プラン',
@@ -2870,10 +2879,10 @@ class AppLocalizations {
       'voiceActionConfirmTitle': 'このアクションをNetlink連携ツール全体で実行しますか？',
       'voiceActionDismiss': '破棄',
       'voiceAgentIntro': 'こんにちは！私はARIA、あなたのパーソナルAI音声コパイロットです。ミーティングの調整、アプローチメールの下書き・送信、名刺連絡先の記録、ネットワーク指標の集計など、何でもお申し付けください。',
-      'voiceChipAddContact': '👤 マーカス・チェンを連絡先に追加',
-      'voiceChipFollowUpElena': '✉️ エレナにフォローアップメールを送信',
-      'voiceChipScheduleTomorrow': '📅 明日14時にミーティングを設定',
-      'voiceChipSummarizeStats': '📊 ネットワーク統計を要約',
+      'voiceChipAddContact': 'マーカス・チェンを連絡先に追加',
+      'voiceChipFollowUpElena': 'エレナにフォローアップメールを送信',
+      'voiceChipScheduleTomorrow': '明日14時にミーティングを設定',
+      'voiceChipSummarizeStats': 'ネットワーク統計を要約',
       'voiceCommandCaptured': '音声コマンドを認識しました！AIで処理中...',
       'voiceLiveListeningPrompt': '音声コマンドを聞き取っています... 自然にお話しください。',
       'voiceLiveTapToSpeak': 'マイクをタップして「メールを送信」「ミーティングを予約」「連絡先を追加」とお話しください。',
@@ -2947,6 +2956,9 @@ class AppLocalizations {
       'aiGenerationsQuotaLabel': 'AI生成',
       'cardScansQuotaLabel': '名刺スキャン',
       'emailSyncQuotaLabel': 'メール同期',
+      'aiCampaignsQuotaLabel': 'AI生成',
+      'networkingModeUsageLabel': '名刺スキャン',
+      'savedContactsQuotaLabel': '連絡先保存',
       'outboundProvider': '送信プロバイダー',
       'customSmtp': 'カスタムSMTP',
       'gmailAppPasswordGuide': 'Gmailをご利用の場合、Googleアカウント > セキュリティ > 2段階認証プロセスからアプリパスワードを生成してください。',
@@ -2987,9 +2999,12 @@ class AppLocalizations {
 
   String translate(String key) {
     final lang = locale.languageCode;
-    return _localizedValues[lang]?[key] ??
-        _localizedValues['en']?[key] ??
-        key;
+    final val = _localizedValues[lang]?[key] ?? _localizedValues['en']?[key];
+    if (val != null) return val;
+    if (key == 'plan') return lang == 'ja' ? 'プラン' : 'Plan';
+    if (key == 'integrations') return lang == 'ja' ? '連携機能' : 'Integrations';
+    if (key == 'appearance') return lang == 'ja' ? '外観' : 'Appearance';
+    return key;
   }
 
   // Strongly-typed getters

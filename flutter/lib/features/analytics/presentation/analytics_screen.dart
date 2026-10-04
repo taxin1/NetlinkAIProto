@@ -127,17 +127,19 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // ── Page Heading (Standardized) ──
-                  PopInItem(
-                    index: 0,
-                    child: Center(
-                      child: Text(
-                        context.tr('analyticsAndIntelligence'),
-                        style: AppTypography.headlineMd,
-                        textAlign: TextAlign.center,
+                  if (!Responsive.hasShellTopBar(context)) ...[
+                    PopInItem(
+                      index: 0,
+                      child: Center(
+                        child: Text(
+                          context.tr('analyticsAndIntelligence'),
+                          style: AppTypography.headlineMd,
+                          textAlign: TextAlign.center,
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 24),
+                    const SizedBox(height: 24),
+                  ],
 
                   // ── Trial Banner (Shows when not signed in) ──
                   if (isGuest) ...[
@@ -168,7 +170,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                     index: isGuest ? 3 : 2,
                     child: _buildExecutiveKpiGrid(context, analyticsData, isGuest),
                   ),
-                  const SizedBox(height: 36),
+                  const SectionDivider(margin: EdgeInsets.symmetric(vertical: 28)),
 
                   // ── Section 2: Activity Breakdown & Engagement Summary (Web App Parity) ──
                   _buildSectionHeader(
@@ -182,7 +184,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                     index: isGuest ? 4 : 3,
                     child: _buildActivityAndEngagementSummary(context, analyticsData, isGuest),
                   ),
-                  const SizedBox(height: 36),
+                  const SectionDivider(margin: EdgeInsets.symmetric(vertical: 28)),
 
                   // ── Section 3: Network Growth & Outreach Funnel ──
                   _buildSectionHeader(
@@ -197,7 +199,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                     index: isGuest ? 5 : 4,
                     child: _buildGrowthAndFunnelSection(context, analyticsData),
                   ),
-                  const SizedBox(height: 36),
+                  const SectionDivider(margin: EdgeInsets.symmetric(vertical: 28)),
 
                   // ── Section 4: Event ROI & Breakdown ──
                   _buildSectionHeader(
@@ -212,7 +214,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                     index: isGuest ? 6 : 5,
                     child: _buildEventRoiSection(context, analyticsData),
                   ),
-                  const SizedBox(height: 36),
+                  const SectionDivider(margin: EdgeInsets.symmetric(vertical: 28)),
 
                   // ── Section 5: Strategic AI Insights ──
                   _buildSectionHeader(
@@ -341,10 +343,10 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
         : (isGuest ? '46.8%' : '0.0%');
     final meetings = data.meetingsScheduled;
 
-    final impressionsGrowth = (!isGuest && !data.hasData) ? '0%' : '+18.4%';
-    final connectionsGrowth = (!isGuest && !data.hasData) ? '0 ${context.tr('total')}' : (isGuest ? '+24 ${context.tr('thisWeekGrowth')}' : '${data.activeConnections} ${context.tr('total')}');
-    final responseGrowth = (!isGuest && !data.hasData) ? context.tr('noEmailsYet') : (isGuest ? '2.6x ${context.tr('industryAvg')}' : '${data.emailsSent} ${context.tr('sent')}');
-    final meetingsGrowth = (!isGuest && !data.hasData) ? '0 ${context.tr('confirmedSuffix')}' : (isGuest ? '82% ${context.tr('conversionRate')}' : '${data.meetingsScheduled} ${context.tr('bookedSuffix')}');
+    final impressionsGrowth = data.impressionsGrowth;
+    final connectionsGrowth = data.connectionsGrowth;
+    final responseGrowth = data.responseGrowth;
+    final meetingsGrowth = data.meetingsGrowth;
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -361,9 +363,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
               title: context.tr('profileImpressions'),
               value: '$impressions',
               growth: impressionsGrowth,
-              isPositive: data.hasData || isGuest,
               icon: Icons.visibility_outlined,
-              glowColor: const Color(0xFF06B6D4),
             ),
             _buildKpiCard(
               context,
@@ -371,9 +371,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
               title: context.tr('activeConnections'),
               value: '$connections',
               growth: connectionsGrowth,
-              isPositive: data.hasData || isGuest,
               icon: Icons.hub_rounded,
-              glowColor: const Color(0xFF10B981),
             ),
             _buildKpiCard(
               context,
@@ -381,9 +379,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
               title: context.tr('coldOutreachResponse'),
               value: responseRate,
               growth: responseGrowth,
-              isPositive: data.hasData || isGuest,
               icon: Icons.mark_email_read_outlined,
-              glowColor: const Color(0xFF8B5CF6),
             ),
             _buildKpiCard(
               context,
@@ -391,9 +387,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
               title: context.tr('meetingsScheduled'),
               value: '$meetings',
               growth: meetingsGrowth,
-              isPositive: data.hasData || isGuest,
               icon: Icons.calendar_month_rounded,
-              glowColor: const Color(0xFFF59E0B),
             ),
           ],
         );
@@ -406,70 +400,107 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
     required double width,
     required String title,
     required String value,
-    required String growth,
-    required bool isPositive,
+    required String? growth,
     required IconData icon,
-    required Color glowColor,
   }) {
+    final hasPill = growth != null && growth.trim().isNotEmpty;
+    final isUp = growth?.startsWith('+') ?? false;
+    final isDown = growth?.startsWith('-') ?? false;
+
     return SizedBox(
       width: width,
       child: GlassCard(
-        tintColor: glowColor,
+        tintColor: null, // Neutral glass: no colored gradient tint
+        glowColor: null,
         borderRadius: BorderRadius.circular(18),
-        padding: const EdgeInsets.all(18),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Container(
-                  padding: const EdgeInsets.all(8),
+                  width: 36,
+                  height: 36,
                   decoration: BoxDecoration(
-                    color: glowColor.withValues(alpha: 0.18),
-                    shape: BoxShape.circle,
-                    border: Border.all(color: glowColor.withValues(alpha: 0.35), width: 1),
-                  ),
-                  child: Icon(icon, color: glowColor, size: 18),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: (isPositive ? Colors.green : Colors.grey).withValues(alpha: 0.15),
+                    color: context.colors.surfaceContainerHighest.withValues(alpha: 0.35),
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
-                      color: (isPositive ? Colors.green : Colors.grey).withValues(alpha: 0.3),
-                    ),
+                    border: Border.all(color: context.colors.glassBorder, width: 0.8),
                   ),
-                  child: Text(
-                    growth,
-                    style: AppTypography.labelSm.copyWith(
-                      color: isPositive ? Colors.green : Colors.grey,
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  child: Icon(icon, color: context.colors.onSurfaceVariant, size: 18),
                 ),
+                if (hasPill)
+                  Flexible(
+                    child: Container(
+                      margin: const EdgeInsets.only(left: 6),
+                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: context.colors.surfaceContainerHighest.withValues(alpha: 0.35),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: context.colors.glassBorder,
+                          width: 0.8,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (isUp) ...[
+                            Icon(
+                              Icons.arrow_upward_rounded,
+                              size: 10,
+                              color: context.colors.onSurfaceVariant,
+                            ),
+                            const SizedBox(width: 2.5),
+                          ] else if (isDown) ...[
+                            Icon(
+                              Icons.arrow_downward_rounded,
+                              size: 10,
+                              color: context.colors.onSurfaceVariant,
+                            ),
+                            const SizedBox(width: 2.5),
+                          ],
+                          Flexible(
+                            child: Text(
+                              growth,
+                              style: AppTypography.labelSm.copyWith(
+                                color: context.colors.onSurface,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
               ],
             ),
-            const SizedBox(height: 14),
+            const SizedBox(height: 12),
             Text(
               value,
               style: AppTypography.headlineMd.copyWith(
-                fontSize: 26,
+                fontSize: 24,
                 fontWeight: FontWeight.bold,
                 color: context.colors.onSurface,
               ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
             const SizedBox(height: 2),
             Text(
               title,
               style: AppTypography.bodySm.copyWith(
                 color: context.colors.onSurfaceVariant.withValues(alpha: 0.8),
-                fontSize: 12,
+                fontSize: 11.5,
               ),
-              maxLines: 1,
+              maxLines: 2,
               overflow: TextOverflow.ellipsis,
+              softWrap: true,
             ),
           ],
         ),
@@ -557,13 +588,18 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      context.tr('totalInteractions'),
-                      style: AppTypography.bodySm.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: context.colors.onSurface,
+                    Expanded(
+                      child: Text(
+                        context.tr('totalInteractions'),
+                        style: AppTypography.bodySm.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: context.colors.onSurface,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
+                    const SizedBox(width: 8),
                     Text(
                       '${data.totalInteractions}',
                       style: AppTypography.headlineSm.copyWith(
@@ -585,13 +621,18 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      context.tr('mostActiveType'),
-                      style: AppTypography.bodySm.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: context.colors.onSurface,
+                    Flexible(
+                      child: Text(
+                        context.tr('mostActiveType'),
+                        style: AppTypography.bodySm.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: context.colors.onSurface,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
+                    const SizedBox(width: 8),
                     Text(
                       data.mostActiveType,
                       style: AppTypography.bodySm.copyWith(
@@ -636,7 +677,15 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(label, style: AppTypography.bodySm.copyWith(fontWeight: FontWeight.w500)),
+            Expanded(
+              child: Text(
+                label,
+                style: AppTypography.bodySm.copyWith(fontWeight: FontWeight.w500),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const SizedBox(width: 8),
             Text('$count (${pct.toStringAsFixed(0)}%)', style: AppTypography.labelSm.copyWith(color: context.colors.onSurfaceVariant)),
           ],
         ),
@@ -699,10 +748,15 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                context.tr('weeklyInteractionVelocity'),
-                style: AppTypography.headlineSm.copyWith(fontSize: 17),
+              Expanded(
+                child: Text(
+                  context.tr('weeklyInteractionVelocity'),
+                  style: AppTypography.headlineSm.copyWith(fontSize: 17),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
+              const SizedBox(width: 8),
               Text(
                 '$totalActions ${context.tr('actions')}',
                 style: AppTypography.bodySm.copyWith(
@@ -833,14 +887,19 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              stageName,
-              style: AppTypography.bodySm.copyWith(
-                color: context.colors.onSurface,
-                fontWeight: FontWeight.w600,
-                fontSize: 12,
+            Expanded(
+              child: Text(
+                stageName,
+                style: AppTypography.bodySm.copyWith(
+                  color: context.colors.onSurface,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 12,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
+            const SizedBox(width: 8),
             Text(
               countText,
               style: AppTypography.bodySm.copyWith(
@@ -948,74 +1007,156 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
     required Color roiColor,
   }) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: context.colors.surface.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: context.colors.glassBorder),
       ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: roiColor.withValues(alpha: 0.12),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(Icons.event_available_rounded, color: roiColor, size: 20),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final isNarrow = constraints.maxWidth < 340;
+
+          if (isNarrow) {
+            return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  eventName,
-                  style: AppTypography.bodyMd.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: context.colors.onSurface,
-                  ),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: roiColor.withValues(alpha: 0.12),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(Icons.event_available_rounded, color: roiColor, size: 18),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            eventName,
+                            style: AppTypography.bodyMd.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: context.colors.onSurface,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          Text(
+                            location,
+                            style: AppTypography.bodySm.copyWith(
+                              color: context.colors.onSurfaceVariant.withValues(alpha: 0.7),
+                              fontSize: 11,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2.5),
+                      decoration: BoxDecoration(
+                        color: roiColor.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: roiColor.withValues(alpha: 0.3)),
+                      ),
+                      child: Text(
+                        roiScore,
+                        style: AppTypography.labelSm.copyWith(
+                          color: roiColor,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 10.5,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
+                const SizedBox(height: 8),
                 Text(
-                  location,
+                  '$matches • $meetings',
                   style: AppTypography.bodySm.copyWith(
-                    color: context.colors.onSurfaceVariant.withValues(alpha: 0.7),
+                    color: context.colors.onSurfaceVariant,
                     fontSize: 11,
                   ),
                 ),
               ],
-            ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
+            );
+          }
+
+          return Row(
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
+                padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: roiColor.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: roiColor.withValues(alpha: 0.3)),
+                  color: roiColor.withValues(alpha: 0.12),
+                  shape: BoxShape.circle,
                 ),
-                child: Text(
-                  roiScore,
-                  style: AppTypography.labelSm.copyWith(
-                    color: roiColor,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 11,
-                  ),
+                child: Icon(Icons.event_available_rounded, color: roiColor, size: 20),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      eventName,
+                      style: AppTypography.bodyMd.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: context.colors.onSurface,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      location,
+                      style: AppTypography.bodySm.copyWith(
+                        color: context.colors.onSurfaceVariant.withValues(alpha: 0.7),
+                        fontSize: 11,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 4),
-              Text(
-                '$matches • $meetings',
-                style: AppTypography.bodySm.copyWith(
-                  color: context.colors.onSurfaceVariant,
-                  fontSize: 11,
-                ),
+              const SizedBox(width: 10),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: roiColor.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: roiColor.withValues(alpha: 0.3)),
+                    ),
+                    child: Text(
+                      roiScore,
+                      style: AppTypography.labelSm.copyWith(
+                        color: roiColor,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '$matches • $meetings',
+                    style: AppTypography.bodySm.copyWith(
+                      color: context.colors.onSurfaceVariant,
+                      fontSize: 11,
+                    ),
+                  ),
+                ],
               ),
             ],
-          ),
-        ],
+          );
+        },
       ),
     );
   }
@@ -1028,7 +1169,8 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
     return GlassCard(
       borderRadius: BorderRadius.circular(20),
       padding: const EdgeInsets.all(22),
-      glowColor: context.colors.primary.withValues(alpha: 0.15),
+      glowColor: null,
+      tintColor: null,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1042,7 +1184,6 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
             _buildInsightCard(
               context,
               tag: context.tr('tagQuickStart'),
-              tagColor: context.colors.primary,
               text: context.tr('insightQuickStartText'),
             ),
             const SizedBox(height: 12),
@@ -1050,21 +1191,18 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
             _buildInsightCard(
               context,
               tag: context.tr('tagHighSynergy'),
-              tagColor: Colors.amber,
               text: context.tr('insightHighSynergyText'),
             ),
             const SizedBox(height: 12),
             _buildInsightCard(
               context,
               tag: context.tr('tagTimeWindow'),
-              tagColor: const Color(0xFF06B6D4),
               text: context.tr('insightTimeWindowText'),
             ),
             const SizedBox(height: 12),
             _buildInsightCard(
               context,
               tag: context.tr('tagNetworkDiversity'),
-              tagColor: const Color(0xFF8B5CF6),
               text: context.tr('insightNetworkDiversityText'),
             ),
           ],
@@ -1074,7 +1212,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
           Row(
             children: [
               Expanded(
-                child: GradientButton(
+                child: LiquidGlassButton(
                   label: context.tr('exportAnalyticsReport'),
                   icon: Icons.file_download_outlined,
                   height: 46,
@@ -1126,15 +1264,14 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
   Widget _buildInsightCard(
     BuildContext context, {
     required String tag,
-    required Color tagColor,
     required String text,
   }) {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: context.colors.surface.withValues(alpha: 0.3),
+        color: context.colors.surfaceContainerHighest.withValues(alpha: 0.35),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: tagColor.withValues(alpha: 0.3)),
+        border: Border.all(color: context.colors.glassBorder, width: 0.8),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1144,16 +1281,23 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
               Container(
                 width: 6,
                 height: 6,
-                decoration: BoxDecoration(color: tagColor, shape: BoxShape.circle),
+                decoration: BoxDecoration(
+                  color: context.colors.onSurfaceVariant.withValues(alpha: 0.6),
+                  shape: BoxShape.circle,
+                ),
               ),
               const SizedBox(width: 6),
-              Text(
-                tag,
-                style: AppTypography.labelSm.copyWith(
-                  color: tagColor,
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.0,
+              Expanded(
+                child: Text(
+                  tag,
+                  style: AppTypography.labelSm.copyWith(
+                    color: context.colors.onSurface,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.0,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],

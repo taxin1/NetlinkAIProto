@@ -27,14 +27,28 @@ class DashboardService {
 
       // 2. Network Growth (Contacts added in last 7 days)
       int networkGrowth = 0;
+      List<double> weeklyGrowthPoints = [0, 0, 0, 0, 0, 0, 0];
       try {
-        final sevenDaysAgo = DateTime.now().subtract(const Duration(days: 7)).toIso8601String();
+        final now = DateTime.now();
+        final sevenDaysAgo = now.subtract(const Duration(days: 7));
         final recentContactsRes = await client
             .from('contacts')
-            .select('id')
+            .select('id, created_at')
             .eq('user_id', userId)
-            .gte('created_at', sevenDaysAgo);
-        networkGrowth = (recentContactsRes as List<dynamic>).length;
+            .gte('created_at', sevenDaysAgo.toIso8601String());
+        final list = (recentContactsRes as List<dynamic>);
+        networkGrowth = list.length;
+        for (final item in list) {
+          if (item is Map && item['created_at'] != null) {
+            final dt = DateTime.tryParse(item['created_at'].toString());
+            if (dt != null) {
+              final diff = now.difference(dt).inDays;
+              if (diff >= 0 && diff < 7) {
+                weeklyGrowthPoints[6 - diff] += 1.0;
+              }
+            }
+          }
+        }
       } catch (_) {}
 
       // 3. Emails Sent Count (All time)
@@ -165,6 +179,7 @@ class DashboardService {
         emailsSent: emailsSent,
         upcomingEvents: upcomingEventsCount,
         networkGrowth: networkGrowth,
+        weeklyGrowthPoints: weeklyGrowthPoints,
         upcomingEventsList: upcomingEventsList,
         networkingSummary: networkingSummary,
         emailHighlights: emailHighlights,

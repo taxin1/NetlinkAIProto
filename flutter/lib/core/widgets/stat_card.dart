@@ -8,11 +8,15 @@ class StatCard extends StatelessWidget {
   final String label;
   final String value;
   final IconData icon;
-  final Color iconColor;
+  final Color? iconColor;
   final Color? iconBgColor;
+  final Color? tintColor;
+  final bool useTint;
+  final bool useIconGradient;
   final String? trendLabel;
   final Color? trendColor;
   final IconData? trendIcon;
+  final VoidCallback? onTap;
 
   final EdgeInsetsGeometry? padding;
   final double? valueFontSize;
@@ -22,20 +26,26 @@ class StatCard extends StatelessWidget {
     required this.label,
     required this.value,
     required this.icon,
-    required this.iconColor,
+    this.iconColor,
     this.iconBgColor,
+    this.tintColor,
+    this.useTint = false,
+    this.useIconGradient = false,
     this.trendLabel,
     this.trendColor,
     this.trendIcon,
+    this.onTap,
     this.padding,
     this.valueFontSize,
   });
 
   @override
   Widget build(BuildContext context) {
+    final effectiveIconColor = iconColor ?? context.colors.onSurfaceVariant;
     return GlassCard(
       borderRadius: BorderRadius.circular(16),
-      tintColor: iconColor,
+      tintColor: useTint ? (tintColor ?? effectiveIconColor) : null,
+      onTap: onTap,
       padding: padding ?? const EdgeInsets.fromLTRB(14, 12, 12, 10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -62,21 +72,34 @@ class StatCard extends StatelessWidget {
                 width: 30,
                 height: 30,
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      iconColor.withValues(alpha: 0.25),
-                      iconColor.withValues(alpha: 0.10),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
+                  color: useIconGradient
+                      ? null
+                      : (iconBgColor ?? context.colors.surfaceContainerHighest.withValues(alpha: 0.4)),
+                  gradient: useIconGradient
+                      ? LinearGradient(
+                          colors: [
+                            effectiveIconColor.withValues(alpha: 0.25),
+                            effectiveIconColor.withValues(alpha: 0.10),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        )
+                      : null,
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: iconColor.withValues(alpha: 0.3),
+                    color: useIconGradient
+                        ? effectiveIconColor.withValues(alpha: 0.3)
+                        : context.colors.glassBorder,
                     width: 0.8,
                   ),
                 ),
-                child: Icon(icon, color: iconColor, size: 16),
+                child: Icon(
+                  icon,
+                  color: useIconGradient
+                      ? effectiveIconColor
+                      : (iconColor ?? context.colors.onSurfaceVariant),
+                  size: 16,
+                ),
               ),
             ],
           ),
@@ -92,13 +115,13 @@ class StatCard extends StatelessWidget {
             Row(
               children: [
                 if (trendIcon != null)
-                  Icon(trendIcon, color: trendColor ?? context.colors.successGlow, size: 12),
+                  Icon(trendIcon, color: trendColor ?? context.colors.onSurfaceVariant, size: 12),
                 const SizedBox(width: 3),
                 Flexible(
                   child: Text(
                     trendLabel!,
                     style: AppTypography.labelCaps.copyWith(
-                      color: trendColor ?? context.colors.successGlow,
+                      color: trendColor ?? context.colors.onSurfaceVariant,
                       fontSize: 10,
                     ),
                     overflow: TextOverflow.ellipsis,

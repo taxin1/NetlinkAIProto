@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import '../theme/app_colors.dart';
 
 /// Elevated liquid frosted glass card using GPU gradients & optional BackdropFilter blur
 class GlassCard extends StatefulWidget {
@@ -38,6 +39,8 @@ class _GlassCardState extends State<GlassCard> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final accent = widget.tintColor ?? widget.glowColor;
     final isInteractive = widget.onTap != null;
+    final defaultGlow = context.colors.primary;
+    final effectiveGlowColor = widget.glowColor ?? defaultGlow;
 
     Widget cardContent = AnimatedContainer(
       duration: const Duration(milliseconds: 180),
@@ -71,10 +74,14 @@ class _GlassCardState extends State<GlassCard> {
           color: isDark
               ? (accent != null
                   ? accent.withValues(alpha: _isHovered || _isPressed ? 0.55 : 0.35)
-                  : Color(_isHovered || _isPressed ? 0x55FFFFFF : 0x2BFFFFFF))
+                  : (_isHovered || _isPressed
+                      ? (isInteractive ? defaultGlow.withValues(alpha: 0.50) : const Color(0x55FFFFFF))
+                      : const Color(0x2BFFFFFF)))
               : (accent != null
                   ? accent.withValues(alpha: _isHovered || _isPressed ? 0.60 : 0.40)
-                  : Color(_isHovered || _isPressed ? 0xF0FFFFFF : 0xD0FFFFFF)),
+                  : (_isHovered || _isPressed
+                      ? (isInteractive ? defaultGlow.withValues(alpha: 0.55) : const Color(0xF0FFFFFF))
+                      : const Color(0xD0FFFFFF))),
           width: _isHovered || _isPressed ? 1.5 : 1.2,
         ),
       ),
@@ -99,13 +106,13 @@ class _GlassCardState extends State<GlassCard> {
             ),
             if (widget.glowColor != null || _isHovered)
               BoxShadow(
-                color: (widget.glowColor ?? const Color(0xFF00E5FF)).withValues(
+                color: effectiveGlowColor.withValues(
                   alpha: isDark
-                      ? (_isPressed ? 0.08 : (_isHovered ? 0.20 : 0.10))
-                      : (_isHovered ? 0.15 : 0.06),
+                      ? (_isPressed ? 0.08 : (_isHovered ? 0.22 : 0.10))
+                      : (_isHovered ? 0.16 : 0.06),
                 ),
-                blurRadius: _isHovered ? 16 : 10,
-                spreadRadius: -4,
+                blurRadius: _isHovered ? 18 : 10,
+                spreadRadius: _isHovered ? -2 : -4,
                 offset: const Offset(0, 3),
               ),
           ],

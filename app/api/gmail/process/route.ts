@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { getGmailTokens } from '@/lib/gmail'
 import { google } from 'googleapis'
 
@@ -12,44 +13,106 @@ function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
   ])
 }
 
-// Helper function to get base URL with proper fallbacks
 function getBaseUrl(request: NextRequest): string {
-  // First, check if NEXT_PUBLIC_APP_URL is explicitly set
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL
   if (baseUrl) {
     return baseUrl
   }
-  
-  // In production, default to www.networklinkai.com
   if (process.env.NODE_ENV === 'production') {
     return 'https://www.networklinkai.com'
   }
-  
-  // In development, use request origin (localhost)
   return request.nextUrl.origin
+}
+
+function getAppRedirect(url: string, success: boolean, message?: string) {
+  return new NextResponse(`<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="refresh" content="0;url=${url}">
+  <title>${success ? 'Connected!' : 'Connection Status'}</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0A0D14; color: white; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; text-align: center; }
+    .card { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); padding: 32px; border-radius: 20px; max-width: 340px; margin: 20px; }
+    .btn { display: inline-block; margin-top: 20px; padding: 12px 24px; background: linear-gradient(135deg, #3B82F6, #6366F1); color: white; text-decoration: none; border-radius: 99px; font-weight: 600; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>${success ? '✅ Connected!' : '⚠️ Notice'}</h2>
+    <p style="opacity: 0.8; font-size: 14px; margin-top: 8px;">${message || (success ? 'Returning to Netlink AI app...' : 'Returning to Netlink AI...')}</p>
+    <a href="${url}" class="btn">Tap to Return to App</a>
+  </div>
+  <script>
+    (function() {
+      try {
+        window.location.replace('${url}');
+      } catch(e) {
+        window.location.href = '${url}';
+      }
+    })();
+  </script>
+</body>
+</html>`, {
+    headers: { 'Content-Type': 'text/html' },
+  })
 }
 
 export async function GET(request: NextRequest) {
   const startTime = Date.now()
+  const searchParams = request.nextUrl.searchParams
+  const code = searchParams.get('code')
+  const stateRaw = searchParams.get('state')
+  const baseUrl = getBaseUrl(request)
+
+  let stateData: { userId?: string; returnUrl?: string; provider?: string } = {}
+  if (stateRaw) {
+    try {
+      stateData = JSON.parse(Buffer.from(stateRaw, 'base64url').toString('utf8'))
+    } catch (_) {
+      try {
+        stateData = JSON.parse(Buffer.from(stateRaw, 'base64').toString('utf8'))
+      } catch (_) {
+        try {
+          stateData = JSON.parse(decodeURIComponent(stateRaw))
+        } catch (_) {}
+      }
+    }
+  }
   
   try {
     console.log('[Gmail Process] Starting...')
-    const searchParams = request.nextUrl.searchParams
-    const code = searchParams.get('code')
 
     if (!code) {
       console.error('[Gmail Process] No code provided')
+      if (stateData.returnUrl?.startsWith('io.supabase.netlink://')) {
+        return getAppRedirect(`${stateData.returnUrl}?error=no_code`, false, 'No authorization code received.')
+      }
       return NextResponse.redirect(
         new URL('/dashboard/settings?error=no_code', request.url)
       )
     }
 
-    // Step 1: Check authentication
-    const supabase = await createClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    // Step 1: Check authentication (check cookie user first, then fallback to mobile state.userId)
+    let user: { id: string; email?: string } | null = null
+    try {
+      const supabase = await createClient()
+      const { data: { user: cookieUser }, error: authError } = await supabase.auth.getUser()
+      if (cookieUser && !authError) {
+        user = cookieUser
+      }
+    } catch (_) {}
 
-    if (authError || !user) {
-      console.error('[Gmail Process] Auth error:', authError)
+    if (!user && stateData.userId) {
+      user = { id: stateData.userId }
+    }
+
+    if (!user) {
+      console.error('[Gmail Process] Auth error: No authenticated user found')
+      if (stateData.returnUrl?.startsWith('io.supabase.netlink://')) {
+        return getAppRedirect(`${stateData.returnUrl}?error=unauthenticated`, false, 'Please sign in first.')
+      }
       return NextResponse.redirect(new URL('/auth/login', request.url))
     }
 
@@ -62,25 +125,12 @@ export async function GET(request: NextRequest) {
     }
 
     // Step 2: Exchange code for tokens
-    const baseUrl = getBaseUrl(request)
     let tokens
     try {
       console.log('[Gmail Process] Exchanging code for tokens...')
-      console.log('[Gmail Process] Authorization code length:', code.length)
-      console.log('[Gmail Process] Base URL:', baseUrl)
-      console.log('[Gmail Process] NEXT_PUBLIC_APP_URL:', process.env.NEXT_PUBLIC_APP_URL || 'Not set (using request origin)')
-      console.log('[Gmail Process] GOOGLE_CLIENT_ID:', process.env.GOOGLE_CLIENT_ID ? 'Set' : 'MISSING')
-      console.log('[Gmail Process] GOOGLE_CLIENT_SECRET:', process.env.GOOGLE_CLIENT_SECRET ? 'Set' : 'MISSING')
-      
       tokens = await withTimeout(getGmailTokens(code, baseUrl), 15000)
-      console.log('[Gmail Process] Tokens received successfully')
-      console.log('[Gmail Process] Has access token:', !!tokens.access_token)
-      console.log('[Gmail Process] Has refresh token:', !!tokens.refresh_token)
     } catch (tokenError: any) {
-      console.error('[Gmail Process] Token exchange failed')
-      console.error('[Gmail Process] Error type:', tokenError?.constructor?.name)
-      console.error('[Gmail Process] Error message:', tokenError?.message)
-      console.error('[Gmail Process] Full error:', JSON.stringify(tokenError, null, 2))
+      console.error('[Gmail Process] Token exchange failed:', tokenError?.message)
       throw tokenError
     }
 
@@ -110,7 +160,7 @@ export async function GET(request: NextRequest) {
       console.warn('[Gmail Process] Could not fetch email address from Gmail API:', error)
     }
 
-    // Step 4: Store tokens in database
+    // Step 4: Store tokens in database using service role (admin) if available
     const now = new Date().toISOString()
     const connectionData = {
       user_id: user.id,
@@ -121,19 +171,14 @@ export async function GET(request: NextRequest) {
         : null,
       email_address: emailAddress,
       updated_at: now,
-      created_at: now, // Ensure created_at is set for new connections
+      created_at: now,
     }
 
-    console.log('[Gmail Process] Storing tokens in database...')
-    console.log('[Gmail Process] Connection data:', {
-      user_id: user.id,
-      email_address: emailAddress,
-      has_access_token: !!tokens.access_token,
-      has_refresh_token: !!tokens.refresh_token,
-    })
+    console.log('[Gmail Process] Storing tokens in database for user:', user.id)
 
+    const dbClient = process.env.SUPABASE_SERVICE_ROLE_KEY ? createAdminClient() : await createClient()
     const { data: savedData, error: dbError } = await withTimeout(
-      supabase
+      dbClient
         .from('gmail_connections')
         .upsert(connectionData, {
           onConflict: 'user_id',
@@ -153,19 +198,18 @@ export async function GET(request: NextRequest) {
       throw new Error('Failed to save connection to database')
     }
 
-    console.log('[Gmail Process] Tokens stored successfully')
-    console.log('[Gmail Process] Saved connection ID:', savedData.id)
-    const elapsedTime = Date.now() - startTime
-    console.log(`[Gmail Process] ✅ Success in ${elapsedTime}ms`)
+    console.log('[Gmail Process] Tokens stored successfully. ID:', savedData.id)
 
-    // Build redirect URL with base URL
+    // Step 5: Redirect back to mobile deep link or web dashboard
+    if (stateData.returnUrl?.startsWith('io.supabase.netlink://')) {
+      const mobileRedirect = `${stateData.returnUrl}?success=true&provider=gmail&email=${encodeURIComponent(emailAddress || '')}`
+      return getAppRedirect(mobileRedirect, true)
+    }
+
     const redirectUrl = new URL('/dashboard/settings', baseUrl)
     redirectUrl.searchParams.set('success', 'gmail_connected')
-
     return NextResponse.redirect(redirectUrl.toString(), { status: 307 })
   } catch (error: any) {
-    const elapsedTime = Date.now() - startTime
-    console.error(`[Gmail Process] ❌ Error after ${elapsedTime}ms`)
     console.error('[Gmail Process] Error:', error)
     
     let errorMessage = 'token_exchange_failed'
@@ -181,7 +225,10 @@ export async function GET(request: NextRequest) {
       errorMessage = 'database_error'
     }
     
-    const baseUrl = getBaseUrl(request)
+    if (stateData.returnUrl?.startsWith('io.supabase.netlink://')) {
+      return getAppRedirect(`${stateData.returnUrl}?error=${encodeURIComponent(errorMessage)}&provider=gmail`, false, `Error: ${errorMessage}`)
+    }
+
     const redirectUrl = new URL('/dashboard/settings', baseUrl)
     redirectUrl.searchParams.set('error', errorMessage)
     return NextResponse.redirect(redirectUrl.toString(), { status: 307 })

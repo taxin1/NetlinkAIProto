@@ -2,12 +2,11 @@ import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_typography.dart';
 
-/// Standardized section header matching the Analytics page design.
+/// Standardized section header matching the application's clean design.
 ///
 /// Features:
 /// - Circular icon badge with clean neutral styling (no harsh colors)
-/// - 18px font headline text
-/// - Smooth horizontal fading gradient divider line
+/// - 18px font headline text with soft wrapping (no ellipsis truncation)
 /// - Optional trailing action/badge widget
 class SectionHeader extends StatelessWidget {
   final IconData? icon;
@@ -30,6 +29,7 @@ class SectionHeader extends StatelessWidget {
     return Padding(
       padding: padding ?? EdgeInsets.zero,
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           if (icon != null) ...[
             Container(
@@ -50,28 +50,14 @@ class SectionHeader extends StatelessWidget {
             ),
             const SizedBox(width: 10),
           ],
-          Flexible(
+          Expanded(
             child: Text(
               label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+              softWrap: true,
               style: AppTypography.headlineSm.copyWith(
                 fontSize: 18,
+                fontWeight: FontWeight.w600,
                 color: context.colors.onSurface,
-              ),
-            ),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Container(
-              height: 1,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    context.colors.glassBorder,
-                    context.colors.glassBorder.withValues(alpha: 0.0),
-                  ],
-                ),
               ),
             ),
           ),
@@ -80,6 +66,36 @@ class SectionHeader extends StatelessWidget {
             trailing!,
           ],
         ],
+      ),
+    );
+  }
+}
+
+/// Standardized horizontal divider line placed at the end of content sections.
+class SectionDivider extends StatelessWidget {
+  final EdgeInsetsGeometry? margin;
+  final Color? color;
+
+  const SectionDivider({
+    super.key,
+    this.margin,
+    this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final dividerColor = color ?? context.colors.glassBorder;
+    return Container(
+      margin: margin ?? const EdgeInsets.symmetric(vertical: 32),
+      height: 1,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            dividerColor.withValues(alpha: 0.0),
+            dividerColor,
+            dividerColor.withValues(alpha: 0.0),
+          ],
+        ),
       ),
     );
   }
