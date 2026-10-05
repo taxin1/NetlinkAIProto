@@ -7,6 +7,7 @@ import '../../../core/widgets/gradient_button.dart';
 import '../../../core/widgets/glass_card.dart';
 import '../../../core/widgets/pop_in_item.dart';
 import '../../../core/widgets/section_header.dart';
+import '../../../core/widgets/scrollable_list_window.dart';
 import '../../../core/widgets/trial_banner_card.dart';
 import '../../../core/utils/responsive.dart';
 import '../../../core/tour/tour_controller.dart';
