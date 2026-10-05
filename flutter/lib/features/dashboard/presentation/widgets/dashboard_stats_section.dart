@@ -81,12 +81,11 @@ class DashboardStatsSection extends StatelessWidget {
                   flex: 4,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Expanded(child: contactsCard),
-                      const SizedBox(height: 10),
-                      Expanded(child: emailsCard),
-                      const SizedBox(height: 10),
-                      Expanded(child: eventsCard),
+                      contactsCard,
+                      emailsCard,
+                      eventsCard,
                     ],
                   ),
                 ),
@@ -133,17 +132,17 @@ class _StatRowCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GlassCard(
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(22),
       tintColor: null, // Neutral glass: no colored gradient tint
       glowColor: null,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      padding: const EdgeInsets.all(10),
       onTap: null, // Not a full button: no whole-card hover/press
       child: Center(
         child: Row(
           children: [
             Container(
-              width: 38,
-              height: 38,
+              width: 40,
+              height: 40,
               decoration: BoxDecoration(
                 color: context.colors.surfaceContainerHighest.withValues(alpha: 0.35),
                 borderRadius: BorderRadius.circular(12),
@@ -158,7 +157,7 @@ class _StatRowCard extends StatelessWidget {
                 color: context.colors.onSurfaceVariant,
               ),
             ),
-            const SizedBox(width: 14),
+            const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -273,10 +272,10 @@ class _NetworkGrowthGraphicalCardState extends State<_NetworkGrowthGraphicalCard
         : List.generate(7, (i) => 0.0);
 
     return GlassCard(
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(22),
       tintColor: null, // Neutral glass: no colored gradient tint
       glowColor: null,
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(10),
       onTap: null, // Card itself is static: chart interacts with hover and Analytics badge is the button
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -286,11 +285,11 @@ class _NetworkGrowthGraphicalCardState extends State<_NetworkGrowthGraphicalCard
           Row(
             children: [
               Container(
-                width: 36,
-                height: 36,
+                width: 40,
+                height: 40,
                 decoration: BoxDecoration(
                   color: context.colors.surfaceContainerHighest.withValues(alpha: 0.35),
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(12),
                   border: Border.all(
                     color: context.colors.glassBorder,
                     width: 0.8,
@@ -335,13 +334,13 @@ class _NetworkGrowthGraphicalCardState extends State<_NetworkGrowthGraphicalCard
               Material(
                 color: Colors.transparent,
                 child: InkWell(
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(12),
                   onTap: widget.onTap,
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                     decoration: BoxDecoration(
                       color: context.colors.surfaceContainerHighest.withValues(alpha: 0.25),
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(12),
                       border: Border.all(
                         color: context.colors.glassBorder,
                         width: 0.8,

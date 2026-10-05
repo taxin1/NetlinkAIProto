@@ -12,6 +12,7 @@ import '../../../core/widgets/glass_card.dart';
 import '../../../core/widgets/gradient_button.dart';
 import '../../../core/widgets/pop_in_item.dart';
 import '../../../core/widgets/section_header.dart';
+import '../../../core/widgets/scrollable_list_window.dart';
 import '../../../core/widgets/trial_banner_card.dart';
 import '../../../core/utils/responsive.dart';
 import '../../../core/router/app_router.dart';
@@ -29,6 +30,8 @@ class EventMatchmakingScreen extends ConsumerStatefulWidget {
 
 class _EventMatchmakingScreenState extends ConsumerState<EventMatchmakingScreen> {
   final ScrollController _scrollController = ScrollController();
+  final ScrollController _matchesScrollController = ScrollController();
+  final ScrollController _scheduledScrollController = ScrollController();
   final TextEditingController _searchController = TextEditingController();
 
   final GlobalKey _pulseKey = GlobalKey();
@@ -48,6 +51,8 @@ class _EventMatchmakingScreenState extends ConsumerState<EventMatchmakingScreen>
   void dispose() {
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
+    _matchesScrollController.dispose();
+    _scheduledScrollController.dispose();
     _searchController.dispose();
     super.dispose();
   }
@@ -85,21 +90,24 @@ class _EventMatchmakingScreenState extends ConsumerState<EventMatchmakingScreen>
 
   void _scrollTo(GlobalKey key, String tabLabel) {
     setState(() => _activeTab = tabLabel);
+    if (!mounted || key.currentContext == null) return;
+    final RenderBox? box = key.currentContext!.findRenderObject() as RenderBox?;
+    if (box == null || !box.hasSize) return;
+    final RenderBox? ancestor = context.findRenderObject() as RenderBox?;
+    if (ancestor == null || !ancestor.hasSize) return;
+    final position = box.localToGlobal(Offset.zero, ancestor: ancestor);
+    final target = _scrollController.offset + position.dy - Responsive.topPadding(context);
+
     _isAutoScrolling = true;
-    final context = key.currentContext;
-    if (context != null) {
-      Scrollable.ensureVisible(
-        context,
-        duration: const Duration(milliseconds: 400),
-        curve: Curves.easeInOutCubic,
-      ).then((_) {
-        Future.delayed(const Duration(milliseconds: 100), () {
-          if (mounted) _isAutoScrolling = false;
-        });
+    _scrollController.animateTo(
+      target.clamp(0.0, _scrollController.position.maxScrollExtent),
+      duration: const Duration(milliseconds: 400),
+      curve: Curves.easeOutCubic,
+    ).then((_) {
+      Future.delayed(const Duration(milliseconds: 150), () {
+        if (mounted) _isAutoScrolling = false;
       });
-    } else {
-      _isAutoScrolling = false;
-    }
+    });
   }
 
   @override
@@ -151,44 +159,65 @@ class _EventMatchmakingScreenState extends ConsumerState<EventMatchmakingScreen>
                   ],
 
                   // ── Section 1: Match Pulse & Overview ──
-                  SectionHeader(
-                    icon: Icons.hub_rounded,
-                    label: context.tr('matchPulseTitle'),
-                    color: context.colors.primary,
-                  ),
-                  const SizedBox(height: 16),
-                  PopInItem(
+                  Container(
                     key: _pulseKey,
-                    index: isGuest ? 2 : 1,
-                    child: _buildMatchPulse(context, state),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SectionHeader(
+                          icon: Icons.hub_rounded,
+                          label: context.tr('matchPulseTitle'),
+                          color: context.colors.primary,
+                        ),
+                        const SizedBox(height: 16),
+                        PopInItem(
+                          index: isGuest ? 2 : 1,
+                          child: _buildMatchPulse(context, state),
+                        ),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 36),
+                  const SectionDivider(margin: EdgeInsets.symmetric(vertical: 36)),
 
                   // ── Section 2: AI Matches & Filters (Unified Section) ──
-                  SectionHeader(
-                    icon: Icons.auto_awesome_rounded,
-                    label: context.tr('aiMatchesFeed'),
-                    color: const Color(0xFF8B5CF6),
-                  ),
-                  const SizedBox(height: 16),
-                  PopInItem(
+                  Container(
                     key: _matchesKey,
-                    index: isGuest ? 3 : 2,
-                    child: _buildMatchesFeed(context, state, matches),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SectionHeader(
+                          icon: Icons.auto_awesome_rounded,
+                          label: context.tr('aiMatchesFeed'),
+                          color: const Color(0xFF8B5CF6),
+                        ),
+                        const SizedBox(height: 16),
+                        PopInItem(
+                          index: isGuest ? 3 : 2,
+                          child: _buildMatchesFeed(context, state, matches),
+                        ),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 36),
+                  const SectionDivider(margin: EdgeInsets.symmetric(vertical: 36)),
 
                   // ── Section 3: Scheduled Meetups ──
-                  SectionHeader(
-                    icon: Icons.calendar_today_rounded,
-                    label: context.tr('scheduledMeetups'),
-                    color: const Color(0xFF10B981),
-                  ),
-                  const SizedBox(height: 16),
-                  PopInItem(
+                  Container(
                     key: _scheduledKey,
-                    index: isGuest ? 4 : 3,
-                    child: _buildScheduledSection(context, scheduled),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SectionHeader(
+                          icon: Icons.calendar_today_rounded,
+                          label: context.tr('scheduledMeetups'),
+                          color: const Color(0xFF10B981),
+                        ),
+                        const SizedBox(height: 16),
+                        PopInItem(
+                          index: isGuest ? 4 : 3,
+                          child: _buildScheduledSection(context, scheduled),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -296,8 +325,8 @@ class _EventMatchmakingScreenState extends ConsumerState<EventMatchmakingScreen>
       child: GlassCard(
         tintColor: null, // Neutral glass: no colored gradient tint
         glowColor: null,
-        borderRadius: BorderRadius.circular(18),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        borderRadius: BorderRadius.circular(22),
+        padding: const EdgeInsets.all(10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -306,11 +335,11 @@ class _EventMatchmakingScreenState extends ConsumerState<EventMatchmakingScreen>
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Container(
-                  width: 36,
-                  height: 36,
+                  width: 40,
+                  height: 40,
                   decoration: BoxDecoration(
                     color: context.colors.surfaceContainerHighest.withValues(alpha: 0.35),
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: context.colors.glassBorder, width: 0.8),
                   ),
                   child: Icon(icon, color: context.colors.onSurfaceVariant, size: 18),
@@ -606,7 +635,21 @@ class _EventMatchmakingScreenState extends ConsumerState<EventMatchmakingScreen>
             ),
           ),
         ] else ...[
-          ...matches.map((profile) => _buildMatchCard(context, profile)),
+          ScrollableListWindow(
+            controller: _matchesScrollController,
+            showScrollbar: matches.length > 2,
+            maxHeight: MediaQuery.of(context).size.width > 700 ? 460 : 340,
+            child: ListView.builder(
+              controller: _matchesScrollController,
+              shrinkWrap: true,
+              physics: const ClampingScrollPhysics(),
+              padding: EdgeInsets.zero,
+              itemCount: matches.length,
+              itemBuilder: (context, index) {
+                return _buildMatchCard(context, matches[index]);
+              },
+            ),
+          ),
         ],
       ],
     );
@@ -618,196 +661,192 @@ class _EventMatchmakingScreenState extends ConsumerState<EventMatchmakingScreen>
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: context.colors.surface.withValues(alpha: 0.3),
+        color: context.colors.surfaceCard,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: profile.compatibilityScore >= 95
-              ? const Color(0xFF8B5CF6).withValues(alpha: 0.4)
-              : context.colors.glassBorder,
-          width: profile.compatibilityScore >= 95 ? 1.5 : 1.0,
+          color: context.colors.glassBorder,
+          width: 1.0,
         ),
       ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(18),
-          onTap: () => _showMatchDetailsDialog(context, profile),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            child: IntrinsicHeight(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // ── Avatar ──
-                  Center(
-                    child: Container(
-                      width: 50,
-                      height: 50,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            context.colors.primary.withValues(alpha: 0.8),
-                            const Color(0xFF8B5CF6).withValues(alpha: 0.8),
-                          ],
-                        ),
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: context.colors.primary.withValues(alpha: 0.25),
-                            blurRadius: 10,
-                          ),
-                        ],
-                      ),
-                      child: Center(
-                        child: Text(
-                          profile.avatarInitials,
-                          style: AppTypography.bodyMd.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 14),
-
-                  // ── Name, Role/Company, Event & Location ──
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          profile.name,
-                          style: AppTypography.headlineSm.copyWith(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          '${profile.role} • ${profile.company}',
-                          style: AppTypography.bodySm.copyWith(
-                            color: context.colors.onSurfaceVariant,
-                            fontWeight: FontWeight.w500,
-                            fontSize: 12,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 4),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 4,
-                          crossAxisAlignment: WrapCrossAlignment.center,
-                          children: [
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(Icons.event_outlined, size: 12, color: context.colors.primary),
-                                const SizedBox(width: 4),
-                                Text(
-                                  profile.eventTitle,
-                                  style: AppTypography.bodySm.copyWith(
-                                    color: context.colors.primary,
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(Icons.location_on_outlined,
-                                    size: 12, color: context.colors.onSurfaceVariant),
-                                const SizedBox(width: 2),
-                                Text(
-                                  profile.location,
-                                  style: AppTypography.bodySm.copyWith(
-                                    color: context.colors.onSurfaceVariant.withValues(alpha: 0.7),
-                                    fontSize: 11,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        child: IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // ── Avatar ──
+              Center(
+                child: Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        context.colors.primary.withValues(alpha: 0.8),
+                        const Color(0xFF8B5CF6).withValues(alpha: 0.8),
                       ],
                     ),
-                  ),
-                  const SizedBox(width: 10),
-
-                  // ── Match Badge, Bookmark & Details Button ──
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [
-                                  const Color(0xFF8B5CF6).withValues(alpha: 0.25),
-                                  context.colors.primary.withValues(alpha: 0.15),
-                                ],
-                              ),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: const Color(0xFF8B5CF6).withValues(alpha: 0.5),
-                              ),
-                            ),
-                            child: Text(
-                              '${profile.compatibilityScore}% ${context.tr('matchSuffix')}',
-                              style: AppTypography.bodySm.copyWith(
-                                color: const Color(0xFFA78BFA),
-                                fontWeight: FontWeight.bold,
-                                fontSize: 11,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                          IconButton(
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
-                            splashRadius: 16,
-                            icon: Icon(
-                              profile.isBookmarked ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
-                              size: 19,
-                              color: profile.isBookmarked
-                                  ? context.colors.primary
-                                  : context.colors.onSurfaceVariant.withValues(alpha: 0.6),
-                            ),
-                            onPressed: () {
-                              ref.read(matchmakingNotifierProvider.notifier).toggleBookmark(profile.id);
-                              if (isGuest) {
-                                AppToast.show(context, context.tr('bookmarkedTrialToast'));
-                              }
-                            },
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 10),
-                      AnimatedGlassIconButton(
-                        label: context.tr('details'),
-                        icon: Icons.arrow_forward_rounded,
-                        size: 28,
-                        iconSize: 13,
-                        fontSize: 11,
-                        padding: const EdgeInsets.symmetric(horizontal: 10),
-                        iconColor: context.colors.primary,
-                        onPressed: () => _showMatchDetailsDialog(context, profile),
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: context.colors.primary.withValues(alpha: 0.25),
+                        blurRadius: 10,
                       ),
                     ],
                   ),
+                  child: Center(
+                    child: Text(
+                      profile.avatarInitials,
+                      style: AppTypography.bodyMd.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+
+              // ── Name, Role/Company, Event & Location ──
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      profile.name,
+                      style: AppTypography.headlineSm.copyWith(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '${profile.role} • ${profile.company}',
+                      style: AppTypography.bodySm.copyWith(
+                        color: context.colors.onSurfaceVariant,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 11.5,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 5),
+                    if (profile.eventTitle.isNotEmpty)
+                      Row(
+                        children: [
+                          Icon(Icons.event_outlined, size: 11, color: context.colors.primary),
+                          const SizedBox(width: 3),
+                          Expanded(
+                            child: Text(
+                              profile.eventTitle,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppTypography.bodySm.copyWith(
+                                color: context.colors.primary,
+                                fontSize: 10.5,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    if (profile.location.isNotEmpty) ...[
+                      const SizedBox(height: 2),
+                      Row(
+                        children: [
+                          Icon(Icons.location_on_outlined,
+                              size: 11, color: context.colors.onSurfaceVariant),
+                          const SizedBox(width: 3),
+                          Expanded(
+                            child: Text(
+                              profile.location,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppTypography.bodySm.copyWith(
+                                color: context.colors.onSurfaceVariant.withValues(alpha: 0.7),
+                                fontSize: 10.5,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+
+              // ── Match Metric, Bookmark & Details Button ──
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            '${profile.compatibilityScore}%',
+                            style: AppTypography.headlineSm.copyWith(
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                              color: context.colors.onSurface,
+                              height: 1.1,
+                            ),
+                          ),
+                          Text(
+                            context.tr('matchSuffix'),
+                            style: AppTypography.labelSm.copyWith(
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.w500,
+                              color: context.colors.onSurfaceVariant,
+                              height: 1.1,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(width: 4),
+                      IconButton(
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints.tightFor(width: 26, height: 26),
+                        visualDensity: VisualDensity.compact,
+                        splashRadius: 16,
+                        icon: Icon(
+                          profile.isBookmarked ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
+                          size: 18,
+                          color: profile.isBookmarked
+                              ? context.colors.primary
+                              : context.colors.onSurfaceVariant.withValues(alpha: 0.6),
+                        ),
+                        onPressed: () {
+                          ref.read(matchmakingNotifierProvider.notifier).toggleBookmark(profile.id);
+                          if (isGuest) {
+                            AppToast.show(context, context.tr('bookmarkedTrialToast'));
+                          }
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  AnimatedGlassIconButton(
+                    label: context.tr('details'),
+                    icon: Icons.arrow_forward_rounded,
+                    size: 28,
+                    iconSize: 13,
+                    fontSize: 11,
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    iconColor: context.colors.primary,
+                    onPressed: () => _showMatchDetailsDialog(context, profile),
+                  ),
                 ],
               ),
-            ),
+            ],
           ),
         ),
       ),
@@ -849,13 +888,13 @@ class _EventMatchmakingScreenState extends ConsumerState<EventMatchmakingScreen>
                   children: [
                     // Header
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 18, 14, 14),
+                      padding: const EdgeInsets.fromLTRB(16, 16, 12, 14),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Container(
-                            width: 48,
-                            height: 48,
+                            width: 44,
+                            height: 44,
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
                                 colors: [
@@ -871,51 +910,23 @@ class _EventMatchmakingScreenState extends ConsumerState<EventMatchmakingScreen>
                                 style: AppTypography.bodyMd.copyWith(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 16,
+                                  fontSize: 15,
                                 ),
                               ),
                             ),
                           ),
-                          const SizedBox(width: 14),
+                          const SizedBox(width: 12),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        currentProfile.name,
-                                        style: AppTypography.headlineSm.copyWith(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                                      decoration: BoxDecoration(
-                                        gradient: LinearGradient(
-                                          colors: [
-                                            const Color(0xFF8B5CF6).withValues(alpha: 0.25),
-                                            context.colors.primary.withValues(alpha: 0.15),
-                                          ],
-                                        ),
-                                        borderRadius: BorderRadius.circular(10),
-                                        border: Border.all(
-                                          color: const Color(0xFF8B5CF6).withValues(alpha: 0.5),
-                                        ),
-                                      ),
-                                      child: Text(
-                                        '${currentProfile.compatibilityScore}% ${context.tr('matchSuffix')}',
-                                        style: AppTypography.bodySm.copyWith(
-                                          color: const Color(0xFFA78BFA),
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 11,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
+                                Text(
+                                  currentProfile.name,
+                                  style: AppTypography.headlineSm.copyWith(
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  softWrap: true,
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
@@ -923,40 +934,92 @@ class _EventMatchmakingScreenState extends ConsumerState<EventMatchmakingScreen>
                                   style: AppTypography.bodySm.copyWith(
                                     color: context.colors.onSurfaceVariant,
                                     fontWeight: FontWeight.w500,
+                                    fontSize: 12,
                                   ),
+                                  softWrap: true,
                                 ),
-                                const SizedBox(height: 4),
-                                Row(
-                                  children: [
-                                    Icon(Icons.event_outlined, size: 13, color: context.colors.primary),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      currentProfile.eventTitle,
-                                      style: AppTypography.bodySm.copyWith(
-                                        color: context.colors.primary,
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w600,
+                                if (currentProfile.eventTitle.isNotEmpty) ...[
+                                  const SizedBox(height: 4),
+                                  Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.only(top: 2),
+                                        child: Icon(Icons.event_outlined, size: 12, color: context.colors.primary),
                                       ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Icon(Icons.location_on_outlined,
-                                        size: 13, color: context.colors.onSurfaceVariant),
-                                    const SizedBox(width: 2),
-                                    Text(
-                                      currentProfile.location,
-                                      style: AppTypography.bodySm.copyWith(
-                                        color: context.colors.onSurfaceVariant.withValues(alpha: 0.7),
-                                        fontSize: 11,
+                                      const SizedBox(width: 4),
+                                      Expanded(
+                                        child: Text(
+                                          currentProfile.eventTitle,
+                                          style: AppTypography.bodySm.copyWith(
+                                            color: context.colors.primary,
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                          softWrap: true,
+                                        ),
                                       ),
-                                    ),
-                                  ],
-                                ),
+                                    ],
+                                  ),
+                                ],
+                                if (currentProfile.location.isNotEmpty) ...[
+                                  const SizedBox(height: 2),
+                                  Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.only(top: 2),
+                                        child: Icon(Icons.location_on_outlined,
+                                            size: 12, color: context.colors.onSurfaceVariant),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Expanded(
+                                        child: Text(
+                                          currentProfile.location,
+                                          style: AppTypography.bodySm.copyWith(
+                                            color: context.colors.onSurfaceVariant.withValues(alpha: 0.7),
+                                            fontSize: 11,
+                                          ),
+                                          softWrap: true,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
                               ],
                             ),
                           ),
-                          IconButton(
-                            icon: const Icon(Icons.close_rounded, size: 20),
-                            onPressed: () => Navigator.pop(dialogCtx),
+                          const SizedBox(width: 8),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints.tightFor(width: 28, height: 28),
+                                icon: const Icon(Icons.close_rounded, size: 18),
+                                onPressed: () => Navigator.pop(dialogCtx),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                '${currentProfile.compatibilityScore}%',
+                                style: AppTypography.headlineSm.copyWith(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                  color: context.colors.onSurface,
+                                  height: 1.1,
+                                ),
+                              ),
+                              Text(
+                                context.tr('matchSuffix'),
+                                style: AppTypography.labelSm.copyWith(
+                                  fontSize: 9.5,
+                                  fontWeight: FontWeight.w500,
+                                  color: context.colors.onSurfaceVariant,
+                                  height: 1.1,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -966,6 +1029,7 @@ class _EventMatchmakingScreenState extends ConsumerState<EventMatchmakingScreen>
                     // Scrollable content
                     Flexible(
                       child: SingleChildScrollView(
+                        primary: false,
                         padding: const EdgeInsets.all(20),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -974,25 +1038,38 @@ class _EventMatchmakingScreenState extends ConsumerState<EventMatchmakingScreen>
                             Container(
                               padding: const EdgeInsets.all(14),
                               decoration: BoxDecoration(
-                                color: context.colors.primary.withValues(alpha: 0.08),
+                                color: context.colors.surfaceCard,
                                 borderRadius: BorderRadius.circular(14),
                                 border: Border.all(
-                                  color: context.colors.primary.withValues(alpha: 0.25),
+                                  color: context.colors.glassBorder,
                                 ),
                               ),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    context.tr('whyAiMatchedHeader'),
-                                    style: AppTypography.labelCaps.copyWith(
-                                      color: context.colors.primary,
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.bold,
-                                      letterSpacing: 0.8,
-                                    ),
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.auto_awesome_rounded,
+                                        size: 13,
+                                        color: context.colors.onSurfaceVariant,
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Expanded(
+                                        child: Text(
+                                          context.tr('whyAiMatchedHeader'),
+                                          style: AppTypography.labelCaps.copyWith(
+                                            color: context.colors.onSurface,
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.bold,
+                                            letterSpacing: 0.8,
+                                          ),
+                                          softWrap: true,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  const SizedBox(height: 6),
+                                  const SizedBox(height: 8),
                                   Text(
                                     currentProfile.whyAiMatched,
                                     style: AppTypography.bodySm.copyWith(
@@ -1007,44 +1084,45 @@ class _EventMatchmakingScreenState extends ConsumerState<EventMatchmakingScreen>
 
                             // 2. Seeking Info
                             Container(
-                              padding: const EdgeInsets.all(12),
+                              padding: const EdgeInsets.all(14),
                               decoration: BoxDecoration(
-                                color: Colors.amber.withValues(alpha: 0.08),
-                                borderRadius: BorderRadius.circular(10),
-                                border: Border.all(color: Colors.amber.withValues(alpha: 0.22)),
+                                color: context.colors.surfaceCard,
+                                borderRadius: BorderRadius.circular(14),
+                                border: Border.all(color: context.colors.glassBorder),
                               ),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Row(
                                     children: [
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                        decoration: BoxDecoration(
-                                          color: Colors.amber.withValues(alpha: 0.2),
-                                          borderRadius: BorderRadius.circular(6),
-                                        ),
-                                        child: Text(
-                                          context.tr('seeking'),
-                                          style: AppTypography.bodySm.copyWith(
-                                            color: Colors.amber,
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 11,
-                                          ),
-                                        ),
+                                      Icon(
+                                        Icons.search_rounded,
+                                        size: 13,
+                                        color: context.colors.onSurfaceVariant,
                                       ),
-                                      const SizedBox(width: 8),
+                                      const SizedBox(width: 6),
                                       Expanded(
                                         child: Text(
-                                          currentProfile.seeking,
-                                          style: AppTypography.bodySm.copyWith(
-                                            color: context.colors.onSurface,
-                                            fontWeight: FontWeight.w600,
-                                            fontSize: 12,
+                                          context.tr('seeking').toUpperCase(),
+                                          style: AppTypography.labelCaps.copyWith(
+                                            color: context.colors.onSurfaceVariant,
+                                            fontWeight: FontWeight.bold,
+                                            letterSpacing: 0.8,
+                                            fontSize: 11,
                                           ),
+                                          softWrap: true,
                                         ),
                                       ),
                                     ],
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    currentProfile.seeking,
+                                    style: AppTypography.bodySm.copyWith(
+                                      color: context.colors.onSurface,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 12.5,
+                                    ),
                                   ),
                                   if (currentProfile.seekingDetail != null) ...[
                                     const SizedBox(height: 6),
@@ -1060,48 +1138,49 @@ class _EventMatchmakingScreenState extends ConsumerState<EventMatchmakingScreen>
                                 ],
                               ),
                             ),
-                            const SizedBox(height: 8),
+                            const SizedBox(height: 10),
 
                             // 3. Offering Info
                             Container(
-                              padding: const EdgeInsets.all(12),
+                              padding: const EdgeInsets.all(14),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF14B8A6).withValues(alpha: 0.08),
-                                borderRadius: BorderRadius.circular(10),
-                                border: Border.all(color: const Color(0xFF14B8A6).withValues(alpha: 0.22)),
+                                color: context.colors.surfaceCard,
+                                borderRadius: BorderRadius.circular(14),
+                                border: Border.all(color: context.colors.glassBorder),
                               ),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Row(
                                     children: [
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                        decoration: BoxDecoration(
-                                          color: const Color(0xFF14B8A6).withValues(alpha: 0.2),
-                                          borderRadius: BorderRadius.circular(6),
-                                        ),
-                                        child: Text(
-                                          context.tr('offering'),
-                                          style: AppTypography.bodySm.copyWith(
-                                            color: const Color(0xFF14B8A6),
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 11,
-                                          ),
-                                        ),
+                                      Icon(
+                                        Icons.handshake_outlined,
+                                        size: 13,
+                                        color: context.colors.onSurfaceVariant,
                                       ),
-                                      const SizedBox(width: 8),
+                                      const SizedBox(width: 6),
                                       Expanded(
                                         child: Text(
-                                          currentProfile.offering,
-                                          style: AppTypography.bodySm.copyWith(
-                                            color: context.colors.onSurface,
-                                            fontWeight: FontWeight.w600,
-                                            fontSize: 12,
+                                          context.tr('offering').toUpperCase(),
+                                          style: AppTypography.labelCaps.copyWith(
+                                            color: context.colors.onSurfaceVariant,
+                                            fontWeight: FontWeight.bold,
+                                            letterSpacing: 0.8,
+                                            fontSize: 11,
                                           ),
+                                          softWrap: true,
                                         ),
                                       ),
                                     ],
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    currentProfile.offering,
+                                    style: AppTypography.bodySm.copyWith(
+                                      color: context.colors.onSurface,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 12.5,
+                                    ),
                                   ),
                                   if (currentProfile.offeringDetail != null) ...[
                                     const SizedBox(height: 6),
@@ -1155,25 +1234,32 @@ class _EventMatchmakingScreenState extends ConsumerState<EventMatchmakingScreen>
                                     color: context.colors.glassBorder.withValues(alpha: 0.6),
                                   ),
                                 ),
-                                child: Center(
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(
-                                        Icons.check_circle_rounded,
-                                        size: 18,
-                                        color: context.colors.onSurfaceVariant.withValues(alpha: 0.7),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        context.tr('meetingScheduled'),
-                                        style: AppTypography.bodySm.copyWith(
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                                  child: Center(
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          Icons.check_circle_rounded,
+                                          size: 18,
                                           color: context.colors.onSurfaceVariant.withValues(alpha: 0.7),
-                                          fontWeight: FontWeight.w600,
-                                          fontSize: 14,
                                         ),
-                                      ),
-                                    ],
+                                        const SizedBox(width: 8),
+                                        Flexible(
+                                          child: Text(
+                                            context.tr('meetingScheduled'),
+                                            style: AppTypography.bodySm.copyWith(
+                                              color: context.colors.onSurfaceVariant.withValues(alpha: 0.7),
+                                              fontWeight: FontWeight.w600,
+                                              fontSize: 13,
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               )
@@ -1242,32 +1328,43 @@ class _EventMatchmakingScreenState extends ConsumerState<EventMatchmakingScreen>
 
   Widget _buildScheduledSection(BuildContext context, List<ScheduledMeeting> scheduled) {
     return GlassCard(
+      tintColor: null,
+      glowColor: null,
       borderRadius: BorderRadius.circular(20),
-      padding: const EdgeInsets.all(22),
+      padding: const EdgeInsets.all(18),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Text(
-                context.tr('yourScheduledMeetups'),
-                style: AppTypography.headlineSm.copyWith(fontSize: 18),
-              ),
-              const Spacer(),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.green.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(12),
-                ),
+              Expanded(
                 child: Text(
-                  '${scheduled.length} ${context.tr('activeCount')}',
-                  style: AppTypography.bodySm.copyWith(
-                    color: Colors.green,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 12,
-                  ),
+                  context.tr('yourScheduledMeetups'),
+                  style: AppTypography.headlineSm.copyWith(fontSize: 17),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
                 ),
+              ),
+              const SizedBox(width: 8),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    '${scheduled.length}',
+                    style: AppTypography.bodyMd.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: context.colors.onSurface,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    context.tr('activeCount'),
+                    style: AppTypography.labelSm.copyWith(
+                      color: context.colors.onSurfaceVariant,
+                      fontSize: 11,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -1286,131 +1383,161 @@ class _EventMatchmakingScreenState extends ConsumerState<EventMatchmakingScreen>
               ),
             ),
           ] else ...[
-            ...scheduled.map((meet) {
-              return Container(
-                margin: const EdgeInsets.only(bottom: 12),
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: context.colors.surface.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: context.colors.glassBorder),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: Column(
+          ScrollableListWindow(
+            controller: _scheduledScrollController,
+            showScrollbar: scheduled.length > 2,
+            maxHeight: MediaQuery.of(context).size.width > 700 ? 440 : 330,
+            child: ListView.builder(
+              controller: _scheduledScrollController,
+              shrinkWrap: true,
+              physics: const ClampingScrollPhysics(),
+              padding: EdgeInsets.zero,
+              itemCount: scheduled.length,
+              itemBuilder: (context, index) {
+                final meet = scheduled[index];
+                    return Container(
+                      margin: EdgeInsets.only(
+                        bottom: index == scheduled.length - 1 ? 0 : 12,
+                      ),
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: context.colors.surfaceCard,
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: context.colors.glassBorder),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                '${context.tr('meetWith')} ${meet.personName}',
-                                style: AppTypography.headlineSm.copyWith(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.bold,
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      '${context.tr('meetWith')} ${meet.personName}',
+                                      style: AppTypography.headlineSm.copyWith(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      '${meet.personRole} • ${meet.personCompany}',
+                                      style: AppTypography.bodySm.copyWith(
+                                        color: context.colors.onSurfaceVariant,
+                                        fontSize: 12,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
                                 ),
                               ),
-                              const SizedBox(height: 2),
-                              Text(
-                                '${meet.personRole} • ${meet.personCompany}',
-                                style: AppTypography.bodySm.copyWith(
-                                  color: context.colors.onSurfaceVariant,
-                                  fontSize: 12,
+                              const SizedBox(width: 12),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: context.colors.surfaceContainerHighest.withValues(alpha: 0.5),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(color: context.colors.glassBorder),
+                                ),
+                                child: Text(
+                                  meet.isConfirmed ? context.tr('confirmed') : context.tr('pending'),
+                                  style: AppTypography.bodySm.copyWith(
+                                    color: context.colors.onSurface,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 11,
+                                  ),
                                 ),
                               ),
                             ],
                           ),
-                        ),
-                        const SizedBox(width: 12),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: Colors.green.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Text(
-                            meet.isConfirmed ? context.tr('confirmed') : context.tr('pending'),
-                            style: AppTypography.bodySm.copyWith(
-                              color: Colors.green,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 11,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    if (meet.topic.isNotEmpty) ...[
-                      const SizedBox(height: 8),
-                      Text(
-                        meet.topic,
-                        style: AppTypography.bodySm.copyWith(
-                          color: context.colors.onSurface.withValues(alpha: 0.9),
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                    const SizedBox(height: 10),
-                    Wrap(
-                      spacing: 16,
-                      runSpacing: 6,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      children: [
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.schedule, size: 13, color: context.colors.primary),
-                            const SizedBox(width: 5),
+                          if (meet.topic.isNotEmpty) ...[
+                            const SizedBox(height: 8),
                             Text(
-                              '${meet.scheduledTime.month}/${meet.scheduledTime.day} @ ${_formatTime(meet.scheduledTime)}',
+                              meet.topic,
                               style: AppTypography.bodySm.copyWith(
-                                color: context.colors.primary,
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
+                                color: context.colors.onSurface.withValues(alpha: 0.9),
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
                           ],
-                        ),
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.place_outlined,
-                                size: 13, color: context.colors.onSurfaceVariant),
-                            const SizedBox(width: 5),
-                            Text(
-                              meet.locationOrLink,
-                              style: AppTypography.bodySm.copyWith(
-                                color: context.colors.onSurfaceVariant.withValues(alpha: 0.9),
-                                fontSize: 11,
-                              ),
-                            ),
-                          ],
-                        ),
-                        if (meet.eventTitle.isNotEmpty)
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
+                          const SizedBox(height: 10),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Icon(Icons.event_outlined,
-                                  size: 13,
-                                  color: context.colors.onSurfaceVariant.withValues(alpha: 0.7)),
-                              const SizedBox(width: 5),
-                              Text(
-                                meet.eventTitle,
-                                style: AppTypography.bodySm.copyWith(
-                                  color: context.colors.onSurfaceVariant.withValues(alpha: 0.7),
-                                  fontSize: 11,
-                                ),
+                              Row(
+                                children: [
+                                  Icon(Icons.schedule, size: 13, color: context.colors.primary),
+                                  const SizedBox(width: 6),
+                                  Expanded(
+                                    child: Text(
+                                      '${meet.scheduledTime.month}/${meet.scheduledTime.day} @ ${_formatTime(meet.scheduledTime)}',
+                                      style: AppTypography.bodySm.copyWith(
+                                        color: context.colors.primary,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
                               ),
+                              const SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  Icon(Icons.place_outlined,
+                                      size: 13, color: context.colors.onSurfaceVariant),
+                                  const SizedBox(width: 6),
+                                  Expanded(
+                                    child: Text(
+                                      meet.locationOrLink,
+                                      style: AppTypography.bodySm.copyWith(
+                                        color: context.colors.onSurfaceVariant.withValues(alpha: 0.9),
+                                        fontSize: 11,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              if (meet.eventTitle.isNotEmpty) ...[
+                                const SizedBox(height: 4),
+                                Row(
+                                  children: [
+                                    Icon(Icons.event_outlined,
+                                        size: 13,
+                                        color: context.colors.onSurfaceVariant.withValues(alpha: 0.7)),
+                                    const SizedBox(width: 6),
+                                    Expanded(
+                                      child: Text(
+                                        meet.eventTitle,
+                                        style: AppTypography.bodySm.copyWith(
+                                          color: context.colors.onSurfaceVariant.withValues(alpha: 0.7),
+                                          fontSize: 11,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ],
                           ),
-                      ],
-                    ),
-                  ],
+                        ],
+                      ),
+                    );
+                  },
                 ),
-              );
-            }),
+              ),
           ],
         ],
       ),
@@ -1450,6 +1577,7 @@ class _EventMatchmakingScreenState extends ConsumerState<EventMatchmakingScreen>
               ),
               title: Text(context.tr('scheduleMeetup'), style: AppTypography.headlineSm.copyWith(fontSize: 18)),
               content: SingleChildScrollView(
+                primary: false,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,

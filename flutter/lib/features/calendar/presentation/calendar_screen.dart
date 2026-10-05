@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/localization/app_localizations.dart';
+import '../../../core/router/app_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/animated_glass_icon_button.dart';
@@ -11,6 +13,7 @@ import '../../../core/widgets/gradient_button.dart';
 import '../../../core/widgets/pop_in_item.dart';
 import '../../../core/widgets/section_header.dart';
 import '../../../core/widgets/trial_banner_card.dart';
+import '../../../core/widgets/scrollable_list_window.dart';
 import '../../../core/utils/responsive.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../contacts/providers/contacts_provider.dart';
@@ -25,6 +28,13 @@ class CalendarScreen extends ConsumerStatefulWidget {
 
 class _CalendarScreenState extends ConsumerState<CalendarScreen> {
   static const _categories = ['All', 'Meeting', 'Networking', 'Call'];
+  final ScrollController _eventsScrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _eventsScrollController.dispose();
+    super.dispose();
+  }
 
   List<String> _getWeekDays(BuildContext context) {
     return [
@@ -111,8 +121,10 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(context.tr('scheduleNewEvent'),
-                            style: AppTypography.headlineSm.copyWith(fontSize: 18)),
+                        Expanded(
+                          child: Text(context.tr('scheduleNewEvent'),
+                              style: AppTypography.headlineSm.copyWith(fontSize: 18)),
+                        ),
                         IconButton(
                           icon: const Icon(Icons.close_rounded),
                           onPressed: () => Navigator.of(ctx).pop(),
@@ -170,104 +182,131 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                     const SizedBox(height: 14),
 
                     // Date & Times Row
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(context.tr('date'),
-                                  style: AppTypography.labelSm.copyWith(
-                                      color: context.colors.onSurfaceVariant,
-                                      fontWeight: FontWeight.w600)),
-                              const SizedBox(height: 6),
-                              InkWell(
-                                onTap: () async {
-                                  final picked = await showDatePicker(
-                                    context: context,
-                                    initialDate: selectedDate,
-                                    firstDate: DateTime(2020),
-                                    lastDate: DateTime(2035),
-                                  );
-                                  if (picked != null) {
-                                    setSheetState(() => selectedDate = picked);
-                                  }
-                                },
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                                  decoration: BoxDecoration(
-                                    color: context.colors.surface.withValues(alpha: 0.25),
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(color: context.colors.glassBorder),
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        final isCompact = constraints.maxWidth < 360;
+
+                        final dateWidget = Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(context.tr('date'),
+                                style: AppTypography.labelSm.copyWith(
+                                    color: context.colors.onSurfaceVariant,
+                                    fontWeight: FontWeight.w600)),
+                            const SizedBox(height: 6),
+                            InkWell(
+                              onTap: () async {
+                                final picked = await showDatePicker(
+                                  context: context,
+                                  initialDate: selectedDate,
+                                  firstDate: DateTime(2020),
+                                  lastDate: DateTime(2035),
+                                );
+                                if (picked != null) {
+                                  setSheetState(() => selectedDate = picked);
+                                }
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                                decoration: BoxDecoration(
+                                  color: context.colors.surface.withValues(alpha: 0.25),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(color: context.colors.glassBorder),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Expanded(
+                                      child: Text(
                                         '${selectedDate.month}/${selectedDate.day}/${selectedDate.year}',
                                         style: AppTypography.bodySm
                                             .copyWith(color: context.colors.onSurface),
+                                        overflow: TextOverflow.ellipsis,
                                       ),
-                                      Icon(Icons.calendar_month,
-                                          size: 16, color: context.colors.primary),
-                                    ],
-                                  ),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Icon(Icons.calendar_month,
+                                        size: 16, color: context.colors.primary),
+                                  ],
                                 ),
                               ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                            ),
+                          ],
+                        );
+
+                        final timeWidget = Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(context.tr('timeRange'),
+                                style: AppTypography.labelSm.copyWith(
+                                    color: context.colors.onSurfaceVariant,
+                                    fontWeight: FontWeight.w600)),
+                            const SizedBox(height: 6),
+                            InkWell(
+                              onTap: () async {
+                                final pickedStart = await showTimePicker(
+                                  context: context,
+                                  initialTime: startTime,
+                                );
+                                if (pickedStart != null) {
+                                  setSheetState(() {
+                                    startTime = pickedStart;
+                                    endTime = TimeOfDay(
+                                      hour: (pickedStart.hour + 1) % 24,
+                                      minute: pickedStart.minute,
+                                    );
+                                  });
+                                }
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                                decoration: BoxDecoration(
+                                  color: context.colors.surface.withValues(alpha: 0.25),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(color: context.colors.glassBorder),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Expanded(
+                                      child: FittedBox(
+                                        fit: BoxFit.scaleDown,
+                                        alignment: Alignment.centerLeft,
+                                        child: Text(
+                                          '${startTime.format(context)} - ${endTime.format(context)}',
+                                          style: AppTypography.bodySm
+                                              .copyWith(color: context.colors.onSurface),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Icon(Icons.access_time_rounded,
+                                        size: 16, color: context.colors.primary),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+
+                        if (isCompact) {
+                          return Column(
                             children: [
-                              Text(context.tr('timeRange'),
-                                  style: AppTypography.labelSm.copyWith(
-                                      color: context.colors.onSurfaceVariant,
-                                      fontWeight: FontWeight.w600)),
-                              const SizedBox(height: 6),
-                              InkWell(
-                                onTap: () async {
-                                  final pickedStart = await showTimePicker(
-                                    context: context,
-                                    initialTime: startTime,
-                                  );
-                                  if (pickedStart != null) {
-                                    setSheetState(() {
-                                      startTime = pickedStart;
-                                      endTime = TimeOfDay(
-                                        hour: (pickedStart.hour + 1) % 24,
-                                        minute: pickedStart.minute,
-                                      );
-                                    });
-                                  }
-                                },
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                                  decoration: BoxDecoration(
-                                    color: context.colors.surface.withValues(alpha: 0.25),
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(color: context.colors.glassBorder),
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        '${startTime.format(context)} - ${endTime.format(context)}',
-                                        style: AppTypography.bodySm
-                                            .copyWith(color: context.colors.onSurface),
-                                      ),
-                                      Icon(Icons.access_time_rounded,
-                                          size: 16, color: context.colors.primary),
-                                    ],
-                                  ),
-                                ),
-                              ),
+                              dateWidget,
+                              const SizedBox(height: 12),
+                              timeWidget,
                             ],
-                          ),
-                        ),
-                      ],
+                          );
+                        }
+
+                        return Row(
+                          children: [
+                            Expanded(child: dateWidget),
+                            const SizedBox(width: 12),
+                            Expanded(child: timeWidget),
+                          ],
+                        );
+                      },
                     ),
                     const SizedBox(height: 14),
 
@@ -357,8 +396,11 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(context.tr('sendNotificationReminder'),
-                            style: AppTypography.bodySm.copyWith(color: context.colors.onSurface)),
+                        Expanded(
+                          child: Text(context.tr('sendNotificationReminder'),
+                              style: AppTypography.bodySm.copyWith(color: context.colors.onSurface)),
+                        ),
+                        const SizedBox(width: 8),
                         Switch(
                           value: notificationEnabled,
                           activeThumbColor: context.colors.primary,
@@ -369,8 +411,11 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(context.tr('syncWithGoogleCalendar'),
-                            style: AppTypography.bodySm.copyWith(color: context.colors.onSurface)),
+                        Expanded(
+                          child: Text(context.tr('syncWithGoogleCalendar'),
+                              style: AppTypography.bodySm.copyWith(color: context.colors.onSurface)),
+                        ),
+                        const SizedBox(width: 8),
                         Switch(
                           value: isGoogleSynced,
                           activeThumbColor: context.colors.primary,
@@ -507,68 +552,45 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                 const SizedBox(height: 24),
               ],
 
-              // ── Google Calendar Sync Banner ──
-              PopInItem(
-                index: isGuest ? 2 : 1,
-                child: GlassCard(
-                  borderRadius: BorderRadius.circular(16),
-                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Text(
-                                  state.isGoogleCalendarConnected
-                                      ? context.tr('googleCalendarSynced')
-                                      : context.tr('googleCalendarReady'),
-                                  style: AppTypography.bodySm.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: context.colors.onSurface,
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                Container(
-                                  width: 7,
-                                  height: 7,
-                                  decoration: BoxDecoration(
-                                    color: state.isGoogleCalendarConnected
-                                        ? Colors.greenAccent
-                                        : Colors.amberAccent,
-                                    shape: BoxShape.circle,
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: (state.isGoogleCalendarConnected
-                                                ? Colors.greenAccent
-                                                : Colors.amberAccent)
-                                            .withValues(alpha: 0.5),
-                                        blurRadius: 4,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Text(
-                              state.isGoogleCalendarConnected
-                                  ? '${context.tr('googleCalendarConnectedWith')} ${state.googleCalendarEmail ?? 'Google Account'}。${context.tr('eventsAutoSyncDesc')}'
-                                  : context.tr('googleCalendarConnectHint'),
-                              style: AppTypography.bodySm.copyWith(
-                                fontSize: 12,
-                                color: context.colors.onSurfaceVariant,
-                              ),
-                            ),
-                          ],
+              // ── Google Calendar Warning Banner (Only when not connected, like TrialBannerCard) ──
+              if (!state.isGoogleCalendarConnected) ...[
+                PopInItem(
+                  index: isGuest ? 2 : 1,
+                  child: GlassCard(
+                    borderRadius: BorderRadius.circular(16),
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    glowColor: context.colors.primary.withValues(alpha: 0.15),
+                    child: Row(
+                      children: [
+                        Icon(Icons.info_outline_rounded, color: context.colors.primary, size: 18),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            context.tr('googleCalendarNotConnectedAlert'),
+                            style: AppTypography.bodySm.copyWith(color: context.colors.onSurface),
+                          ),
                         ),
-                      ),
-                    ],
+                        const SizedBox(width: 8),
+                        GestureDetector(
+                          onTap: () {
+                            context.go('${AppRoutes.settings}?section=integrations');
+                          },
+                          child: Text(
+                            context.tr('connect'),
+                            style: AppTypography.bodySm.copyWith(
+                              color: context.colors.primary,
+                              fontWeight: FontWeight.w700,
+                              decoration: TextDecoration.underline,
+                              decorationColor: context.colors.primary,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 18),
+                const SizedBox(height: 18),
+              ],
 
               // ── Meeting Reminders Alert ──
               if (reminders.isNotEmpty) ...[
@@ -663,14 +685,18 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Text(
-                                      '${_getMonthName(context, currentMonth.month)} ${currentMonth.year}',
-                                      style: AppTypography.headlineSm.copyWith(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                        color: context.colors.onSurface,
+                                    Expanded(
+                                      child: Text(
+                                        '${_getMonthName(context, currentMonth.month)} ${currentMonth.year}',
+                                        style: AppTypography.headlineSm.copyWith(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                          color: context.colors.onSurface,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
                                       ),
                                     ),
+                                    const SizedBox(width: 8),
                                     Row(
                                       children: [
                                         TextButton(
@@ -715,14 +741,18 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                           return Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(
-                                '${_getMonthName(context, currentMonth.month)} ${currentMonth.year}',
-                                style: AppTypography.headlineSm.copyWith(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: context.colors.onSurface,
+                              Expanded(
+                                child: Text(
+                                  '${_getMonthName(context, currentMonth.month)} ${currentMonth.year}',
+                                  style: AppTypography.headlineSm.copyWith(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: context.colors.onSurface,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
+                              const SizedBox(width: 8),
                               Row(
                                 children: [
                                   TextButton(
@@ -817,16 +847,16 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                               duration: const Duration(milliseconds: 150),
                               decoration: BoxDecoration(
                                 color: isSelected
-                                    ? context.colors.primary.withValues(alpha: 0.25)
+                                    ? context.colors.primary
                                     : (isToday
-                                        ? context.colors.primary.withValues(alpha: 0.08)
+                                        ? context.colors.primary.withValues(alpha: 0.12)
                                         : Colors.transparent),
                                 borderRadius: BorderRadius.circular(10),
                                 border: Border.all(
                                   color: isSelected
                                       ? context.colors.primary
                                       : (isToday
-                                          ? context.colors.primary.withValues(alpha: 0.4)
+                                          ? context.colors.primary.withValues(alpha: 0.6)
                                           : Colors.transparent),
                                   width: isSelected ? 1.5 : 1.0,
                                 ),
@@ -841,11 +871,13 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                                           ? FontWeight.bold
                                           : FontWeight.normal,
                                       color: isSelected
-                                          ? context.colors.primary
-                                          : (isCurrentMonth
-                                              ? context.colors.onSurface
-                                              : context.colors.onSurfaceVariant
-                                                  .withValues(alpha: 0.35)),
+                                          ? context.colors.onPrimary
+                                          : (isToday
+                                              ? context.colors.primary
+                                              : (isCurrentMonth
+                                                  ? context.colors.onSurface
+                                                  : context.colors.onSurfaceVariant
+                                                      .withValues(alpha: 0.35))),
                                       fontSize: 12,
                                     ),
                                   ),
@@ -854,10 +886,12 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                                     Row(
                                       mainAxisAlignment: MainAxisAlignment.center,
                                       children: dayEventsList.take(3).map((e) {
-                                        Color dotColor = context.colors.primary;
-                                        if (e.category == 'Networking') {
+                                        Color dotColor = isSelected
+                                            ? context.colors.onPrimary
+                                            : context.colors.primary;
+                                        if (!isSelected && e.category == 'Networking') {
                                           dotColor = Colors.purpleAccent;
-                                        } else if (e.category == 'Call') {
+                                        } else if (!isSelected && e.category == 'Call') {
                                           dotColor = Colors.greenAccent;
                                         }
                                         return Container(
@@ -882,7 +916,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 36),
+              const SectionDivider(margin: EdgeInsets.symmetric(vertical: 36)),
 
               // ── Day Schedule Agenda GlassCard ──
               SectionHeader(
@@ -893,20 +927,25 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
               const SizedBox(height: 16),
               PopInItem(
                 index: 4,
-                child: GlassCard(
-                  borderRadius: BorderRadius.circular(20),
-                  padding: const EdgeInsets.all(22),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: GlassCard(
+                    borderRadius: BorderRadius.circular(20),
+                    padding: const EdgeInsets.all(22),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Header with Date and Filters
                       LayoutBuilder(builder: (context, constraints) {
-                        final isNarrow = constraints.maxWidth < 600;
+                        final isNarrow = constraints.maxWidth < 760;
                         return isNarrow
                             ? Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Row(
+                                  Wrap(
+                                    crossAxisAlignment: WrapCrossAlignment.center,
+                                    spacing: 8,
+                                    runSpacing: 4,
                                     children: [
                                       Text(
                                         '${_getMonthName(context, selectedDate.month)} ${selectedDate.day}, ${selectedDate.year}',
@@ -915,7 +954,6 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
-                                      const SizedBox(width: 8),
                                       Container(
                                         padding: const EdgeInsets.symmetric(
                                             horizontal: 8, vertical: 2),
@@ -959,6 +997,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
                                   Row(
+                                    mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Text(
                                         '${_getMonthName(context, selectedDate.month)} ${selectedDate.day}, ${selectedDate.year}',
@@ -986,20 +1025,26 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                                       ),
                                     ],
                                   ),
-                                  Row(
-                                    children: _categories.map((cat) {
-                                      final isSel = state.categoryFilter == cat;
-                                      return Padding(
-                                        padding: const EdgeInsets.only(left: 6),
-                                        child: AppFilterChip(
-                                          label: _getCategoryLabel(context, cat),
-                                          selected: isSel,
-                                          onSelected: (_) => ref
-                                              .read(calendarNotifierProvider.notifier)
-                                              .setCategoryFilter(cat),
-                                        ),
-                                      );
-                                    }).toList(),
+                                  const SizedBox(width: 12),
+                                  Flexible(
+                                    child: SingleChildScrollView(
+                                      scrollDirection: Axis.horizontal,
+                                      child: Row(
+                                        children: _categories.map((cat) {
+                                          final isSel = state.categoryFilter == cat;
+                                          return Padding(
+                                            padding: const EdgeInsets.only(left: 6),
+                                            child: AppFilterChip(
+                                              label: _getCategoryLabel(context, cat),
+                                              selected: isSel,
+                                              onSelected: (_) => ref
+                                                  .read(calendarNotifierProvider.notifier)
+                                                  .setCategoryFilter(cat),
+                                            ),
+                                          );
+                                        }).toList(),
+                                      ),
+                                    ),
                                   ),
                                 ],
                               );
@@ -1035,201 +1080,247 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                           ),
                         ),
                       ] else ...[
-                        ...dayEvents.map((event) {
-                          return Container(
-                            margin: const EdgeInsets.only(bottom: 12),
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: context.colors.surface.withValues(alpha: 0.25),
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: context.colors.glassBorder),
-                            ),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // Time Box
-                                Container(
-                                  width: 80,
-                                  padding: const EdgeInsets.symmetric(vertical: 8),
+                        ScrollableListWindow(
+                          controller: _eventsScrollController,
+                          maxHeight: MediaQuery.of(context).size.width > 700 ? 460 : 330,
+                          child: ListView.builder(
+                            controller: _eventsScrollController,
+                            shrinkWrap: true,
+                            physics: const ClampingScrollPhysics(),
+                            padding: EdgeInsets.zero,
+                            itemCount: dayEvents.length,
+                            itemBuilder: (context, index) {
+                                final event = dayEvents[index];
+                                return Container(
+                                  margin: EdgeInsets.only(
+                                    bottom: index == dayEvents.length - 1 ? 0 : 12,
+                                  ),
+                                  padding: const EdgeInsets.all(12),
                                   decoration: BoxDecoration(
-                                    color: context.colors.primary.withValues(alpha: 0.12),
-                                    borderRadius: BorderRadius.circular(10),
-                                    border: Border.all(
-                                        color: context.colors.primary.withValues(alpha: 0.3)),
+                                    color: context.colors.surface.withValues(alpha: 0.25),
+                                    borderRadius: BorderRadius.circular(22),
+                                    border: Border.all(color: context.colors.glassBorder),
                                   ),
-                                  child: Column(
-                                    children: [
-                                      Text(
-                                        event.startTime.hour >= 12
-                                            ? '${event.startTime.hour > 12 ? event.startTime.hour - 12 : event.startTime.hour}:${event.startTime.minute.toString().padLeft(2, '0')}'
-                                            : '${event.startTime.hour == 0 ? 12 : event.startTime.hour}:${event.startTime.minute.toString().padLeft(2, '0')}',
-                                        style: AppTypography.statsNumber.copyWith(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                          color: context.colors.primary,
-                                        ),
-                                      ),
-                                      Text(
-                                        event.startTime.hour >= 12 ? 'PM' : 'AM',
-                                        style: AppTypography.labelSm.copyWith(
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.bold,
-                                          color: context.colors.primary.withValues(alpha: 0.8),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(width: 14),
-
-                                // Details
-                                Expanded(
-                                  child: Column(
+                                  child: Row(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Row(
+                                      // Time Box & Actions Below
+                                      Column(
+                                        mainAxisSize: MainAxisSize.min,
                                         children: [
                                           Container(
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 8, vertical: 2),
+                                            width: 74,
+                                            padding: const EdgeInsets.symmetric(vertical: 8),
                                             decoration: BoxDecoration(
-                                              color: event.category == 'Networking'
-                                                  ? Colors.purple.withValues(alpha: 0.2)
-                                                  : (event.category == 'Call'
-                                                      ? Colors.green.withValues(alpha: 0.2)
-                                                      : context.colors.primary.withValues(alpha: 0.15)),
-                                              borderRadius: BorderRadius.circular(6),
+                                              color: context.colors.primary.withValues(alpha: 0.12),
+                                              borderRadius: BorderRadius.circular(10),
+                                              border: Border.all(
+                                                  color: context.colors.primary.withValues(alpha: 0.3)),
                                             ),
-                                            child: Text(
-                                              _getCategoryLabel(context, event.category).toUpperCase(),
-                                              style: AppTypography.labelSm.copyWith(
-                                                fontSize: 9,
-                                                fontWeight: FontWeight.bold,
-                                                color: event.category == 'Networking'
-                                                    ? Colors.purpleAccent
-                                                    : (event.category == 'Call'
-                                                        ? Colors.greenAccent
-                                                        : context.colors.primary),
-                                              ),
+                                            child: Column(
+                                              children: [
+                                                Text(
+                                                  event.startTime.hour >= 12
+                                                      ? '${event.startTime.hour > 12 ? event.startTime.hour - 12 : event.startTime.hour}:${event.startTime.minute.toString().padLeft(2, '0')}'
+                                                      : '${event.startTime.hour == 0 ? 12 : event.startTime.hour}:${event.startTime.minute.toString().padLeft(2, '0')}',
+                                                  style: AppTypography.statsNumber.copyWith(
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: context.colors.primary,
+                                                  ),
+                                                ),
+                                                Text(
+                                                  event.startTime.hour >= 12 ? 'PM' : 'AM',
+                                                  style: AppTypography.labelSm.copyWith(
+                                                    fontSize: 10,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: context.colors.primary.withValues(alpha: 0.8),
+                                                  ),
+                                                ),
+                                              ],
                                             ),
                                           ),
-                                          if (event.isGoogleSynced) ...[
-                                            const SizedBox(width: 6),
-                                            Icon(Icons.sync_rounded,
-                                                size: 12, color: context.colors.primary),
-                                            Text(
-                                              ' Google',
-                                              style: AppTypography.labelSm.copyWith(
-                                                fontSize: 10,
-                                                color: context.colors.primary,
+                                          const SizedBox(height: 6),
+                                          Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              if (event.location?.startsWith('http') == true) ...[
+                                                IconButton(
+                                                  visualDensity: VisualDensity.compact,
+                                                  constraints: const BoxConstraints.tightFor(width: 28, height: 28),
+                                                  padding: EdgeInsets.zero,
+                                                  splashRadius: 16,
+                                                  icon: const Icon(Icons.open_in_new_rounded, size: 16),
+                                                  color: context.colors.primary,
+                                                  tooltip: context.tr('joinMeeting'),
+                                                  onPressed: () {
+                                                    final uri = Uri.tryParse(event.location!);
+                                                    if (uri != null) launchUrl(uri);
+                                                  },
+                                                ),
+                                                const SizedBox(width: 4),
+                                              ],
+                                              IconButton(
+                                                visualDensity: VisualDensity.compact,
+                                                constraints: const BoxConstraints.tightFor(width: 28, height: 28),
+                                                padding: EdgeInsets.zero,
+                                                splashRadius: 16,
+                                                icon: const Icon(Icons.delete_outline_rounded,
+                                                    size: 16, color: Colors.redAccent),
+                                                tooltip: context.tr('delete'),
+                                                onPressed: () => ref
+                                                    .read(calendarNotifierProvider.notifier)
+                                                    .deleteEvent(event.id),
                                               ),
-                                            ),
-                                          ],
+                                            ],
+                                          ),
                                         ],
                                       ),
-                                      const SizedBox(height: 6),
-                                      Text(
-                                        event.title,
-                                        style: AppTypography.bodyMd.copyWith(
-                                          fontWeight: FontWeight.bold,
-                                          color: context.colors.onSurface,
-                                        ),
-                                      ),
-                                      if (event.description != null &&
-                                          event.description!.isNotEmpty) ...[
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          event.description!,
-                                          style: AppTypography.bodySm.copyWith(
-                                            color: context.colors.onSurfaceVariant,
-                                            fontSize: 12,
-                                          ),
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ],
-                                      if (event.location != null && event.location!.isNotEmpty) ...[
-                                        const SizedBox(height: 6),
-                                        Row(
+                                      const SizedBox(width: 12),
+
+                                      // Details
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
-                                            Icon(
-                                              event.location!.startsWith('http')
-                                                  ? Icons.video_camera_front_rounded
-                                                  : Icons.location_on_rounded,
-                                              size: 13,
-                                              color: context.colors.primary,
-                                            ),
-                                            const SizedBox(width: 4),
-                                            Expanded(
-                                              child: Text(
-                                                event.location!,
-                                                style: AppTypography.bodySm.copyWith(
-                                                  fontSize: 11,
-                                                  color: event.location!.startsWith('http')
-                                                      ? context.colors.primary
-                                                      : context.colors.onSurfaceVariant,
+                                            Wrap(
+                                              crossAxisAlignment: WrapCrossAlignment.center,
+                                              spacing: 6,
+                                              runSpacing: 4,
+                                              children: [
+                                                Container(
+                                                  padding: const EdgeInsets.symmetric(
+                                                      horizontal: 8, vertical: 2),
+                                                  decoration: BoxDecoration(
+                                                    color: event.category == 'Networking'
+                                                        ? Colors.purple.withValues(alpha: 0.2)
+                                                        : (event.category == 'Call'
+                                                            ? Colors.green.withValues(alpha: 0.2)
+                                                            : context.colors.primary.withValues(alpha: 0.15)),
+                                                    borderRadius: BorderRadius.circular(6),
+                                                  ),
+                                                  child: Text(
+                                                    _getCategoryLabel(context, event.category).toUpperCase(),
+                                                    style: AppTypography.labelSm.copyWith(
+                                                      fontSize: 9,
+                                                      fontWeight: FontWeight.bold,
+                                                      color: event.category == 'Networking'
+                                                          ? Colors.purpleAccent
+                                                          : (event.category == 'Call'
+                                                              ? Colors.greenAccent
+                                                              : context.colors.primary),
+                                                    ),
+                                                    overflow: TextOverflow.ellipsis,
+                                                    maxLines: 1,
+                                                  ),
                                                 ),
+                                                if (event.isGoogleSynced)
+                                                  Row(
+                                                    mainAxisSize: MainAxisSize.min,
+                                                    children: [
+                                                      Icon(Icons.sync_rounded,
+                                                          size: 12, color: context.colors.primary),
+                                                      Flexible(
+                                                        child: Text(
+                                                          ' Google',
+                                                          style: AppTypography.labelSm.copyWith(
+                                                            fontSize: 10,
+                                                            color: context.colors.primary,
+                                                          ),
+                                                          overflow: TextOverflow.ellipsis,
+                                                          maxLines: 1,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                              ],
+                                            ),
+                                            const SizedBox(height: 6),
+                                            Text(
+                                              event.title,
+                                              style: AppTypography.bodyMd.copyWith(
+                                                fontWeight: FontWeight.bold,
+                                                color: context.colors.onSurface,
+                                              ),
+                                            ),
+                                            if (event.description != null &&
+                                                event.description!.isNotEmpty) ...[
+                                              const SizedBox(height: 4),
+                                              Text(
+                                                event.description!,
+                                                style: AppTypography.bodySm.copyWith(
+                                                  color: context.colors.onSurfaceVariant,
+                                                  fontSize: 12,
+                                                ),
+                                                maxLines: 2,
                                                 overflow: TextOverflow.ellipsis,
                                               ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                      if (event.contactName != null) ...[
-                                        const SizedBox(height: 4),
-                                        Row(
-                                          children: [
-                                            Icon(Icons.person_outline_rounded,
-                                                size: 13,
-                                                color: context.colors.onSurfaceVariant),
-                                            const SizedBox(width: 4),
-                                            Text(
-                                              '${event.contactName}${event.contactCompany != null ? ' (${event.contactCompany})' : ''}',
-                                              style: AppTypography.bodySm.copyWith(
-                                                fontSize: 11,
-                                                color: context.colors.onSurfaceVariant,
+                                            ],
+                                            if (event.location != null && event.location!.isNotEmpty) ...[
+                                              const SizedBox(height: 6),
+                                              Row(
+                                                children: [
+                                                  Icon(
+                                                    event.location!.startsWith('http')
+                                                        ? Icons.video_camera_front_rounded
+                                                        : Icons.location_on_rounded,
+                                                    size: 13,
+                                                    color: context.colors.primary,
+                                                  ),
+                                                  const SizedBox(width: 4),
+                                                  Expanded(
+                                                    child: Text(
+                                                      event.location!,
+                                                      style: AppTypography.bodySm.copyWith(
+                                                        fontSize: 11,
+                                                        color: event.location!.startsWith('http')
+                                                            ? context.colors.primary
+                                                            : context.colors.onSurfaceVariant,
+                                                      ),
+                                                      overflow: TextOverflow.ellipsis,
+                                                    ),
+                                                  ),
+                                                ],
                                               ),
-                                            ),
+                                            ],
+                                            if (event.contactName != null) ...[
+                                              const SizedBox(height: 4),
+                                              Row(
+                                                children: [
+                                                  Icon(Icons.person_outline_rounded,
+                                                      size: 13,
+                                                      color: context.colors.onSurfaceVariant),
+                                                  const SizedBox(width: 4),
+                                                  Expanded(
+                                                    child: Text(
+                                                      '${event.contactName}${event.contactCompany != null ? ' (${event.contactCompany})' : ''}',
+                                                      style: AppTypography.bodySm.copyWith(
+                                                        fontSize: 11,
+                                                        color: context.colors.onSurfaceVariant,
+                                                      ),
+                                                      maxLines: 1,
+                                                      overflow: TextOverflow.ellipsis,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
                                           ],
                                         ),
-                                      ],
+                                      ),
                                     ],
                                   ),
-                                ),
-
-                                // Actions
-                                Row(
-                                  children: [
-                                    if (event.location?.startsWith('http') == true)
-                                      IconButton(
-                                        icon: const Icon(Icons.open_in_new_rounded, size: 18),
-                                        color: context.colors.primary,
-                                        tooltip: context.tr('joinMeeting'),
-                                        onPressed: () {
-                                          final uri = Uri.tryParse(event.location!);
-                                          if (uri != null) launchUrl(uri);
-                                        },
-                                      ),
-                                    IconButton(
-                                      icon: const Icon(Icons.delete_outline_rounded,
-                                          size: 18, color: Colors.redAccent),
-                                      tooltip: context.tr('delete'),
-                                      onPressed: () => ref
-                                          .read(calendarNotifierProvider.notifier)
-                                          .deleteEvent(event.id),
-                                    ),
-                                  ],
-                                ),
-                              ],
+                                );
+                              },
                             ),
-                          );
-                        }),
-                      ],
+                          ),
+                        ],
                     ],
                   ),
                 ),
               ),
-            ],
+            ),
+          ],
           ),
         ),
       ),

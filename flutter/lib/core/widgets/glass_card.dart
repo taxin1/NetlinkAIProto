@@ -147,7 +147,7 @@ class _GlassCardState extends State<GlassCard> {
         },
         onTapCancel: () => setState(() => _isPressed = false),
         child: AnimatedScale(
-          scale: _isPressed ? 0.985 : (_isHovered ? 1.015 : 1.0),
+          scale: _isPressed ? 0.985 : 1.0,
           duration: const Duration(milliseconds: 140),
           curve: Curves.easeOutCubic,
           child: cardBody,

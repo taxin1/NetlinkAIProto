@@ -15,6 +15,7 @@ class GradientButton extends StatefulWidget {
   final double? fontSize;
   final double? iconSize;
   final bool expand;
+  final double? minWidth;
 
   const GradientButton({
     super.key,
@@ -25,6 +26,7 @@ class GradientButton extends StatefulWidget {
     this.icon,
     this.width,
     this.maxWidth = 260,
+    this.minWidth,
     this.fontSize,
     this.iconSize,
     this.expand = true,
@@ -41,13 +43,13 @@ class _GradientButtonState extends State<GradientButton> {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final effectiveMaxWidth = widget.width ?? widget.maxWidth;
     final defaultMinWidth = widget.height <= 34 ? 80.0 : (widget.height <= 40 ? 100.0 : 140.0);
     final effectiveMinWidth = widget.width != null
         ? widget.width!
-        : (defaultMinWidth > effectiveMaxWidth ? effectiveMaxWidth : defaultMinWidth);
+        : (widget.minWidth ??
+            (defaultMinWidth > effectiveMaxWidth ? effectiveMaxWidth : defaultMinWidth));
 
     final effectiveFontSize = widget.fontSize ??
         (widget.height <= 34 ? 12.0 : (widget.height <= 40 ? 13.0 : 15.0));
@@ -75,7 +77,7 @@ class _GradientButtonState extends State<GradientButton> {
           },
           onTapCancel: () => setState(() => _isPressed = false),
           child: AnimatedScale(
-            scale: _isPressed ? 0.94 : (_isHovered ? 1.03 : 1.0),
+            scale: _isPressed ? 0.96 : 1.0,
             duration: const Duration(milliseconds: 120),
             curve: Curves.easeOutCubic,
             child: AnimatedContainer(
@@ -95,19 +97,6 @@ class _GradientButtonState extends State<GradientButton> {
                       : Colors.white.withValues(alpha: 0.30),
                   width: 1.2,
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: colors.glowBlue.withValues(alpha: _isPressed ? 0.25 : (_isHovered ? 0.55 : 0.40)),
-                    blurRadius: _isPressed ? 10 : (_isHovered ? 32 : 24),
-                    spreadRadius: _isPressed ? -4 : (_isHovered ? 0 : -2),
-                    offset: Offset(0, _isPressed ? 2 : (_isHovered ? 8 : 6)),
-                  ),
-                  BoxShadow(
-                    color: colors.primaryButtonGradient.first.withValues(alpha: isDark ? 0.30 : 0.20),
-                    blurRadius: _isPressed ? 6 : (_isHovered ? 16 : 10),
-                    offset: Offset(0, _isPressed ? 1 : (_isHovered ? 4 : 2)),
-                  ),
-                ],
               ),
               child: Center(
                 child: widget.isLoading
@@ -236,7 +225,7 @@ class _LiquidGlassButtonState extends State<LiquidGlassButton> {
           if (isEnabled) setState(() => _isPressed = false);
         },
         child: AnimatedScale(
-          scale: isEnabled ? (_isPressed ? 0.94 : (_isHovered ? 1.03 : 1.0)) : 1.0,
+          scale: isEnabled ? (_isPressed ? 0.96 : 1.0) : 1.0,
           duration: const Duration(milliseconds: 120),
           curve: Curves.easeOutCubic,
           child: AnimatedOpacity(
@@ -249,25 +238,6 @@ class _LiquidGlassButtonState extends State<LiquidGlassButton> {
               padding: widget.padding ?? (widget.expand ? null : const EdgeInsets.symmetric(horizontal: 14)),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(99),
-                boxShadow: isEnabled
-                    ? [
-                        BoxShadow(
-                          color: isDark
-                              ? Colors.black.withValues(alpha: _isPressed ? 0.20 : (_isHovered ? 0.50 : 0.35))
-                              : const Color(0x180B1A3A),
-                          blurRadius: _isPressed ? 8 : (_isHovered ? 24 : 16),
-                          spreadRadius: 0,
-                          offset: Offset(0, _isPressed ? 2 : (_isHovered ? 8 : 6)),
-                        ),
-                        if (isDark || _isHovered)
-                          BoxShadow(
-                            color: colors.primary.withValues(alpha: _isPressed ? 0.15 : (_isHovered ? 0.35 : 0.20)),
-                            blurRadius: _isHovered ? 28 : 20,
-                            spreadRadius: _isHovered ? -2 : -4,
-                            offset: Offset(0, _isHovered ? 4 : 2),
-                          ),
-                      ]
-                    : null,
               ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(99),
@@ -463,7 +433,7 @@ class _PillTextButtonState extends State<PillTextButton> {
         },
         onTapCancel: () => setState(() => _isPressed = false),
         child: AnimatedScale(
-          scale: _isPressed ? 0.93 : (_isHovered ? 1.05 : 1.0),
+          scale: _isPressed ? 0.96 : 1.0,
           duration: const Duration(milliseconds: 120),
           curve: Curves.easeOutCubic,
           child: AnimatedContainer(

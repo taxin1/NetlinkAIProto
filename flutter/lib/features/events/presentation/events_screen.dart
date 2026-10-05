@@ -10,6 +10,7 @@ import '../../../core/widgets/glass_card.dart';
 import '../../../core/widgets/gradient_button.dart';
 import '../../../core/widgets/pop_in_item.dart';
 import '../../../core/widgets/section_header.dart';
+import '../../../core/widgets/scrollable_list_window.dart';
 import '../../../core/widgets/trial_banner_card.dart';
 import '../../../core/utils/responsive.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -42,6 +43,7 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
   final GlobalKey _createSectionKey = GlobalKey();
   final GlobalKey _eventsSectionKey = GlobalKey();
   final ScrollController _scrollController = ScrollController();
+  final ScrollController _eventsListScrollController = ScrollController();
   String _activeTab = 'Create';
   bool _isAutoScrolling = false;
 
@@ -55,6 +57,7 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
   void dispose() {
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
+    _eventsListScrollController.dispose();
     _urlController.dispose();
     _titleController.dispose();
     _descController.dispose();
@@ -91,21 +94,24 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
 
   void _scrollTo(GlobalKey key, String tabLabel) {
     setState(() => _activeTab = tabLabel);
+    if (!mounted || key.currentContext == null) return;
+    final RenderBox? box = key.currentContext!.findRenderObject() as RenderBox?;
+    if (box == null || !box.hasSize) return;
+    final RenderBox? ancestor = context.findRenderObject() as RenderBox?;
+    if (ancestor == null || !ancestor.hasSize) return;
+    final position = box.localToGlobal(Offset.zero, ancestor: ancestor);
+    final target = _scrollController.offset + position.dy - Responsive.topPadding(context);
+
     _isAutoScrolling = true;
-    final context = key.currentContext;
-    if (context != null) {
-      Scrollable.ensureVisible(
-        context,
-        duration: const Duration(milliseconds: 400),
-        curve: Curves.easeInOutCubic,
-      ).then((_) {
-        Future.delayed(const Duration(milliseconds: 100), () {
-          if (mounted) _isAutoScrolling = false;
-        });
+    _scrollController.animateTo(
+      target.clamp(0.0, _scrollController.position.maxScrollExtent),
+      duration: const Duration(milliseconds: 400),
+      curve: Curves.easeOutCubic,
+    ).then((_) {
+      Future.delayed(const Duration(milliseconds: 150), () {
+        if (mounted) _isAutoScrolling = false;
       });
-    } else {
-      _isAutoScrolling = false;
-    }
+    });
   }
 
   Future<void> _handleExtractUrl() async {
@@ -257,16 +263,20 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
                   ],
 
                   // ── Smart Event Creator GlassCard ──
-                  SectionHeader(
-                    icon: Icons.add_circle_outline_rounded,
-                    label: context.tr('createEvent'),
-                    color: context.colors.primary,
-                  ),
-                  const SizedBox(height: 16),
-                  PopInItem(
+                  Container(
                     key: _createSectionKey,
-                    index: isGuest ? 2 : 1,
-                    child: GlassCard(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SectionHeader(
+                          icon: Icons.add_circle_outline_rounded,
+                          label: context.tr('createEvent'),
+                          color: context.colors.primary,
+                        ),
+                        const SizedBox(height: 16),
+                        PopInItem(
+                          index: isGuest ? 2 : 1,
+                          child: GlassCard(
                   borderRadius: BorderRadius.circular(20),
                   padding: const EdgeInsets.all(24),
                   child: Column(
@@ -407,102 +417,129 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
                       const SizedBox(height: 14),
 
                       // Date & Time Row
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(context.tr('date'),
-                                    style: AppTypography.labelSm.copyWith(
-                                        color: context.colors.onSurfaceVariant,
-                                        fontWeight: FontWeight.w600)),
-                                const SizedBox(height: 6),
-                                InkWell(
-                                  onTap: () async {
-                                    final picked = await showDatePicker(
-                                      context: context,
-                                      initialDate: _selectedDate,
-                                      firstDate: DateTime(2020),
-                                      lastDate: DateTime(2035),
-                                    );
-                                    if (picked != null) setState(() => _selectedDate = picked);
-                                  },
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                                    decoration: BoxDecoration(
-                                      color: context.colors.surface.withValues(alpha: 0.25),
-                                      borderRadius: BorderRadius.circular(12),
-                                      border: Border.all(color: context.colors.glassBorder),
-                                    ),
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
+                      LayoutBuilder(
+                        builder: (context, constraints) {
+                          final isCompact = constraints.maxWidth < 360;
+
+                          final dateWidget = Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(context.tr('date'),
+                                  style: AppTypography.labelSm.copyWith(
+                                      color: context.colors.onSurfaceVariant,
+                                      fontWeight: FontWeight.w600)),
+                              const SizedBox(height: 6),
+                              InkWell(
+                                onTap: () async {
+                                  final picked = await showDatePicker(
+                                    context: context,
+                                    initialDate: _selectedDate,
+                                    firstDate: DateTime(2020),
+                                    lastDate: DateTime(2035),
+                                  );
+                                  if (picked != null) setState(() => _selectedDate = picked);
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                                  decoration: BoxDecoration(
+                                    color: context.colors.surface.withValues(alpha: 0.25),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(color: context.colors.glassBorder),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Expanded(
+                                        child: Text(
                                           '${_selectedDate.month}/${_selectedDate.day}/${_selectedDate.year}',
                                           style: AppTypography.bodySm
                                               .copyWith(color: context.colors.onSurface),
+                                          overflow: TextOverflow.ellipsis,
                                         ),
-                                        Icon(Icons.calendar_today_rounded,
-                                            size: 16, color: context.colors.primary),
-                                      ],
-                                    ),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Icon(Icons.calendar_today_rounded,
+                                          size: 16, color: context.colors.primary),
+                                    ],
                                   ),
                                 ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                              ),
+                            ],
+                          );
+
+                          final timeWidget = Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(context.tr('timeRange'),
+                                  style: AppTypography.labelSm.copyWith(
+                                      color: context.colors.onSurfaceVariant,
+                                      fontWeight: FontWeight.w600)),
+                              const SizedBox(height: 6),
+                              InkWell(
+                                onTap: () async {
+                                  final picked = await showTimePicker(
+                                    context: context,
+                                    initialTime: _startTime,
+                                  );
+                                  if (picked != null) {
+                                    setState(() {
+                                      _startTime = picked;
+                                      _endTime = TimeOfDay(
+                                        hour: (picked.hour + 1) % 24,
+                                        minute: picked.minute,
+                                      );
+                                    });
+                                  }
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                                  decoration: BoxDecoration(
+                                    color: context.colors.surface.withValues(alpha: 0.25),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(color: context.colors.glassBorder),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Expanded(
+                                        child: FittedBox(
+                                          fit: BoxFit.scaleDown,
+                                          alignment: Alignment.centerLeft,
+                                          child: Text(
+                                            '${_startTime.format(context)} - ${_endTime.format(context)}',
+                                            style: AppTypography.bodySm
+                                                .copyWith(color: context.colors.onSurface),
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Icon(Icons.access_time_rounded,
+                                          size: 16, color: context.colors.primary),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          );
+
+                          if (isCompact) {
+                            return Column(
                               children: [
-                                Text(context.tr('timeRange'),
-                                    style: AppTypography.labelSm.copyWith(
-                                        color: context.colors.onSurfaceVariant,
-                                        fontWeight: FontWeight.w600)),
-                                const SizedBox(height: 6),
-                                InkWell(
-                                  onTap: () async {
-                                    final picked = await showTimePicker(
-                                      context: context,
-                                      initialTime: _startTime,
-                                    );
-                                    if (picked != null) {
-                                      setState(() {
-                                        _startTime = picked;
-                                        _endTime = TimeOfDay(
-                                          hour: (picked.hour + 1) % 24,
-                                          minute: picked.minute,
-                                        );
-                                      });
-                                    }
-                                  },
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                                    decoration: BoxDecoration(
-                                      color: context.colors.surface.withValues(alpha: 0.25),
-                                      borderRadius: BorderRadius.circular(12),
-                                      border: Border.all(color: context.colors.glassBorder),
-                                    ),
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          '${_startTime.format(context)} - ${_endTime.format(context)}',
-                                          style: AppTypography.bodySm
-                                              .copyWith(color: context.colors.onSurface),
-                                        ),
-                                        Icon(Icons.access_time_rounded,
-                                            size: 16, color: context.colors.primary),
-                                      ],
-                                    ),
-                                  ),
-                                ),
+                                dateWidget,
+                                const SizedBox(height: 12),
+                                timeWidget,
                               ],
-                            ),
-                          ),
-                        ],
+                            );
+                          }
+
+                          return Row(
+                            children: [
+                              Expanded(child: dateWidget),
+                              const SizedBox(width: 12),
+                              Expanded(child: timeWidget),
+                            ],
+                          );
+                        },
                       ),
                       const SizedBox(height: 14),
 
@@ -580,9 +617,14 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(context.tr('sendNotificationReminder'),
+                          Expanded(
+                            child: Text(
+                              context.tr('sendNotificationReminder'),
                               style: AppTypography.bodySm
-                                  .copyWith(color: context.colors.onSurface)),
+                                  .copyWith(color: context.colors.onSurface),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
                           Switch(
                             value: _notificationEnabled,
                             activeThumbColor: context.colors.primary,
@@ -593,9 +635,14 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(context.tr('syncWithGoogleCalendar'),
+                          Expanded(
+                            child: Text(
+                              context.tr('syncWithGoogleCalendar'),
                               style: AppTypography.bodySm
-                                  .copyWith(color: context.colors.onSurface)),
+                                  .copyWith(color: context.colors.onSurface),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
                           Switch(
                             value: _isGoogleSynced,
                             activeThumbColor: context.colors.primary,
@@ -620,7 +667,10 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 60),
+                      ],
+                    ),
+                  ),
+              const SectionDivider(margin: EdgeInsets.symmetric(vertical: 36)),
 
               // ── Your Events Section ──
               PopInItem(
@@ -670,24 +720,27 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
                                       ref.read(eventsNotifierProvider.notifier).setSearchQuery(q),
                                 ),
                                 const SizedBox(height: 10),
-                                Row(
-                                  children: ['all', 'upcoming', 'past'].map((tab) {
-                                    final isSel = state.filter == tab;
-                                    final tabLabel = tab == 'all'
-                                        ? context.tr('filterAll')
-                                        : tab == 'upcoming'
-                                            ? context.tr('filterUpcoming')
-                                            : context.tr('filterPast');
-                                    return Padding(
-                                      padding: const EdgeInsets.only(right: 8),
-                                      child: AppFilterChip(
-                                        label: tabLabel,
-                                        selected: isSel,
-                                        onSelected: (_) =>
-                                            ref.read(eventsNotifierProvider.notifier).setFilter(tab),
-                                      ),
-                                    );
-                                  }).toList(),
+                                SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  child: Row(
+                                    children: ['all', 'upcoming', 'past'].map((tab) {
+                                      final isSel = state.filter == tab;
+                                      final tabLabel = tab == 'all'
+                                          ? context.tr('filterAll')
+                                          : tab == 'upcoming'
+                                              ? context.tr('filterUpcoming')
+                                              : context.tr('filterPast');
+                                      return Padding(
+                                        padding: const EdgeInsets.only(right: 8),
+                                        child: AppFilterChip(
+                                          label: tabLabel,
+                                          selected: isSel,
+                                          onSelected: (_) =>
+                                              ref.read(eventsNotifierProvider.notifier).setFilter(tab),
+                                        ),
+                                      );
+                                    }).toList(),
+                                  ),
                                 ),
                               ],
                             )
@@ -780,9 +833,21 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
                         ),
                       ),
                     ] else ...[
-                      ...events.map((event) {
-                        return _buildEventCard(context, event);
-                      }),
+                      ScrollableListWindow(
+                        controller: _eventsListScrollController,
+                        showScrollbar: events.length > 2,
+                        maxHeight: MediaQuery.of(context).size.width > 700 ? 460 : 340,
+                        child: ListView.builder(
+                          controller: _eventsListScrollController,
+                          shrinkWrap: true,
+                          physics: const ClampingScrollPhysics(),
+                          padding: EdgeInsets.zero,
+                          itemCount: events.length,
+                          itemBuilder: (context, index) {
+                            return _buildEventCard(context, events[index]);
+                          },
+                        ),
+                      ),
                     ],
                   ],
                 ),
@@ -832,11 +897,11 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
       margin: const EdgeInsets.only(bottom: 14),
       decoration: BoxDecoration(
         color: context.colors.surface.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(22),
         border: Border.all(color: context.colors.glassBorder),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(18),
+        padding: const EdgeInsets.all(10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -856,7 +921,7 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: context.colors.primary.withValues(alpha: 0.35),
                       width: 1.0,
@@ -900,7 +965,10 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
                         ),
                       ),
                       const SizedBox(height: 4),
-                      Row(
+                      Wrap(
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        spacing: 8,
+                        runSpacing: 4,
                         children: [
                           if (event.isToday)
                             Container(
@@ -951,18 +1019,19 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
                                 ),
                               ),
                             ),
-                          if (event.notificationEnabled) ...[
-                            const SizedBox(width: 8),
+                          if (event.notificationEnabled)
                             Icon(Icons.notifications_active_rounded,
                                 size: 13, color: context.colors.primary),
-                          ],
-                          if (event.isGoogleSynced) ...[
-                            const SizedBox(width: 8),
-                            Icon(Icons.sync_rounded, size: 13, color: context.colors.primary),
-                            Text(' Google',
-                                style: AppTypography.labelSm
-                                    .copyWith(fontSize: 10, color: context.colors.primary)),
-                          ],
+                          if (event.isGoogleSynced)
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.sync_rounded, size: 13, color: context.colors.primary),
+                                Text(' Google',
+                                    style: AppTypography.labelSm
+                                        .copyWith(fontSize: 10, color: context.colors.primary)),
+                              ],
+                            ),
                         ],
                       ),
                     ],
@@ -997,66 +1066,91 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
             const SizedBox(height: 10),
 
             // Meta Row (Time, Location, Contact)
-            Wrap(
-              spacing: 16,
-              runSpacing: 8,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                Row(
-                  mainAxisSize: MainAxisSize.min,
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final maxItemWidth = constraints.maxWidth;
+                return Wrap(
+                  spacing: 16,
+                  runSpacing: 8,
+                  crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
-                    Icon(Icons.access_time_rounded,
-                        size: 14, color: context.colors.onSurfaceVariant),
-                    const SizedBox(width: 5),
-                    Text(
-                      event.timeRangeFormatted,
-                      style: AppTypography.bodySm.copyWith(
-                        fontSize: 11,
-                        color: context.colors.onSurfaceVariant,
+                    ConstrainedBox(
+                      constraints: BoxConstraints(maxWidth: maxItemWidth),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.access_time_rounded,
+                              size: 14, color: context.colors.onSurfaceVariant),
+                          const SizedBox(width: 5),
+                          Flexible(
+                            child: Text(
+                              event.timeRangeFormatted,
+                              style: AppTypography.bodySm.copyWith(
+                                fontSize: 11,
+                                color: context.colors.onSurfaceVariant,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
+                    if (event.location != null)
+                      ConstrainedBox(
+                        constraints: BoxConstraints(maxWidth: maxItemWidth),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              event.location!.startsWith('http')
+                                  ? Icons.video_camera_front_rounded
+                                  : Icons.location_on_rounded,
+                              size: 14,
+                              color: context.colors.primary,
+                            ),
+                            const SizedBox(width: 5),
+                            Flexible(
+                              child: Text(
+                                _cleanLocationName(event.location!),
+                                style: AppTypography.bodySm.copyWith(
+                                  fontSize: 11,
+                                  color: event.location!.startsWith('http')
+                                      ? context.colors.primary
+                                      : context.colors.onSurfaceVariant,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    if (event.contactName != null)
+                      ConstrainedBox(
+                        constraints: BoxConstraints(maxWidth: maxItemWidth),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.person_outline_rounded,
+                                size: 14, color: context.colors.onSurfaceVariant),
+                            const SizedBox(width: 5),
+                            Flexible(
+                              child: Text(
+                                '${event.contactName}${event.contactCompany != null ? ' (${event.contactCompany})' : ''}',
+                                style: AppTypography.bodySm.copyWith(
+                                  fontSize: 11,
+                                  color: context.colors.onSurfaceVariant,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                   ],
-                ),
-                if (event.location != null)
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        event.location!.startsWith('http')
-                            ? Icons.video_camera_front_rounded
-                            : Icons.location_on_rounded,
-                        size: 14,
-                        color: context.colors.primary,
-                      ),
-                      const SizedBox(width: 5),
-                      Text(
-                        _cleanLocationName(event.location!),
-                        style: AppTypography.bodySm.copyWith(
-                          fontSize: 11,
-                          color: event.location!.startsWith('http')
-                              ? context.colors.primary
-                              : context.colors.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
-                if (event.contactName != null)
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.person_outline_rounded,
-                          size: 14, color: context.colors.onSurfaceVariant),
-                      const SizedBox(width: 5),
-                      Text(
-                        '${event.contactName}${event.contactCompany != null ? ' (${event.contactCompany})' : ''}',
-                        style: AppTypography.bodySm.copyWith(
-                          fontSize: 11,
-                          color: context.colors.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
-              ],
+                );
+              },
             ),
             if (event.location?.startsWith('http') == true) ...[
               const SizedBox(height: 16),

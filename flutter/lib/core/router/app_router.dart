@@ -180,7 +180,16 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(path: AppRoutes.aiAssistant,      name: 'aiAssistant',      pageBuilder: (_, s) => _buildSlideTransitionPage(const AiAssistantScreen())),
           GoRoute(path: AppRoutes.voiceAgent,       name: 'voiceAgent',       redirect: (_, __) => AppRoutes.aiAssistant),
           GoRoute(path: AppRoutes.quotation,        name: 'quotation',        pageBuilder: (_, s) => _buildSlideTransitionPage(const QuotationScreen())),
-          GoRoute(path: AppRoutes.settings,         name: 'settings',         pageBuilder: (_, s) => _buildSlideTransitionPage(const SettingsScreen())),
+          GoRoute(
+            path: AppRoutes.settings,
+            name: 'settings',
+            pageBuilder: (_, s) {
+              final section = s.uri.queryParameters['section'] ??
+                  (s.extra is Map ? (s.extra as Map)['section'] as String? : null) ??
+                  (s.extra is String ? s.extra as String : null);
+              return _buildSlideTransitionPage(SettingsScreen(initialSection: section));
+            },
+          ),
         ],
       ),
     ],

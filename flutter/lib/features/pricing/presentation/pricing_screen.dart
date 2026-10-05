@@ -114,15 +114,15 @@ class _PricingScreenState extends State<PricingScreen> {
                 _FreePlanCard(),
                 const SizedBox(height: 24),
                 _ProPlanCard(),
-                const SizedBox(height: 64),
+                const SectionDivider(margin: EdgeInsets.symmetric(vertical: 36)),
 
                 // ── Feature Comparison Table ───────────────────────────────────────
                 const _ComparisonTable(),
-                const SizedBox(height: 64),
+                const SectionDivider(margin: EdgeInsets.symmetric(vertical: 36)),
 
                 // ── FAQ ───────────────────────────────────────────────────────────
                 const _FaqSection(),
-                const SizedBox(height: 64),
+                const SectionDivider(margin: EdgeInsets.symmetric(vertical: 36)),
 
                 // ── Footer CTA ────────────────────────────────────────────────────
                 const _FooterCta(),

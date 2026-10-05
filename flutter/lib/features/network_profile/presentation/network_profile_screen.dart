@@ -32,7 +32,7 @@ class NetworkProfileScreen extends ConsumerStatefulWidget {
 class _NetworkProfileScreenState extends ConsumerState<NetworkProfileScreen> {
   final ScrollController _scrollController = ScrollController();
   final PageController _qrPageController = PageController();
-  final GlobalKey _profileInfoKey = TourTargetKeys.profileFeature;
+  final GlobalKey _profileInfoKey = GlobalKey();
   final GlobalKey _profileQrKey = GlobalKey();
 
   late final TextEditingController _nameController;
@@ -270,7 +270,7 @@ class _NetworkProfileScreenState extends ConsumerState<NetworkProfileScreen> {
 
     final target = _scrollController.offset +
         position.dy -
-        (kToolbarHeight + MediaQuery.of(context).padding.top + 20);
+        Responsive.topPadding(context);
 
     _scrollController
         .animateTo(
@@ -338,30 +338,32 @@ class _NetworkProfileScreenState extends ConsumerState<NetworkProfileScreen> {
                   ],
 
                   // ── Section 1: Profile Information ──
-                  Column(
-                    children: [
-                      PopInItem(
-                        index: isGuest ? 2 : 1,
-                        child: SectionHeader(
-                          icon: Icons.badge_rounded,
-                          label: context.tr('profileInformation'),
-                          color: context.colors.primary,
+                  Container(
+                    key: _profileInfoKey,
+                    child: Column(
+                      children: [
+                        PopInItem(
+                          index: isGuest ? 2 : 1,
+                          child: SectionHeader(
+                            icon: Icons.badge_rounded,
+                            label: context.tr('profileInformation'),
+                            color: context.colors.primary,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 20),
+                        const SizedBox(height: 20),
 
-                      // Profile Card Container
-                      PopInItem(
-                        index: isGuest ? 3 : 2,
-                        child: GlassCard(
-                          borderRadius: BorderRadius.circular(20),
-                          padding: const EdgeInsets.all(24),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Form Fields (Highlighted till Phone Number)
-                              Container(
-                                key: _profileInfoKey,
+                        // Profile Card Container
+                        PopInItem(
+                          index: isGuest ? 3 : 2,
+                          child: GlassCard(
+                            borderRadius: BorderRadius.circular(20),
+                            padding: const EdgeInsets.all(24),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Form Fields (Highlighted till Phone Number)
+                                Container(
+                                  key: TourTargetKeys.profileFeature,
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
@@ -603,7 +605,8 @@ class _NetworkProfileScreenState extends ConsumerState<NetworkProfileScreen> {
                         ),
                       ],
                     ),
-                  const SizedBox(height: 60),
+                  ),
+                  const SectionDivider(margin: EdgeInsets.symmetric(vertical: 36)),
 
                   // ── Section 2: Profile QR Carousel ──
                   PopInItem(
@@ -686,27 +689,6 @@ class _NetworkProfileScreenState extends ConsumerState<NetworkProfileScreen> {
                                                             .glassBorder,
                                                     width: isActive ? 2.5 : 1.2,
                                                   ),
-                                                  boxShadow: isActive
-                                                      ? [
-                                                          BoxShadow(
-                                                            color: highlightColor
-                                                                .withValues(
-                                                                    alpha: 0.45),
-                                                            blurRadius: 16,
-                                                            spreadRadius: 1,
-                                                          ),
-                                                        ]
-                                                      : [
-                                                          BoxShadow(
-                                                            color: Colors.black
-                                                                .withValues(
-                                                                    alpha: 0.08),
-                                                            blurRadius: 6,
-                                                            offset:
-                                                                const Offset(
-                                                                    0, 2),
-                                                          ),
-                                                        ],
                                                 ),
                                                 alignment: Alignment.center,
                                                 child: BrandLogoWidget(
@@ -779,16 +761,6 @@ class _NetworkProfileScreenState extends ConsumerState<NetworkProfileScreen> {
                                                           width: 1.2,
                                                         )
                                                       : null,
-                                                  boxShadow: [
-                                                    BoxShadow(
-                                                      color: highlightColor
-                                                          .withValues(
-                                                              alpha: 0.35),
-                                                      blurRadius: 12,
-                                                      offset:
-                                                          const Offset(0, 2),
-                                                    ),
-                                                  ],
                                                 ),
                                                 alignment: Alignment.center,
                                                 child: BrandLogoWidget(

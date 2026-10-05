@@ -161,15 +161,6 @@ class _FloatingNavItemWidgetState extends State<_FloatingNavItemWidget> {
                     : Colors.transparent,
                 width: 1.2,
               ),
-              boxShadow: widget.isActive
-                  ? [
-                      BoxShadow(
-                        color: context.colors.primary.withValues(alpha: 0.22),
-                        blurRadius: 12,
-                        spreadRadius: 0,
-                      ),
-                    ]
-                  : const [],
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,

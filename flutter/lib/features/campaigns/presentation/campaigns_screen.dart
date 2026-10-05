@@ -12,6 +12,7 @@ import '../../../core/widgets/glass_card.dart';
 import '../../../core/widgets/gradient_button.dart';
 import '../../../core/widgets/pop_in_item.dart';
 import '../../../core/widgets/section_header.dart';
+import '../../../core/widgets/scrollable_list_window.dart';
 import '../../../core/widgets/trial_banner_card.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../models/campaign_model.dart';
@@ -29,6 +30,7 @@ class _CampaignsScreenState extends ConsumerState<CampaignsScreen> {
   final GlobalKey _createSectionKey = GlobalKey();
   final GlobalKey _campaignsSectionKey = GlobalKey();
   final ScrollController _scrollController = ScrollController();
+  final ScrollController _campaignsListScrollController = ScrollController();
 
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _purposeController = TextEditingController();
@@ -72,6 +74,7 @@ class _CampaignsScreenState extends ConsumerState<CampaignsScreen> {
   void dispose() {
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
+    _campaignsListScrollController.dispose();
     _nameController.dispose();
     _purposeController.dispose();
     _subjectController.dispose();
@@ -82,19 +85,24 @@ class _CampaignsScreenState extends ConsumerState<CampaignsScreen> {
 
   void _scrollTo(GlobalKey key, String tabLabel) {
     setState(() => _activeTab = tabLabel);
-    final context = key.currentContext;
-    if (context != null) {
-      _isAutoScrolling = true;
-      Scrollable.ensureVisible(
-        context,
-        duration: const Duration(milliseconds: 400),
-        curve: Curves.easeInOutCubic,
-      ).then((_) {
-        Future.delayed(const Duration(milliseconds: 150), () {
-          if (mounted) _isAutoScrolling = false;
-        });
+    if (!mounted || key.currentContext == null) return;
+    final RenderBox? box = key.currentContext!.findRenderObject() as RenderBox?;
+    if (box == null || !box.hasSize) return;
+    final RenderBox? ancestor = context.findRenderObject() as RenderBox?;
+    if (ancestor == null || !ancestor.hasSize) return;
+    final position = box.localToGlobal(Offset.zero, ancestor: ancestor);
+    final target = _scrollController.offset + position.dy - Responsive.topPadding(context);
+
+    _isAutoScrolling = true;
+    _scrollController.animateTo(
+      target.clamp(0.0, _scrollController.position.maxScrollExtent),
+      duration: const Duration(milliseconds: 400),
+      curve: Curves.easeOutCubic,
+    ).then((_) {
+      Future.delayed(const Duration(milliseconds: 150), () {
+        if (mounted) _isAutoScrolling = false;
       });
-    }
+    });
   }
 
   InputDecoration _inputDecoration(BuildContext context, String hint, {Widget? suffixIcon}) {
@@ -561,7 +569,7 @@ class _CampaignsScreenState extends ConsumerState<CampaignsScreen> {
               ),
 
                   // ── Inter-Section Spacing ──
-                  const SizedBox(height: 60),
+                  const SectionDivider(margin: EdgeInsets.symmetric(vertical: 36)),
 
                   // ── Section 2: Your Campaigns ──
                   Container(
@@ -652,15 +660,22 @@ class _CampaignsScreenState extends ConsumerState<CampaignsScreen> {
                         else if (state.filteredCampaigns.isEmpty)
                           _buildEmptyState(context)
                         else
-                          ListView.separated(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: state.filteredCampaigns.length,
-                            separatorBuilder: (_, __) => const SizedBox(height: 16),
-                            itemBuilder: (context, index) {
-                              final campaign = state.filteredCampaigns[index];
-                              return _buildCampaignCard(context, campaign, state);
-                            },
+                          ScrollableListWindow(
+                            controller: _campaignsListScrollController,
+                            showScrollbar: state.filteredCampaigns.length > 2,
+                            maxHeight: MediaQuery.of(context).size.width > 700 ? 480 : 340,
+                            child: ListView.separated(
+                              controller: _campaignsListScrollController,
+                              shrinkWrap: true,
+                              physics: const ClampingScrollPhysics(),
+                              padding: EdgeInsets.zero,
+                              itemCount: state.filteredCampaigns.length,
+                              separatorBuilder: (_, __) => const SizedBox(height: 16),
+                              itemBuilder: (context, index) {
+                                final campaign = state.filteredCampaigns[index];
+                                return _buildCampaignCard(context, campaign, state);
+                              },
+                            ),
                           ),
                       ],
                     ),

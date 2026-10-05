@@ -148,7 +148,7 @@ class HowItWorksScreen extends StatelessWidget {
                         );
                       },
                     ),
-                    const SizedBox(height: 40),
+                    const SectionDivider(margin: EdgeInsets.symmetric(vertical: 36)),
 
                     // ── Step-by-Step Guide (Zentra dark glass list) ────────────
                     SectionHeader(
@@ -209,7 +209,7 @@ class HowItWorksScreen extends StatelessWidget {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 48),
+                    const SectionDivider(margin: EdgeInsets.symmetric(vertical: 36)),
 
                     // ── Core Values (2x2 Grid or 4-col) ───────────────────────────
                     SectionHeader(

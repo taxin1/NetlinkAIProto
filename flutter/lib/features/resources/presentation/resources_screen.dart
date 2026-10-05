@@ -5,6 +5,7 @@ import '../../../core/widgets/gradient_button.dart';
 import '../../../core/widgets/glass_card.dart';
 import '../../../core/widgets/trial_banner_card.dart';
 import '../../../core/widgets/sub_page_top_bar.dart';
+import '../../../core/widgets/section_header.dart';
 import '../../../core/utils/responsive.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/app_colors.dart';
@@ -115,7 +116,7 @@ class _ResourcesScreenState extends State<ResourcesScreen> {
                   ],
                   onTap: () => context.push(AppRoutes.gettingStarted),
                 ),
-                const SizedBox(height: 24),
+                const SectionDivider(margin: EdgeInsets.symmetric(vertical: 24)),
                 _ResourceCard(
                   title: context.tr('setupGuide'),
                   description: context.tr('setupGuideDesc'),
@@ -129,7 +130,7 @@ class _ResourcesScreenState extends State<ResourcesScreen> {
                   ],
                   onTap: () => context.push(AppRoutes.setupGuide),
                 ),
-                const SizedBox(height: 24),
+                const SectionDivider(margin: EdgeInsets.symmetric(vertical: 24)),
                 _ResourceCard(
                   title: context.tr('pricing'),
                   description: context.tr('pricingDesc'),
@@ -143,7 +144,7 @@ class _ResourcesScreenState extends State<ResourcesScreen> {
                   ],
                   onTap: () => context.push(AppRoutes.pricing),
                 ),
-                const SizedBox(height: 24),
+                const SectionDivider(margin: EdgeInsets.symmetric(vertical: 24)),
                 _ResourceCard(
                   title: context.tr('faq'),
                   description: context.tr('faqDesc'),

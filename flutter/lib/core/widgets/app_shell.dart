@@ -207,16 +207,17 @@ class _OrbPainter extends CustomPainter {
 }
 
 String _resolvePageTitle(BuildContext context, String location) {
+  final clean = location.split('?').first;
   for (final item in _navItems) {
-    if (location == item.route ||
-        (item.route != AppRoutes.dashboard && location.startsWith('${item.route}/'))) {
+    if (clean == item.route ||
+        (item.route != AppRoutes.dashboard && clean.startsWith('${item.route}/'))) {
       return context.tr(item.labelKey);
     }
   }
-  if (location.startsWith(AppRoutes.pricing)) {
+  if (clean.startsWith(AppRoutes.pricing)) {
     return context.tr('pricing');
   }
-  if (location.startsWith(AppRoutes.directory)) {
+  if (clean.startsWith(AppRoutes.directory)) {
     return context.tr('networkProfile');
   }
   return context.l10n.dashboard;
@@ -532,8 +533,9 @@ class _SidebarNavItemState extends State<_SidebarNavItem> {
 
   @override
   Widget build(BuildContext context) {
-    final isActive = widget.currentLocation == widget.route ||
-        (widget.route != AppRoutes.dashboard && widget.currentLocation.startsWith('${widget.route}/'));
+    final clean = widget.currentLocation.split('?').first;
+    final isActive = clean == widget.route ||
+        (widget.route != AppRoutes.dashboard && clean.startsWith('${widget.route}/'));
 
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
@@ -637,8 +639,9 @@ class _RailNavItemState extends State<_RailNavItem> {
 
   @override
   Widget build(BuildContext context) {
-    final isActive = widget.currentLocation == widget.route ||
-        (widget.route != AppRoutes.dashboard && widget.currentLocation.startsWith('${widget.route}/'));
+    final clean = widget.currentLocation.split('?').first;
+    final isActive = clean == widget.route ||
+        (widget.route != AppRoutes.dashboard && clean.startsWith('${widget.route}/'));
 
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
@@ -956,8 +959,9 @@ class _DrawerNavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isActive = currentLocation == route ||
-        (route != AppRoutes.dashboard && currentLocation.startsWith('$route/'));
+    final clean = currentLocation.split('?').first;
+    final isActive = clean == route ||
+        (route != AppRoutes.dashboard && clean.startsWith('$route/'));
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 140),

@@ -319,7 +319,7 @@ class _ModalPrimaryButtonState extends State<ModalPrimaryButton> {
         },
         onTapCancel: () => setState(() => _isPressed = false),
         child: AnimatedScale(
-          scale: _isPressed ? 0.96 : (_isHovered ? 1.02 : 1.0),
+          scale: _isPressed ? 0.96 : 1.0,
           duration: const Duration(milliseconds: 120),
           curve: Curves.easeOutCubic,
           child: AnimatedContainer(
@@ -338,14 +338,6 @@ class _ModalPrimaryButtonState extends State<ModalPrimaryButton> {
                     : Colors.white.withValues(alpha: 0.30),
                 width: 1.2,
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: (widget.gradient?.first ?? colors.primary).withValues(alpha: _isHovered ? 0.45 : 0.32),
-                  blurRadius: _isHovered ? 18 : 12,
-                  spreadRadius: _isHovered ? 1 : 0,
-                  offset: const Offset(0, 4),
-                ),
-              ],
             ),
             child: Center(
               child: Row(
@@ -417,7 +409,7 @@ class _ModalSecondaryButtonState extends State<ModalSecondaryButton> {
         },
         onTapCancel: () => setState(() => _isPressed = false),
         child: AnimatedScale(
-          scale: _isPressed ? 0.96 : (_isHovered ? 1.02 : 1.0),
+          scale: _isPressed ? 0.96 : 1.0,
           duration: const Duration(milliseconds: 120),
           curve: Curves.easeOutCubic,
           child: AnimatedContainer(

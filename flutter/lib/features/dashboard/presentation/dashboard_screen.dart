@@ -150,7 +150,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final position = box.localToGlobal(Offset.zero, ancestor: context.findRenderObject());
     
     // Calculate the target offset, adjusting for the top app bar height
-    final target = _scrollController.offset + position.dy - (kToolbarHeight + MediaQuery.of(context).padding.top + 16);
+    final target = _scrollController.offset + position.dy - Responsive.topPadding(context);
     
     _isAutoScrolling = true;
     _scrollController.animateTo(
@@ -330,16 +330,16 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                       child: Container(
                                         decoration: BoxDecoration(
                                           color: context.colors.surface.withValues(alpha: 0.35),
-                                          borderRadius: BorderRadius.circular(16),
+                                          borderRadius: BorderRadius.circular(22),
                                           border: Border.all(color: context.colors.glassBorder),
                                         ),
                                         child: Material(
                                           color: Colors.transparent,
                                           child: InkWell(
-                                            borderRadius: BorderRadius.circular(16),
+                                            borderRadius: BorderRadius.circular(22),
                                             onTap: () => context.go(AppRoutes.events),
                                             child: Padding(
-                                              padding: const EdgeInsets.all(14),
+                                              padding: const EdgeInsets.all(10),
                                               child: Row(
                                                 crossAxisAlignment: CrossAxisAlignment.start,
                                                 children: [
@@ -903,7 +903,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               label: context.tr('scannerTab'),
               icon: Icons.document_scanner_outlined,
               activeIcon: Icons.document_scanner_rounded,
-              onTap: () => _scrollTo(_scannerCardKey, 'Scanner'),
+              onTap: () => _scrollTo(_scannerSectionKey, 'Scanner'),
             ),
             FloatingNavItem(
               label: context.tr('eventsTab'),
@@ -940,7 +940,7 @@ class _HighlightCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GlassCard(
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(22),
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

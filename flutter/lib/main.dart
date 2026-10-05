@@ -108,6 +108,9 @@ class NetworkLinkApp extends ConsumerWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
+      scrollBehavior: const MaterialScrollBehavior().copyWith(
+        scrollbars: false,
+      ),
       routerConfig: router,
     );
   }

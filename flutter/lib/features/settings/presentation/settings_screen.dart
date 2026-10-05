@@ -31,7 +31,8 @@ import '../../../core/localization/locale_provider.dart';
 import '../../../core/localization/app_localizations.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
-  const SettingsScreen({super.key});
+  final String? initialSection;
+  const SettingsScreen({super.key, this.initialSection});
 
   @override
   ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
@@ -50,7 +51,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> with WidgetsBin
   final GlobalKey _integrationsKey = GlobalKey();
   final GlobalKey _securityKey = GlobalKey();
 
-  String _activeTab = 'Profile';
+  late String _activeTab = (widget.initialSection?.toLowerCase() == 'integrations')
+      ? 'Integrations'
+      : 'Profile';
   bool _isAutoScrolling = false;
 
   // Email Config Form State
@@ -134,7 +137,29 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> with WidgetsBin
     // Initial load
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadSavedSettings();
+      _handleInitialSection();
     });
+  }
+
+  void _handleInitialSection() {
+    final target = widget.initialSection?.toLowerCase();
+    if (target == 'integrations') {
+      _scrollTo(_integrationsKey, 'Integrations');
+    } else if (target == 'plan' || target == 'subscription') {
+      _scrollTo(_subscriptionKey, 'Plan');
+    } else if (target == 'email') {
+      _scrollTo(_emailKey, 'Email');
+    }
+  }
+
+  @override
+  void didUpdateWidget(SettingsScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialSection != null && widget.initialSection != oldWidget.initialSection) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _handleInitialSection();
+      });
+    }
   }
 
   @override
@@ -196,7 +221,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> with WidgetsBin
 
     final target = _scrollController.offset +
         position.dy -
-        (kToolbarHeight + MediaQuery.of(context).padding.top + 16);
+        Responsive.topPadding(context);
 
     _isAutoScrolling = true;
     _scrollController.animateTo(
@@ -1359,11 +1384,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> with WidgetsBin
         children: [
           Row(
             children: [
-              Text(
-                context.tr('outboundProvider'),
-                style: AppTypography.bodyMd.copyWith(fontWeight: FontWeight.w600),
+              Expanded(
+                child: Text(
+                  context.tr('outboundProvider'),
+                  style: AppTypography.bodyMd.copyWith(fontWeight: FontWeight.w600),
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
-              const Spacer(),
+              const SizedBox(width: 8),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(

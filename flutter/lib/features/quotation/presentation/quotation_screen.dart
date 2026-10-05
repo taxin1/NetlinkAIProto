@@ -175,21 +175,24 @@ class _QuotationScreenState extends ConsumerState<QuotationScreen> {
 
   void _scrollTo(GlobalKey key, String tabLabel) {
     setState(() => _activeTab = tabLabel);
+    if (!mounted || key.currentContext == null) return;
+    final RenderBox? box = key.currentContext!.findRenderObject() as RenderBox?;
+    if (box == null || !box.hasSize) return;
+    final RenderBox? ancestor = context.findRenderObject() as RenderBox?;
+    if (ancestor == null || !ancestor.hasSize) return;
+    final position = box.localToGlobal(Offset.zero, ancestor: ancestor);
+    final target = _scrollController.offset + position.dy - Responsive.topPadding(context);
+
     _isAutoScrolling = true;
-    final targetContext = key.currentContext;
-    if (targetContext != null) {
-      Scrollable.ensureVisible(
-        targetContext,
-        duration: const Duration(milliseconds: 400),
-        curve: Curves.easeInOutCubic,
-      ).then((_) {
-        Future.delayed(const Duration(milliseconds: 100), () {
-          if (mounted) _isAutoScrolling = false;
-        });
+    _scrollController.animateTo(
+      target.clamp(0.0, _scrollController.position.maxScrollExtent),
+      duration: const Duration(milliseconds: 400),
+      curve: Curves.easeOutCubic,
+    ).then((_) {
+      Future.delayed(const Duration(milliseconds: 150), () {
+        if (mounted) _isAutoScrolling = false;
       });
-    } else {
-      _isAutoScrolling = false;
-    }
+    });
   }
 
   int get _calculatedBaseCost {
@@ -260,44 +263,65 @@ class _QuotationScreenState extends ConsumerState<QuotationScreen> {
                   ],
 
                   // ── Section 1: Project Scope & Requirements ──
-                  SectionHeader(
-                    icon: Icons.assignment_outlined,
-                    label: context.tr('scopeAndRequirements'),
-                    color: context.colors.primary,
-                  ),
-                  const SizedBox(height: 16),
-                  PopInItem(
+                  Container(
                     key: _requirementsKey,
-                    index: isGuest ? 2 : 1,
-                    child: _buildRequirementsSection(context),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SectionHeader(
+                          icon: Icons.assignment_outlined,
+                          label: context.tr('scopeAndRequirements'),
+                          color: context.colors.primary,
+                        ),
+                        const SizedBox(height: 16),
+                        PopInItem(
+                          index: isGuest ? 2 : 1,
+                          child: _buildRequirementsSection(context),
+                        ),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 36),
+                  const SectionDivider(margin: EdgeInsets.symmetric(vertical: 36)),
 
                   // ── Section 2: Cost Breakdown & Tier Estimator ──
-                  SectionHeader(
-                    icon: Icons.calculate_outlined,
-                    label: context.tr('costEstimatorTiers'),
-                    color: const Color(0xFF10B981),
-                  ),
-                  const SizedBox(height: 16),
-                  PopInItem(
+                  Container(
                     key: _estimatesKey,
-                    index: isGuest ? 3 : 2,
-                    child: _buildCostEstimatorSection(context),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SectionHeader(
+                          icon: Icons.calculate_outlined,
+                          label: context.tr('costEstimatorTiers'),
+                          color: const Color(0xFF10B981),
+                        ),
+                        const SizedBox(height: 16),
+                        PopInItem(
+                          index: isGuest ? 3 : 2,
+                          child: _buildCostEstimatorSection(context),
+                        ),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 36),
+                  const SectionDivider(margin: EdgeInsets.symmetric(vertical: 36)),
 
                   // ── Section 3: Voice Requirements Assistant ──
-                  SectionHeader(
-                    icon: Icons.mic_rounded,
-                    label: context.tr('voiceAssistant'),
-                    color: const Color(0xFF8B5CF6),
-                  ),
-                  const SizedBox(height: 16),
-                  PopInItem(
+                  Container(
                     key: _voiceKey,
-                    index: isGuest ? 4 : 3,
-                    child: _buildVoiceAssistantSection(context),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SectionHeader(
+                          icon: Icons.mic_rounded,
+                          label: context.tr('voiceAssistant'),
+                          color: const Color(0xFF8B5CF6),
+                        ),
+                        const SizedBox(height: 16),
+                        PopInItem(
+                          index: isGuest ? 4 : 3,
+                          child: _buildVoiceAssistantSection(context),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -534,20 +558,29 @@ class _QuotationScreenState extends ConsumerState<QuotationScreen> {
           children: [
             Icon(icon, size: 15, color: context.colors.primary),
             const SizedBox(width: 8),
-            Text(
-              label,
-              style: AppTypography.labelSm.copyWith(
-                color: context.colors.onSurface,
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
+            Expanded(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Flexible(
+                    child: Text(
+                      label,
+                      style: AppTypography.labelSm.copyWith(
+                        color: context.colors.onSurface,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  if (isRequired)
+                    Text(' *',
+                        style: AppTypography.labelSm.copyWith(
+                          color: const Color(0xFFEF4444),
+                          fontSize: 12,
+                        )),
+                ],
               ),
             ),
-            if (isRequired)
-              Text(' *',
-                  style: AppTypography.labelSm.copyWith(
-                    color: const Color(0xFFEF4444),
-                    fontSize: 12,
-                  )),
           ],
         ),
         const SizedBox(height: 8),
@@ -784,19 +817,30 @@ class _QuotationScreenState extends ConsumerState<QuotationScreen> {
 
   Widget _buildCostItemRow(BuildContext context, String title, String value, {bool isAccent = false}) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          title,
-          style: AppTypography.bodySm.copyWith(
-            color: context.colors.onSurfaceVariant,
+        Expanded(
+          flex: 6,
+          child: Text(
+            title,
+            style: AppTypography.bodySm.copyWith(
+              color: context.colors.onSurfaceVariant,
+            ),
           ),
         ),
-        Text(
-          value,
-          style: AppTypography.bodyMd.copyWith(
-            color: isAccent ? context.colors.primary : context.colors.onSurface,
-            fontWeight: FontWeight.bold,
+        const SizedBox(width: 8),
+        Flexible(
+          flex: 4,
+          child: Align(
+            alignment: Alignment.topRight,
+            child: Text(
+              value,
+              textAlign: TextAlign.right,
+              style: AppTypography.bodyMd.copyWith(
+                color: isAccent ? context.colors.primary : context.colors.onSurface,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ),
       ],

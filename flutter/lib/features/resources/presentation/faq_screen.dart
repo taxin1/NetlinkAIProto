@@ -86,7 +86,7 @@ class _FaqScreenState extends State<FaqScreen> {
     final RenderBox? box = key.currentContext!.findRenderObject() as RenderBox?;
     if (box == null || !box.hasSize) return;
     final position = box.localToGlobal(Offset.zero, ancestor: context.findRenderObject());
-    final target = _scrollController.offset + position.dy - (kToolbarHeight + MediaQuery.of(context).padding.top + 16);
+    final target = _scrollController.offset + position.dy - Responsive.topPadding(context);
     
     _isAutoScrolling = true;
     _scrollController.animateTo(
@@ -192,7 +192,7 @@ class _FaqScreenState extends State<FaqScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 24),
+                  const SectionDivider(margin: EdgeInsets.symmetric(vertical: 24)),
 
                   _FaqCategory(
                     key: _setupKey,
@@ -222,7 +222,7 @@ class _FaqScreenState extends State<FaqScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 24),
+                  const SectionDivider(margin: EdgeInsets.symmetric(vertical: 24)),
 
                   _FaqCategory(
                     key: _featuresKey,
@@ -256,7 +256,7 @@ class _FaqScreenState extends State<FaqScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 24),
+                  const SectionDivider(margin: EdgeInsets.symmetric(vertical: 24)),
 
                   _FaqCategory(
                     key: _pricingKey,
@@ -290,7 +290,7 @@ class _FaqScreenState extends State<FaqScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 24),
+                  const SectionDivider(margin: EdgeInsets.symmetric(vertical: 24)),
 
                   _FaqCategory(
                     key: _troubleshootingKey,

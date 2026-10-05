@@ -430,7 +430,7 @@ class _LandingScreenState extends ConsumerState<LandingScreen>
                   );
                 }
 
-                // ── Portrait Layout (Pins elements towards bottom like Zentra reference) ─────
+                // ── Portrait Layout (Lifted hero layout with balanced optical center) ─────
                 final logoSize = isCompactHeight ? 180.0 : 220.0;
 
                 return Center(
@@ -630,7 +630,7 @@ class _LandingScreenState extends ConsumerState<LandingScreen>
                                   ),
                                 ),
                                 SizedBox(
-                                    height: isCompactHeight ? 32 : 64),
+                                    height: isCompactHeight ? 56 : 100),
                               ],
                             ),
                           ),

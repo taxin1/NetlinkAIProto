@@ -432,12 +432,6 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                               ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: context.colors.primary.withValues(alpha: 0.4),
-                                  blurRadius: 15,
-                                ),
-                              ],
                             ),
                             child: const Icon(Icons.send_rounded, color: Colors.white, size: 17),
                           ),

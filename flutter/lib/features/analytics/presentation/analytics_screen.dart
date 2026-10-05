@@ -10,6 +10,7 @@ import '../../../core/widgets/glass_card.dart';
 import '../../../core/widgets/gradient_button.dart';
 import '../../../core/widgets/pop_in_item.dart';
 import '../../../core/widgets/section_header.dart';
+import '../../../core/widgets/scrollable_list_window.dart';
 import '../../../core/widgets/trial_banner_card.dart';
 import '../../../core/utils/responsive.dart';
 import '../../../core/tour/tour_controller.dart';
@@ -27,6 +28,7 @@ class AnalyticsScreen extends ConsumerStatefulWidget {
 
 class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
   final ScrollController _scrollController = ScrollController();
+  final ScrollController _roiListScrollController = ScrollController();
 
   final GlobalKey _overviewKey = GlobalKey();
   final GlobalKey _funnelKey = GlobalKey();
@@ -83,24 +85,30 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
   void dispose() {
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
+    _roiListScrollController.dispose();
     super.dispose();
   }
 
   void _scrollTo(GlobalKey key, String tabLabel) {
     setState(() => _activeTab = tabLabel);
-    final context = key.currentContext;
-    if (context != null) {
-      _isAutoScrolling = true;
-      Scrollable.ensureVisible(
-        context,
-        duration: const Duration(milliseconds: 400),
-        curve: Curves.easeInOutCubic,
-      ).then((_) {
-        Future.delayed(const Duration(milliseconds: 150), () {
-          if (mounted) _isAutoScrolling = false;
-        });
+    if (!mounted || key.currentContext == null) return;
+    final RenderBox? box = key.currentContext!.findRenderObject() as RenderBox?;
+    if (box == null || !box.hasSize) return;
+    final RenderBox? ancestor = context.findRenderObject() as RenderBox?;
+    if (ancestor == null || !ancestor.hasSize) return;
+    final position = box.localToGlobal(Offset.zero, ancestor: ancestor);
+    final target = _scrollController.offset + position.dy - Responsive.topPadding(context);
+
+    _isAutoScrolling = true;
+    _scrollController.animateTo(
+      target.clamp(0.0, _scrollController.position.maxScrollExtent),
+      duration: const Duration(milliseconds: 400),
+      curve: Curves.easeOutCubic,
+    ).then((_) {
+      Future.delayed(const Duration(milliseconds: 150), () {
+        if (mounted) _isAutoScrolling = false;
       });
-    }
+    });
   }
 
   @override
@@ -158,17 +166,24 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                   const SizedBox(height: 28),
 
                   // ── Section 1: Executive KPI Metrics Grid ──
-                  _buildSectionHeader(
-                    context,
-                    icon: Icons.analytics_rounded,
-                    label: context.tr('overview'),
-                    color: context.colors.primary,
-                  ),
-                  const SizedBox(height: 16),
-                  PopInItem(
+                  Container(
                     key: _overviewKey,
-                    index: isGuest ? 3 : 2,
-                    child: _buildExecutiveKpiGrid(context, analyticsData, isGuest),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildSectionHeader(
+                          context,
+                          icon: Icons.analytics_rounded,
+                          label: context.tr('overview'),
+                          color: context.colors.primary,
+                        ),
+                        const SizedBox(height: 16),
+                        PopInItem(
+                          index: isGuest ? 3 : 2,
+                          child: _buildExecutiveKpiGrid(context, analyticsData, isGuest),
+                        ),
+                      ],
+                    ),
                   ),
                   const SectionDivider(margin: EdgeInsets.symmetric(vertical: 28)),
 
@@ -187,47 +202,68 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                   const SectionDivider(margin: EdgeInsets.symmetric(vertical: 28)),
 
                   // ── Section 3: Network Growth & Outreach Funnel ──
-                  _buildSectionHeader(
-                    context,
-                    icon: Icons.filter_alt_rounded,
-                    label: context.tr('funnel'),
-                    color: const Color(0xFF8B5CF6),
-                  ),
-                  const SizedBox(height: 16),
-                  PopInItem(
+                  Container(
                     key: _funnelKey,
-                    index: isGuest ? 5 : 4,
-                    child: _buildGrowthAndFunnelSection(context, analyticsData),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildSectionHeader(
+                          context,
+                          icon: Icons.filter_alt_rounded,
+                          label: context.tr('funnel'),
+                          color: const Color(0xFF8B5CF6),
+                        ),
+                        const SizedBox(height: 16),
+                        PopInItem(
+                          index: isGuest ? 5 : 4,
+                          child: _buildGrowthAndFunnelSection(context, analyticsData),
+                        ),
+                      ],
+                    ),
                   ),
                   const SectionDivider(margin: EdgeInsets.symmetric(vertical: 28)),
 
                   // ── Section 4: Event ROI & Breakdown ──
-                  _buildSectionHeader(
-                    context,
-                    icon: Icons.leaderboard_rounded,
-                    label: context.tr('eventsRoi'),
-                    color: const Color(0xFF10B981),
-                  ),
-                  const SizedBox(height: 16),
-                  PopInItem(
+                  Container(
                     key: _breakdownKey,
-                    index: isGuest ? 6 : 5,
-                    child: _buildEventRoiSection(context, analyticsData),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildSectionHeader(
+                          context,
+                          icon: Icons.leaderboard_rounded,
+                          label: context.tr('eventsRoi'),
+                          color: const Color(0xFF10B981),
+                        ),
+                        const SizedBox(height: 16),
+                        PopInItem(
+                          index: isGuest ? 6 : 5,
+                          child: _buildEventRoiSection(context, analyticsData),
+                        ),
+                      ],
+                    ),
                   ),
                   const SectionDivider(margin: EdgeInsets.symmetric(vertical: 28)),
 
                   // ── Section 5: Strategic AI Insights ──
-                  _buildSectionHeader(
-                    context,
-                    icon: Icons.auto_awesome_rounded,
-                    label: context.tr('aiInsights'),
-                    color: context.colors.primary,
-                  ),
-                  const SizedBox(height: 16),
-                  PopInItem(
+                  Container(
                     key: _insightsKey,
-                    index: isGuest ? 7 : 6,
-                    child: _buildStrategicAiInsights(context, analyticsData, isGuest),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildSectionHeader(
+                          context,
+                          icon: Icons.auto_awesome_rounded,
+                          label: context.tr('aiInsights'),
+                          color: context.colors.primary,
+                        ),
+                        const SizedBox(height: 16),
+                        PopInItem(
+                          index: isGuest ? 7 : 6,
+                          child: _buildStrategicAiInsights(context, analyticsData, isGuest),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -412,8 +448,8 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
       child: GlassCard(
         tintColor: null, // Neutral glass: no colored gradient tint
         glowColor: null,
-        borderRadius: BorderRadius.circular(18),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        borderRadius: BorderRadius.circular(22),
+        padding: const EdgeInsets.all(10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -422,11 +458,11 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Container(
-                  width: 36,
-                  height: 36,
+                  width: 40,
+                  height: 40,
                   decoration: BoxDecoration(
                     color: context.colors.surfaceContainerHighest.withValues(alpha: 0.35),
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: context.colors.glassBorder, width: 0.8),
                   ),
                   child: Icon(icon, color: context.colors.onSurfaceVariant, size: 18),
@@ -438,7 +474,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                       decoration: BoxDecoration(
                         color: context.colors.surfaceContainerHighest.withValues(alpha: 0.35),
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(10),
                         border: Border.all(
                           color: context.colors.glassBorder,
                           width: 0.8,
@@ -979,22 +1015,50 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
               ),
             ),
           ] else ...[
-            for (final item in data.eventRois) ...[
-              _buildEventRoiItem(
-                context,
-                eventName: item.eventName,
-                location: item.location,
-                matches: item.matches,
-                meetings: item.meetings,
-                roiScore: item.roiScore,
-                roiColor: Colors.green,
+            ScrollableListWindow(
+              controller: _roiListScrollController,
+              showScrollbar: data.eventRois.length > 2,
+              maxHeight: MediaQuery.of(context).size.width > 700 ? 440 : 330,
+              child: ListView.separated(
+                controller: _roiListScrollController,
+                shrinkWrap: true,
+                physics: const ClampingScrollPhysics(),
+                padding: EdgeInsets.zero,
+                itemCount: data.eventRois.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 12),
+                itemBuilder: (context, index) {
+                  final item = data.eventRois[index];
+                  return _buildEventRoiItem(
+                    context,
+                    eventName: item.eventName,
+                    location: item.location,
+                    matches: item.matches,
+                    meetings: item.meetings,
+                    roiScore: item.roiScore,
+                  );
+                },
               ),
-              const SizedBox(height: 12),
-            ],
+            ),
           ],
         ],
       ),
     );
+  }
+
+  Color _getCategoryColor(BuildContext context, String roiScore) {
+    final numMatch = RegExp(r'(\d+)').firstMatch(roiScore);
+    final score = numMatch != null ? int.tryParse(numMatch.group(1)!) ?? 0 : 0;
+    if (score >= 95) {
+      return const Color(0xFF10B981); // Emerald / Top tier
+    } else if (score >= 90) {
+      return const Color(0xFF3B82F6); // Blue / High tier
+    } else if (score >= 80) {
+      return const Color(0xFF8B5CF6); // Purple / Solid tier
+    } else if (score >= 70) {
+      return const Color(0xFFF59E0B); // Amber / Moderate tier
+    } else {
+      return context.colors.primary;
+    }
   }
 
   Widget _buildEventRoiItem(
@@ -1004,8 +1068,12 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
     required String matches,
     required String meetings,
     required String roiScore,
-    required Color roiColor,
   }) {
+    final percentMatch = RegExp(r'(\d+%)').firstMatch(roiScore);
+    final percentText = percentMatch?.group(1) ?? roiScore;
+    final labelText = roiScore.replaceAll(percentText, '').trim();
+    final categoryColor = _getCategoryColor(context, roiScore);
+
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -1026,10 +1094,18 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: roiColor.withValues(alpha: 0.12),
+                        color: context.colors.surfaceContainerHighest.withValues(alpha: 0.35),
                         shape: BoxShape.circle,
+                        border: Border.all(
+                          color: context.colors.glassBorder,
+                          width: 0.8,
+                        ),
                       ),
-                      child: Icon(Icons.event_available_rounded, color: roiColor, size: 18),
+                      child: Icon(
+                        Icons.event_outlined,
+                        color: context.colors.onSurfaceVariant,
+                        size: 18,
+                      ),
                     ),
                     const SizedBox(width: 10),
                     Expanded(
@@ -1058,21 +1134,32 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2.5),
-                      decoration: BoxDecoration(
-                        color: roiColor.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: roiColor.withValues(alpha: 0.3)),
-                      ),
-                      child: Text(
-                        roiScore,
-                        style: AppTypography.labelSm.copyWith(
-                          color: roiColor,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 10.5,
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          percentText,
+                          style: AppTypography.headlineSm.copyWith(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: categoryColor,
+                            height: 1.1,
+                          ),
                         ),
-                      ),
+                        if (labelText.isNotEmpty) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            labelText,
+                            style: AppTypography.labelSm.copyWith(
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.w500,
+                              color: context.colors.onSurfaceVariant.withValues(alpha: 0.75),
+                              height: 1.1,
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                   ],
                 ),
@@ -1093,10 +1180,18 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: roiColor.withValues(alpha: 0.12),
+                  color: context.colors.surfaceContainerHighest.withValues(alpha: 0.35),
                   shape: BoxShape.circle,
+                  border: Border.all(
+                    color: context.colors.glassBorder,
+                    width: 0.8,
+                  ),
                 ),
-                child: Icon(Icons.event_available_rounded, color: roiColor, size: 20),
+                child: Icon(
+                  Icons.event_outlined,
+                  color: context.colors.onSurfaceVariant,
+                  size: 20,
+                ),
               ),
               const SizedBox(width: 14),
               Expanded(
@@ -1124,25 +1219,38 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                   ],
                 ),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 12),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: roiColor.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: roiColor.withValues(alpha: 0.3)),
-                    ),
-                    child: Text(
-                      roiScore,
-                      style: AppTypography.labelSm.copyWith(
-                        color: roiColor,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 11,
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                    textBaseline: TextBaseline.alphabetic,
+                    children: [
+                      Text(
+                        percentText,
+                        style: AppTypography.headlineSm.copyWith(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: categoryColor,
+                          height: 1.1,
+                        ),
                       ),
-                    ),
+                      if (labelText.isNotEmpty) ...[
+                        const SizedBox(width: 4),
+                        Text(
+                          labelText,
+                          style: AppTypography.labelSm.copyWith(
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.w500,
+                            color: context.colors.onSurfaceVariant.withValues(alpha: 0.75),
+                            height: 1.1,
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                   const SizedBox(height: 4),
                   Text(

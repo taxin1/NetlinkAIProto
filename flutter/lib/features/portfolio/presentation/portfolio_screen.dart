@@ -105,7 +105,7 @@ class _PortfolioScreenState extends ConsumerState<PortfolioScreen> {
 
     final target = _scrollController.offset +
         position.dy -
-        (kToolbarHeight + MediaQuery.of(context).padding.top + 16);
+        Responsive.topPadding(context);
 
     _isAutoScrolling = true;
     _scrollController.animateTo(
@@ -337,7 +337,7 @@ class _PortfolioScreenState extends ConsumerState<PortfolioScreen> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(portfolioProvider);
-    final user = SupabaseService.client.auth.currentUser;
+    final user = SupabaseService.isInitialized ? SupabaseService.client.auth.currentUser : null;
     final authState = ref.watch(authProvider);
     final isGuest = authState.user?.isGuest ?? (user == null);
 
@@ -614,7 +614,7 @@ class _PortfolioScreenState extends ConsumerState<PortfolioScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 36),
+              const SectionDivider(margin: EdgeInsets.symmetric(vertical: 36)),
 
               // 2. Basic Information Card
               SectionHeader(
@@ -676,12 +676,6 @@ class _PortfolioScreenState extends ConsumerState<PortfolioScreen> {
                                     decoration: BoxDecoration(
                                       color: context.colors.primary,
                                       shape: BoxShape.circle,
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black.withValues(alpha: 0.4),
-                                          blurRadius: 4,
-                                        ),
-                                      ],
                                     ),
                                     child: const Icon(Icons.camera_alt, size: 14, color: Colors.white),
                                   ),
@@ -794,7 +788,7 @@ class _PortfolioScreenState extends ConsumerState<PortfolioScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 36),
+              const SectionDivider(margin: EdgeInsets.symmetric(vertical: 36)),
 
               // 3. Settings & Theme Selector Card
               SectionHeader(
@@ -1013,7 +1007,7 @@ class _PortfolioScreenState extends ConsumerState<PortfolioScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 36),
+              const SectionDivider(margin: EdgeInsets.symmetric(vertical: 36)),
 
               // 4. Portfolio Sections Manager Card
               SectionHeader(

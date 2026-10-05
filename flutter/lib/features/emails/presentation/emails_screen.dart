@@ -5,13 +5,13 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/router/app_router.dart';
-import '../../../core/widgets/animated_glass_icon_button.dart';
 import '../../../core/widgets/app_filter_chip.dart';
 import '../../../core/widgets/floating_liquid_glass_nav_bar.dart';
 import '../../../core/widgets/gradient_button.dart';
 import '../../../core/widgets/glass_card.dart';
 import '../../../core/widgets/pop_in_item.dart';
 import '../../../core/widgets/section_header.dart';
+import '../../../core/widgets/scrollable_list_window.dart';
 import '../../../core/widgets/sub_page_top_bar.dart';
 import '../../../core/widgets/trial_banner_card.dart';
 import '../../../core/utils/responsive.dart';
@@ -43,12 +43,16 @@ class _EmailsScreenState extends ConsumerState<EmailsScreen> {
   }
 
   final ScrollController _scrollController = ScrollController();
+  final ScrollController _emailsListScrollController = ScrollController();
+  final ScrollController _repliesListScrollController = ScrollController();
   String _emailStatusFilter = 'all'; // 'all', 'sent', 'draft'
   String _replyFilter = 'all'; // 'all', 'unread', 'read'
 
   @override
   void dispose() {
     _scrollController.dispose();
+    _emailsListScrollController.dispose();
+    _repliesListScrollController.dispose();
     super.dispose();
   }
 
@@ -379,15 +383,22 @@ class _EmailsScreenState extends ConsumerState<EmailsScreen> {
             return _buildEmptyEmailsCard(context, state);
           }
 
-          return ListView.separated(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: filteredEmails.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 14),
-            itemBuilder: (ctx, idx) {
-              final email = filteredEmails[idx];
-              return _buildEmailCard(context, email);
-            },
+          return ScrollableListWindow(
+            controller: _emailsListScrollController,
+            showScrollbar: filteredEmails.length > 2,
+            maxHeight: MediaQuery.of(context).size.width > 700 ? 480 : 350,
+            child: ListView.separated(
+              controller: _emailsListScrollController,
+              shrinkWrap: true,
+              physics: const ClampingScrollPhysics(),
+              padding: EdgeInsets.zero,
+              itemCount: filteredEmails.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 14),
+              itemBuilder: (ctx, idx) {
+                final email = filteredEmails[idx];
+                return _buildEmailCard(context, email);
+              },
+            ),
           );
         }(),
       ],
@@ -757,15 +768,22 @@ class _EmailsScreenState extends ConsumerState<EmailsScreen> {
             );
           }
 
-          return ListView.separated(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: filteredReplies.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 12),
-            itemBuilder: (ctx, idx) {
-              final reply = filteredReplies[idx];
-              return _buildReplyCard(context, reply);
-            },
+          return ScrollableListWindow(
+            controller: _repliesListScrollController,
+            showScrollbar: filteredReplies.length > 2,
+            maxHeight: MediaQuery.of(context).size.width > 700 ? 460 : 330,
+            child: ListView.separated(
+              controller: _repliesListScrollController,
+              shrinkWrap: true,
+              physics: const ClampingScrollPhysics(),
+              padding: EdgeInsets.zero,
+              itemCount: filteredReplies.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 12),
+              itemBuilder: (ctx, idx) {
+                final reply = filteredReplies[idx];
+                return _buildReplyCard(context, reply);
+              },
+            ),
           );
         }(),
       ],
@@ -1285,75 +1303,75 @@ class _EmailsScreenState extends ConsumerState<EmailsScreen> {
 
                           // AI Prompt / Purpose
                           Text(
-                            context.tr('aiPromptHint'),
+                            context.tr('eventContextPrompt'),
                             style: AppTypography.labelSm.copyWith(
                               color: context.colors.onSurfaceVariant,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
                           const SizedBox(height: 6),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: TextField(
-                                  controller: purposeController,
-                                  style: AppTypography.bodySm.copyWith(color: context.colors.onSurface),
-                                  decoration: InputDecoration(
-                                    hintText: context.tr('aiPromptHint'),
-                                    hintStyle: AppTypography.bodySm.copyWith(
-                                      color: context.colors.onSurfaceVariant.withValues(alpha: 0.55),
-                                    ),
-                                    isDense: true,
-                                    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                                    filled: true,
-                                    fillColor: fieldFill,
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                      borderSide: BorderSide(color: fieldBorder),
-                                    ),
-                                    enabledBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                      borderSide: BorderSide(color: fieldBorder),
-                                    ),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                      borderSide: BorderSide(color: context.colors.primary),
-                                    ),
-                                  ),
-                                ),
+                          TextField(
+                            controller: purposeController,
+                            minLines: 2,
+                            maxLines: 4,
+                            style: AppTypography.bodySm.copyWith(color: context.colors.onSurface),
+                            decoration: InputDecoration(
+                              hintText: context.tr('aiPromptHint'),
+                              hintStyle: AppTypography.bodySm.copyWith(
+                                color: context.colors.onSurfaceVariant.withValues(alpha: 0.55),
                               ),
-                              const SizedBox(width: 8),
-                              AnimatedGlassIconButton(
-                                label: isGenerating ? context.tr('generatingAiEmail') : context.tr('generateAiEmail'),
-                                icon: isGenerating ? Icons.hourglass_top_rounded : Icons.auto_awesome_rounded,
-                                size: 42,
-                                iconSize: 15,
-                                fontSize: 12,
-                                padding: const EdgeInsets.symmetric(horizontal: 12),
-                                iconColor: context.colors.primary,
-                                isLoading: isGenerating,
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                              filled: true,
+                              fillColor: fieldFill,
+                              border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                onPressed: isGenerating
-                                    ? null
-                                    : () async {
-                                        if (purposeController.text.trim().isEmpty) return;
-                                        setDialogState(() => isGenerating = true);
-                                        final user = ref.read(authProvider).user;
-                                        final result = await ref
-                                            .read(emailsProvider.notifier)
-                                            .generateAiEmail(
-                                              contact: contact,
-                                              purpose: purposeController.text.trim(),
-                                              userName: user?.name,
-                                            );
-                                        setDialogState(() {
-                                          isGenerating = false;
-                                          subjectController.text = result['subject'] ?? '';
-                                          bodyController.text = result['body'] ?? '';
-                                        });
-                                      },
+                                borderSide: BorderSide(color: fieldBorder),
                               ),
-                            ],
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(color: fieldBorder),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(color: context.colors.primary),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: GradientButton(
+                              label: isGenerating
+                                  ? context.tr('generatingAiEmail')
+                                  : context.tr('generateAiEmail'),
+                              icon: isGenerating
+                                  ? Icons.hourglass_top_rounded
+                                  : Icons.auto_awesome_rounded,
+                              height: 38,
+                              fontSize: 12,
+                              iconSize: 15,
+                              expand: false,
+                              isLoading: isGenerating,
+                              onPressed: isGenerating
+                                  ? null
+                                  : () async {
+                                      if (purposeController.text.trim().isEmpty) return;
+                                      setDialogState(() => isGenerating = true);
+                                      final user = ref.read(authProvider).user;
+                                      final result = await ref
+                                          .read(emailsProvider.notifier)
+                                          .generateAiEmail(
+                                            contact: contact,
+                                            purpose: purposeController.text.trim(),
+                                            userName: user?.name,
+                                          );
+                                      setDialogState(() {
+                                        isGenerating = false;
+                                        subjectController.text = result['subject'] ?? '';
+                                        bodyController.text = result['body'] ?? '';
+                                      });
+                                    },
+                            ),
                           ),
                           const SizedBox(height: 18),
 
@@ -1436,78 +1454,183 @@ class _EmailsScreenState extends ConsumerState<EmailsScreen> {
                   ),
                   Divider(height: 1, color: context.colors.glassBorder),
 
-                  // Action Buttons with generous spacing
+                  // Action Buttons with responsive layout
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: LiquidGlassButton(
-                            label: context.tr('cancel'),
-                            height: 44,
-                            onPressed: () => Navigator.pop(ctx),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: LiquidGlassButton(
-                            label: isSaving ? context.tr('saving') : context.tr('saveDraft'),
-                            icon: Icons.save_outlined,
-                            height: 44,
-                            onPressed: isSaving
-                                ? null
-                                : () async {
-                                    if (subjectController.text.trim().isEmpty || bodyController.text.trim().isEmpty) {
-                                      AppToast.show(context, context.tr('subjectAndBodyRequired'));
-                                      return;
-                                    }
-                                    setDialogState(() => isSaving = true);
-                                    final success = await ref.read(emailsProvider.notifier).saveDraft(
-                                          contact: contact,
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final isNarrow = constraints.maxWidth < 440;
+                        if (isNarrow) {
+                          return Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: LiquidGlassButton(
+                                      label: isSaving ? context.tr('saving') : context.tr('saveDraft'),
+                                      icon: Icons.save_outlined,
+                                      height: 44,
+                                      fontSize: 13,
+                                      iconSize: 16,
+                                      minWidth: 0,
+                                      onPressed: isSaving
+                                          ? null
+                                          : () async {
+                                              if (subjectController.text.trim().isEmpty || bodyController.text.trim().isEmpty) {
+                                                AppToast.show(context, context.tr('subjectAndBodyRequired'));
+                                                return;
+                                              }
+                                              setDialogState(() => isSaving = true);
+                                              final success = await ref.read(emailsProvider.notifier).saveDraft(
+                                                    contact: contact,
+                                                    subject: subjectController.text.trim(),
+                                                    body: bodyController.text.trim(),
+                                                  );
+                                              if (success && ctx.mounted) {
+                                                Navigator.pop(ctx);
+                                              } else {
+                                                setDialogState(() => isSaving = false);
+                                              }
+                                            },
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: GradientButton(
+                                      label: context.tr('sendNow'),
+                                      icon: Icons.send_rounded,
+                                      height: 44,
+                                      fontSize: 13,
+                                      iconSize: 16,
+                                      minWidth: 0,
+                                      onPressed: () async {
+                                        if (subjectController.text.trim().isEmpty || bodyController.text.trim().isEmpty) {
+                                          AppToast.show(context, context.tr('subjectAndBodyRequired'));
+                                          return;
+                                        }
+                                        final user = ref.read(authProvider).user;
+                                        final tempEmail = EmailItem(
+                                          id: '',
+                                          userId: user?.id ?? '',
+                                          contactId: contact.id,
+                                          contactName: contact.name,
+                                          contactEmail: contact.email,
+                                          contactCompany: contact.company,
                                           subject: subjectController.text.trim(),
                                           body: bodyController.text.trim(),
+                                          status: 'sent',
+                                          sentAt: DateTime.now(),
+                                          createdAt: DateTime.now(),
                                         );
-                                    if (success && ctx.mounted) {
-                                      Navigator.pop(ctx);
-                                    } else {
-                                      setDialogState(() => isSaving = false);
-                                    }
-                                  },
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: GradientButton(
-                            label: context.tr('sendNow'),
-                            icon: Icons.send_rounded,
-                            height: 44,
-                            onPressed: () async {
-                            if (subjectController.text.trim().isEmpty || bodyController.text.trim().isEmpty) {
-                              AppToast.show(context, context.tr('subjectAndBodyRequired'));
-                              return;
-                            }
-                            final user = ref.read(authProvider).user;
-                            final tempEmail = EmailItem(
-                              id: '',
-                              userId: user?.id ?? '',
-                              contactId: contact.id,
-                              contactName: contact.name,
-                              contactEmail: contact.email,
-                              contactCompany: contact.company,
-                              subject: subjectController.text.trim(),
-                              body: bodyController.text.trim(),
-                              status: 'sent',
-                              sentAt: DateTime.now(),
-                              createdAt: DateTime.now(),
-                            );
-                            final success = await ref.read(emailsProvider.notifier).sendEmailItem(email: tempEmail);
-                            if (success && ctx.mounted) {
-                              Navigator.pop(ctx);
-                            }
-                          },
-                          ),
-                        ),
-                      ],
+                                        final success = await ref.read(emailsProvider.notifier).sendEmailItem(email: tempEmail);
+                                        if (success && ctx.mounted) {
+                                          Navigator.pop(ctx);
+                                        }
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 6),
+                              SizedBox(
+                                width: double.infinity,
+                                child: TextButton(
+                                  onPressed: () => Navigator.pop(ctx),
+                                  style: TextButton.styleFrom(
+                                    visualDensity: VisualDensity.compact,
+                                    padding: const EdgeInsets.symmetric(vertical: 4),
+                                  ),
+                                  child: Text(
+                                    context.tr('cancel'),
+                                    style: AppTypography.bodySm.copyWith(
+                                      color: context.colors.onSurfaceVariant.withValues(alpha: 0.8),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          );
+                        }
+                        return Row(
+                          children: [
+                            Expanded(
+                              child: LiquidGlassButton(
+                                label: context.tr('cancel'),
+                                height: 44,
+                                fontSize: 13,
+                                minWidth: 0,
+                                onPressed: () => Navigator.pop(ctx),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: LiquidGlassButton(
+                                label: isSaving ? context.tr('saving') : context.tr('saveDraft'),
+                                icon: Icons.save_outlined,
+                                height: 44,
+                                fontSize: 13,
+                                iconSize: 16,
+                                minWidth: 0,
+                                onPressed: isSaving
+                                    ? null
+                                    : () async {
+                                        if (subjectController.text.trim().isEmpty || bodyController.text.trim().isEmpty) {
+                                          AppToast.show(context, context.tr('subjectAndBodyRequired'));
+                                          return;
+                                        }
+                                        setDialogState(() => isSaving = true);
+                                        final success = await ref.read(emailsProvider.notifier).saveDraft(
+                                              contact: contact,
+                                              subject: subjectController.text.trim(),
+                                              body: bodyController.text.trim(),
+                                            );
+                                        if (success && ctx.mounted) {
+                                          Navigator.pop(ctx);
+                                        } else {
+                                          setDialogState(() => isSaving = false);
+                                        }
+                                      },
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: GradientButton(
+                                label: context.tr('sendNow'),
+                                icon: Icons.send_rounded,
+                                height: 44,
+                                fontSize: 13,
+                                iconSize: 16,
+                                minWidth: 0,
+                                onPressed: () async {
+                                  if (subjectController.text.trim().isEmpty || bodyController.text.trim().isEmpty) {
+                                    AppToast.show(context, context.tr('subjectAndBodyRequired'));
+                                    return;
+                                  }
+                                  final user = ref.read(authProvider).user;
+                                  final tempEmail = EmailItem(
+                                    id: '',
+                                    userId: user?.id ?? '',
+                                    contactId: contact.id,
+                                    contactName: contact.name,
+                                    contactEmail: contact.email,
+                                    contactCompany: contact.company,
+                                    subject: subjectController.text.trim(),
+                                    body: bodyController.text.trim(),
+                                    status: 'sent',
+                                    sentAt: DateTime.now(),
+                                    createdAt: DateTime.now(),
+                                  );
+                                  final success = await ref.read(emailsProvider.notifier).sendEmailItem(email: tempEmail);
+                                  if (success && ctx.mounted) {
+                                    Navigator.pop(ctx);
+                                  }
+                                },
+                              ),
+                            ),
+                          ],
+                        );
+                      },
                     ),
                   ),
                 ],
@@ -1699,60 +1822,147 @@ class _EmailsScreenState extends ConsumerState<EmailsScreen> {
                   ),
                   Divider(height: 1, color: context.colors.glassBorder),
 
-                  // Actions
+                  // Actions with responsive layout
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: LiquidGlassButton(
-                            label: context.tr('cancel'),
-                            height: 44,
-                            onPressed: () => Navigator.pop(ctx),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: LiquidGlassButton(
-                            label: isSaving ? context.tr('saving') : context.tr('updateDraft'),
-                            icon: Icons.save_outlined,
-                            height: 44,
-                            onPressed: isSaving
-                                ? null
-                                : () async {
-                                    setDialogState(() => isSaving = true);
-                                    final success = await ref.read(emailsProvider.notifier).updateDraft(
-                                          emailId: email.id,
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final isNarrow = constraints.maxWidth < 440;
+                        if (isNarrow) {
+                          return Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: LiquidGlassButton(
+                                      label: isSaving ? context.tr('saving') : context.tr('updateDraft'),
+                                      icon: Icons.save_outlined,
+                                      height: 44,
+                                      fontSize: 13,
+                                      iconSize: 16,
+                                      minWidth: 0,
+                                      onPressed: isSaving
+                                          ? null
+                                          : () async {
+                                              setDialogState(() => isSaving = true);
+                                              final success = await ref.read(emailsProvider.notifier).updateDraft(
+                                                    emailId: email.id,
+                                                    subject: subjectController.text.trim(),
+                                                    body: bodyController.text.trim(),
+                                                  );
+                                              if (success && ctx.mounted) {
+                                                Navigator.pop(ctx);
+                                              } else {
+                                                setDialogState(() => isSaving = false);
+                                              }
+                                            },
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: GradientButton(
+                                      label: context.tr('sendNow'),
+                                      icon: Icons.send_rounded,
+                                      height: 44,
+                                      fontSize: 13,
+                                      iconSize: 16,
+                                      minWidth: 0,
+                                      onPressed: () async {
+                                        final updated = email.copyWith(
                                           subject: subjectController.text.trim(),
                                           body: bodyController.text.trim(),
                                         );
-                                    if (success && ctx.mounted) {
-                                      Navigator.pop(ctx);
-                                    } else {
-                                      setDialogState(() => isSaving = false);
-                                    }
-                                  },
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: GradientButton(
-                            label: context.tr('sendNow'),
-                            icon: Icons.send_rounded,
-                            height: 44,
-                            onPressed: () async {
-                              final updated = email.copyWith(
-                                subject: subjectController.text.trim(),
-                                body: bodyController.text.trim(),
-                              );
-                              final success = await ref.read(emailsProvider.notifier).sendEmailItem(email: updated);
-                              if (success && ctx.mounted) {
-                                Navigator.pop(ctx);
-                              }
-                            },
-                          ),
-                        ),
-                      ],
+                                        final success = await ref.read(emailsProvider.notifier).sendEmailItem(email: updated);
+                                        if (success && ctx.mounted) {
+                                          Navigator.pop(ctx);
+                                        }
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 6),
+                              SizedBox(
+                                width: double.infinity,
+                                child: TextButton(
+                                  onPressed: () => Navigator.pop(ctx),
+                                  style: TextButton.styleFrom(
+                                    visualDensity: VisualDensity.compact,
+                                    padding: const EdgeInsets.symmetric(vertical: 4),
+                                  ),
+                                  child: Text(
+                                    context.tr('cancel'),
+                                    style: AppTypography.bodySm.copyWith(
+                                      color: context.colors.onSurfaceVariant.withValues(alpha: 0.8),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          );
+                        }
+                        return Row(
+                          children: [
+                            Expanded(
+                              child: LiquidGlassButton(
+                                label: context.tr('cancel'),
+                                height: 44,
+                                fontSize: 13,
+                                minWidth: 0,
+                                onPressed: () => Navigator.pop(ctx),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: LiquidGlassButton(
+                                label: isSaving ? context.tr('saving') : context.tr('updateDraft'),
+                                icon: Icons.save_outlined,
+                                height: 44,
+                                fontSize: 13,
+                                iconSize: 16,
+                                minWidth: 0,
+                                onPressed: isSaving
+                                    ? null
+                                    : () async {
+                                        setDialogState(() => isSaving = true);
+                                        final success = await ref.read(emailsProvider.notifier).updateDraft(
+                                              emailId: email.id,
+                                              subject: subjectController.text.trim(),
+                                              body: bodyController.text.trim(),
+                                            );
+                                        if (success && ctx.mounted) {
+                                          Navigator.pop(ctx);
+                                        } else {
+                                          setDialogState(() => isSaving = false);
+                                        }
+                                      },
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: GradientButton(
+                                label: context.tr('sendNow'),
+                                icon: Icons.send_rounded,
+                                height: 44,
+                                fontSize: 13,
+                                iconSize: 16,
+                                minWidth: 0,
+                                onPressed: () async {
+                                  final updated = email.copyWith(
+                                    subject: subjectController.text.trim(),
+                                    body: bodyController.text.trim(),
+                                  );
+                                  final success = await ref.read(emailsProvider.notifier).sendEmailItem(email: updated);
+                                  if (success && ctx.mounted) {
+                                    Navigator.pop(ctx);
+                                  }
+                                },
+                              ),
+                            ),
+                          ],
+                        );
+                      },
                     ),
                   ),
                 ],

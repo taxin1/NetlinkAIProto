@@ -80,7 +80,7 @@ class _GettingStartedScreenState extends State<GettingStartedScreen> {
     final RenderBox? box = key.currentContext!.findRenderObject() as RenderBox?;
     if (box == null || !box.hasSize) return;
     final position = box.localToGlobal(Offset.zero, ancestor: context.findRenderObject());
-    final target = _scrollController.offset + position.dy - (kToolbarHeight + MediaQuery.of(context).padding.top + 16);
+    final target = _scrollController.offset + position.dy - Responsive.topPadding(context);
     
     _isAutoScrolling = true;
     _scrollController.animateTo(
@@ -162,11 +162,11 @@ class _GettingStartedScreenState extends State<GettingStartedScreen> {
                 ),
                 const SizedBox(height: 32),
 
-                  const SizedBox(height: 48),
+                  const SectionDivider(margin: EdgeInsets.symmetric(vertical: 36)),
 
                   // ── Quick Start Guide ────────────────────────────────────
-                  Container(key: _guideKey),
                   SectionHeader(
+                    key: _guideKey,
                     icon: Icons.bolt_rounded,
                     label: context.tr('quickStartGuide'),
                     color: context.colors.primary,
@@ -222,7 +222,7 @@ class _GettingStartedScreenState extends State<GettingStartedScreen> {
 
                     return _buildPairGrid(stepCards, is2Col);
                   }),
-                  const SizedBox(height: 48),
+                  const SectionDivider(margin: EdgeInsets.symmetric(vertical: 36)),
 
                   // ── Key Features ─────────────────────────────────────────
                   Container(
@@ -273,14 +273,14 @@ class _GettingStartedScreenState extends State<GettingStartedScreen> {
 
                           return _buildPairGrid(featureCards, is2Col);
                         }),
-                        const SizedBox(height: 48),
                       ],
                     ),
                   ),
+                  const SectionDivider(margin: EdgeInsets.symmetric(vertical: 36)),
 
                   // ── Next Steps ───────────────────────────────────────────
-                  Container(key: _nextStepsKey),
                   SectionHeader(
+                    key: _nextStepsKey,
                     icon: Icons.arrow_forward_rounded,
                     label: context.tr('nextStepsHeader'),
                     color: const Color(0xFF10B981),

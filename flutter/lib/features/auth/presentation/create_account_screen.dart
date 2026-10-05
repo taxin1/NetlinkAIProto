@@ -460,7 +460,7 @@ class _AnimatedLinkButtonState extends State<_AnimatedLinkButton> {
         },
         onTapCancel: () => setState(() => _isPressed = false),
         child: AnimatedScale(
-          scale: _isPressed ? 0.96 : (_isHovered ? 1.02 : 1.0),
+          scale: _isPressed ? 0.96 : 1.0,
           duration: const Duration(milliseconds: 100),
           child: RichText(
             text: TextSpan(

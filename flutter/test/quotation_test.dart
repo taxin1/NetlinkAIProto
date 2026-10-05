@@ -42,5 +42,50 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
 
     expect(find.byType(QuotationScreen), findsOneWidget);
+
+    // Scroll down to the Dynamic Cost Breakdown card
+    final breakdownFinder = find.byType(QuotationScreen);
+    await tester.drag(breakdownFinder, const Offset(0, -600));
+    await tester.pump(const Duration(milliseconds: 500));
+
+    // Verify cost breakdown items are visible and no overflow occurred
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('QuotationScreen renders cost breakdown on 320px narrow mobile without overflow', (tester) async {
+    SharedPreferences.setMockInitialValues({});
+    final prefs = await SharedPreferences.getInstance();
+
+    tester.view.physicalSize = const Size(320, 640);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(prefs),
+        ],
+        child: const MaterialApp(
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          home: AppShell(
+            child: QuotationScreen(),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump(const Duration(milliseconds: 300));
+    final breakdownFinder = find.byType(QuotationScreen);
+    await tester.drag(breakdownFinder, const Offset(0, -600));
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(tester.takeException(), isNull);
   });
 }

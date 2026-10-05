@@ -112,7 +112,7 @@ class _NetworkingModeScreenState extends ConsumerState<NetworkingModeScreen> {
 
     final target = _scrollController.offset +
         position.dy -
-        (kToolbarHeight + MediaQuery.of(context).padding.top + 16);
+        Responsive.topPadding(context);
 
     _isAutoScrolling = true;
     _scrollController.animateTo(
@@ -457,65 +457,85 @@ class _NetworkingModeScreenState extends ConsumerState<NetworkingModeScreen> {
                   ],
 
                   // ── Section 1: Mode Controls & Automation ──
-                  SectionHeader(
-                    icon: Icons.tune_rounded,
-                    label: context.tr('modeAndAutomation'),
-                    color: context.colors.primary,
-                  ),
-                  const SizedBox(height: 16),
-                  PopInItem(
-                    index: isGuest ? 2 : 1,
-                    child: Container(
-                      key: _modeKey,
-                      child: _buildModeCard(context, state, eventsState.events),
+                  Container(
+                    key: _modeKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SectionHeader(
+                          icon: Icons.tune_rounded,
+                          label: context.tr('modeAndAutomation'),
+                          color: context.colors.primary,
+                        ),
+                        const SizedBox(height: 16),
+                        PopInItem(
+                          index: isGuest ? 2 : 1,
+                          child: _buildModeCard(context, state, eventsState.events),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 36),
+                  const SectionDivider(margin: EdgeInsets.symmetric(vertical: 36)),
 
                   // ── Section 2: Email Template ──
-                  SectionHeader(
-                    icon: Icons.mark_email_read_rounded,
-                    label: context.tr('emailTemplateTitle'),
-                    color: const Color(0xFF8B5CF6),
-                  ),
-                  const SizedBox(height: 16),
-                  PopInItem(
-                    index: isGuest ? 3 : 2,
-                    child: Container(
-                      key: _templateKey,
-                      child: _buildTemplateCard(context, state),
+                  Container(
+                    key: _templateKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SectionHeader(
+                          icon: Icons.mark_email_read_rounded,
+                          label: context.tr('emailTemplateTitle'),
+                          color: const Color(0xFF8B5CF6),
+                        ),
+                        const SizedBox(height: 16),
+                        PopInItem(
+                          index: isGuest ? 3 : 2,
+                          child: _buildTemplateCard(context, state),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 36),
+                  const SectionDivider(margin: EdgeInsets.symmetric(vertical: 36)),
 
                   // ── Section 3: Card Scanner & Quick Add ──
-                  SectionHeader(
-                    icon: Icons.document_scanner_rounded,
-                    label: context.tr('cardScannerTitle'),
-                    color: const Color(0xFF38BDF8),
-                  ),
-                  const SizedBox(height: 16),
-                  PopInItem(
-                    index: isGuest ? 4 : 3,
-                    child: Container(
-                      key: _scannerKey,
-                      child: _buildScannerCard(context, state),
+                  Container(
+                    key: _scannerKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SectionHeader(
+                          icon: Icons.document_scanner_rounded,
+                          label: context.tr('cardScannerTitle'),
+                          color: const Color(0xFF38BDF8),
+                        ),
+                        const SizedBox(height: 16),
+                        PopInItem(
+                          index: isGuest ? 4 : 3,
+                          child: _buildScannerCard(context, state),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 36),
+                  const SectionDivider(margin: EdgeInsets.symmetric(vertical: 36)),
 
                   // ── Section 4: Session Queue & Stats ──
-                  SectionHeader(
-                    icon: Icons.stacked_line_chart_rounded,
-                    label: context.tr('sessionQueueTitle'),
-                    color: const Color(0xFF10B981),
-                  ),
-                  const SizedBox(height: 16),
-                  PopInItem(
-                    index: isGuest ? 5 : 4,
-                    child: Container(
-                      key: _statsKey,
-                      child: _buildStatsCard(context, state),
+                  Container(
+                    key: _statsKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SectionHeader(
+                          icon: Icons.stacked_line_chart_rounded,
+                          label: context.tr('sessionQueueTitle'),
+                          color: const Color(0xFF10B981),
+                        ),
+                        const SizedBox(height: 16),
+                        PopInItem(
+                          index: isGuest ? 5 : 4,
+                          child: _buildStatsCard(context, state),
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -621,6 +641,8 @@ class _NetworkingModeScreenState extends ConsumerState<NetworkingModeScreen> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: context.colors.primary,
                       foregroundColor: Colors.white,
+                      elevation: 0,
+                      shadowColor: Colors.transparent,
                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     ),
@@ -649,21 +671,10 @@ class _NetworkingModeScreenState extends ConsumerState<NetworkingModeScreen> {
                   ],
                 ),
               ),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    state.isEnabled ? context.tr('activeStatus') : context.tr('disabledStatus'),
-                    style: AppTypography.bodySm.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: state.isEnabled ? context.colors.primary : context.colors.onSurfaceVariant,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Switch(
-                    value: state.isEnabled,
-                    activeThumbColor: context.colors.primary,
-                    onChanged: (val) {
+              Switch(
+                value: state.isEnabled,
+                activeThumbColor: context.colors.primary,
+                onChanged: (val) {
                       if (val && state.isLimitReached) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
@@ -682,8 +693,6 @@ class _NetworkingModeScreenState extends ConsumerState<NetworkingModeScreen> {
                   ),
                 ],
               ),
-            ],
-          ),
           const SizedBox(height: 18),
 
           // Active Event Association Selector
@@ -830,50 +839,20 @@ class _NetworkingModeScreenState extends ConsumerState<NetworkingModeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      context.tr('followUpEmailTemplate'),
-                      style: AppTypography.bodyMd.copyWith(fontWeight: FontWeight.w600),
-                    ),
-                    Text(
-                      context.tr('aiCustomizedMessageDesc'),
-                      style: AppTypography.labelCaps.copyWith(
-                        color: context.colors.onSurfaceVariant,
-                        fontSize: 11,
-                      ),
-                    ),
-                  ],
+              Text(
+                context.tr('followUpEmailTemplate'),
+                style: AppTypography.bodyMd.copyWith(fontWeight: FontWeight.w600),
+              ),
+              Text(
+                context.tr('aiCustomizedMessageDesc'),
+                style: AppTypography.labelCaps.copyWith(
+                  color: context.colors.onSurfaceVariant,
+                  fontSize: 11,
                 ),
               ),
-              if (state.isTemplatePrepared)
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF10B981).withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: const Color(0xFF10B981).withValues(alpha: 0.4)),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.check_circle_rounded, size: 14, color: Color(0xFF34D399)),
-                      const SizedBox(width: 4),
-                      Text(
-                        context.tr('preparedStatus'),
-                        style: AppTypography.labelSm.copyWith(
-                          color: const Color(0xFF34D399),
-                          fontWeight: FontWeight.bold,
-                          fontSize: 10,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
             ],
           ),
           const SizedBox(height: 18),

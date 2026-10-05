@@ -7,6 +7,7 @@ import '../../../core/widgets/gradient_button.dart';
 import '../../../core/widgets/glass_card.dart';
 import '../../../core/widgets/pop_in_item.dart';
 import '../../../core/widgets/section_header.dart';
+import '../../../core/widgets/scrollable_list_window.dart';
 import '../../../core/widgets/trial_banner_card.dart';
 import '../../../core/utils/responsive.dart';
 import '../../../core/tour/tour_controller.dart';
@@ -24,10 +25,12 @@ class ContactsScreen extends ConsumerStatefulWidget {
 
 class _ContactsScreenState extends ConsumerState<ContactsScreen> {
   final _searchController = TextEditingController();
+  final _contactsScrollController = ScrollController();
 
   @override
   void dispose() {
     _searchController.dispose();
+    _contactsScrollController.dispose();
     super.dispose();
   }
 
@@ -79,7 +82,10 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
                 surfaceTintColor: Colors.transparent,
                 dayForegroundColor: WidgetStateProperty.resolveWith((states) {
                   if (states.contains(WidgetState.selected)) {
-                    return Colors.white;
+                    return isLight ? AppColorsLight.onPrimary : AppColors.onPrimary;
+                  }
+                  if (states.contains(WidgetState.disabled)) {
+                    return (isLight ? const Color(0xFF0F172A) : Colors.white).withValues(alpha: 0.38);
                   }
                   return isLight ? const Color(0xFF0F172A) : Colors.white;
                 }),
@@ -89,13 +95,36 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
                   }
                   return Colors.transparent;
                 }),
-                todayForegroundColor:
-                    WidgetStateProperty.all(context.colors.primary),
+                todayForegroundColor: WidgetStateProperty.resolveWith((states) {
+                  if (states.contains(WidgetState.selected)) {
+                    return isLight ? AppColorsLight.onPrimary : AppColors.onPrimary;
+                  }
+                  if (states.contains(WidgetState.disabled)) {
+                    return context.colors.primary.withValues(alpha: 0.38);
+                  }
+                  return context.colors.primary;
+                }),
+                todayBackgroundColor: WidgetStateProperty.resolveWith((states) {
+                  if (states.contains(WidgetState.selected)) {
+                    return context.colors.primary;
+                  }
+                  return Colors.transparent;
+                }),
+                todayBorder: BorderSide(color: context.colors.primary, width: 1.5),
                 yearForegroundColor: WidgetStateProperty.resolveWith((states) {
                   if (states.contains(WidgetState.selected)) {
-                    return Colors.white;
+                    return isLight ? AppColorsLight.onPrimary : AppColors.onPrimary;
+                  }
+                  if (states.contains(WidgetState.disabled)) {
+                    return (isLight ? const Color(0xFF0F172A) : Colors.white).withValues(alpha: 0.38);
                   }
                   return isLight ? const Color(0xFF0F172A) : Colors.white;
+                }),
+                yearBackgroundColor: WidgetStateProperty.resolveWith((states) {
+                  if (states.contains(WidgetState.selected)) {
+                    return context.colors.primary;
+                  }
+                  return Colors.transparent;
                 }),
               ),
             ),
@@ -621,55 +650,62 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
                   ),
                 )
               else
-                ListView.separated(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: contacts.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 14),
-                  itemBuilder: (context, index) {
-                    final contact = contacts[index];
-                    return PopInItem(
-                      index: index + 2,
-                      child: _ContactCard(
-                        contact: contact,
-                        onDelete: () async {
-                          final confirm = await showDialog<bool>(
-                            context: context,
-                            builder: (ctx) => AlertDialog(
-                              backgroundColor: context.colors.surfaceCard,
-                              title: Text(context.tr('deleteContactTitle')),
-                              content: Text(
-                                '${context.tr('deleteContactConfirm')}\n(${contact.name})',
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(ctx, false),
-                                  child: Text(context.tr('cancel')),
-                                ),
-                                TextButton(
-                                  onPressed: () => Navigator.pop(ctx, true),
-                                  child: Text(
-                                    context.tr('delete'),
-                                    style: const TextStyle(
-                                      color: Color(0xFFEF4444),
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                ScrollableListWindow(
+                  controller: _contactsScrollController,
+                  showScrollbar: contacts.length > 2,
+                  maxHeight: MediaQuery.of(context).size.width > 700 ? 500 : 350,
+                  child: ListView.separated(
+                    controller: _contactsScrollController,
+                    shrinkWrap: true,
+                    physics: const ClampingScrollPhysics(),
+                    padding: EdgeInsets.zero,
+                    itemCount: contacts.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 14),
+                      itemBuilder: (context, index) {
+                        final contact = contacts[index];
+                        return PopInItem(
+                          index: index + 2,
+                          child: _ContactCard(
+                            contact: contact,
+                            onDelete: () async {
+                              final confirm = await showDialog<bool>(
+                                context: context,
+                                builder: (ctx) => AlertDialog(
+                                  backgroundColor: context.colors.surfaceCard,
+                                  title: Text(context.tr('deleteContactTitle')),
+                                  content: Text(
+                                    '${context.tr('deleteContactConfirm')}\n(${contact.name})',
                                   ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(ctx, false),
+                                      child: Text(context.tr('cancel')),
+                                    ),
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(ctx, true),
+                                      child: Text(
+                                        context.tr('delete'),
+                                        style: const TextStyle(
+                                          color: Color(0xFFEF4444),
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
-                          );
+                              );
 
-                          if (confirm == true) {
-                            await ref
-                                .read(contactsProvider.notifier)
-                                .deleteContact(contact.id);
-                          }
-                        },
-                      ),
-                    );
-                  },
-                ),
+                              if (confirm == true) {
+                                await ref
+                                    .read(contactsProvider.notifier)
+                                    .deleteContact(contact.id);
+                              }
+                            },
+                          ),
+                        );
+                      },
+                    ),
+                  ),
             ],
           ),
         ),

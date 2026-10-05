@@ -140,6 +140,8 @@ class AppTheme {
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.primaryContainer,
             foregroundColor: Colors.white,
+            elevation: 0,
+            shadowColor: Colors.transparent,
             minimumSize: const Size(double.infinity, 52),
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(99)),
@@ -211,14 +213,39 @@ class AppTheme {
           headerForegroundColor: Colors.white,
           surfaceTintColor: Colors.transparent,
           dayForegroundColor: WidgetStateProperty.resolveWith((states) {
-            if (states.contains(WidgetState.selected)) return Colors.white;
+            if (states.contains(WidgetState.selected)) return AppColors.onPrimary;
+            if (states.contains(WidgetState.disabled)) {
+              return Colors.white.withValues(alpha: 0.38);
+            }
             return Colors.white;
           }),
           dayBackgroundColor: WidgetStateProperty.resolveWith((states) {
             if (states.contains(WidgetState.selected)) return AppColors.primary;
             return Colors.transparent;
           }),
-          todayForegroundColor: WidgetStateProperty.all(AppColors.primary),
+          todayForegroundColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) return AppColors.onPrimary;
+            if (states.contains(WidgetState.disabled)) {
+              return AppColors.primary.withValues(alpha: 0.38);
+            }
+            return AppColors.primary;
+          }),
+          todayBackgroundColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) return AppColors.primary;
+            return Colors.transparent;
+          }),
+          todayBorder: const BorderSide(color: AppColors.primary, width: 1.5),
+          yearForegroundColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) return AppColors.onPrimary;
+            if (states.contains(WidgetState.disabled)) {
+              return Colors.white.withValues(alpha: 0.38);
+            }
+            return Colors.white;
+          }),
+          yearBackgroundColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) return AppColors.primary;
+            return Colors.transparent;
+          }),
         ),
       );
 
@@ -360,6 +387,8 @@ class AppTheme {
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColorsLight.primaryContainer,
             foregroundColor: Colors.white,
+            elevation: 0,
+            shadowColor: Colors.transparent,
             minimumSize: const Size(double.infinity, 52),
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(99)),
@@ -431,14 +460,39 @@ class AppTheme {
           headerForegroundColor: const Color(0xFF0F172A),
           surfaceTintColor: Colors.transparent,
           dayForegroundColor: WidgetStateProperty.resolveWith((states) {
-            if (states.contains(WidgetState.selected)) return Colors.white;
+            if (states.contains(WidgetState.selected)) return AppColorsLight.onPrimary;
+            if (states.contains(WidgetState.disabled)) {
+              return const Color(0xFF0F172A).withValues(alpha: 0.38);
+            }
             return const Color(0xFF0F172A);
           }),
           dayBackgroundColor: WidgetStateProperty.resolveWith((states) {
             if (states.contains(WidgetState.selected)) return AppColorsLight.primary;
             return Colors.transparent;
           }),
-          todayForegroundColor: WidgetStateProperty.all(AppColorsLight.primary),
+          todayForegroundColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) return AppColorsLight.onPrimary;
+            if (states.contains(WidgetState.disabled)) {
+              return AppColorsLight.primary.withValues(alpha: 0.38);
+            }
+            return AppColorsLight.primary;
+          }),
+          todayBackgroundColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) return AppColorsLight.primary;
+            return Colors.transparent;
+          }),
+          todayBorder: const BorderSide(color: AppColorsLight.primary, width: 1.5),
+          yearForegroundColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) return AppColorsLight.onPrimary;
+            if (states.contains(WidgetState.disabled)) {
+              return const Color(0xFF0F172A).withValues(alpha: 0.38);
+            }
+            return const Color(0xFF0F172A);
+          }),
+          yearBackgroundColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) return AppColorsLight.primary;
+            return Colors.transparent;
+          }),
         ),
       );
 }

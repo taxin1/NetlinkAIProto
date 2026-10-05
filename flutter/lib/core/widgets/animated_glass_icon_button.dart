@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 
-/// Reusable liquid glass icon button with press & hover animations, glass border, cyan glow, and 12px squircle shape
+/// Reusable liquid glass icon button with press & hover animations, glass border, and 12px squircle shape
 class AnimatedGlassIconButton extends StatefulWidget {
   final IconData? icon;
   final String? label;
@@ -44,7 +44,6 @@ class _AnimatedGlassIconButtonState extends State<AnimatedGlassIconButton> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final isDisabled = widget.isLoading || widget.onPressed == null;
     final activeColor = widget.iconColor ?? context.colors.primary;
 
@@ -61,7 +60,7 @@ class _AnimatedGlassIconButtonState extends State<AnimatedGlassIconButton> {
               },
         onTapCancel: () => setState(() => _isPressed = false),
         child: AnimatedScale(
-          scale: _isPressed ? 0.90 : (_isHovered ? 1.05 : 1.0),
+          scale: _isPressed ? 0.95 : 1.0,
           duration: const Duration(milliseconds: 120),
           curve: Curves.easeOutCubic,
           child: AnimatedOpacity(
@@ -90,14 +89,6 @@ class _AnimatedGlassIconButtonState extends State<AnimatedGlassIconButton> {
                       : (widget.borderColor ?? context.colors.glassBorder),
                   width: 1.2,
                 ),
-                boxShadow: [
-                  if (_isPressed || _isHovered)
-                    BoxShadow(
-                      color: activeColor.withValues(alpha: isDark ? 0.3 : 0.15),
-                      blurRadius: 10,
-                      spreadRadius: 1,
-                    ),
-                ],
               ),
               child: widget.label != null
                   ? Row(
