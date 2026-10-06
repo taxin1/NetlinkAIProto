@@ -81,11 +81,19 @@ class AppModalDialog extends StatelessWidget {
         iconColor: iconColor,
         iconBackgroundColor: iconBackgroundColor,
         primaryLabel: primaryLabel,
-        onPrimary: onPrimary ?? () => Navigator.of(ctx).pop(),
+        onPrimary: onPrimary ?? () {
+          if (Navigator.of(ctx, rootNavigator: true).canPop()) {
+            Navigator.of(ctx, rootNavigator: true).pop();
+          }
+        },
         primaryIcon: primaryIcon,
         primaryGradient: primaryGradient,
         secondaryLabel: secondaryLabel,
-        onSecondary: onSecondary ?? () => Navigator.of(ctx).pop(),
+        onSecondary: onSecondary ?? () {
+          if (Navigator.of(ctx, rootNavigator: true).canPop()) {
+            Navigator.of(ctx, rootNavigator: true).pop();
+          }
+        },
         showCloseButton: showCloseButton,
         maxWidth: maxWidth,
       ),
@@ -105,7 +113,7 @@ class AppModalDialog extends StatelessWidget {
       iconColor: context.colors.errorRuby,
       iconBackgroundColor: context.colors.errorRuby.withValues(alpha: 0.15),
       secondaryLabel: context.tr('cancel'),
-      onSecondary: () => Navigator.of(context).pop(false),
+      onSecondary: () => Navigator.of(context, rootNavigator: true).pop(false),
       primaryLabel: context.tr('signOut'),
       primaryIcon: Icons.logout_rounded,
       primaryGradient: const [
@@ -113,7 +121,7 @@ class AppModalDialog extends StatelessWidget {
         Color(0xFFDC2626),
       ],
       onPrimary: () {
-        Navigator.of(context).pop(true);
+        Navigator.of(context, rootNavigator: true).pop(true);
         onConfirm?.call();
       },
       barrierDismissible: true,
@@ -208,7 +216,7 @@ class AppModalDialog extends StatelessWidget {
                             color: colors.onSurfaceVariant,
                             size: 20,
                           ),
-                          onPressed: () => Navigator.of(context).pop(),
+                          onPressed: () => Navigator.of(context, rootNavigator: true).pop(),
                           tooltip: context.tr('close'),
                         ),
                     ],

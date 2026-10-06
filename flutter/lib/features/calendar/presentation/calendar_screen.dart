@@ -15,6 +15,7 @@ import '../../../core/widgets/section_header.dart';
 import '../../../core/widgets/scrollable_list_window.dart';
 import '../../../core/widgets/trial_banner_card.dart';
 import '../../../core/utils/responsive.dart';
+import '../../../core/tour/tour_controller.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../contacts/providers/contacts_provider.dart';
 import '../providers/calendar_provider.dart';
@@ -659,6 +660,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
               PopInItem(
                 index: 3,
                 child: GlassCard(
+                  key: TourTargetKeys.calendarFeature,
                   borderRadius: BorderRadius.circular(20),
                   padding: const EdgeInsets.all(20),
                   child: Column(

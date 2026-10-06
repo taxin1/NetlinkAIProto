@@ -16,6 +16,7 @@ import '../../../core/widgets/section_header.dart';
 import '../../../core/widgets/trial_banner_card.dart';
 import '../../../core/utils/responsive.dart';
 import '../../../core/services/supabase_service.dart';
+import '../../../core/tour/tour_controller.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../../core/widgets/floating_liquid_glass_nav_bar.dart';
 import '../models/portfolio_model.dart';
@@ -67,19 +68,22 @@ class _PortfolioScreenState extends ConsumerState<PortfolioScreen> {
 
     double getY(GlobalKey key) {
       if (key.currentContext == null) return double.infinity;
-      final RenderBox? box = key.currentContext!.findRenderObject() as RenderBox?;
+      final RenderBox? box =
+          key.currentContext!.findRenderObject() as RenderBox?;
       if (box == null || !box.hasSize) return double.infinity;
       return box.localToGlobal(Offset.zero).dy;
     }
 
     final screenH = MediaQuery.of(context).size.height;
-    final triggerLine = kToolbarHeight + MediaQuery.of(context).padding.top + 72 + 50;
+    final triggerLine =
+        kToolbarHeight + MediaQuery.of(context).padding.top + 72 + 50;
     final maxScroll = _scrollController.position.maxScrollExtent;
     final currentPixels = _scrollController.position.pixels;
 
     String newActive = _activeTab;
 
-    if ((maxScroll > 0 && currentPixels >= maxScroll - 80) || getY(_sectionsKey) <= screenH * 0.65) {
+    if ((maxScroll > 0 && currentPixels >= maxScroll - 80) ||
+        getY(_sectionsKey) <= screenH * 0.65) {
       newActive = 'Sections';
     } else if (getY(_settingsKey) <= triggerLine) {
       newActive = 'Settings';
@@ -101,18 +105,20 @@ class _PortfolioScreenState extends ConsumerState<PortfolioScreen> {
     if (key.currentContext == null) return;
     final RenderBox? box = key.currentContext!.findRenderObject() as RenderBox?;
     if (box == null || !box.hasSize) return;
-    final position = box.localToGlobal(Offset.zero, ancestor: context.findRenderObject());
+    final position =
+        box.localToGlobal(Offset.zero, ancestor: context.findRenderObject());
 
-    final target = _scrollController.offset +
-        position.dy -
-        Responsive.topPadding(context);
+    final target =
+        _scrollController.offset + position.dy - Responsive.topPadding(context);
 
     _isAutoScrolling = true;
-    _scrollController.animateTo(
+    _scrollController
+        .animateTo(
       target.clamp(0.0, _scrollController.position.maxScrollExtent),
       duration: const Duration(milliseconds: 400),
       curve: Curves.easeOutCubic,
-    ).then((_) {
+    )
+        .then((_) {
       Future.delayed(const Duration(milliseconds: 100), () {
         if (mounted) _isAutoScrolling = false;
       });
@@ -141,7 +147,8 @@ class _PortfolioScreenState extends ConsumerState<PortfolioScreen> {
   void _copyPortfolioLink(String slug) {
     final url = 'https://www.networklinkai.com/portfolio/$slug';
     Clipboard.setData(ClipboardData(text: url));
-    AppToast.show(context, '${context.tr('linkCopied')} ($url)', type: ToastType.success);
+    AppToast.show(context, '${context.tr('linkCopied')} ($url)',
+        type: ToastType.success);
   }
 
   Future<void> _handleSyncGoogle() async {
@@ -201,7 +208,8 @@ class _PortfolioScreenState extends ConsumerState<PortfolioScreen> {
                     child: Text(
                       context.tr('orFetchByGmail'),
                       style: AppTypography.labelCaps.copyWith(
-                        color: context.colors.onSurfaceVariant.withValues(alpha: 0.7),
+                        color: context.colors.onSurfaceVariant
+                            .withValues(alpha: 0.7),
                         fontSize: 10,
                       ),
                     ),
@@ -213,16 +221,20 @@ class _PortfolioScreenState extends ConsumerState<PortfolioScreen> {
               TextField(
                 controller: emailCtrl,
                 keyboardType: TextInputType.emailAddress,
-                style: AppTypography.bodySm.copyWith(color: context.colors.onSurface),
+                style: AppTypography.bodySm
+                    .copyWith(color: context.colors.onSurface),
                 decoration: InputDecoration(
                   hintText: context.tr('emailHint'),
                   hintStyle: AppTypography.bodySm.copyWith(
-                    color: context.colors.onSurfaceVariant.withValues(alpha: 0.6),
+                    color:
+                        context.colors.onSurfaceVariant.withValues(alpha: 0.6),
                   ),
-                  prefixIcon: Icon(Icons.email_outlined, size: 18, color: context.colors.primary),
+                  prefixIcon: Icon(Icons.email_outlined,
+                      size: 18, color: context.colors.primary),
                   filled: true,
                   fillColor: context.colors.surface.withValues(alpha: 0.35),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide(color: context.colors.glassBorder),
@@ -245,7 +257,9 @@ class _PortfolioScreenState extends ConsumerState<PortfolioScreen> {
                         final email = emailCtrl.text.trim();
                         if (email.isNotEmpty) {
                           Navigator.of(ctx).pop();
-                          ref.read(portfolioProvider.notifier).syncGoogleAvatar(email: email);
+                          ref
+                              .read(portfolioProvider.notifier)
+                              .syncGoogleAvatar(email: email);
                         } else {
                           AppToast.show(context, context.tr('enterValidGmail'));
                         }
@@ -260,8 +274,8 @@ class _PortfolioScreenState extends ConsumerState<PortfolioScreen> {
                     onPressed: () {
                       Navigator.of(ctx).pop();
                       ref.read(portfolioProvider.notifier).setProfileImage(
-                        'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400',
-                      );
+                            'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400',
+                          );
                     },
                   ),
                 ],
@@ -276,7 +290,8 @@ class _PortfolioScreenState extends ConsumerState<PortfolioScreen> {
   Widget _buildAvatarImage(String? imageUrl) {
     if (imageUrl == null || imageUrl.trim().isEmpty) {
       return Center(
-        child: Icon(Icons.person_rounded, size: 40, color: context.colors.primary),
+        child:
+            Icon(Icons.person_rounded, size: 40, color: context.colors.primary),
       );
     }
 
@@ -291,7 +306,8 @@ class _PortfolioScreenState extends ConsumerState<PortfolioScreen> {
             bytes,
             fit: BoxFit.cover,
             errorBuilder: (_, __, ___) => Center(
-              child: Icon(Icons.person_rounded, size: 40, color: context.colors.primary),
+              child: Icon(Icons.person_rounded,
+                  size: 40, color: context.colors.primary),
             ),
           );
         }
@@ -302,7 +318,8 @@ class _PortfolioScreenState extends ConsumerState<PortfolioScreen> {
       trimmed,
       fit: BoxFit.cover,
       errorBuilder: (ctx, error, stackTrace) => Center(
-        child: Icon(Icons.person_rounded, size: 40, color: context.colors.primary),
+        child:
+            Icon(Icons.person_rounded, size: 40, color: context.colors.primary),
       ),
       loadingBuilder: (ctx, child, progress) {
         if (progress == null) return child;
@@ -337,17 +354,21 @@ class _PortfolioScreenState extends ConsumerState<PortfolioScreen> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(portfolioProvider);
-    final user = SupabaseService.isInitialized ? SupabaseService.client.auth.currentUser : null;
+    final user = SupabaseService.isInitialized
+        ? SupabaseService.client.auth.currentUser
+        : null;
     final authState = ref.watch(authProvider);
     final isGuest = authState.user?.isGuest ?? (user == null);
 
     // Listen for notification messages
     ref.listen<PortfolioState>(portfolioProvider, (prev, next) {
-      if (next.errorMessage != null && next.errorMessage != prev?.errorMessage) {
+      if (next.errorMessage != null &&
+          next.errorMessage != prev?.errorMessage) {
         AppToast.show(context, next.errorMessage!, type: ToastType.error);
         ref.read(portfolioProvider.notifier).clearMessages();
       }
-      if (next.successMessage != null && next.successMessage != prev?.successMessage) {
+      if (next.successMessage != null &&
+          next.successMessage != prev?.successMessage) {
         AppToast.show(context, next.successMessage!, type: ToastType.success);
         ref.read(portfolioProvider.notifier).clearMessages();
       }
@@ -372,554 +393,695 @@ class _PortfolioScreenState extends ConsumerState<PortfolioScreen> {
             right: Responsive.pagePadding(context),
             bottom: 120,
           ),
-      child: Center(
-        child: Container(
-          constraints: const BoxConstraints(maxWidth: Responsive.maxContentWidth),
-          width: double.infinity,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Page Heading (Standardized)
-              if (!Responsive.hasShellTopBar(context)) ...[
-                PopInItem(
-                  index: 0,
-                  child: Center(
-                    child: Text(
-                      context.tr('portfolioBuilder'),
-                      style: AppTypography.headlineMd,
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-              ],
-
-              // Trial Banner (Shows when not signed in)
-              if (isGuest) ...[
-                const PopInItem(
-                  index: 1,
-                  child: TrialBannerCard(),
-                ),
-                const SizedBox(height: 24),
-              ],
-
-              // 1. AI Portfolio Generator Card
-              SectionHeader(
-                key: _generatorKey,
-                icon: Icons.auto_awesome_rounded,
-                label: context.tr('aiPortfolioGenerator'),
-                color: context.colors.primary,
-              ),
-              const SizedBox(height: 16),
-              PopInItem(
-                index: isGuest ? 2 : 1,
-                child: GlassCard(
-                  padding: const EdgeInsets.all(24),
-                  borderRadius: BorderRadius.circular(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  context.tr('aiPortfolioGenerator'),
-                                  style: AppTypography.headlineSm.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                    color: context.colors.onSurface,
-                                  ),
-                                ),
-                                Text(
-                                  context.tr('generatePortfolioSubtitle'),
-                                  style: AppTypography.bodySm.copyWith(
-                                    color: context.colors.onSurfaceVariant,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          AnimatedGlassIconButton(
-                            icon: Icons.visibility_outlined,
-                            tooltip: context.tr('preview'),
-                            iconColor: context.colors.primary,
-                            onPressed: () => _showLivePreview(context, portfolio),
-                          ),
-                          const SizedBox(width: 8),
-                          AnimatedGlassIconButton(
-                            icon: Icons.share_rounded,
-                            tooltip: context.tr('sharePortfolio'),
-                            iconColor: context.colors.primary,
-                            onPressed: () => _copyPortfolioLink(portfolio.slug),
-                          ),
-                        ],
+          child: Center(
+            child: Container(
+              constraints:
+                  const BoxConstraints(maxWidth: Responsive.maxContentWidth),
+              width: double.infinity,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Page Heading (Standardized)
+                  if (!Responsive.hasShellTopBar(context)) ...[
+                    PopInItem(
+                      index: 0,
+                      child: Center(
+                        child: Text(
+                          context.tr('portfolioBuilder'),
+                          style: AppTypography.headlineMd,
+                          textAlign: TextAlign.center,
+                        ),
                       ),
-                      const SizedBox(height: 18),
+                    ),
+                    const SizedBox(height: 24),
+                  ],
 
-                      // CV Upload & Google Sync Quick Actions
-                      Wrap(
-                        spacing: 10,
-                        runSpacing: 10,
+                  // Trial Banner (Shows when not signed in)
+                  if (isGuest) ...[
+                    const PopInItem(
+                      index: 1,
+                      child: TrialBannerCard(),
+                    ),
+                    const SizedBox(height: 24),
+                  ],
+
+                  // 1. AI Portfolio Generator Card
+                  SectionHeader(
+                    key: _generatorKey,
+                    icon: Icons.auto_awesome_rounded,
+                    label: context.tr('aiPortfolioGenerator'),
+                    color: context.colors.primary,
+                  ),
+                  const SizedBox(height: 16),
+                  PopInItem(
+                    index: isGuest ? 2 : 1,
+                    child: GlassCard(
+                      key: TourTargetKeys.portfolioFeature,
+                      padding: const EdgeInsets.all(24),
+                      borderRadius: BorderRadius.circular(20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // CV Picker Action
-                          InkWell(
-                            onTap: state.isExtractingCV
-                                ? null
-                                : () => ref.read(portfolioProvider.notifier).pickAndExtractCV(),
-                            borderRadius: BorderRadius.circular(12),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                              decoration: BoxDecoration(
-                                color: context.colors.surface.withValues(alpha: 0.4),
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                  color: state.cvFileName != null
-                                      ? const Color(0xFF00C853)
-                                      : context.colors.glassBorder,
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  if (state.isExtractingCV)
-                                    const SizedBox(
-                                      width: 16,
-                                      height: 16,
-                                      child: CircularProgressIndicator(strokeWidth: 2),
-                                    )
-                                  else
-                                    Icon(
-                                      state.cvFileName != null
-                                          ? Icons.description_rounded
-                                          : Icons.upload_file_rounded,
-                                      size: 18,
-                                      color: state.cvFileName != null
-                                          ? const Color(0xFF00C853)
-                                          : context.colors.primary,
-                                    ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    state.cvFileName ?? context.tr('uploadCvResume'),
-                                    style: AppTypography.bodySm.copyWith(
-                                      color: state.cvFileName != null
-                                          ? const Color(0xFF00C853)
-                                          : context.colors.onSurface,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  if (state.cvFileName != null) ...[
-                                    const SizedBox(width: 6),
-                                    GestureDetector(
-                                      onTap: () => ref.read(portfolioProvider.notifier).removeCVFile(),
-                                      child: const Icon(Icons.close, size: 16, color: Colors.white70),
-                                    ),
-                                  ],
-                                ],
-                              ),
-                            ),
-                          ),
-
-                          // Google Avatar Sync Action
-                          InkWell(
-                            onTap: state.isSyncingGoogle
-                                ? null
-                                : () => _handleSyncGoogle(),
-                            borderRadius: BorderRadius.circular(12),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                              decoration: BoxDecoration(
-                                color: context.colors.surface.withValues(alpha: 0.4),
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: context.colors.glassBorder),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  if (state.isSyncingGoogle) ...[
-                                    SizedBox(
-                                      width: 18,
-                                      height: 18,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        color: context.colors.primary,
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      context.tr('aiPortfolioGenerator'),
+                                      style: AppTypography.headlineSm.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                        color: context.colors.onSurface,
                                       ),
                                     ),
-                                    const SizedBox(width: 8),
-                                  ] else ...[
-                                    Icon(Icons.sync_rounded, size: 18, color: context.colors.primary),
-                                    const SizedBox(width: 8),
-                                  ],
-                                  Text(
-                                    state.isSyncingGoogle ? context.tr('loading') : context.tr('syncGooglePhoto'),
-                                    style: AppTypography.bodySm.copyWith(
-                                      color: context.colors.onSurface,
-                                      fontWeight: FontWeight.w600,
+                                    Text(
+                                      context.tr('generatePortfolioSubtitle'),
+                                      style: AppTypography.bodySm.copyWith(
+                                        color: context.colors.onSurfaceVariant,
+                                      ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 14),
-
-                      // Optional Guidance Prompt
-                      TextField(
-                        controller: _promptController,
-                        maxLines: 2,
-                        decoration: InputDecoration(
-                          hintText: context.tr('customInstructionsHint'),
-                          hintStyle: AppTypography.bodySm.copyWith(
-                            color: context.colors.onSurfaceVariant.withValues(alpha: 0.6),
-                          ),
-                          filled: true,
-                          fillColor: context.colors.surface.withValues(alpha: 0.25),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: context.colors.glassBorder),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: context.colors.glassBorder),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: context.colors.primary),
-                          ),
-                          contentPadding: const EdgeInsets.all(12),
-                        ),
-                        style: AppTypography.bodySm.copyWith(color: context.colors.onSurface),
-                      ),
-                      const SizedBox(height: 16),
-
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: GradientButton(
-                          label: context.tr('generatePortfolioAi'),
-                          icon: Icons.auto_awesome_rounded,
-                          isLoading: state.isGenerating,
-                          height: 44,
-                          maxWidth: 240,
-                          onPressed: () => ref.read(portfolioProvider.notifier).generatePortfolio(
-                                additionalInfo: _promptController.text.trim(),
-                              ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SectionDivider(margin: EdgeInsets.symmetric(vertical: 36)),
-
-              // 2. Basic Information Card
-              SectionHeader(
-                key: _infoKey,
-                icon: Icons.person_rounded,
-                label: context.tr('basicInformation'),
-                color: const Color(0xFF38BDF8),
-              ),
-              const SizedBox(height: 16),
-              PopInItem(
-                index: 2,
-                child: GlassCard(
-                  padding: const EdgeInsets.all(24),
-                  borderRadius: BorderRadius.circular(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        context.tr('basicInformation'),
-                        style: AppTypography.headlineSm.copyWith(fontWeight: FontWeight.bold, fontSize: 16).copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: context.colors.onSurface,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-
-                      // Profile Picture Row
-                      Row(
-                        children: [
-                          Stack(
-                            children: [
-                              ClipOval(
-                                child: Container(
-                                  width: 72,
-                                  height: 72,
-                                  color: context.colors.primary.withValues(alpha: 0.15),
-                                  child: state.isSyncingGoogle
-                                      ? const Center(
-                                          child: SizedBox(
-                                            width: 24,
-                                            height: 24,
-                                            child: CircularProgressIndicator(strokeWidth: 2),
-                                          ),
-                                        )
-                                      : _buildAvatarImage(portfolio.profileImageUrl),
+                                  ],
                                 ),
                               ),
-                              Positioned(
-                                bottom: 0,
-                                right: 0,
-                                child: InkWell(
-                                  onTap: state.isUploadingImage
-                                      ? null
-                                      : () => ref
-                                          .read(portfolioProvider.notifier)
-                                          .pickAndUploadImage(),
-                                  child: Container(
-                                    padding: const EdgeInsets.all(6),
-                                    decoration: BoxDecoration(
-                                      color: context.colors.primary,
-                                      shape: BoxShape.circle,
+                              const SizedBox(width: 8),
+                              AnimatedGlassIconButton(
+                                icon: Icons.visibility_outlined,
+                                tooltip: context.tr('preview'),
+                                iconColor: context.colors.primary,
+                                onPressed: () =>
+                                    _showLivePreview(context, portfolio),
+                              ),
+                              const SizedBox(width: 8),
+                              AnimatedGlassIconButton(
+                                icon: Icons.share_rounded,
+                                tooltip: context.tr('sharePortfolio'),
+                                iconColor: context.colors.primary,
+                                onPressed: () =>
+                                    _copyPortfolioLink(portfolio.slug),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 18),
+
+                          // CV Upload & Google Sync Quick Actions
+                          Wrap(
+                            spacing: 10,
+                            runSpacing: 10,
+                            children: [
+                              // CV Picker Action
+                              InkWell(
+                                onTap: state.isExtractingCV
+                                    ? null
+                                    : () => ref
+                                        .read(portfolioProvider.notifier)
+                                        .pickAndExtractCV(),
+                                borderRadius: BorderRadius.circular(12),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 14, vertical: 10),
+                                  decoration: BoxDecoration(
+                                    color: context.colors.surface
+                                        .withValues(alpha: 0.4),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: state.cvFileName != null
+                                          ? const Color(0xFF00C853)
+                                          : context.colors.glassBorder,
                                     ),
-                                    child: const Icon(Icons.camera_alt, size: 14, color: Colors.white),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      if (state.isExtractingCV)
+                                        const SizedBox(
+                                          width: 16,
+                                          height: 16,
+                                          child: CircularProgressIndicator(
+                                              strokeWidth: 2),
+                                        )
+                                      else
+                                        Icon(
+                                          state.cvFileName != null
+                                              ? Icons.description_rounded
+                                              : Icons.upload_file_rounded,
+                                          size: 18,
+                                          color: state.cvFileName != null
+                                              ? const Color(0xFF00C853)
+                                              : context.colors.primary,
+                                        ),
+                                      const SizedBox(width: 8),
+                                      Flexible(
+                                        child: Text(
+                                          state.cvFileName ??
+                                              context.tr('uploadCvResume'),
+                                          style: AppTypography.bodySm.copyWith(
+                                            color: state.cvFileName != null
+                                                ? const Color(0xFF00C853)
+                                                : context.colors.onSurface,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                      if (state.cvFileName != null) ...[
+                                        const SizedBox(width: 6),
+                                        GestureDetector(
+                                          onTap: () => ref
+                                              .read(portfolioProvider.notifier)
+                                              .removeCVFile(),
+                                          child: const Icon(Icons.close,
+                                              size: 16, color: Colors.white70),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                ),
+                              ),
+
+                              // Google Avatar Sync Action
+                              InkWell(
+                                onTap: state.isSyncingGoogle
+                                    ? null
+                                    : () => _handleSyncGoogle(),
+                                borderRadius: BorderRadius.circular(12),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 14, vertical: 10),
+                                  decoration: BoxDecoration(
+                                    color: context.colors.surface
+                                        .withValues(alpha: 0.4),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                        color: context.colors.glassBorder),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      if (state.isSyncingGoogle) ...[
+                                        SizedBox(
+                                          width: 18,
+                                          height: 18,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            color: context.colors.primary,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                      ] else ...[
+                                        Icon(Icons.sync_rounded,
+                                            size: 18,
+                                            color: context.colors.primary),
+                                        const SizedBox(width: 8),
+                                      ],
+                                      Flexible(
+                                        child: Text(
+                                          state.isSyncingGoogle
+                                              ? context.tr('loading')
+                                              : context.tr('syncGooglePhoto'),
+                                          style: AppTypography.bodySm.copyWith(
+                                            color: context.colors.onSurface,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ),
                             ],
                           ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  context.tr('profilePhoto'),
-                                  style: AppTypography.bodyMd.copyWith(fontWeight: FontWeight.w600).copyWith(
-                                    color: context.colors.onSurface,
-                                    fontWeight: FontWeight.w600,
+                          const SizedBox(height: 14),
+
+                          // Optional Guidance Prompt
+                          TextField(
+                            controller: _promptController,
+                            maxLines: 2,
+                            decoration: InputDecoration(
+                              hintText: context.tr('customInstructionsHint'),
+                              hintStyle: AppTypography.bodySm.copyWith(
+                                color: context.colors.onSurfaceVariant
+                                    .withValues(alpha: 0.6),
+                              ),
+                              filled: true,
+                              fillColor: context.colors.surface
+                                  .withValues(alpha: 0.25),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(
+                                    color: context.colors.glassBorder),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(
+                                    color: context.colors.glassBorder),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide:
+                                    BorderSide(color: context.colors.primary),
+                              ),
+                              contentPadding: const EdgeInsets.all(12),
+                            ),
+                            style: AppTypography.bodySm
+                                .copyWith(color: context.colors.onSurface),
+                          ),
+                          const SizedBox(height: 16),
+
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: GradientButton(
+                              label: context.tr('generatePortfolioAi'),
+                              icon: Icons.auto_awesome_rounded,
+                              isLoading: state.isGenerating,
+                              height: 44,
+                              maxWidth: 240,
+                              onPressed: () => ref
+                                  .read(portfolioProvider.notifier)
+                                  .generatePortfolio(
+                                    additionalInfo:
+                                        _promptController.text.trim(),
                                   ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  context.tr('profilePhotoSubtitle'),
-                                  style: AppTypography.bodySm.copyWith(
-                                    color: context.colors.onSurfaceVariant,
-                                    fontSize: 11,
-                                  ),
-                                ),
-                                const SizedBox(height: 10),
-                                Wrap(
-                                  spacing: 8,
-                                  runSpacing: 8,
-                                  children: [
-                                    AnimatedGlassIconButton(
-                                      label: context.tr('uploadNew'),
-                                      icon: Icons.upload_rounded,
-                                      size: 32,
-                                      iconSize: 15,
-                                      fontSize: 12,
-                                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                                      iconColor: context.colors.primary,
-                                      isLoading: state.isUploadingImage,
-                                      onPressed: state.isUploadingImage
-                                          ? null
-                                          : () => ref
-                                              .read(portfolioProvider.notifier)
-                                              .pickAndUploadImage(),
-                                    ),
-                                    AnimatedGlassIconButton(
-                                      label: context.tr('syncGoogle'),
-                                      icon: Icons.sync_rounded,
-                                      size: 32,
-                                      iconSize: 15,
-                                      fontSize: 12,
-                                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                                      iconColor: context.colors.primary,
-                                      isLoading: state.isSyncingGoogle,
-                                      onPressed: state.isSyncingGoogle
-                                          ? null
-                                          : () => _handleSyncGoogle(),
-                                    ),
-                                    AnimatedGlassIconButton(
-                                      label: context.tr('removePhoto'),
-                                      icon: Icons.delete_outline_rounded,
-                                      size: 32,
-                                      iconSize: 15,
-                                      fontSize: 12,
-                                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                                      iconColor: const Color(0xFFEF4444),
-                                      onPressed: (portfolio.profileImageUrl?.isNotEmpty == true &&
-                                              !state.isUploadingImage &&
-                                              !state.isSyncingGoogle)
-                                          ? () => ref
-                                              .read(portfolioProvider.notifier)
-                                              .removeProfileImage()
-                                          : null,
-                                    ),
-                                  ],
-                                ),
-                              ],
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 20),
-
-                      _buildTextField(
-                        label: context.tr('fullNameDisplayTitle'),
-                        controller: _titleController,
-                        onChanged: (val) =>
-                            ref.read(portfolioProvider.notifier).updateBasicInfo(title: val),
-                      ),
-                      const SizedBox(height: 14),
-
-                      _buildTextField(
-                        label: context.tr('professionalHeadline'),
-                        controller: _subtitleController,
-                        onChanged: (val) =>
-                            ref.read(portfolioProvider.notifier).updateBasicInfo(subtitle: val),
-                      ),
-                      const SizedBox(height: 14),
-
-                      _buildTextField(
-                        label: context.tr('shortBio'),
-                        controller: _bioController,
-                        maxLines: 3,
-                        onChanged: (val) =>
-                            ref.read(portfolioProvider.notifier).updateBasicInfo(bio: val),
-                      ),
-                    ],
+                    ),
                   ),
-                ),
-              ),
-              const SectionDivider(margin: EdgeInsets.symmetric(vertical: 36)),
+                  const SectionDivider(
+                      margin: EdgeInsets.symmetric(vertical: 36)),
 
-              // 3. Settings & Theme Selector Card
-              SectionHeader(
-                key: _settingsKey,
-                icon: Icons.tune_rounded,
-                label: context.tr('portfolioSettings'),
-                color: const Color(0xFF8B5CF6),
-              ),
-              const SizedBox(height: 16),
-              PopInItem(
-                index: 3,
-                child: GlassCard(
-                  padding: const EdgeInsets.all(24),
-                  borderRadius: BorderRadius.circular(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        context.tr('portfolioSettings'),
-                        style: AppTypography.headlineSm.copyWith(fontWeight: FontWeight.bold, fontSize: 16).copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: context.colors.onSurface,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-
-                      // Toggles
-                      _buildSwitchRow(
-                        title: context.tr('publicPortfolio'),
-                        subtitle: context.tr('publicPortfolioDesc'),
-                        value: portfolio.isPublic,
-                        onChanged: (val) => ref
-                            .read(portfolioProvider.notifier)
-                            .updateSettings(isPublic: val),
-                      ),
-                      const Divider(height: 20, color: Colors.white12),
-
-                      _buildSwitchRow(
-                        title: context.tr('showContactInfo'),
-                        subtitle: context.tr('showContactInfoDesc'),
-                        value: portfolio.showContactInfo,
-                        onChanged: (val) => ref
-                            .read(portfolioProvider.notifier)
-                            .updateSettings(showContactInfo: val),
-                      ),
-                      const Divider(height: 20, color: Colors.white12),
-
-                      _buildSwitchRow(
-                        title: context.tr('showSocialLinks'),
-                        subtitle: context.tr('showSocialLinksDesc'),
-                        value: portfolio.showSocialLinks,
-                        onChanged: (val) => ref
-                            .read(portfolioProvider.notifier)
-                            .updateSettings(showSocialLinks: val),
-                      ),
-                      const Divider(height: 24, color: Colors.white12),
-
-                      // Theme Selector
-                      Text(
-                        context.tr('themeStyle'),
-                        style: AppTypography.labelSm.copyWith(
-                          color: context.colors.onSurfaceVariant,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Wrap(
-                        spacing: 10,
-                        runSpacing: 10,
-                        children: [
-                          _buildThemeChip('modern', context.tr('themeModern'), portfolio.theme),
-                          _buildThemeChip('minimal', context.tr('themeMinimal'), portfolio.theme),
-                          _buildThemeChip('creative', context.tr('themeCreative'), portfolio.theme),
-                          _buildThemeChip('professional', context.tr('themeProfessional'), portfolio.theme),
-                        ],
-                      ),
-                      const SizedBox(height: 20),
-
-                      // Slug Customizer
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  // 2. Basic Information Card
+                  SectionHeader(
+                    key: _infoKey,
+                    icon: Icons.person_rounded,
+                    label: context.tr('basicInformation'),
+                    color: const Color(0xFF38BDF8),
+                  ),
+                  const SizedBox(height: 16),
+                  PopInItem(
+                    index: 2,
+                    child: GlassCard(
+                      padding: const EdgeInsets.all(24),
+                      borderRadius: BorderRadius.circular(20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            context.tr('customPortfolioSlug'),
+                            context.tr('basicInformation'),
+                            style: AppTypography.headlineSm
+                                .copyWith(
+                                    fontWeight: FontWeight.bold, fontSize: 16)
+                                .copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: context.colors.onSurface,
+                                ),
+                          ),
+                          const SizedBox(height: 16),
+
+                          // Profile Picture Row
+                          Row(
+                            children: [
+                              Stack(
+                                children: [
+                                  ClipOval(
+                                    child: Container(
+                                      width: 72,
+                                      height: 72,
+                                      color: context.colors.primary
+                                          .withValues(alpha: 0.15),
+                                      child: state.isSyncingGoogle
+                                          ? const Center(
+                                              child: SizedBox(
+                                                width: 24,
+                                                height: 24,
+                                                child:
+                                                    CircularProgressIndicator(
+                                                        strokeWidth: 2),
+                                              ),
+                                            )
+                                          : _buildAvatarImage(
+                                              portfolio.profileImageUrl),
+                                    ),
+                                  ),
+                                  Positioned(
+                                    bottom: 0,
+                                    right: 0,
+                                    child: InkWell(
+                                      onTap: state.isUploadingImage
+                                          ? null
+                                          : () => ref
+                                              .read(portfolioProvider.notifier)
+                                              .pickAndUploadImage(),
+                                      child: Container(
+                                        padding: const EdgeInsets.all(6),
+                                        decoration: BoxDecoration(
+                                          color: context.colors.primary,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: const Icon(Icons.camera_alt,
+                                            size: 14, color: Colors.white),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      context.tr('profilePhoto'),
+                                      style: AppTypography.bodyMd
+                                          .copyWith(fontWeight: FontWeight.w600)
+                                          .copyWith(
+                                            color: context.colors.onSurface,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      context.tr('profilePhotoSubtitle'),
+                                      style: AppTypography.bodySm.copyWith(
+                                        color: context.colors.onSurfaceVariant,
+                                        fontSize: 11,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 10),
+                                    Wrap(
+                                      spacing: 8,
+                                      runSpacing: 8,
+                                      children: [
+                                        AnimatedGlassIconButton(
+                                          label: context.tr('uploadNew'),
+                                          icon: Icons.upload_rounded,
+                                          size: 32,
+                                          iconSize: 15,
+                                          fontSize: 12,
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 12),
+                                          iconColor: context.colors.primary,
+                                          isLoading: state.isUploadingImage,
+                                          onPressed: state.isUploadingImage
+                                              ? null
+                                              : () => ref
+                                                  .read(portfolioProvider
+                                                      .notifier)
+                                                  .pickAndUploadImage(),
+                                        ),
+                                        AnimatedGlassIconButton(
+                                          label: context.tr('syncGoogle'),
+                                          icon: Icons.sync_rounded,
+                                          size: 32,
+                                          iconSize: 15,
+                                          fontSize: 12,
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 12),
+                                          iconColor: context.colors.primary,
+                                          isLoading: state.isSyncingGoogle,
+                                          onPressed: state.isSyncingGoogle
+                                              ? null
+                                              : () => _handleSyncGoogle(),
+                                        ),
+                                        AnimatedGlassIconButton(
+                                          label: context.tr('removePhoto'),
+                                          icon: Icons.delete_outline_rounded,
+                                          size: 32,
+                                          iconSize: 15,
+                                          fontSize: 12,
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 12),
+                                          iconColor: const Color(0xFFEF4444),
+                                          onPressed: (portfolio.profileImageUrl
+                                                          ?.isNotEmpty ==
+                                                      true &&
+                                                  !state.isUploadingImage &&
+                                                  !state.isSyncingGoogle)
+                                              ? () => ref
+                                                  .read(portfolioProvider
+                                                      .notifier)
+                                                  .removeProfileImage()
+                                              : null,
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 20),
+
+                          _buildTextField(
+                            label: context.tr('fullNameDisplayTitle'),
+                            controller: _titleController,
+                            onChanged: (val) => ref
+                                .read(portfolioProvider.notifier)
+                                .updateBasicInfo(title: val),
+                          ),
+                          const SizedBox(height: 14),
+
+                          _buildTextField(
+                            label: context.tr('professionalHeadline'),
+                            controller: _subtitleController,
+                            onChanged: (val) => ref
+                                .read(portfolioProvider.notifier)
+                                .updateBasicInfo(subtitle: val),
+                          ),
+                          const SizedBox(height: 14),
+
+                          _buildTextField(
+                            label: context.tr('shortBio'),
+                            controller: _bioController,
+                            maxLines: 3,
+                            onChanged: (val) => ref
+                                .read(portfolioProvider.notifier)
+                                .updateBasicInfo(bio: val),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SectionDivider(
+                      margin: EdgeInsets.symmetric(vertical: 36)),
+
+                  // 3. Settings & Theme Selector Card
+                  SectionHeader(
+                    key: _settingsKey,
+                    icon: Icons.tune_rounded,
+                    label: context.tr('portfolioSettings'),
+                    color: const Color(0xFF8B5CF6),
+                  ),
+                  const SizedBox(height: 16),
+                  PopInItem(
+                    index: 3,
+                    child: GlassCard(
+                      padding: const EdgeInsets.all(24),
+                      borderRadius: BorderRadius.circular(20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            context.tr('portfolioSettings'),
+                            style: AppTypography.headlineSm
+                                .copyWith(
+                                    fontWeight: FontWeight.bold, fontSize: 16)
+                                .copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: context.colors.onSurface,
+                                ),
+                          ),
+                          const SizedBox(height: 16),
+
+                          // Toggles
+                          _buildSwitchRow(
+                            title: context.tr('publicPortfolio'),
+                            subtitle: context.tr('publicPortfolioDesc'),
+                            value: portfolio.isPublic,
+                            onChanged: (val) => ref
+                                .read(portfolioProvider.notifier)
+                                .updateSettings(isPublic: val),
+                          ),
+                          const Divider(height: 20, color: Colors.white12),
+
+                          _buildSwitchRow(
+                            title: context.tr('showContactInfo'),
+                            subtitle: context.tr('showContactInfoDesc'),
+                            value: portfolio.showContactInfo,
+                            onChanged: (val) => ref
+                                .read(portfolioProvider.notifier)
+                                .updateSettings(showContactInfo: val),
+                          ),
+                          const Divider(height: 20, color: Colors.white12),
+
+                          _buildSwitchRow(
+                            title: context.tr('showSocialLinks'),
+                            subtitle: context.tr('showSocialLinksDesc'),
+                            value: portfolio.showSocialLinks,
+                            onChanged: (val) => ref
+                                .read(portfolioProvider.notifier)
+                                .updateSettings(showSocialLinks: val),
+                          ),
+                          const Divider(height: 24, color: Colors.white12),
+
+                          // Theme Selector
+                          Text(
+                            context.tr('themeStyle'),
                             style: AppTypography.labelSm.copyWith(
                               color: context.colors.onSurfaceVariant,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
-                          Text(
-                            '${_slugController.text.length}/48',
-                            style: AppTypography.labelSm.copyWith(
-                              color: context.colors.onSurfaceVariant.withValues(alpha: 0.6),
-                              fontSize: 11,
-                            ),
+                          const SizedBox(height: 10),
+                          Wrap(
+                            spacing: 10,
+                            runSpacing: 10,
+                            children: [
+                              _buildThemeChip('modern',
+                                  context.tr('themeModern'), portfolio.theme),
+                              _buildThemeChip('minimal',
+                                  context.tr('themeMinimal'), portfolio.theme),
+                              _buildThemeChip('creative',
+                                  context.tr('themeCreative'), portfolio.theme),
+                              _buildThemeChip(
+                                  'professional',
+                                  context.tr('themeProfessional'),
+                                  portfolio.theme),
+                            ],
                           ),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      LayoutBuilder(
-                        builder: (context, constraints) {
-                          final isNarrow = constraints.maxWidth < 430;
-                          return Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                            decoration: BoxDecoration(
-                              color: context.colors.surface.withValues(alpha: 0.25),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: context.colors.glassBorder),
-                            ),
-                            child: isNarrow
-                                ? Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'networklinkai.com/portfolio/',
-                                        style: AppTypography.bodySm.copyWith(
-                                          color: context.colors.onSurfaceVariant.withValues(alpha: 0.65),
-                                          fontSize: 12,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Row(
+                          const SizedBox(height: 20),
+
+                          // Slug Customizer
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                context.tr('customPortfolioSlug'),
+                                style: AppTypography.labelSm.copyWith(
+                                  color: context.colors.onSurfaceVariant,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              Text(
+                                '${_slugController.text.length}/48',
+                                style: AppTypography.labelSm.copyWith(
+                                  color: context.colors.onSurfaceVariant
+                                      .withValues(alpha: 0.6),
+                                  fontSize: 11,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 6),
+                          LayoutBuilder(
+                            builder: (context, constraints) {
+                              final isNarrow = constraints.maxWidth < 430;
+                              return Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 14, vertical: 8),
+                                decoration: BoxDecoration(
+                                  color: context.colors.surface
+                                      .withValues(alpha: 0.25),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                      color: context.colors.glassBorder),
+                                ),
+                                child: isNarrow
+                                    ? Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
+                                          Text(
+                                            'networklinkai.com/portfolio/',
+                                            style:
+                                                AppTypography.bodySm.copyWith(
+                                              color: context
+                                                  .colors.onSurfaceVariant
+                                                  .withValues(alpha: 0.65),
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Row(
+                                            children: [
+                                              Expanded(
+                                                child: TextFormField(
+                                                  controller: _slugController,
+                                                  maxLength: 48,
+                                                  style: AppTypography.bodySm
+                                                      .copyWith(
+                                                    color:
+                                                        context.colors.primary,
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 14,
+                                                  ),
+                                                  decoration:
+                                                      const InputDecoration(
+                                                    counterText: '',
+                                                    border: InputBorder.none,
+                                                    focusedBorder:
+                                                        InputBorder.none,
+                                                    enabledBorder:
+                                                        InputBorder.none,
+                                                    errorBorder:
+                                                        InputBorder.none,
+                                                    disabledBorder:
+                                                        InputBorder.none,
+                                                    isDense: true,
+                                                    contentPadding:
+                                                        EdgeInsets.symmetric(
+                                                            vertical: 4),
+                                                  ),
+                                                  onChanged: (val) {
+                                                    setState(() {});
+                                                    ref
+                                                        .read(portfolioProvider
+                                                            .notifier)
+                                                        .updateSettings(
+                                                            slug: val);
+                                                  },
+                                                ),
+                                              ),
+                                              IconButton(
+                                                icon: const Icon(
+                                                    Icons.copy_rounded,
+                                                    size: 18),
+                                                color: context.colors.primary,
+                                                tooltip: context.tr('copyLink'),
+                                                visualDensity:
+                                                    VisualDensity.compact,
+                                                onPressed: () =>
+                                                    _copyPortfolioLink(
+                                                        _slugController.text),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      )
+                                    : Row(
+                                        children: [
+                                          Text(
+                                            'networklinkai.com/portfolio/',
+                                            style:
+                                                AppTypography.bodySm.copyWith(
+                                              color: context
+                                                  .colors.onSurfaceVariant
+                                                  .withValues(alpha: 0.65),
+                                              fontSize: 12,
+                                            ),
+                                          ),
                                           Expanded(
                                             child: TextFormField(
                                               controller: _slugController,
                                               maxLength: 48,
-                                              style: AppTypography.bodySm.copyWith(
+                                              style:
+                                                  AppTypography.bodySm.copyWith(
                                                 color: context.colors.primary,
                                                 fontWeight: FontWeight.bold,
-                                                fontSize: 14,
+                                                fontSize: 13,
                                               ),
                                               decoration: const InputDecoration(
                                                 counterText: '',
@@ -927,217 +1089,198 @@ class _PortfolioScreenState extends ConsumerState<PortfolioScreen> {
                                                 focusedBorder: InputBorder.none,
                                                 enabledBorder: InputBorder.none,
                                                 errorBorder: InputBorder.none,
-                                                disabledBorder: InputBorder.none,
+                                                disabledBorder:
+                                                    InputBorder.none,
                                                 isDense: true,
-                                                contentPadding: EdgeInsets.symmetric(vertical: 4),
+                                                contentPadding:
+                                                    EdgeInsets.symmetric(
+                                                        vertical: 6),
                                               ),
                                               onChanged: (val) {
                                                 setState(() {});
-                                                ref.read(portfolioProvider.notifier).updateSettings(slug: val);
+                                                ref
+                                                    .read(portfolioProvider
+                                                        .notifier)
+                                                    .updateSettings(slug: val);
                                               },
                                             ),
                                           ),
                                           IconButton(
-                                            icon: const Icon(Icons.copy_rounded, size: 18),
+                                            icon: const Icon(Icons.copy_rounded,
+                                                size: 18),
                                             color: context.colors.primary,
                                             tooltip: context.tr('copyLink'),
-                                            visualDensity: VisualDensity.compact,
-                                            onPressed: () => _copyPortfolioLink(_slugController.text),
+                                            visualDensity:
+                                                VisualDensity.compact,
+                                            onPressed: () => _copyPortfolioLink(
+                                                _slugController.text),
                                           ),
                                         ],
                                       ),
-                                    ],
-                                  )
-                                : Row(
-                                    children: [
-                                      Text(
-                                        'networklinkai.com/portfolio/',
-                                        style: AppTypography.bodySm.copyWith(
-                                          color: context.colors.onSurfaceVariant.withValues(alpha: 0.65),
-                                          fontSize: 12,
-                                        ),
-                                      ),
-                                      Expanded(
-                                        child: TextFormField(
-                                          controller: _slugController,
-                                          maxLength: 48,
-                                          style: AppTypography.bodySm.copyWith(
-                                            color: context.colors.primary,
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 13,
-                                          ),
-                                          decoration: const InputDecoration(
-                                            counterText: '',
-                                            border: InputBorder.none,
-                                            focusedBorder: InputBorder.none,
-                                            enabledBorder: InputBorder.none,
-                                            errorBorder: InputBorder.none,
-                                            disabledBorder: InputBorder.none,
-                                            isDense: true,
-                                            contentPadding: EdgeInsets.symmetric(vertical: 6),
-                                          ),
-                                          onChanged: (val) {
-                                            setState(() {});
-                                            ref.read(portfolioProvider.notifier).updateSettings(slug: val);
-                                          },
-                                        ),
-                                      ),
-                                      IconButton(
-                                        icon: const Icon(Icons.copy_rounded, size: 18),
-                                        color: context.colors.primary,
-                                        tooltip: context.tr('copyLink'),
-                                        visualDensity: VisualDensity.compact,
-                                        onPressed: () => _copyPortfolioLink(_slugController.text),
-                                      ),
-                                    ],
-                                  ),
-                          );
-                        },
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        'Full link: https://www.networklinkai.com/portfolio/${_slugController.text}',
-                        style: AppTypography.bodySm.copyWith(
-                          color: context.colors.onSurfaceVariant.withValues(alpha: 0.6),
-                          fontSize: 11,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SectionDivider(margin: EdgeInsets.symmetric(vertical: 36)),
-
-              // 4. Portfolio Sections Manager Card
-              SectionHeader(
-                key: _sectionsKey,
-                icon: Icons.view_quilt_rounded,
-                label: context.tr('portfolioSections'),
-                color: const Color(0xFF10B981),
-              ),
-              const SizedBox(height: 16),
-              PopInItem(
-                index: 4,
-                child: GlassCard(
-                  padding: const EdgeInsets.all(24),
-                  borderRadius: BorderRadius.circular(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            '${context.tr('portfolioSections')} (${portfolio.sections.length})',
-                            style: AppTypography.headlineSm.copyWith(fontWeight: FontWeight.bold, fontSize: 16).copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: context.colors.onSurface,
-                            ),
+                              );
+                            },
                           ),
-                          AnimatedGlassIconButton(
-                            label: context.tr('addSection'),
-                            icon: Icons.add_rounded,
-                            size: 32,
-                            iconSize: 15,
-                            fontSize: 12,
-                            padding: const EdgeInsets.symmetric(horizontal: 12),
-                            iconColor: context.colors.primary,
-                            onPressed: () => _openAddSectionSheet(context),
+                          const SizedBox(height: 6),
+                          Text(
+                            'Full link: https://www.networklinkai.com/portfolio/${_slugController.text}',
+                            style: AppTypography.bodySm.copyWith(
+                              color: context.colors.onSurfaceVariant
+                                  .withValues(alpha: 0.6),
+                              fontSize: 11,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ],
                       ),
-                      const SizedBox(height: 16),
+                    ),
+                  ),
+                  const SectionDivider(
+                      margin: EdgeInsets.symmetric(vertical: 36)),
 
-                      if (portfolio.sections.isEmpty) ...[
-                        Center(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 24),
-                            child: Column(
-                              children: [
-                                Icon(Icons.layers_clear_outlined,
-                                    size: 40, color: context.colors.onSurfaceVariant.withValues(alpha: 0.5)),
-                                const SizedBox(height: 10),
-                                Text(
-                                  context.tr('noSectionsYet'),
-                                  style: AppTypography.bodySm.copyWith(
-                                    color: context.colors.onSurfaceVariant,
-                                  ),
+                  // 4. Portfolio Sections Manager Card
+                  SectionHeader(
+                    key: _sectionsKey,
+                    icon: Icons.view_quilt_rounded,
+                    label: context.tr('portfolioSections'),
+                    color: const Color(0xFF10B981),
+                  ),
+                  const SizedBox(height: 16),
+                  PopInItem(
+                    index: 4,
+                    child: GlassCard(
+                      padding: const EdgeInsets.all(24),
+                      borderRadius: BorderRadius.circular(20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  '${context.tr('portfolioSections')} (${portfolio.sections.length})',
+                                  style: AppTypography.headlineSm
+                                      .copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16)
+                                      .copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: context.colors.onSurface,
+                                      ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
-                              ],
-                            ),
+                              ),
+                              const SizedBox(width: 8),
+                              AnimatedGlassIconButton(
+                                label: context.tr('addSection'),
+                                icon: Icons.add_rounded,
+                                size: 32,
+                                iconSize: 15,
+                                fontSize: 12,
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 12),
+                                iconColor: context.colors.primary,
+                                onPressed: () => _openAddSectionSheet(context),
+                              ),
+                            ],
                           ),
-                        ),
-                      ] else ...[
-                        ...portfolio.sections.asMap().entries.map((entry) {
-                          final idx = entry.key;
-                          final section = entry.value;
-                          return _buildSectionItem(context, section, idx, portfolio.sections.length);
-                        }),
-                      ],
-                    ],
+                          const SizedBox(height: 16),
+                          if (portfolio.sections.isEmpty) ...[
+                            Center(
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 24),
+                                child: Column(
+                                  children: [
+                                    Icon(Icons.layers_clear_outlined,
+                                        size: 40,
+                                        color: context.colors.onSurfaceVariant
+                                            .withValues(alpha: 0.5)),
+                                    const SizedBox(height: 10),
+                                    Text(
+                                      context.tr('noSectionsYet'),
+                                      style: AppTypography.bodySm.copyWith(
+                                        color: context.colors.onSurfaceVariant,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ] else ...[
+                            ...portfolio.sections.asMap().entries.map((entry) {
+                              final idx = entry.key;
+                              final section = entry.value;
+                              return _buildSectionItem(context, section, idx,
+                                  portfolio.sections.length);
+                            }),
+                          ],
+                        ],
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              const SizedBox(height: 32),
+                  const SizedBox(height: 32),
 
-              // 5. Save & Publish Action Bar
-              PopInItem(
-                index: 5,
-                child: Center(
-                  child: GradientButton(
-                    label: context.tr('savePublishPortfolio'),
-                    icon: Icons.cloud_upload_rounded,
-                    isLoading: state.isSaving,
-                    height: 52,
-                    maxWidth: 320,
-                    onPressed: () => ref.read(portfolioProvider.notifier).savePortfolio(),
+                  // 5. Save & Publish Action Bar
+                  PopInItem(
+                    index: 5,
+                    child: Center(
+                      child: GradientButton(
+                        label: context.tr('savePublishPortfolio'),
+                        icon: Icons.cloud_upload_rounded,
+                        isLoading: state.isSaving,
+                        height: 52,
+                        maxWidth: 320,
+                        onPressed: () => ref
+                            .read(portfolioProvider.notifier)
+                            .savePortfolio(),
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
-      ),
-    ),
 
-    // ── Floating Liquid Glass Bottom Navigation Bar (Mobile / Phone Mode) ──
-    FloatingLiquidGlassNavBar(
-      activeTabLabel: _activeTab,
-      items: [
-        FloatingNavItem(
-          id: 'Generator',
-          label: context.tr('navGenerator'),
-          icon: Icons.auto_awesome_outlined,
-          activeIcon: Icons.auto_awesome_rounded,
-          onTap: () => _scrollTo(_generatorKey, 'Generator'),
-        ),
-        FloatingNavItem(
-          id: 'Info',
-          label: context.tr('navInfo'),
-          icon: Icons.person_outline_rounded,
-          activeIcon: Icons.person_rounded,
-          onTap: () => _scrollTo(_infoKey, 'Info'),
-        ),
-        FloatingNavItem(
-          id: 'Settings',
-          label: context.tr('navSettings'),
-          icon: Icons.tune_rounded,
-          activeIcon: Icons.tune_rounded,
-          onTap: () => _scrollTo(_settingsKey, 'Settings'),
-        ),
-        FloatingNavItem(
-          id: 'Sections',
-          label: context.tr('navSections'),
-          icon: Icons.view_quilt_outlined,
-          activeIcon: Icons.view_quilt_rounded,
-          onTap: () => _scrollTo(_sectionsKey, 'Sections'),
+        // ── Floating Liquid Glass Bottom Navigation Bar (Mobile / Phone Mode) ──
+        FloatingLiquidGlassNavBar(
+          activeTabLabel: _activeTab,
+          items: [
+            FloatingNavItem(
+              id: 'Generator',
+              label: context.tr('navGenerator'),
+              icon: Icons.auto_awesome_outlined,
+              activeIcon: Icons.auto_awesome_rounded,
+              onTap: () => _scrollTo(_generatorKey, 'Generator'),
+            ),
+            FloatingNavItem(
+              id: 'Info',
+              label: context.tr('navInfo'),
+              icon: Icons.person_outline_rounded,
+              activeIcon: Icons.person_rounded,
+              onTap: () => _scrollTo(_infoKey, 'Info'),
+            ),
+            FloatingNavItem(
+              id: 'Settings',
+              label: context.tr('navSettings'),
+              icon: Icons.tune_rounded,
+              activeIcon: Icons.tune_rounded,
+              onTap: () => _scrollTo(_settingsKey, 'Settings'),
+            ),
+            FloatingNavItem(
+              id: 'Sections',
+              label: context.tr('navSections'),
+              icon: Icons.view_quilt_outlined,
+              activeIcon: Icons.view_quilt_rounded,
+              onTap: () => _scrollTo(_sectionsKey, 'Sections'),
+            ),
+          ],
         ),
       ],
-    ),
-  ],
-);
-}
+    );
+  }
 
   Widget _buildTextField({
     required String label,
@@ -1175,7 +1318,8 @@ class _PortfolioScreenState extends ConsumerState<PortfolioScreen> {
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(color: context.colors.primary),
             ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           ),
           style: AppTypography.bodySm.copyWith(color: context.colors.onSurface),
         ),
@@ -1226,7 +1370,8 @@ class _PortfolioScreenState extends ConsumerState<PortfolioScreen> {
   Widget _buildThemeChip(String value, String label, String currentTheme) {
     final isSelected = currentTheme == value;
     return GestureDetector(
-      onTap: () => ref.read(portfolioProvider.notifier).updateSettings(theme: value),
+      onTap: () =>
+          ref.read(portfolioProvider.notifier).updateSettings(theme: value),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
@@ -1236,14 +1381,17 @@ class _PortfolioScreenState extends ConsumerState<PortfolioScreen> {
               : context.colors.surface.withValues(alpha: 0.3),
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
-            color: isSelected ? context.colors.primary : context.colors.glassBorder,
+            color: isSelected
+                ? context.colors.primary
+                : context.colors.glassBorder,
             width: isSelected ? 1.5 : 1.0,
           ),
         ),
         child: Text(
           label,
           style: AppTypography.bodySm.copyWith(
-            color: isSelected ? context.colors.primary : context.colors.onSurface,
+            color:
+                isSelected ? context.colors.primary : context.colors.onSurface,
             fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
           ),
         ),
@@ -1322,7 +1470,9 @@ class _PortfolioScreenState extends ConsumerState<PortfolioScreen> {
               IconButton(
                 icon: const Icon(Icons.arrow_upward_rounded, size: 18),
                 onPressed: index > 0
-                    ? () => ref.read(portfolioProvider.notifier).moveSection(index, -1)
+                    ? () => ref
+                        .read(portfolioProvider.notifier)
+                        .moveSection(index, -1)
                     : null,
                 visualDensity: VisualDensity.compact,
               ),
@@ -1330,14 +1480,19 @@ class _PortfolioScreenState extends ConsumerState<PortfolioScreen> {
               IconButton(
                 icon: const Icon(Icons.arrow_downward_rounded, size: 18),
                 onPressed: index < totalCount - 1
-                    ? () => ref.read(portfolioProvider.notifier).moveSection(index, 1)
+                    ? () => ref
+                        .read(portfolioProvider.notifier)
+                        .moveSection(index, 1)
                     : null,
                 visualDensity: VisualDensity.compact,
               ),
               // Delete
               IconButton(
-                icon: const Icon(Icons.delete_outline_rounded, size: 18, color: Colors.redAccent),
-                onPressed: () => ref.read(portfolioProvider.notifier).deleteSection(section.id),
+                icon: const Icon(Icons.delete_outline_rounded,
+                    size: 18, color: Colors.redAccent),
+                onPressed: () => ref
+                    .read(portfolioProvider.notifier)
+                    .deleteSection(section.id),
                 visualDensity: VisualDensity.compact,
               ),
             ],
@@ -1358,7 +1513,8 @@ class _PortfolioScreenState extends ConsumerState<PortfolioScreen> {
             decoration: InputDecoration(
               filled: true,
               fillColor: context.colors.surface.withValues(alpha: 0.25),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide(color: context.colors.glassBorder),
@@ -1550,9 +1706,8 @@ class _AddSectionModal extends StatelessWidget {
                           : Colors.white.withValues(alpha: 0.05),
                       borderRadius: BorderRadius.circular(14),
                       border: Border.all(
-                        color: isLight
-                            ? const Color(0xFFCBD5E1)
-                            : Colors.white12,
+                        color:
+                            isLight ? const Color(0xFFCBD5E1) : Colors.white12,
                       ),
                     ),
                     child: Row(
@@ -1560,11 +1715,15 @@ class _AddSectionModal extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.15),
+                            color: Theme.of(context)
+                                .colorScheme
+                                .primary
+                                .withValues(alpha: 0.15),
                             shape: BoxShape.circle,
                           ),
                           child: Icon(item['icon'] as IconData,
-                              size: 20, color: Theme.of(context).colorScheme.primary),
+                              size: 20,
+                              color: Theme.of(context).colorScheme.primary),
                         ),
                         const SizedBox(width: 14),
                         Expanded(
@@ -1691,7 +1850,8 @@ class _PortfolioPreviewModal extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: cardBg,
                           borderRadius: BorderRadius.circular(24),
-                          border: Border.all(color: accentColor.withValues(alpha: 0.25)),
+                          border: Border.all(
+                              color: accentColor.withValues(alpha: 0.25)),
                           boxShadow: [
                             BoxShadow(
                               color: accentColor.withValues(alpha: 0.1),
@@ -1708,12 +1868,16 @@ class _PortfolioPreviewModal extends StatelessWidget {
                                 height: 88,
                                 color: accentColor.withValues(alpha: 0.15),
                                 child: (portfolio.profileImageUrl != null &&
-                                        portfolio.profileImageUrl!.trim().isNotEmpty)
+                                        portfolio.profileImageUrl!
+                                            .trim()
+                                            .isNotEmpty)
                                     ? Image.network(
                                         portfolio.profileImageUrl!.trim(),
                                         fit: BoxFit.cover,
-                                        errorBuilder: (ctx, err, stack) => Center(
-                                          child: Icon(Icons.person_rounded, size: 48, color: accentColor),
+                                        errorBuilder: (ctx, err, stack) =>
+                                            Center(
+                                          child: Icon(Icons.person_rounded,
+                                              size: 48, color: accentColor),
                                         ),
                                         loadingBuilder: (ctx, child, progress) {
                                           if (progress == null) return child;
@@ -1721,13 +1885,15 @@ class _PortfolioPreviewModal extends StatelessWidget {
                                             child: SizedBox(
                                               width: 20,
                                               height: 20,
-                                              child: CircularProgressIndicator(strokeWidth: 2),
+                                              child: CircularProgressIndicator(
+                                                  strokeWidth: 2),
                                             ),
                                           );
                                         },
                                       )
                                     : Center(
-                                        child: Icon(Icons.person_rounded, size: 48, color: accentColor),
+                                        child: Icon(Icons.person_rounded,
+                                            size: 48, color: accentColor),
                                       ),
                               ),
                             ),
@@ -1783,10 +1949,12 @@ class _PortfolioPreviewModal extends StatelessWidget {
                             children: [
                               Text(
                                 section.title,
-                                style: AppTypography.bodyMd.copyWith(fontWeight: FontWeight.w600).copyWith(
-                                  color: accentColor,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                                style: AppTypography.bodyMd
+                                    .copyWith(fontWeight: FontWeight.w600)
+                                    .copyWith(
+                                      color: accentColor,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                               ),
                               const SizedBox(height: 12),
                               Text(

@@ -26,6 +26,7 @@ import '../../../core/router/app_router.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../calendar/providers/calendar_provider.dart';
 import '../../contacts/providers/contacts_provider.dart';
+import '../../emails/providers/emails_provider.dart';
 import '../../network_profile/providers/profile_provider.dart';
 import '../../../core/localization/locale_provider.dart';
 import '../../../core/localization/app_localizations.dart';
@@ -83,6 +84,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> with WidgetsBin
   Timer? _gmailPollingTimer;
   bool _isDisconnectingGmail = false;
   bool _isConnectingCalendar = false;
+  bool _isDisconnectingCalendar = false;
 
   // Subscription State
   String? _subscriptionPlan;
@@ -119,6 +121,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> with WidgetsBin
         if (success) {
           AppToast.show(context, 'Gmail connected successfully!', type: ToastType.success);
           _loadSavedSettings();
+          ref.read(emailsProvider.notifier).loadAll();
         } else if (error != null) {
           AppToast.show(context, 'Gmail connection failed: $error', type: ToastType.error);
         }
@@ -173,6 +176,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> with WidgetsBin
       }
       _loadSavedSettings();
       ref.read(calendarNotifierProvider.notifier).loadEvents();
+      ref.read(emailsProvider.notifier).loadAll();
     }
   }
 
@@ -373,7 +377,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> with WidgetsBin
         primaryGradient: const [Color(0xFFEF4444), Color(0xFFDC2626)],
         secondaryLabel: context.tr('cancel'),
         onPrimary: () async {
-          Navigator.of(context).pop();
+          Navigator.of(context, rootNavigator: true).pop();
           setState(() => _isDisconnectingGmail = true);
           try {
             await SupabaseService.client
@@ -386,6 +390,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> with WidgetsBin
                 _gmailConnectedEmail = null;
                 _isDisconnectingGmail = false;
               });
+              ref.read(emailsProvider.notifier).loadAll();
               AppToast.show(context, context.tr('gmailDisconnected'), type: ToastType.info);
             }
           } catch (e) {
@@ -395,7 +400,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> with WidgetsBin
             }
           }
         },
-        onSecondary: () => Navigator.of(context).pop(),
+        onSecondary: () => Navigator.of(context, rootNavigator: true).pop(),
       );
     } else {
       // Connect Gmail OAuth
@@ -446,6 +451,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> with WidgetsBin
             _gmailConnectedEmail = gmailRes['email_address'] as String?;
             _isConnectingGmail = false;
           });
+          ref.read(emailsProvider.notifier).loadAll();
           AppToast.show(context, context.tr('gmailConnected'), type: ToastType.success);
         }
       } catch (_) {}
@@ -477,13 +483,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> with WidgetsBin
         primaryGradient: const [Color(0xFFEF4444), Color(0xFFDC2626)],
         secondaryLabel: context.tr('cancel'),
         onPrimary: () async {
-          Navigator.of(context).pop();
-          await ref.read(calendarNotifierProvider.notifier).connectGoogleCalendar();
-          if (mounted) {
-            AppToast.show(context, context.tr('calendarDisconnected'), type: ToastType.info);
+          Navigator.of(context, rootNavigator: true).pop();
+          setState(() => _isDisconnectingCalendar = true);
+          try {
+            await ref.read(calendarNotifierProvider.notifier).connectGoogleCalendar();
+            if (mounted) {
+              setState(() => _isDisconnectingCalendar = false);
+              AppToast.show(context, context.tr('calendarDisconnected'), type: ToastType.info);
+            }
+          } catch (_) {
+            if (mounted) {
+              setState(() => _isDisconnectingCalendar = false);
+            }
           }
         },
-        onSecondary: () => Navigator.of(context).pop(),
+        onSecondary: () => Navigator.of(context, rootNavigator: true).pop(),
       );
     } else {
       setState(() => _isConnectingCalendar = true);
@@ -510,8 +524,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> with WidgetsBin
       primaryLabel: context.tr('delete'),
       primaryGradient: const [Color(0xFFEF4444), Color(0xFFDC2626)],
       secondaryLabel: context.tr('cancel'),
-      onPrimary: () => Navigator.of(context).pop(true),
-      onSecondary: () => Navigator.of(context).pop(false),
+      onPrimary: () => Navigator.of(context, rootNavigator: true).pop(true),
+      onSecondary: () => Navigator.of(context, rootNavigator: true).pop(false),
     );
 
     if (confirmed != true) return;
@@ -1903,7 +1917,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> with WidgetsBin
                 ? 'Connected: ${calendarState.googleCalendarEmail}'
                 : context.tr('googleCalendarSyncDesc'),
             isConnected: calendarState.isGoogleCalendarConnected,
-            isLoading: _isConnectingCalendar,
+            isLoading: _isConnectingCalendar || _isDisconnectingCalendar,
             onToggle: _toggleCalendarIntegration,
           ),
         ],

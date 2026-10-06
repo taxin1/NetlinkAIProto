@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -248,6 +249,7 @@ class _NetworkGrowthGraphicalCard extends StatefulWidget {
 
 class _NetworkGrowthGraphicalCardState extends State<_NetworkGrowthGraphicalCard> {
   int? _hoveredIndex;
+  int? _initialTapIndex;
 
   List<DateTime> _getSevenDays() {
     final now = DateTime.now();
@@ -417,15 +419,34 @@ class _NetworkGrowthGraphicalCardState extends State<_NetworkGrowthGraphicalCard
                   builder: (context, chartConstraints) {
                     final width = chartConstraints.maxWidth;
                     return GestureDetector(
+                      key: const ValueKey('network_growth_chart_gesture'),
+                      behavior: HitTestBehavior.opaque,
+                      onTapDown: (details) {
+                        final idx = _getIndexFromOffset(details.localPosition.dx, width);
+                        _initialTapIndex = _hoveredIndex;
+                        setState(() => _hoveredIndex = idx);
+                      },
+                      onTap: () {
+                        if (_initialTapIndex == _hoveredIndex) {
+                          setState(() => _hoveredIndex = null);
+                        }
+                      },
+                      onPanStart: (details) {
+                        _updateHoverFromOffset(details.localPosition.dx, width);
+                      },
                       onPanUpdate: (details) {
                         _updateHoverFromOffset(details.localPosition.dx, width);
                       },
-                      onPanEnd: (_) => setState(() => _hoveredIndex = null),
                       child: MouseRegion(
+                        cursor: SystemMouseCursors.click,
                         onHover: (event) {
                           _updateHoverFromOffset(event.localPosition.dx, width);
                         },
-                        onExit: (_) => setState(() => _hoveredIndex = null),
+                        onExit: (event) {
+                          if (event.kind == PointerDeviceKind.mouse) {
+                            setState(() => _hoveredIndex = null);
+                          }
+                        },
                         child: CustomPaint(
                           size: Size(width, 95),
                           painter: _GrowthSparklinePainter(
@@ -447,15 +468,25 @@ class _NetworkGrowthGraphicalCardState extends State<_NetworkGrowthGraphicalCard
                   final isToday = i == 6;
                   final isHovered = _hoveredIndex == i;
                   return Expanded(
-                    child: Center(
-                      child: Text(
-                        _formatDayLabel(days[i], context),
-                        style: AppTypography.labelCaps.copyWith(
-                          fontSize: 9.5,
-                          fontWeight: isToday || isHovered ? FontWeight.w700 : FontWeight.w500,
-                          color: isToday || isHovered
-                              ? context.colors.onSurface
-                              : context.colors.onSurfaceVariant.withValues(alpha: 0.7),
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () {
+                        setState(() {
+                          _hoveredIndex = (_hoveredIndex == i) ? null : i;
+                        });
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        alignment: Alignment.center,
+                        child: Text(
+                          _formatDayLabel(days[i], context),
+                          style: AppTypography.labelCaps.copyWith(
+                            fontSize: 9.5,
+                            fontWeight: isToday || isHovered ? FontWeight.w700 : FontWeight.w500,
+                            color: isToday || isHovered
+                                ? context.colors.onSurface
+                                : context.colors.onSurfaceVariant.withValues(alpha: 0.7),
+                          ),
                         ),
                       ),
                     ),
@@ -469,10 +500,14 @@ class _NetworkGrowthGraphicalCardState extends State<_NetworkGrowthGraphicalCard
     );
   }
 
-  void _updateHoverFromOffset(double dx, double width) {
-    if (width <= 0) return;
+  int _getIndexFromOffset(double dx, double width) {
+    if (width <= 0) return 0;
     final fraction = (dx / width).clamp(0.0, 1.0);
-    final idx = (fraction * 6).round().clamp(0, 6);
+    return (fraction * 6).round().clamp(0, 6);
+  }
+
+  void _updateHoverFromOffset(double dx, double width) {
+    final idx = _getIndexFromOffset(dx, width);
     if (idx != _hoveredIndex) {
       setState(() => _hoveredIndex = idx);
     }

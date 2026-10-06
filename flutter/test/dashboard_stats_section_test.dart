@@ -146,4 +146,120 @@ void main() {
     expect(find.text('10'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('Network growth chart shows day-wise data immediately on click/tap', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    const testData = DashboardData(
+      totalContacts: 10,
+      emailsSent: 5,
+      upcomingEvents: 2,
+      networkGrowth: 15,
+      weeklyGrowthPoints: [1, 2, 3, 4, 5, 6, 7],
+    );
+
+    await tester.pumpWidget(buildTestWidget(data: testData));
+    await tester.pumpAndSettle();
+
+    // Default subtitle is "this week"
+    expect(find.text('this week'), findsOneWidget);
+
+    // Find chart GestureDetector by key
+    final chartFinder = find.byKey(const ValueKey('network_growth_chart_gesture'));
+    expect(chartFinder, findsOneWidget);
+
+    // Tap on the left side of the chart (around day 0)
+    final chartRect = tester.getRect(chartFinder);
+    await tester.tapAt(Offset(chartRect.left + 5, chartRect.center.dy));
+    await tester.pumpAndSettle();
+
+    // Day-wise data appears immediately without dragging!
+    expect(find.text('this week'), findsNothing);
+    expect(find.textContaining(' on '), findsOneWidget);
+
+    // Tap again to toggle back to "this week"
+    await tester.tapAt(Offset(chartRect.left + 5, chartRect.center.dy));
+    await tester.pumpAndSettle();
+    expect(find.text('this week'), findsOneWidget);
+  });
+
+  testWidgets('Tapping day labels at the bottom selects and displays day data', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    const testData = DashboardData(
+      totalContacts: 10,
+      emailsSent: 5,
+      upcomingEvents: 2,
+      networkGrowth: 15,
+      weeklyGrowthPoints: [10, 20, 30, 40, 50, 60, 70],
+    );
+
+    await tester.pumpWidget(buildTestWidget(data: testData));
+    await tester.pumpAndSettle();
+
+    expect(find.text('this week'), findsOneWidget);
+
+    // Day label for first of 7 days
+    final now = DateTime.now();
+    final firstDay = now.subtract(const Duration(days: 6));
+    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    final firstDayLabel = days[(firstDay.weekday - 1) % 7];
+
+    await tester.tap(find.text(firstDayLabel).first);
+    await tester.pumpAndSettle();
+
+    expect(find.text('this week'), findsNothing);
+    expect(find.text('+10 on $firstDayLabel'), findsOneWidget);
+
+    // Tap the same day label to toggle off
+    await tester.tap(find.text(firstDayLabel).first);
+    await tester.pumpAndSettle();
+    expect(find.text('this week'), findsOneWidget);
+  });
+
+  testWidgets('Dragging across chart updates day-wise data continuously', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    const testData = DashboardData(
+      totalContacts: 10,
+      emailsSent: 5,
+      upcomingEvents: 2,
+      networkGrowth: 15,
+      weeklyGrowthPoints: [10, 20, 30, 40, 50, 60, 70],
+    );
+
+    await tester.pumpWidget(buildTestWidget(data: testData));
+    await tester.pumpAndSettle();
+
+    final chartFinder = find.byKey(const ValueKey('network_growth_chart_gesture'));
+    final chartRect = tester.getRect(chartFinder);
+
+    // Pan from left (day 0) to right (day 6)
+    final gesture = await tester.startGesture(Offset(chartRect.left + 5, chartRect.center.dy));
+    await tester.pumpAndSettle();
+
+    // Day 0 data shows on start
+    expect(find.textContaining(' on '), findsOneWidget);
+
+    // Drag to center
+    await gesture.moveTo(Offset(chartRect.center.dx, chartRect.center.dy));
+    await tester.pumpAndSettle();
+    expect(find.textContaining(' on '), findsOneWidget);
+
+    // Release at center
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    // Data remains visible after drag release
+    expect(find.textContaining(' on '), findsOneWidget);
+  });
 }

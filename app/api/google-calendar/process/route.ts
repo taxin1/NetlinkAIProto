@@ -37,32 +37,87 @@ function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
 }
 
 function getAppRedirect(url: string, success: boolean, message?: string) {
+  let androidIntentUrl = url
+  if (url.startsWith('io.supabase.netlink://')) {
+    const rawPathAndQuery = url.replace('io.supabase.netlink://', '')
+    androidIntentUrl = `intent://${rawPathAndQuery}#Intent;scheme=io.supabase.netlink;package=com.networklinkai.networklink_ai;end;`
+  }
+
   return new NextResponse(`<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="refresh" content="0;url=${url}">
   <title>${success ? 'Connected!' : 'Connection Status'}</title>
   <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0A0D14; color: white; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; text-align: center; }
-    .card { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); padding: 32px; border-radius: 20px; max-width: 340px; margin: 20px; }
-    .btn { display: inline-block; margin-top: 20px; padding: 12px 24px; background: linear-gradient(135deg, #3B82F6, #6366F1); color: white; text-decoration: none; border-radius: 99px; font-weight: 600; font-size: 14px; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0A0D14;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      text-align: center;
+    }
+    .card {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 32px 24px;
+      border-radius: 20px;
+      max-width: 360px;
+      margin: 20px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+    }
+    .icon { font-size: 38px; margin-bottom: 12px; }
+    h2 { margin: 0 0 8px; font-size: 20px; font-weight: 700; }
+    p { opacity: 0.8; font-size: 14px; margin: 0 0 24px; line-height: 1.5; }
+    .btn {
+      display: inline-block;
+      padding: 13px 28px;
+      background: linear-gradient(135deg, #3B82F6, #6366F1);
+      color: white;
+      text-decoration: none;
+      border-radius: 99px;
+      font-weight: 600;
+      font-size: 14px;
+      box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
   <div class="card">
-    <h2>${success ? '✅ Connected!' : '⚠️ Notice'}</h2>
-    <p style="opacity: 0.8; font-size: 14px; margin-top: 8px;">${message || (success ? 'Returning to Netlink AI app...' : 'Returning to Netlink AI...')}</p>
-    <a href="${url}" class="btn">Tap to Return to App</a>
+    <div class="icon">${success ? '✅' : '⚠️'}</div>
+    <h2>${success ? 'Connected!' : 'Notice'}</h2>
+    <p id="msg">${message || (success ? 'Returning to Netlink AI app...' : 'Returning to Netlink AI...')}</p>
+    <a id="return-btn" href="${url}" class="btn">Tap to Return to App</a>
   </div>
   <script>
     (function() {
-      try {
-        window.location.replace('${url}');
-      } catch(e) {
-        window.location.href = '${url}';
+      var isAndroid = /Android/i.test(navigator.userAgent);
+      var customSchemeUrl = ${JSON.stringify(url)};
+      var androidIntentUrl = ${JSON.stringify(androidIntentUrl)};
+      var targetUrl = isAndroid ? androidIntentUrl : customSchemeUrl;
+      var btn = document.getElementById('return-btn');
+      if (btn) {
+        btn.href = targetUrl;
       }
+
+      // 1. Try immediate script-driven navigation
+      try {
+        window.location.href = targetUrl;
+      } catch(e) {}
+
+      // 2. Fallback synthetic click if direct assignment is blocked
+      setTimeout(function() {
+        try {
+          if (btn) {
+            btn.click();
+          }
+        } catch(e) {}
+      }, 300);
     })();
   </script>
 </body>

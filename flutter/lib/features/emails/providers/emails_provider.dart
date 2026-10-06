@@ -1,8 +1,11 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../core/services/supabase_service.dart';
 import '../../../core/services/business_card_scanner_service.dart';
+import '../../../core/services/integration_service.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../models/email_models.dart';
 
@@ -72,9 +75,26 @@ class EmailsState {
 
 class EmailsNotifier extends StateNotifier<EmailsState> {
   final Ref _ref;
+  StreamSubscription<Uri>? _integrationSub;
+  Timer? _pollingTimer;
 
   EmailsNotifier(this._ref) : super(const EmailsState()) {
     loadAll();
+    _integrationSub = IntegrationEvents.onConnectCallback.listen((uri) {
+      final provider = uri.queryParameters['provider'];
+      final success = uri.queryParameters['success'] == 'true';
+      if (provider == 'gmail' && success) {
+        state = state.copyWith(isGmailConnected: true, isSyncing: false);
+        loadAll();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _integrationSub?.cancel();
+    _pollingTimer?.cancel();
+    super.dispose();
   }
 
   void setTab(int index) {
@@ -667,22 +687,43 @@ $senderName''';
       return;
     }
 
-    state = state.copyWith(isSyncing: true);
     try {
-      final client = SupabaseService.client;
-      await client.from('gmail_connections').upsert({
-        'user_id': user.id,
-        'email': user.email,
-        'connected_at': DateTime.now().toIso8601String(),
-      });
-      state = state.copyWith(
-        isGmailConnected: true,
-        isSyncing: false,
-        successMessage: 'Gmail account connected!',
-      );
+      final targetAuthUrl = IntegrationEvents.buildGmailOAuthUrl(userId: user.id);
+      final authUri = Uri.parse(targetAuthUrl);
+      if (await canLaunchUrl(authUri)) {
+        await launchUrl(authUri, mode: LaunchMode.externalApplication);
+        _startConnectionPolling(user.id);
+      } else {
+        state = state.copyWith(errorMessage: 'Unable to launch Google OAuth consent screen');
+      }
     } catch (e) {
-      state = state.copyWith(isSyncing: false, errorMessage: 'Failed to connect Gmail: $e');
+      state = state.copyWith(errorMessage: 'Failed to launch Gmail OAuth: $e');
     }
+  }
+
+  void _startConnectionPolling(String userId) {
+    _pollingTimer?.cancel();
+    int attempts = 0;
+    _pollingTimer = Timer.periodic(const Duration(seconds: 2), (timer) async {
+      attempts++;
+      if (attempts > 60 || state.isGmailConnected) {
+        timer.cancel();
+        return;
+      }
+      try {
+        final client = SupabaseService.client;
+        final res = await client
+            .from('gmail_connections')
+            .select('id')
+            .eq('user_id', userId)
+            .maybeSingle();
+        if (res != null) {
+          timer.cancel();
+          state = state.copyWith(isGmailConnected: true, isSyncing: false);
+          await loadAll();
+        }
+      } catch (_) {}
+    });
   }
 
   static final List<EmailContactOption> _seedContacts = [
