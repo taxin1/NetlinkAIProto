@@ -45,8 +45,8 @@ Now includes **TWO** buttons:
 #### **Email Configuration (Already Done):**
 Your `.env.local` has:
 \`\`\`
-GMAIL_USER=cognisorai@gmail.com
-GMAIL_APP_PASSWORD=qffz djsz byrw dkdo
+GMAIL_USER=your-email@gmail.com
+GMAIL_APP_PASSWORD=your-app-password
 \`\`\`
 
 This uses Gmail's SMTP server to send emails.
@@ -79,7 +79,7 @@ CREATE INDEX IF NOT EXISTS emails_sent_at_idx ON public.emails(sent_at);
 Host: smtp.gmail.com
 Port: 587
 Security: TLS
-From: cognisorai@gmail.com
+From: your-email@gmail.com
 \`\`\`
 
 ### API Endpoint:

@@ -10,6 +10,13 @@ class IntegrationEvents {
   static final StreamController<Uri> _connectController =
       StreamController<Uri>.broadcast();
 
+  /// Google OAuth Client ID (configurable at compile time via --dart-define=GOOGLE_CLIENT_ID=...)
+  static const String googleClientId = String.fromEnvironment(
+    'GOOGLE_CLIENT_ID',
+    defaultValue:
+        '783966653046-n6quk2616a8t1rk61r2mn0rtcurnt9q9.apps.googleusercontent.com',
+  );
+
   /// Stream of incoming deep link URIs with host `connect-callback`
   static Stream<Uri> get onConnectCallback => _connectController.stream;
 
@@ -51,7 +58,7 @@ class IntegrationEvents {
         '&prompt=consent'
         '&response_type=code'
         '&state=$state'
-        '&client_id=783966653046-n6quk2616a8t1rk61r2mn0rtcurnt9q9.apps.googleusercontent.com'
+        '&client_id=$googleClientId'
         '&redirect_uri=${Uri.encodeComponent(redirectUri)}';
   }
 
@@ -70,7 +77,7 @@ class IntegrationEvents {
         '&prompt=consent'
         '&response_type=code'
         '&state=$state'
-        '&client_id=783966653046-n6quk2616a8t1rk61r2mn0rtcurnt9q9.apps.googleusercontent.com'
+        '&client_id=$googleClientId'
         '&redirect_uri=${Uri.encodeComponent(redirectUri)}';
   }
 }

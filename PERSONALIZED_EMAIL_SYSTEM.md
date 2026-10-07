@@ -113,7 +113,7 @@ From Name: Your Name or Company Name
 
 ### ❌ Shared Email (Bad Approach):
 \`\`\`
-Problem: All users share cognisorai@gmail.com
+Problem: All users share a single central system email account
 - Hit Gmail's daily limit fast (500 emails)
 - All emails from same address
 - Users can't brand their emails

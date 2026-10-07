@@ -16,7 +16,7 @@ Your app is using: `http://localhost:3000/api/google-calendar/callback`
 
 2. **Navigate to OAuth Credentials**
    - Go to: **APIs & Services** → **Credentials**
-   - Find your OAuth 2.0 Client ID (the one starting with `783966653046-...`)
+   - Find your OAuth 2.0 Client ID
    - Click on it to edit
 
 3. **Add Authorized Redirect URIs**

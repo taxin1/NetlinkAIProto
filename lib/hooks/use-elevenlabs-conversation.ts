@@ -122,17 +122,43 @@ export function useElevenLabsConversation(options: UseElevenLabsConversationOpti
         await conversation.startSession({
           conversationToken: tokenToUse,
         });
-      } else if (agentIdToUse) {
-        // For public agents - connect directly using agent ID
-        console.log(`🔗 Connecting directly to agent: ${agentIdToUse}`);
-        await conversation.startSession({
-          agentId: agentIdToUse,
-        });
       } else {
-        throw new Error(
-          'Agent ID or conversation token is required. ' +
-          'Provide agentId in options, or set NEXT_PUBLIC_ELEVENLABS_AGENT_ID environment variable.'
-        );
+        // Attempt to request signed session from server route to keep secrets server-side
+        let connectedViaServer = false;
+        try {
+          const res = await fetch('/api/elevenlabs/conversation-token', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ agentId: agentIdToUse }),
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (data.signedUrl) {
+              console.log('🔗 Connecting via server-issued signed URL session...');
+              await (conversation as any).startSession({
+                signedUrl: data.signedUrl,
+              });
+              connectedViaServer = true;
+            }
+          }
+        } catch (serverErr) {
+          console.warn('Server conversation session unavailable, falling back to client agent ID:', serverErr);
+        }
+
+        if (!connectedViaServer) {
+          if (agentIdToUse) {
+            // For public agents - connect directly using agent ID
+            console.log(`🔗 Connecting directly to agent: ${agentIdToUse}`);
+            await conversation.startSession({
+              agentId: agentIdToUse,
+            });
+          } else {
+            throw new Error(
+              'Agent ID or conversation token is required. ' +
+              'Configure ELEVENLABS_AGENT_ID on the server or provide agentId in options.'
+            );
+          }
+        }
       }
 
       setIsSessionActive(true);

@@ -13,7 +13,7 @@ as $$
 declare
   result json;
 begin
-  if secret_key <> coalesce(current_setting('app.admin_secret', true), 'Cognisor@2025') then
+  if secret_key is null or secret_key = '' or secret_key <> coalesce(current_setting('app.admin_secret', true), 'your_admin_secret_here') then
     raise exception 'Unauthorized';
   end if;
 
@@ -53,7 +53,7 @@ security definer
 set search_path = public, auth, extensions
 as $$
 begin
-  if secret_key <> coalesce(current_setting('app.admin_secret', true), 'Cognisor@2025') then
+  if secret_key is null or secret_key = '' or secret_key <> coalesce(current_setting('app.admin_secret', true), 'your_admin_secret_here') then
     raise exception 'Unauthorized';
   end if;
 

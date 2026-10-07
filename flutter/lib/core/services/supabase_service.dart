@@ -3,9 +3,15 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class SupabaseService {
   SupabaseService._();
 
-  static const String supabaseUrl = 'https://kaqptbreyakggqybftjc.supabase.co';
-  static const String supabaseAnonKey =
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImthcXB0YnJleWFrZ2dxeWJmdGpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk2NzA2OTYsImV4cCI6MjA3NTI0NjY5Nn0.oiq1JbOcmxFs9qIZ7fBqWRyCRBUnACAqpUVj6CoWNto';
+  static const String supabaseUrl = String.fromEnvironment(
+    'SUPABASE_URL',
+    defaultValue: 'https://kaqptbreyakggqybftjc.supabase.co',
+  );
+  static const String supabaseAnonKey = String.fromEnvironment(
+    'SUPABASE_ANON_KEY',
+    defaultValue:
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImthcXB0YnJleWFrZ2dxeWJmdGpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk2NzA2OTYsImV4cCI6MjA3NTI0NjY5Nn0.oiq1JbOcmxFs9qIZ7fBqWRyCRBUnACAqpUVj6CoWNto',
+  );
 
   static bool _initialized = false;
 

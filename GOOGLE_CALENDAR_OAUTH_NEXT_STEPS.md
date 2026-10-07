@@ -6,7 +6,7 @@ Based on your OAuth request details, here's what you need to do next:
 
 You have:
 - ✅ OAuth request initiated with the correct parameters
-- ✅ Client ID: `783966653046-n6quk2616a8t1rk61r2mn0rtcurnt9q9.apps.googleusercontent.com`
+- ✅ Client ID: `your_client_id.apps.googleusercontent.com`
 - ✅ Redirect URI: `http://localhost:3000/api/google-calendar/callback`
 - ✅ Scopes: `calendar` and `calendar.events`
 - ✅ Access type: `offline` (for refresh tokens)
@@ -19,7 +19,7 @@ Create or update your `.env.local` file in the project root:
 
 \`\`\`env
 # Google Calendar OAuth
-GOOGLE_CLIENT_ID=783966653046-n6quk2616a8t1rk61r2mn0rtcurnt9q9.apps.googleusercontent.com
+GOOGLE_CLIENT_ID=your_client_id.apps.googleusercontent.com
 GOOGLE_CLIENT_SECRET=your_client_secret_here
 GOOGLE_REDIRECT_URI=http://localhost:3000/api/google-calendar/callback
 

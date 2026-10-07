@@ -12,13 +12,17 @@ To enable the Admin Dashboard features (Analytics and User List), you need to ru
 
 ## Accessing the Dashboard
 
-Once the script is run:
-1.  Navigate to `/admin` (e.g., `http://localhost:3000/admin`).
-2.  **Login**:
-    *   **Username**: `Admin`
-    *   **Password**: `Cognisor@2025`
+Once the migration is applied:
+1. Ensure your server environment (e.g. `.env.local` or hosting provider) has:
+   ```env
+   ADMIN_USERNAME=your_admin_username
+   ADMIN_PASSWORD=your_secure_admin_password
+   ADMIN_SECRET=your_secure_admin_secret
+   ```
+2. Navigate to `/admin` (e.g., `http://localhost:3000/admin`).
+3. **Login**: Enter the username and password configured in your environment variables.
 
 ## Troubleshooting
 
-*   **"Error loading dashboard data"**: This means the SQL functions haven't been created or the secret key doesn't match. Ensure you ran the script successfully.
-*   **"Unauthorized"**: The hardcoded password in the code must match the one in the SQL function.
+*   **"Error loading dashboard data"**: Ensure `SUPABASE_SERVICE_ROLE_KEY` is configured and database migrations are applied.
+*   **"Unauthorized"**: Verify your `ADMIN_USERNAME` and `ADMIN_PASSWORD` in `.env.local`. Ensure you restart the development server after modifying environment variables.

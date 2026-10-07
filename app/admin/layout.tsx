@@ -1,6 +1,7 @@
-import { cookies, headers } from "next/headers"
+import { headers } from "next/headers"
 import { redirect } from "next/navigation"
 import { AdminLayoutWrapper } from "@/components/admin-layout-wrapper"
+import { verifyAdminSession } from "@/lib/admin/auth"
 
 export default async function AdminLayout({
   children,
@@ -13,10 +14,8 @@ export default async function AdminLayout({
   
   // Only check authentication if not on login page
   if (!isLoginPage) {
-    const cookieStore = await cookies()
-    const token = cookieStore.get('admin_token')
-
-    if (!token || token.value !== 'cognisor_admin_secure') {
+    const isValid = await verifyAdminSession()
+    if (!isValid) {
       redirect('/admin/login')
     }
   }

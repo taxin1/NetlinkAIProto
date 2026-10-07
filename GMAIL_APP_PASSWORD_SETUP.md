@@ -18,7 +18,7 @@ Invalid login: 535-5.7.8 Username and Password not accepted
 Gmail App Passwords **only work** if 2FA is enabled.
 
 1. Go to https://myaccount.google.com/security
-2. Sign in with: **cognisorai@gmail.com**
+2. Sign in with your Google account
 3. Find **"2-Step Verification"**
 4. Click **"Get Started"**
 5. Follow the steps to enable 2FA
@@ -50,8 +50,8 @@ Gmail App Passwords **only work** if 2FA is enabled.
 
 **Current (in your .env.local):**
 \`\`\`
-GMAIL_USER=cognisorai@gmail.com
-GMAIL_APP_PASSWORD=qffz djsz byrw dkdo
+GMAIL_USER=your-email@gmail.com
+GMAIL_APP_PASSWORD=your-app-password
 \`\`\`
 
 **Update the App Password with the new one:**
@@ -68,7 +68,7 @@ GMAIL_APP_PASSWORD=qffz djsz byrw dkdo
 
 **Example:**
 \`\`\`env
-GMAIL_USER=cognisorai@gmail.com
+GMAIL_USER=your-email@gmail.com
 GMAIL_APP_PASSWORD=yourNewAppPasswordHere
 \`\`\`
 
@@ -185,6 +185,6 @@ If you continue to have problems:
 ---
 
 **Current Status**: 
-- Email: cognisorai@gmail.com
+- Email: your-email@gmail.com
 - Password: Need to generate new App Password
 - Action Required: Follow Steps 1-4 above
