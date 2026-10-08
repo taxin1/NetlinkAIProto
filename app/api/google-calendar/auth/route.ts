@@ -1,21 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { getAuthenticatedUser } from '@/lib/supabase/server'
 import { getGoogleCalendarAuthUrl } from '@/lib/google-calendar'
+import { createSignedOAuthState } from '@/lib/auth/oauth-state'
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient()
-    const authHeader = request.headers.get("authorization")
-    const bearerToken = authHeader?.startsWith("Bearer ") ? authHeader.substring(7) : null
-
-    let user = null
-    if (bearerToken) {
-      const { data } = await supabase.auth.getUser(bearerToken)
-      user = data?.user
-    } else {
-      const { data } = await supabase.auth.getUser()
-      user = data?.user
-    }
+    const { user } = await getAuthenticatedUser(request)
 
     const shouldRedirect = request.nextUrl.searchParams.get('redirect') === 'true'
 
@@ -46,13 +36,19 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const authUrl = getGoogleCalendarAuthUrl(baseUrl)
+    const returnUrl = request.nextUrl.searchParams.get('returnUrl') || undefined
+    const signedState = createSignedOAuthState({
+      userId: user.id,
+      returnUrl,
+      provider: 'google-calendar',
+    })
+
+    const authUrl = getGoogleCalendarAuthUrl(baseUrl, signedState)
     
     if (shouldRedirect) {
       return NextResponse.redirect(authUrl)
     }
 
-    // Store state in session or use a secure token to link to user
     return NextResponse.json({ authUrl })
   } catch (error) {
     console.error('Error generating Google Calendar auth URL:', error)

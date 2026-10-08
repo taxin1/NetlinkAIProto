@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getGoogleCalendarTokens } from '@/lib/google-calendar'
+import { verifySignedOAuthState } from '@/lib/auth/oauth-state'
 
 const REQUIRED_SCOPES = [
   'https://www.googleapis.com/auth/calendar',
@@ -133,20 +134,8 @@ export async function GET(request: NextRequest) {
   const stateRaw = searchParams.get('state')
   const baseUrl = getBaseUrl(request)
 
-  let stateData: { userId?: string; returnUrl?: string; provider?: string } = {}
-  if (stateRaw) {
-    try {
-      stateData = JSON.parse(Buffer.from(stateRaw, 'base64url').toString('utf8'))
-    } catch (_) {
-      try {
-        stateData = JSON.parse(Buffer.from(stateRaw, 'base64').toString('utf8'))
-      } catch (_) {
-        try {
-          stateData = JSON.parse(decodeURIComponent(stateRaw))
-        } catch (_) {}
-      }
-    }
-  }
+  const verifiedState = verifySignedOAuthState(stateRaw)
+  const stateData: { userId?: string; returnUrl?: string; provider?: string } = verifiedState || {}
   
   try {
     console.log('[Google Calendar Process] Starting...')
@@ -161,7 +150,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(redirectUrl.toString())
     }
 
-    // Step 1: Check authentication (check cookie user first, then fallback to mobile state.userId)
+    // Step 1: Check authentication (check cookie user first, then fallback ONLY to HMAC-verified state)
     let user: { id: string; email?: string } | null = null
     try {
       const supabase = await createClient()
@@ -171,12 +160,12 @@ export async function GET(request: NextRequest) {
       }
     } catch (_) {}
 
-    if (!user && stateData.userId) {
-      user = { id: stateData.userId }
+    if (!user && verifiedState?.userId) {
+      user = { id: verifiedState.userId }
     }
 
     if (!user) {
-      console.error('[Google Calendar Process] Auth error: No authenticated user found')
+      console.error('[Google Calendar Process] Auth error: No authenticated user or valid signed state found')
       if (stateData.returnUrl?.startsWith('io.supabase.netlink://')) {
         return getAppRedirect(`${stateData.returnUrl}?error=unauthenticated&provider=google-calendar`, false, 'Please sign in first.')
       }

@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { getAuthenticatedUser } from "@/lib/supabase/server";
+import { verifyPayPalSubscription } from "@/lib/paypal";
 
 export async function POST(request: NextRequest) {
   try {
     // Verify user authentication
-    const supabase = await createClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const { user, supabase } = await getAuthenticatedUser(request);
 
-    if (authError || !user) {
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -18,9 +18,30 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Subscription ID is required" }, { status: 400 });
     }
 
+    // Verify subscription status directly with PayPal REST API
+    const verification = await verifyPayPalSubscription(subscriptionId);
+    if (!verification.valid) {
+      return NextResponse.json(
+        {
+          error: "Invalid or inactive PayPal subscription",
+          message: verification.error || "Subscription could not be verified with PayPal",
+        },
+        { status: 400 }
+      );
+    }
+
     // Calculate expiration date (1 month from now for monthly subscription)
     const expiresAt = new Date();
     expiresAt.setMonth(expiresAt.getMonth() + 1);
+
+    const parsedAmount = parseFloat(amount || "0");
+    let assignedPlan = planName || "professional";
+    if (assignedPlan === "enterprise") {
+      assignedPlan = "professional";
+    }
+    if (assignedPlan === "professional" && parsedAmount > 0 && parsedAmount < 15) {
+      assignedPlan = "free";
+    }
 
     // Create or update subscription in database
     const { data: subscription, error: subError } = await supabase
@@ -28,10 +49,10 @@ export async function POST(request: NextRequest) {
       .upsert(
         {
           user_id: user.id,
-          plan_name: planName || "professional",
+          plan_name: assignedPlan,
           status: "active",
           paypal_subscription_id: subscriptionId,
-          amount: parseFloat(amount || "0"),
+          amount: parsedAmount,
           currency: currency,
           billing_period: "month",
           started_at: new Date().toISOString(),

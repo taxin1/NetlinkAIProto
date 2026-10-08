@@ -41,6 +41,18 @@ class SupabaseService {
     }
   }
 
+  /// Returns HTTP headers including `Authorization: Bearer <token>` if authenticated
+  static Map<String, String> get authHeaders {
+    final token = currentSession?.accessToken;
+    if (token != null && token.isNotEmpty) {
+      return {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      };
+    }
+    return {'Content-Type': 'application/json'};
+  }
+
   /// Checks if the user has completed their profile in network_profiles
   /// (Mirrors the exact logic of Netlink-Cogni web app app/onboarding/page.tsx)
   static Future<bool> hasCompletedProfile(String userId) async {

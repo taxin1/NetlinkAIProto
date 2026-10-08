@@ -209,7 +209,7 @@ class EmailsNotifier extends StateNotifier<EmailsState> {
         final response = await http
             .post(
               uri,
-              headers: {'Content-Type': 'application/json'},
+              headers: SupabaseService.authHeaders,
               body: jsonEncode({
                 'contactName': contact.name,
                 'contactCompany': contact.company ?? '',

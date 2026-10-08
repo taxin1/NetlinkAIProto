@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from "next/server"
+import { getAuthenticatedUser } from "@/lib/supabase/server"
 import { extractBusinessCardInfo } from "@/lib/ai/business-card"
 import { checkUsageLimit } from "@/lib/plan-features"
 
 export async function POST(request: NextRequest) {
   try {
-    const { imageBase64, userId } = await request.json()
+    const { user } = await getAuthenticatedUser(request)
+    const body = await request.json().catch(() => ({}))
+    const { imageBase64 } = body
 
     if (!imageBase64) {
       return NextResponse.json(
@@ -13,16 +16,23 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Check business card scan limit
-    if (userId) {
-      const scanLimitCheck = await checkUsageLimit(userId, 'businessCardScans')
+    const guestCookie = request.cookies.get("netlink_guest_id")?.value
+    const isGuestRequest = !user && (guestCookie || (typeof body.userId === "string" && body.userId.startsWith("guest")))
+
+    if (!user && !isGuestRequest) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    // Check business card scan limit for authenticated users
+    if (user) {
+      const scanLimitCheck = await checkUsageLimit(user.id, "businessCardScans")
       if (!scanLimitCheck.allowed) {
         return NextResponse.json(
-          { 
+          {
             error: scanLimitCheck.message || "You've reached your monthly business card scan limit. Upgrade to Professional for unlimited scans.",
             limitReached: true,
             limit: scanLimitCheck.limit,
-            remaining: scanLimitCheck.remaining
+            remaining: scanLimitCheck.remaining,
           },
           { status: 403 }
         )
@@ -31,7 +41,7 @@ export async function POST(request: NextRequest) {
 
     try {
       const info = await extractBusinessCardInfo(imageBase64)
-      
+
       return NextResponse.json({
         success: true,
         data: info,

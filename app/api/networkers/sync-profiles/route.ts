@@ -1,8 +1,24 @@
 import { createClient } from "@/lib/supabase/server"
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
+import { verifyAdminSession } from "@/lib/admin/auth"
 
-export async function POST() {
+export async function POST(request: NextRequest) {
   try {
+    const isAdmin = await verifyAdminSession()
+    const authHeader = request.headers.get("authorization")
+    const cronSecret = process.env.CRON_SECRET
+    const isCronAuthorized = cronSecret && (
+      authHeader?.replace("Bearer ", "") === cronSecret ||
+      request.nextUrl.searchParams.get("secret") === cronSecret
+    )
+
+    if (!isAdmin && !isCronAuthorized) {
+      return NextResponse.json(
+        { error: "Unauthorized. Admin session or valid secret required." },
+        { status: 401 }
+      )
+    }
+
     const supabase = await createClient()
     
     // Get admin client to access auth.users

@@ -1,13 +1,11 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { NextRequest, NextResponse } from 'next/server'
+import { getAuthenticatedUser } from '@/lib/supabase/server'
 import { getGmailAuthUrl } from '@/lib/gmail'
+import { createSignedOAuthState } from '@/lib/auth/oauth-state'
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
+    const { user } = await getAuthenticatedUser(request)
 
     const acceptHeader = request.headers.get('accept') || ''
     const wantsRedirect =
@@ -32,15 +30,20 @@ export async function GET(request: NextRequest) {
     // Determine base URL: prioritize NEXT_PUBLIC_APP_URL, then request origin, then defaults
     let baseUrl = process.env.NEXT_PUBLIC_APP_URL
     if (!baseUrl) {
-      // In production, default to www.networklinkai.com
       if (process.env.NODE_ENV === 'production') {
         baseUrl = 'https://www.networklinkai.com'
       } else {
-        // In development, use request origin (localhost)
         baseUrl = request.nextUrl.origin
       }
     }
-    const authUrl = getGmailAuthUrl(baseUrl)
+
+    const returnUrl = request.nextUrl.searchParams.get('returnUrl') || undefined
+    const signedState = createSignedOAuthState({
+      userId: user.id,
+      returnUrl,
+      provider: 'gmail',
+    })
+    const authUrl = getGmailAuthUrl(baseUrl, signedState)
 
     if (wantsRedirect) {
       return NextResponse.redirect(authUrl, { status: 307 })

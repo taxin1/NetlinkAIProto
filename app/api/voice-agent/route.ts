@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { createClient } from "@/lib/supabase/server"
+import { getAuthenticatedUser } from "@/lib/supabase/server"
 import { OPENROUTER_API_BASE, OPENROUTER_TEXT_MODEL } from "@/lib/gemini"
 
 // Retry utility for handling transient errors
@@ -43,20 +43,25 @@ interface AgentAction {
   response: string
   data?: any
 }
+import { getAuthenticatedUser } from "@/lib/supabase/server"
 
 export async function POST(request: NextRequest) {
   try {
-    const { command, userId, context } = await request.json()
+    const { user, supabase } = await getAuthenticatedUser(request)
 
-    if (!command || !userId) {
-      return NextResponse.json({ error: "Command and userId are required" }, { status: 400 })
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const supabase = await createClient()
+    const { command, context } = await request.json().catch(() => ({}))
+
+    if (!command) {
+      return NextResponse.json({ error: "Command is required" }, { status: 400 })
+    }
 
     const [contactsResult, eventsResult] = await Promise.all([
-      supabase.from("contacts").select("name,email,company").eq("user_id", userId).limit(10),
-      supabase.from("calendar_events").select("title,event_date").eq("user_id", userId).limit(5),
+      supabase.from("contacts").select("name,email,company").eq("user_id", user.id).limit(10),
+      supabase.from("calendar_events").select("title,event_date").eq("user_id", user.id).limit(5),
     ])
 
     const contacts = contactsResult.data || []

@@ -1,23 +1,21 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { getAuthenticatedUser } from '@/lib/supabase/server'
 import { sendGmailMessage, GmailToken } from '@/lib/gmail'
 import { sendEmailWithSettings } from '@/lib/email/smtp'
 import { wrapUserEmailBody } from '@/lib/email/template'
 
 export async function POST(request: Request) {
-  const { emailId, contactEmail, subject, body, useGmailApi } = await request.json()
-  const supabase = await createClient()
-  
   try {
-    // Verify user is authenticated
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    const { user, supabase } = await getAuthenticatedUser(request)
 
-    if (authError || !user) {
+    if (!user) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
       )
     }
+
+    const { emailId, contactEmail, subject, body, useGmailApi } = await request.json().catch(() => ({}))
 
     // Check if Gmail API is connected and should be used
     if (useGmailApi !== false) {
@@ -45,7 +43,7 @@ export async function POST(request: Request) {
             htmlBody
           )
 
-          // Update email status to 'sent' in database
+          // Update email status to 'sent' in database strictly for caller's email
           if (emailId) {
             await supabase
               .from('emails')
@@ -54,6 +52,7 @@ export async function POST(request: Request) {
                 sent_at: new Date().toISOString()
               })
               .eq('id', emailId)
+              .eq('user_id', user.id)
           }
 
           return NextResponse.json({ 
@@ -105,7 +104,7 @@ export async function POST(request: Request) {
       )
     }
 
-    // Update email status to 'sent' in database
+    // Update email status to 'sent' in database strictly for caller's email
     if (emailId) {
       await supabase
         .from('emails')
@@ -114,6 +113,7 @@ export async function POST(request: Request) {
           sent_at: new Date().toISOString()
         })
         .eq('id', emailId)
+        .eq('user_id', user.id)
     }
 
     // Auto-train AI with this email (background, non-blocking)
@@ -138,7 +138,7 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ 
-      success: true,
+      success: true, 
       message: 'Email sent successfully' 
     })
   } catch (error: any) {
@@ -146,15 +146,14 @@ export async function POST(request: Request) {
     
     // Update email status to 'failed' if emailId was provided
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      
-      if (user && emailId) {
+      if (emailId && user) {
         await supabase
           .from('emails')
           .update({ 
             status: 'failed'
           })
           .eq('id', emailId)
+          .eq('user_id', user.id)
       }
     } catch (updateError) {
       console.error('Error updating email status to failed:', updateError)

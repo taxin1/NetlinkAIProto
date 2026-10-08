@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
+import { getAuthenticatedUser } from "@/lib/supabase/server"
 
 /**
  * Server route to generate signed conversation URL / token for ElevenLabs Conversational AI.
@@ -6,6 +7,11 @@ import { NextRequest, NextResponse } from "next/server"
  */
 export async function POST(request: NextRequest) {
   try {
+    const { user } = await getAuthenticatedUser(request)
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
     const body = await request.json().catch(() => ({}))
     const agentId =
       body.agentId ||

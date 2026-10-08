@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'supabase_service.dart';
 
 class ScannedCardData {
   final String name;
@@ -99,7 +100,7 @@ class BusinessCardScannerService {
       final response = await http
           .post(
             uri,
-            headers: {'Content-Type': 'application/json'},
+            headers: SupabaseService.authHeaders,
             body: jsonEncode({
               'imageBase64': base64Image,
               'userId': userId,

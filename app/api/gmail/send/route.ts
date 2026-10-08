@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, getAuthenticatedUser } from '@/lib/supabase/server'
 import { sendGmailMessage, GmailToken } from '@/lib/gmail'
 
 export async function POST(request: Request) {
   try {
-    const supabase = await createClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    const { user, supabase } = await getAuthenticatedUser(request)
 
-    if (authError || !user) {
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -54,6 +53,7 @@ export async function POST(request: Request) {
           sent_at: new Date().toISOString(),
         })
         .eq('id', emailId)
+        .eq('user_id', user.id)
     }
 
     return NextResponse.json({

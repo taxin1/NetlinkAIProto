@@ -2,9 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import { getPayPalCheckoutClient } from "@/lib/paypal";
 // @ts-ignore - @paypal/checkout-server-sdk doesn't have TypeScript types
 import checkoutNodeJssdk from "@paypal/checkout-server-sdk";
+import { getAuthenticatedUser } from "@/lib/supabase/server";
 
 export async function POST(request: NextRequest) {
   try {
+    const { user } = await getAuthenticatedUser(request);
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const body = await request.json();
     const { amount, currency = "USD" } = body;
 

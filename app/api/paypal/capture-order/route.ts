@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getPayPalClient } from "@/lib/paypal";
 // @ts-ignore - @paypal/checkout-server-sdk doesn't have TypeScript types
 import checkoutNodeJssdk from "@paypal/checkout-server-sdk";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getAuthenticatedUser } from "@/lib/supabase/server";
 
 export async function GET(request: NextRequest) {
   try {
@@ -42,6 +42,14 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(new URL(`/checkout?plan=${planName}&error=payment_not_completed`, request.url));
     }
 
+    const capturedAmount = parseFloat(payment.amount?.value || "0");
+    let assignedPlan = planName;
+    if (assignedPlan === "professional" && capturedAmount < 15) {
+      assignedPlan = "free";
+    } else if (assignedPlan === "enterprise" && capturedAmount < 50) {
+      assignedPlan = capturedAmount >= 15 ? "professional" : "free";
+    }
+
     // Calculate expiration date (1 month from now for monthly subscription)
     const expiresAt = new Date();
     expiresAt.setMonth(expiresAt.getMonth() + 1);
@@ -52,10 +60,10 @@ export async function GET(request: NextRequest) {
       .upsert(
         {
           user_id: user.id,
-          plan_name: planName,
+          plan_name: assignedPlan,
           status: "active",
           paypal_order_id: token,
-          amount: parseFloat(payment.amount?.value || "0"),
+          amount: capturedAmount,
           currency: payment.amount?.currency_code || "USD",
           billing_period: "month",
           started_at: new Date().toISOString(),
@@ -84,10 +92,9 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     // Verify user authentication
-    const supabase = await createClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const { user, supabase } = await getAuthenticatedUser(request);
 
-    if (authError || !user) {
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -117,6 +124,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Payment not completed" }, { status: 400 });
     }
 
+    const capturedAmount = parseFloat(payment.amount?.value || "0");
+    let assignedPlan = planName || "professional";
+    if (assignedPlan === "professional" && capturedAmount < 15) {
+      assignedPlan = "free";
+    } else if (assignedPlan === "enterprise" && capturedAmount < 50) {
+      assignedPlan = capturedAmount >= 15 ? "professional" : "free";
+    }
+
     // Calculate expiration date (1 month from now for monthly subscription)
     const expiresAt = new Date();
     expiresAt.setMonth(expiresAt.getMonth() + 1);
@@ -127,10 +142,10 @@ export async function POST(request: NextRequest) {
       .upsert(
         {
           user_id: user.id,
-          plan_name: planName || "professional",
+          plan_name: assignedPlan,
           status: "active",
           paypal_order_id: orderId,
-          amount: parseFloat(payment.amount?.value || "0"),
+          amount: capturedAmount,
           currency: payment.amount?.currency_code || "USD",
           billing_period: "month",
           started_at: new Date().toISOString(),

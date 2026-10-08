@@ -1,9 +1,15 @@
 import { NextRequest, NextResponse } from "next/server"
+import { getAuthenticatedUser } from "@/lib/supabase/server"
 
 // Gemini doesn't have TTS, so we'll signal the client to use browser TTS
 // This route now returns a JSON response indicating to use browser fallback
 export async function POST(request: NextRequest) {
   try {
+    const { user } = await getAuthenticatedUser(request)
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
     const { text, language = "en" } = await request.json()
 
     if (!text) {

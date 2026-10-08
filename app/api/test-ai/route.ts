@@ -3,6 +3,10 @@ import { GEMINI_API_BASE, GEMINI_MODEL } from "@/lib/gemini"
 
 export async function GET(request: NextRequest) {
   try {
+    if (process.env.NODE_ENV === "production") {
+      return NextResponse.json({ error: "Endpoint disabled in production" }, { status: 403 })
+    }
+
     const apiKey = process.env.GEMINI_API_KEY
     
     if (!apiKey) {

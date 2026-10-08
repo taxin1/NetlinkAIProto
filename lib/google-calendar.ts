@@ -241,7 +241,7 @@ export async function listGoogleCalendarEvents(
   }
 }
 
-export function getGoogleCalendarAuthUrl(baseUrlOverride?: string) {
+export function getGoogleCalendarAuthUrl(baseUrlOverride?: string, state?: string) {
   const baseUrl = baseUrlOverride || getBaseUrl()
   let redirectUri = process.env.GOOGLE_REDIRECT_URI || `${baseUrl}/api/google-calendar/callback`
   
@@ -283,6 +283,7 @@ export function getGoogleCalendarAuthUrl(baseUrlOverride?: string) {
     access_type: 'offline',
     scope: scopes,
     prompt: 'consent', // Force consent screen to get refresh token
+    ...(state ? { state } : {}),
   })
 }
 

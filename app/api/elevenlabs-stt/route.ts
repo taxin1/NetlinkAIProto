@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from "next/server"
+import { getAuthenticatedUser } from "@/lib/supabase/server"
 
 export async function POST(request: NextRequest) {
   try {
+    const { user } = await getAuthenticatedUser(request)
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
     const formData = await request.formData()
     const audioFile = formData.get("audio") as File
     const language = formData.get("language") as string || "en"

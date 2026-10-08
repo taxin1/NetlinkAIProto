@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { createClient } from "@/lib/supabase/server"
+import { getAuthenticatedUser } from "@/lib/supabase/server"
 import { generateAIContent } from "@/lib/ai/providers"
 import { formatContactForAI } from "@/lib/ai/contact-context"
 
@@ -12,11 +12,20 @@ interface CommandIntent {
 
 export async function POST(request: NextRequest) {
   try {
-    const { command, userId, language = "en" } = await request.json()
+    const { user, supabase } = await getAuthenticatedUser(request)
 
-    if (!command || !userId) {
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    const userId = user.id
+
+    const body = await request.json().catch(() => ({}))
+    const { command, language = "en" } = body
+
+    if (!command) {
       return NextResponse.json(
-        { error: "Command and userId are required" },
+        { error: "Command is required" },
         { status: 400 }
       )
     }
@@ -24,8 +33,6 @@ export async function POST(request: NextRequest) {
     const languagePrompt = language === "ja" || language === "japanese"
       ? "IMPORTANT: RESPOND IN JAPANESE. すべての回答は日本語で行ってください。"
       : "IMPORTANT: RESPOND IN ENGLISH."
-
-    const supabase = await createClient()
 
     // Fetch comprehensive data from all parts of the website
     const [

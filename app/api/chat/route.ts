@@ -1,16 +1,17 @@
 import { NextRequest, NextResponse } from "next/server"
+import { getAuthenticatedUser } from "@/lib/supabase/server"
 import { generateChatResponse } from "@/lib/ai/assistant"
 import { loadUserAIContext } from "@/lib/ai/contact-context"
-import { isGuest } from "@/lib/guest-trial"
 
 export async function POST(request: NextRequest) {
   try {
+    const { user } = await getAuthenticatedUser(request)
+    const body = await request.json().catch(() => ({}))
     const {
       message,
       language = "en",
-      userId,
       conversationHistory = [],
-    } = await request.json()
+    } = body
 
     if (!message) {
       return NextResponse.json(
@@ -20,9 +21,10 @@ export async function POST(request: NextRequest) {
     }
 
     let userContext
-    if (userId && !isGuest(userId)) {
+    // Only load database user context for verified authenticated users
+    if (user) {
       try {
-        userContext = await loadUserAIContext(userId)
+        userContext = await loadUserAIContext(user.id)
       } catch (err) {
         console.warn("Could not load user AI context:", err)
       }

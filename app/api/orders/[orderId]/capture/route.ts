@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getPayPalClient } from "@/lib/paypal";
 // @ts-ignore - @paypal/checkout-server-sdk doesn't have TypeScript types
 import checkoutNodeJssdk from "@paypal/checkout-server-sdk";
-import { createClient } from "@/lib/supabase/server";
+import { getAuthenticatedUser } from "@/lib/supabase/server";
 
 export async function POST(
   request: NextRequest,
@@ -10,10 +10,9 @@ export async function POST(
 ) {
   try {
     // Verify user authentication
-    const supabase = await createClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const { user, supabase } = await getAuthenticatedUser(request);
 
-    if (authError || !user) {
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -92,7 +91,15 @@ export async function POST(
 
     // Extract plan name from request body if provided
     const body = await request.json().catch(() => ({}));
-    const planName = body.planName || "professional";
+    let planName = body.planName || "professional";
+    const capturedAmount = parseFloat(transaction.amount?.value || "0");
+
+    // Enforce pricing tier validation against captured transaction
+    if (planName === "professional" && capturedAmount < 15) {
+      planName = "free";
+    } else if (planName === "enterprise" && capturedAmount < 50) {
+      planName = capturedAmount >= 15 ? "professional" : "free";
+    }
 
     // Calculate expiration date (1 month from now for monthly subscription)
     const expiresAt = new Date();
@@ -107,7 +114,7 @@ export async function POST(
           plan_name: planName,
           status: "active",
           paypal_order_id: orderId,
-          amount: parseFloat(transaction.amount?.value || "0"),
+          amount: capturedAmount,
           currency: transaction.amount?.currency_code || "USD",
           billing_period: "month",
           started_at: new Date().toISOString(),

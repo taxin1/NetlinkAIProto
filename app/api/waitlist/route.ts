@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { getAuthenticatedUser } from '@/lib/supabase/server'
 import { sendSystemEmail } from '@/lib/email/smtp'
 import { buildWaitlistWelcomeEmail } from '@/lib/email/template'
 
 export async function POST(request: Request) {
   try {
-    const { email, userId } = await request.json()
+    const { user, supabase } = await getAuthenticatedUser(request)
+    const { email } = await request.json().catch(() => ({}))
 
     if (!email) {
       return NextResponse.json(
@@ -13,8 +14,6 @@ export async function POST(request: Request) {
         { status: 400 }
       )
     }
-
-    const supabase = await createClient()
 
     // Check if email already exists in waitlist
     const { data: existing } = await supabase
@@ -38,7 +37,7 @@ export async function POST(request: Request) {
       .from('waitlist')
       .insert({
         email: email.toLowerCase(),
-        user_id: userId || null,
+        user_id: user ? user.id : null,
       })
       .select()
       .single()

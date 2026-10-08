@@ -60,7 +60,7 @@ export async function getGmailClient(token: GmailToken) {
   return { client: oauth2Client, refreshedToken: null }
 }
 
-export function getGmailAuthUrl(baseUrlOverride?: string) {
+export function getGmailAuthUrl(baseUrlOverride?: string, state?: string) {
   const baseUrl = baseUrlOverride || getBaseUrl()
   const gmailRedirectUri = `${baseUrl}/api/gmail/callback`
   
@@ -91,6 +91,7 @@ export function getGmailAuthUrl(baseUrlOverride?: string) {
     access_type: 'offline',
     scope: scopes,
     prompt: 'consent', // Force consent screen to get refresh token
+    ...(state ? { state } : {}),
   })
   
   console.log('[Gmail Auth URL] Generated auth URL (length):', authUrl.length)

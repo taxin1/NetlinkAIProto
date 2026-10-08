@@ -2,6 +2,10 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
+    if (process.env.NODE_ENV === "production") {
+      return NextResponse.json({ error: "Endpoint disabled in production" }, { status: 403 });
+    }
+
     const clientId = process.env.PAYPAL_CLIENT_ID;
     const clientSecret = process.env.PAYPAL_CLIENT_SECRET;
     

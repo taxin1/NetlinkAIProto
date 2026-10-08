@@ -15,6 +15,7 @@ import '../../../core/tour/tour_controller.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../../../core/services/business_card_scanner_service.dart';
+import '../../../core/services/supabase_service.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../../core/localization/locale_provider.dart';
 import '../../../core/localization/app_localizations.dart';
@@ -100,7 +101,7 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
       final response = await http
           .post(
             uri,
-            headers: {'Content-Type': 'application/json'},
+            headers: SupabaseService.authHeaders,
             body: jsonEncode({
               'message': text,
               'language': locale,

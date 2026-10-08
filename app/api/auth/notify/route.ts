@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { createClient } from "@/lib/supabase/server"
+import { getAuthenticatedUser } from "@/lib/supabase/server"
 import type { AuthNotificationType } from "@/lib/email/auth-templates"
 import { sendAuthNotificationEmail } from "@/lib/email/auth-notify"
 
@@ -24,10 +24,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Missing notification type" }, { status: 400 })
     }
 
-    const supabase = await createClient()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
+    const { user } = await getAuthenticatedUser(request)
 
     let email: string | undefined
 

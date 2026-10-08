@@ -1,40 +1,45 @@
 import { NextRequest, NextResponse } from "next/server"
-import { createClient } from "@/lib/supabase/server"
+import { getAuthenticatedUser } from "@/lib/supabase/server"
 
 export async function POST(request: NextRequest) {
   try {
-    const { campaignId, userId } = await request.json()
+    const { user, supabase } = await getAuthenticatedUser(request)
 
-    if (!campaignId || !userId) {
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    const body = await request.json().catch(() => ({}))
+    const { campaignId } = body
+
+    if (!campaignId) {
       return NextResponse.json(
-        { error: "Campaign ID and user ID are required" },
+        { error: "Campaign ID is required" },
         { status: 400 }
       )
     }
 
-    const supabase = await createClient()
-
-    // Verify user owns the campaign
+    // Verify authenticated user owns the campaign
     const { data: campaign, error: campaignError } = await supabase
       .from("email_campaigns")
-      .select("*")
+      .select("id, status")
       .eq("id", campaignId)
-      .eq("user_id", userId)
+      .eq("user_id", user.id)
       .single()
 
     if (campaignError || !campaign) {
       return NextResponse.json(
-        { error: "Campaign not found" },
+        { error: "Campaign not found or unauthorized" },
         { status: 404 }
       )
     }
 
-    // Update campaign status to running
-    // The actual sending will be handled by the frontend component
+    // Update campaign status to running strictly for caller's campaign
     const { error: updateError } = await supabase
       .from("email_campaigns")
       .update({ status: "running" })
       .eq("id", campaignId)
+      .eq("user_id", user.id)
 
     if (updateError) {
       return NextResponse.json(

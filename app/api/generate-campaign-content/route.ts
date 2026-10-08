@@ -1,26 +1,23 @@
 import { NextRequest, NextResponse } from "next/server"
-import { createClient } from "@/lib/supabase/server"
+import { getAuthenticatedUser } from "@/lib/supabase/server"
 import { generateAIContent } from "@/lib/gemini"
 
 export async function POST(request: NextRequest) {
   try {
-    const { campaignName, campaignPurpose, generatePurpose, generateSubject, userId } = await request.json()
+    const { user } = await getAuthenticatedUser(request)
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    const { campaignName, campaignPurpose, generatePurpose, generateSubject } = await request.json()
 
     if (!campaignName || (!generatePurpose && !generateSubject)) {
       return NextResponse.json({ error: "Campaign name and at least one generation type are required" }, { status: 400 })
     }
 
-    const supabase = await createClient()
-    let userProfile: any = {}
-
-    if (userId) {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (user) {
-        userProfile = {
-          name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
-          email: user.email || '',
-        }
-      }
+    const userProfile = {
+      name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
+      email: user.email || '',
     }
 
     const result: { purpose?: string; subject?: string } = {}

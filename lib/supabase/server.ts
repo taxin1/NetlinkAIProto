@@ -31,3 +31,47 @@ export async function createClient() {
     },
   })
 }
+
+/**
+ * Resolves and verifies the authenticated user from either:
+ * 1. Authorization: Bearer <jwt> header (for Flutter/API requests)
+ * 2. Supabase session cookies (for web Next.js requests)
+ *
+ * Returns { user, supabase } or { user: null, supabase }
+ */
+export async function getAuthenticatedUser(request?: Request | null) {
+  const supabase = await createClient()
+
+  if (request) {
+    const authHeader = request.headers.get("authorization")
+    const bearerToken = authHeader?.startsWith("Bearer ")
+      ? authHeader.substring(7).trim()
+      : null
+
+    if (bearerToken) {
+      try {
+        const { data, error } = await supabase.auth.getUser(bearerToken)
+        if (!error && data?.user) {
+          return { user: data.user, supabase }
+        }
+      } catch {
+        // Fall back to cookie check
+      }
+    }
+  }
+
+  try {
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser()
+    if (!error && user) {
+      return { user, supabase }
+    }
+  } catch {
+    // Return null user if cookie verification fails
+  }
+
+  return { user: null, supabase }
+}
+

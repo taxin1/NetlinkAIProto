@@ -18,6 +18,13 @@ export async function GET(request: NextRequest) {
     const authHeader = request.headers.get('authorization')
     const cronSecret = process.env.CRON_SECRET || process.env.GOOGLE_CALENDAR_CRON_SECRET
     
+    if (process.env.NODE_ENV === 'production' && !cronSecret) {
+      return NextResponse.json(
+        { error: 'CRON_SECRET or GOOGLE_CALENDAR_CRON_SECRET must be configured in production.' },
+        { status: 500 }
+      )
+    }
+
     if (cronSecret) {
       const providedSecret = authHeader?.replace('Bearer ', '') || 
                            request.nextUrl.searchParams.get('secret')

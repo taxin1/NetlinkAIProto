@@ -1,13 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { getAuthenticatedUser } from "@/lib/supabase/server";
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const { user, supabase } = await getAuthenticatedUser(request);
 
-    if (authError || !user) {
-      console.error("Unauthorized access attempt:", authError);
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized", message: "Please log in to continue" }, { status: 401 });
     }
 
@@ -15,8 +13,23 @@ export async function POST(request: NextRequest) {
     const { planName, couponId } = body;
 
     if (!planName) {
-      console.error("Missing planName in request:", body);
       return NextResponse.json({ error: "Plan name is required", message: "Please select a plan" }, { status: 400 });
+    }
+
+    // Security check: Only 'free' plan is allowed without a valid coupon
+    if (!couponId && planName !== "free") {
+      return NextResponse.json(
+        { error: "Invalid plan", message: "A valid coupon is required for paid plan access." },
+        { status: 400 }
+      );
+    }
+
+    // Disallow Enterprise through free subscription endpoint
+    if (planName === "enterprise") {
+      return NextResponse.json(
+        { error: "Invalid plan", message: "Enterprise plans require direct billing activation." },
+        { status: 400 }
+      );
     }
 
     // Validate coupon if provided
@@ -31,6 +44,24 @@ export async function POST(request: NextRequest) {
 
       if (couponError || !couponData) {
         return NextResponse.json({ error: "Invalid coupon" }, { status: 400 });
+      }
+
+      // Check coupon expiration
+      if (couponData.valid_until && new Date(couponData.valid_until) < new Date()) {
+        return NextResponse.json({ error: "Coupon has expired" }, { status: 400 });
+      }
+
+      // Check max uses limit
+      if (couponData.max_uses && (couponData.current_uses || 0) >= couponData.max_uses) {
+        return NextResponse.json({ error: "Coupon usage limit reached" }, { status: 400 });
+      }
+
+      // Check discount type allows free subscription
+      if (couponData.discount_type !== "free_month" && (couponData.free_months || 0) <= 0) {
+        return NextResponse.json(
+          { error: "This coupon is a discount coupon and requires payment checkout" },
+          { status: 400 }
+        );
       }
 
       // Check if user has already used this coupon

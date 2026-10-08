@@ -1,38 +1,53 @@
 import { NextRequest, NextResponse } from "next/server"
+import { getAuthenticatedUser } from "@/lib/supabase/server"
 import { generateAIResponse } from "@/lib/ai/assistant"
 import { loadUserAIContext } from "@/lib/ai/contact-context"
 import { checkUsageLimit } from "@/lib/plan-features"
-import { isGuest } from "@/lib/guest-trial"
 
 export async function POST(request: NextRequest) {
   try {
-    const { message, userId, contacts, recentEmails, conversationHistory } = await request.json()
+    const { user } = await getAuthenticatedUser(request)
 
-    if (!message || !userId) {
+    const body = await request.json().catch(() => ({}))
+    const { message, contacts, recentEmails, conversationHistory } = body
+
+    if (!message) {
       return NextResponse.json(
-        { error: "Message and userId are required" },
+        { error: "Message is required" },
         { status: 400 }
       )
     }
 
-    // Check AI assistant message limit
-    const messageLimitCheck = await checkUsageLimit(userId, 'aiAssistantMessages')
-    if (!messageLimitCheck.allowed) {
-      return NextResponse.json(
-        {
-          error: messageLimitCheck.message || "You've reached your daily AI assistant message limit. Upgrade to Professional for unlimited messages.",
-          limitReached: true,
-          limit: messageLimitCheck.limit,
-          remaining: messageLimitCheck.remaining
-        },
-        { status: 403 }
-      )
+    const guestCookie = request.cookies.get("netlink_guest_id")?.value
+    const isGuestRequest = !user && (guestCookie || (typeof body.userId === "string" && body.userId.startsWith("guest")))
+
+    if (!user && !isGuestRequest) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    const resolvedUserId = user ? user.id : (guestCookie || body.userId || "guest")
+
+    // Check AI assistant message limit for authenticated users
+    if (user) {
+      const messageLimitCheck = await checkUsageLimit(user.id, "aiAssistantMessages")
+      if (!messageLimitCheck.allowed) {
+        return NextResponse.json(
+          {
+            error: messageLimitCheck.message || "You've reached your daily AI assistant message limit. Upgrade to Professional for unlimited messages.",
+            limitReached: true,
+            limit: messageLimitCheck.limit,
+            remaining: messageLimitCheck.remaining,
+          },
+          { status: 403 }
+        )
+      }
     }
 
     let userContext
-    if (!isGuest(userId)) {
+    // Only load database user context for verified authenticated users
+    if (user) {
       try {
-        userContext = await loadUserAIContext(userId)
+        userContext = await loadUserAIContext(user.id)
       } catch (err) {
         console.warn("Could not load user AI context:", err)
       }
@@ -41,7 +56,7 @@ export async function POST(request: NextRequest) {
     try {
       const response = await generateAIResponse({
         message,
-        userId,
+        userId: resolvedUserId,
         contacts: contacts || [],
         recentEmails: recentEmails || [],
         conversationHistory: conversationHistory || [],
@@ -60,7 +75,9 @@ export async function POST(request: NextRequest) {
           return NextResponse.json(
             {
               error: "AI service not configured. GEMINI_API_KEY environment variable is missing.",
-              details: process.env.NODE_ENV === "development" ? "Set GEMINI_API_KEY in your .env.local file" : "Set GEMINI_API_KEY in Vercel environment variables"
+              details: process.env.NODE_ENV === "development"
+                ? "Set GEMINI_API_KEY in your .env.local file"
+                : "Set GEMINI_API_KEY in server environment variables",
             },
             { status: 500 }
           )

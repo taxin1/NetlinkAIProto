@@ -43,7 +43,6 @@ export function getPayPalClient() {
   return getPayPalCheckoutClient();
 }
 
-// Legacy export for backward compatibility
 export const paypalClient = (() => {
   try {
     return getPayPalCheckoutClient();
@@ -53,3 +52,72 @@ export const paypalClient = (() => {
     return null as any;
   }
 })();
+
+/**
+ * Verifies a subscription ID directly with the PayPal REST API.
+ * Ensures the subscription exists, is active/approved, and retrieves server-verified details.
+ */
+export async function verifyPayPalSubscription(subscriptionId: string): Promise<{
+  valid: boolean;
+  status?: string;
+  planId?: string;
+  customId?: string;
+  error?: string;
+}> {
+  const clientId = process.env.PAYPAL_CLIENT_ID;
+  const clientSecret = process.env.PAYPAL_CLIENT_SECRET;
+
+  if (!clientId || !clientSecret) {
+    throw new Error("PayPal credentials not configured");
+  }
+
+  const isLive = process.env.PAYPAL_ENVIRONMENT === "live";
+  const baseUrl = isLive ? "https://api-m.paypal.com" : "https://api-m.sandbox.paypal.com";
+
+  try {
+    // 1. Get access token
+    const auth = Buffer.from(`${clientId.trim()}:${clientSecret.trim()}`).toString("base64");
+    const tokenRes = await fetch(`${baseUrl}/v1/oauth2/token`, {
+      method: "POST",
+      headers: {
+        Authorization: `Basic ${auth}`,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: "grant_type=client_credentials",
+    });
+
+    if (!tokenRes.ok) {
+      const errText = await tokenRes.text();
+      return { valid: false, error: `Failed to authenticate with PayPal: ${errText}` };
+    }
+
+    const { access_token } = await tokenRes.json();
+
+    // 2. Fetch subscription details from PayPal
+    const subRes = await fetch(`${baseUrl}/v1/billing/subscriptions/${encodeURIComponent(subscriptionId)}`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${access_token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!subRes.ok) {
+      return { valid: false, error: `Subscription not found: ${subRes.status}` };
+    }
+
+    const subData = await subRes.json();
+    const status = (subData.status || "").toUpperCase();
+    const valid = status === "ACTIVE" || status === "APPROVED";
+
+    return {
+      valid,
+      status,
+      planId: subData.plan_id,
+      customId: subData.custom_id,
+    };
+  } catch (err: any) {
+    return { valid: false, error: err.message };
+  }
+}
+
